@@ -1,0 +1,38 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of go coverage tool
+*.out
+coverage.txt
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Docs
+docs/.next/
+docs/out/
+docs/node_modules/
+
+# Profiling
+*.prof
+*.pprof
+
+# Build artifacts
+bin/
+dist/

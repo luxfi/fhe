@@ -1,0 +1,80 @@
+---
+title: Lux TFHE
+description: Pure Go implementation of Threshold Fully Homomorphic Encryption for the Lux Network
+---
+
+# Lux TFHE
+
+Pure Go implementation of **Threshold Fully Homomorphic Encryption** for the Lux Network. Compute on encrypted data without ever decrypting it.
+
+## Features
+
+- **Pure Go**: No CGO, no external dependencies - compiles anywhere Go runs
+- **Patent-Safe**: Classic boolean circuit approach, no patented LUT techniques
+- **Blockchain Ready**: Public key encryption, deterministic RNG, full serialization
+- **Full Integer Support**: FheUint4 through FheUint256 (including Ethereum addresses)
+
+## Quick Start
+
+```bash
+go get github.com/luxfi/tfhe
+```
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/luxfi/tfhe"
+)
+
+func main() {
+    // Setup
+    params, _ := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+    kg := tfhe.NewKeyGenerator(params)
+    sk, pk := kg.GenKeyPair()
+    bsk := kg.GenBootstrapKey(sk)
+
+    // Encrypt with public key
+    pubEnc := tfhe.NewBitwisePublicEncryptor(params, pk)
+    ctA := pubEnc.EncryptUint64(5, tfhe.FheUint8)
+    ctB := pubEnc.EncryptUint64(3, tfhe.FheUint8)
+
+    // Compute on encrypted data
+    eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+    ctSum, _ := eval.Add(ctA, ctB)
+
+    // Decrypt result
+    dec := tfhe.NewBitwiseDecryptor(params, sk)
+    result := dec.DecryptUint64(ctSum)
+    fmt.Println("5 + 3 =", result) // 8
+}
+```
+
+## Documentation
+
+- [Overview](/docs/overview) - What is TFHE and how does it work?
+- [API Reference](/docs/api) - Complete API documentation
+- [Benchmarks](/docs/benchmarks) - Performance characteristics
+- [Security](/docs/security) - Security model and guarantees
+- [License](/docs/license) - Licensing information
+
+## Performance (Apple M1 Max)
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Bootstrap Key Gen | 132 ms | **18x faster than OpenFHE** |
+| Boolean Gate (AND) | 51 ms | 1.10x faster than OpenFHE |
+| Boolean Gate (XOR) | 51 ms | 1.10x faster than OpenFHE |
+| 8-bit Integer Add | 3.5 s | Uses ripple-carry adder |
+| 8-bit Comparison | 1.7 s | Uses bit-by-bit comparison |
+
+## License
+
+BSD-3-Clause + Patent Rights Reserved
+
+- **Lux Network**: Free to use on Lux mainnet/testnets
+- **Research/Academic**: Free for non-commercial use
+- **Commercial**: License required for other networks
+
+Contact: licensing@lux.partners

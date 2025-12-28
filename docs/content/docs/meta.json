@@ -1,0 +1,11 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "overview",
+    "api",
+    "benchmarks",
+    "security",
+    "license"
+  ]
+}
