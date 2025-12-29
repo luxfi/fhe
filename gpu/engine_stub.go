@@ -37,6 +37,20 @@ type LWEPool struct{}
 // Engine is the main GPU TFHE engine
 type Engine struct{}
 
+// DefaultConfig returns the default GPU engine configuration
+func DefaultConfig() Config {
+	return Config{
+		N:       1024,
+		n:       512,
+		L:       4,
+		Bgbit:   7,
+		Q:       1 << 27,
+		Qks:     1 << 14,
+		Bks:     1 << 4,
+		KeysNKS: 1,
+	}
+}
+
 // New creates a new GPU TFHE engine (stub - returns error)
 func New(cfg Config) (*Engine, error) {
 	return nil, ErrNotSupported
