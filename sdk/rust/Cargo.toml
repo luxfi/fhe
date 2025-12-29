@@ -1,0 +1,31 @@
+[package]
+name = "luxfhe"
+version = "0.1.0"
+edition = "2021"
+authors = ["Lux Industries Inc"]
+description = "Rust bindings for LuxFHE - Fully Homomorphic Encryption"
+license = "BSD-3-Clause"
+repository = "https://github.com/luxfi/tfhe"
+keywords = ["fhe", "homomorphic", "encryption", "cryptography", "privacy"]
+categories = ["cryptography", "api-bindings"]
+
+[lib]
+name = "luxfhe"
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+thiserror = "2.0"
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.71"
+cc = "1.0"
+
+[features]
+default = []
+# Use system-installed library instead of building from source
+system = []
+
+# Benchmarks can be added later
+# [dev-dependencies]
+# criterion = "0.5"

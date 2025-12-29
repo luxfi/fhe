@@ -1,0 +1,15 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "overview",
+    "---SDK---",
+    "sdk",
+    "---Reference---",
+    "gpu",
+    "api",
+    "benchmarks",
+    "security",
+    "license"
+  ]
+}

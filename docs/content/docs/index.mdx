@@ -1,0 +1,127 @@
+---
+title: Lux TFHE
+description: Threshold Fully Homomorphic Encryption for Lux Network with Multi-GPU acceleration
+---
+
+Compute on encrypted data without ever decrypting it. Built for the Lux Network with multi-GPU acceleration.
+
+## Backends
+
+| Backend | Platform | Performance | Use Case |
+|---------|----------|-------------|----------|
+| **Pure Go** | Any | Baseline | Portability, no dependencies |
+| **Metal/MLX** | macOS | 10-100x | Apple Silicon acceleration |
+| **CUDA** | Linux/Windows | 10-100x | NVIDIA GPU acceleration |
+| **CGO/OpenFHE** | Any | ~1x | Interoperability |
+
+## Features
+
+- **Multi-GPU Acceleration**: Massively parallel bootstrapping on Metal (macOS) and CUDA (Linux/Windows)
+- **Lux Network Native**: Designed for confidential smart contracts and threshold decryption
+- **Pure Go Fallback**: Zero dependencies option - compiles anywhere Go runs
+- **Patent-Safe**: Classic boolean circuit approach, no patented techniques
+- **Full Integer Support**: FheUint4 through FheUint256 (including Ethereum addresses)
+- **Blockchain Ready**: Public key encryption, deterministic RNG, serialization
+
+## Quick Start
+
+```bash
+go get github.com/luxfi/tfhe
+```
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/luxfi/tfhe"
+)
+
+func main() {
+    // Setup
+    params, _ := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+    kg := tfhe.NewKeyGenerator(params)
+    sk, pk := kg.GenKeyPair()
+    bsk := kg.GenBootstrapKey(sk)
+
+    // Encrypt with public key
+    pubEnc := tfhe.NewBitwisePublicEncryptor(params, pk)
+    ctA := pubEnc.EncryptUint64(5, tfhe.FheUint8)
+    ctB := pubEnc.EncryptUint64(3, tfhe.FheUint8)
+
+    // Compute on encrypted data
+    eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+    ctSum, _ := eval.Add(ctA, ctB)
+
+    // Decrypt result
+    dec := tfhe.NewBitwiseDecryptor(params, sk)
+    result := dec.DecryptUint64(ctSum)
+    fmt.Println("5 + 3 =", result) // 8
+}
+```
+
+## GPU Acceleration (macOS)
+
+```go
+import "github.com/luxfi/tfhe/gpu"
+
+// Configure GPU engine
+cfg := gpu.Config{
+    Backends:     []string{"metal", "cpu"},
+    MaxBatchSize: 1024,
+    MemoryLimit:  4 * 1024 * 1024 * 1024, // 4GB
+}
+
+engine, _ := gpu.New(cfg)
+defer engine.Close()
+
+// Batch operations execute in parallel on GPU
+results, _ := engine.BatchBootstrap(ciphertexts, bsk)
+```
+
+## Performance (Apple M1 Max)
+
+| Operation | Pure Go | GPU | Speedup |
+|-----------|---------|-----|---------|
+| Bootstrap Key Gen | 132 ms | 132 ms | 1x |
+| Boolean Gate (AND) | 51 ms | ~5 ms | **10x** |
+| 8-bit Integer Add | 3.5 s | ~350 ms | **10x** |
+| Batch 1000 ANDs | 51 s | ~500 ms | **100x** |
+
+*GPU acceleration provides massive speedup for batch operations.*
+
+## Documentation
+
+- [Overview](/docs/overview) - What is TFHE and how does it work?
+- [GPU Acceleration](/docs/gpu) - Multi-GPU setup for Metal and CUDA
+- [API Reference](/docs/api) - Complete API documentation
+- [Benchmarks](/docs/benchmarks) - Detailed performance characteristics
+- [Security](/docs/security) - Security model and guarantees
+- [License](/docs/license) - Licensing information
+
+## Architecture
+
+```
+tfhe/
+├── tfhe.go           # Core TFHE types and parameters
+├── keygen.go         # Key generation (secret, public, bootstrap)
+├── encryptor.go      # Encryption with secret/public keys
+├── decryptor.go      # Decryption
+├── evaluator.go      # Homomorphic operations
+├── integer.go        # Integer encryption/decryption
+├── bitwise.go        # Boolean circuit operations
+├── gpu/              # Multi-GPU acceleration
+│   ├── engine.go     # Metal/MLX backend (macOS)
+│   └── cuda/         # CUDA backend (Linux/Windows)
+└── server/           # Threshold decryption server
+```
+
+## License
+
+BSD-3-Clause + Patent Rights Reserved
+
+- **Lux Network**: Free to use on Lux mainnet/testnets
+- **Research/Academic**: Free for non-commercial use
+- **Commercial**: License required for other networks
+
+Contact: licensing@lux.partners

@@ -1,0 +1,74 @@
+---
+title: SDK Overview
+description: LuxFHE SDKs for multiple languages and platforms
+---
+
+# LuxFHE SDKs
+
+LuxFHE provides official SDKs for multiple programming languages and platforms, enabling fully homomorphic encryption across your entire stack.
+
+## Available SDKs
+
+| SDK | Platform | Status | Install |
+|-----|----------|--------|---------|
+| [Go](/docs/sdk/go) | Native | Stable | `go get github.com/luxfi/tfhe` |
+| [TypeScript](/docs/sdk/typescript) | Node.js / Browser | Stable | `npm install @luxfi/tfhe` |
+| [Python](/docs/sdk/python) | Native (cffi) | Stable | `pip install luxfhe` |
+| [Rust](/docs/sdk/rust) | Native | Stable | `cargo add luxfhe` |
+| [C/C++](/docs/sdk/c) | Native | Stable | CMake / pkg-config |
+| [WASM](/docs/sdk/wasm) | Browser / Edge | Stable | Bundled with TypeScript |
+
+## Quick Comparison
+
+### Performance
+
+Native SDKs (Go, Rust, C/C++) offer the best performance with direct access to hardware acceleration:
+
+- **GPU Acceleration**: Available on Apple Silicon (Metal) and NVIDIA (CUDA)
+- **SIMD Optimization**: Automatic vectorization on all platforms
+- **Multi-threading**: Parallel gate evaluation
+
+### Use Cases
+
+| SDK | Best For |
+|-----|----------|
+| **Go** | Backend services, blockchain nodes, high-performance servers |
+| **TypeScript** | Web applications, Node.js APIs, browser-based encryption |
+| **Python** | ML pipelines, data science, prototyping |
+| **Rust** | Systems programming, embedded, performance-critical |
+| **C/C++** | Legacy integration, custom runtimes, embedded systems |
+| **WASM** | Edge computing, browser-only environments |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                 Your Application                 │
+├─────────┬─────────┬─────────┬─────────┬─────────┤
+│   Go    │  TS/JS  │ Python  │  Rust   │   C++   │
+├─────────┴─────────┴─────────┴─────────┴─────────┤
+│              LuxFHE Core (Pure Go)               │
+├─────────────────────────────────────────────────┤
+│    GPU Acceleration (Metal/CUDA) [Optional]     │
+└─────────────────────────────────────────────────┘
+```
+
+## Common Concepts
+
+All SDKs share the same core concepts:
+
+1. **Context**: Initialize FHE with security parameters
+2. **Key Generation**: Create secret, public, and bootstrap keys
+3. **Encryption**: Encrypt plaintext using public or secret key
+4. **Evaluation**: Perform operations on encrypted data
+5. **Decryption**: Decrypt results using secret key
+
+## Getting Started
+
+Choose your preferred SDK:
+
+- **Go**: Best for server-side and blockchain applications
+- **TypeScript**: Best for web and Node.js applications
+- **Python**: Best for data science and ML workflows
+- **Rust**: Best for systems programming
+- **C/C++**: Best for native integrations

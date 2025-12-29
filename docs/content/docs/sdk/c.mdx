@@ -1,0 +1,238 @@
+---
+title: C/C++ SDK
+description: Native C/C++ SDK for LuxFHE
+---
+
+# C/C++ SDK
+
+The C SDK provides native bindings with full C++ compatibility via `extern "C"`.
+
+## Installation
+
+### macOS / Linux
+
+```bash
+# Build from source
+cd tfhe/c
+mkdir build && cd build
+cmake ..
+make
+sudo make install
+```
+
+### Using pkg-config
+
+```bash
+# After installation
+pkg-config --cflags --libs luxfhe
+```
+
+### CMake Integration
+
+```cmake
+find_package(luxfhe REQUIRED)
+target_link_libraries(myapp PRIVATE luxfhe::luxfhe)
+```
+
+## Quick Start (C)
+
+```c
+#include <stdio.h>
+#include <luxfhe.h>
+
+int main() {
+    // Create context
+    LuxFHE_Context ctx = NULL;
+    luxfhe_context_new(LUXFHE_PARAMS_PN10QP27, &ctx);
+    
+    // Generate keys
+    LuxFHE_SecretKey sk = NULL;
+    LuxFHE_PublicKey pk = NULL;
+    LuxFHE_BootstrapKey bsk = NULL;
+    
+    luxfhe_keygen_secret(ctx, &sk);
+    luxfhe_keygen_public(ctx, sk, &pk);
+    luxfhe_keygen_bootstrap(ctx, sk, &bsk);
+    
+    // Create encryptor/decryptor/evaluator
+    LuxFHE_Encryptor enc = NULL;
+    LuxFHE_Decryptor dec = NULL;
+    LuxFHE_Evaluator eval = NULL;
+    
+    luxfhe_encryptor_new_pk(ctx, pk, &enc);
+    luxfhe_decryptor_new(ctx, sk, &dec);
+    luxfhe_evaluator_new(ctx, bsk, sk, &eval);
+    
+    // Encrypt
+    LuxFHE_Ciphertext ct_true = NULL;
+    LuxFHE_Ciphertext ct_false = NULL;
+    luxfhe_encrypt_bool(enc, true, &ct_true);
+    luxfhe_encrypt_bool(enc, false, &ct_false);
+    
+    // Compute AND gate
+    LuxFHE_Ciphertext ct_result = NULL;
+    luxfhe_and(eval, ct_true, ct_false, &ct_result);
+    
+    // Decrypt
+    bool result;
+    luxfhe_decrypt_bool(dec, ct_result, &result);
+    printf("true AND false = %s\n", result ? "true" : "false");
+    
+    // Cleanup
+    luxfhe_ciphertext_free(ct_result);
+    luxfhe_ciphertext_free(ct_true);
+    luxfhe_ciphertext_free(ct_false);
+    luxfhe_evaluator_free(eval);
+    luxfhe_decryptor_free(dec);
+    luxfhe_encryptor_free(enc);
+    luxfhe_bootstrapkey_free(bsk);
+    luxfhe_publickey_free(pk);
+    luxfhe_secretkey_free(sk);
+    luxfhe_context_free(ctx);
+    
+    return 0;
+}
+```
+
+## Quick Start (C++)
+
+```cpp
+#include <iostream>
+#include <luxfhe.h>
+
+int main() {
+    // Get version
+    std::cout << "LuxFHE " << luxfhe_version() << std::endl;
+    
+    // Create context
+    LuxFHE_Context ctx = nullptr;
+    if (luxfhe_context_new(LUXFHE_PARAMS_PN10QP27, &ctx) != LUXFHE_OK) {
+        std::cerr << "Failed to create context" << std::endl;
+        return 1;
+    }
+    
+    // Generate all keys at once
+    LuxFHE_SecretKey sk = nullptr;
+    LuxFHE_PublicKey pk = nullptr;
+    LuxFHE_BootstrapKey bsk = nullptr;
+    luxfhe_keygen_all(ctx, &sk, &pk, &bsk);
+    
+    // ... use FHE operations
+    
+    // Cleanup
+    luxfhe_context_free(ctx);
+    return 0;
+}
+```
+
+## API Reference
+
+### Error Codes
+
+```c
+typedef enum {
+    LUXFHE_OK = 0,
+    LUXFHE_ERR_NULL_POINTER = -1,
+    LUXFHE_ERR_INVALID_PARAM = -2,
+    LUXFHE_ERR_KEYGEN_FAILED = -3,
+    LUXFHE_ERR_ENCRYPT_FAILED = -4,
+    LUXFHE_ERR_DECRYPT_FAILED = -5,
+    LUXFHE_ERR_EVAL_FAILED = -6,
+    LUXFHE_ERR_SERIALIZE_FAILED = -7,
+    LUXFHE_ERR_DESERIALIZE_FAILED = -8,
+} LuxFHE_Error;
+```
+
+### Parameter Sets
+
+```c
+typedef enum {
+    LUXFHE_PARAMS_PN10QP27 = 0,  // ~128-bit, good performance
+    LUXFHE_PARAMS_PN11QP54 = 1,  // ~128-bit, higher precision
+} LuxFHE_ParamSet;
+```
+
+### Context Management
+
+```c
+LuxFHE_Error luxfhe_context_new(LuxFHE_ParamSet params, LuxFHE_Context* out);
+void luxfhe_context_free(LuxFHE_Context ctx);
+LuxFHE_Error luxfhe_context_params(LuxFHE_Context ctx, LuxFHE_ParamSet* out);
+```
+
+### Key Generation
+
+```c
+LuxFHE_Error luxfhe_keygen_secret(LuxFHE_Context ctx, LuxFHE_SecretKey* out);
+LuxFHE_Error luxfhe_keygen_public(LuxFHE_Context ctx, LuxFHE_SecretKey sk, LuxFHE_PublicKey* out);
+LuxFHE_Error luxfhe_keygen_bootstrap(LuxFHE_Context ctx, LuxFHE_SecretKey sk, LuxFHE_BootstrapKey* out);
+LuxFHE_Error luxfhe_keygen_all(LuxFHE_Context ctx, LuxFHE_SecretKey* sk, LuxFHE_PublicKey* pk, LuxFHE_BootstrapKey* bsk);
+```
+
+### Encryption/Decryption
+
+```c
+LuxFHE_Error luxfhe_encryptor_new_sk(LuxFHE_Context ctx, LuxFHE_SecretKey sk, LuxFHE_Encryptor* out);
+LuxFHE_Error luxfhe_encryptor_new_pk(LuxFHE_Context ctx, LuxFHE_PublicKey pk, LuxFHE_Encryptor* out);
+LuxFHE_Error luxfhe_decryptor_new(LuxFHE_Context ctx, LuxFHE_SecretKey sk, LuxFHE_Decryptor* out);
+
+LuxFHE_Error luxfhe_encrypt_bool(LuxFHE_Encryptor enc, bool value, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_decrypt_bool(LuxFHE_Decryptor dec, LuxFHE_Ciphertext ct, bool* out);
+
+LuxFHE_Error luxfhe_encrypt_byte(LuxFHE_Encryptor enc, uint8_t value, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_decrypt_byte(LuxFHE_Decryptor dec, LuxFHE_Ciphertext ct, uint8_t* out);
+```
+
+### Gate Operations
+
+```c
+LuxFHE_Error luxfhe_evaluator_new(LuxFHE_Context ctx, LuxFHE_BootstrapKey bsk, LuxFHE_SecretKey sk, LuxFHE_Evaluator* out);
+
+// Basic gates
+LuxFHE_Error luxfhe_and(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_or(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_xor(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_not(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct, LuxFHE_Ciphertext* out);
+
+// NAND/NOR/XNOR
+LuxFHE_Error luxfhe_nand(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_nor(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_xnor(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+
+// Multi-input gates
+LuxFHE_Error luxfhe_and3(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext ct3, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_or3(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext ct3, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_mux(LuxFHE_Evaluator eval, LuxFHE_Ciphertext sel, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext* out);
+LuxFHE_Error luxfhe_majority(LuxFHE_Evaluator eval, LuxFHE_Ciphertext ct1, LuxFHE_Ciphertext ct2, LuxFHE_Ciphertext ct3, LuxFHE_Ciphertext* out);
+```
+
+### Serialization
+
+```c
+LuxFHE_Error luxfhe_secretkey_serialize(LuxFHE_SecretKey sk, uint8_t** data, size_t* len);
+LuxFHE_Error luxfhe_ciphertext_serialize(LuxFHE_Ciphertext ct, uint8_t** data, size_t* len);
+void luxfhe_bytes_free(uint8_t* data);
+```
+
+## Error Handling
+
+```c
+LuxFHE_Error err = luxfhe_context_new(LUXFHE_PARAMS_PN10QP27, &ctx);
+if (err != LUXFHE_OK) {
+    const char* msg = luxfhe_error_string(err);
+    fprintf(stderr, "Error: %s\n", msg);
+    return 1;
+}
+```
+
+## Building the Library
+
+```bash
+cd tfhe
+CGO_ENABLED=1 go build -buildmode=c-shared -o c/lib/libluxfhe.dylib ./c/src/luxfhe.go
+```
+
+Output files:
+- `libluxfhe.dylib` (macOS)
+- `libluxfhe.so` (Linux)
+- `luxfhe.dll` (Windows)

@@ -1,0 +1,228 @@
+---
+title: Rust SDK
+description: Rust SDK for LuxFHE with safe bindings
+---
+
+# Rust SDK
+
+The Rust SDK provides safe, idiomatic bindings to LuxFHE via FFI.
+
+## Installation
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+luxfhe = "0.1"
+```
+
+Or from git:
+
+```toml
+[dependencies]
+luxfhe = { git = "https://github.com/luxfi/tfhe", branch = "main" }
+```
+
+## Quick Start
+
+```rust
+use luxfhe::{Context, ParamSet, Result};
+
+fn main() -> Result<()> {
+    // Create context
+    let ctx = Context::new(ParamSet::PN10QP27)?;
+    
+    // Generate keys
+    let sk = ctx.keygen_secret()?;
+    let pk = ctx.keygen_public(&sk)?;
+    let bsk = ctx.keygen_bootstrap(&sk)?;
+    
+    // Create encryptor/decryptor/evaluator
+    let enc = ctx.encryptor_pk(&pk)?;
+    let dec = ctx.decryptor(&sk)?;
+    let eval = ctx.evaluator(&bsk, &sk)?;
+    
+    // Encrypt
+    let ct_true = enc.encrypt(true)?;
+    let ct_false = enc.encrypt(false)?;
+    
+    // Compute
+    let ct_and = eval.and(&ct_true, &ct_false)?;
+    
+    // Decrypt
+    let result = dec.decrypt(&ct_and)?;
+    println!("true AND false = {}", result);
+    
+    Ok(())
+}
+```
+
+## API Reference
+
+### Context
+
+```rust
+use luxfhe::{Context, ParamSet};
+
+// Create with parameter set
+let ctx = Context::new(ParamSet::PN10QP27)?;
+
+// Available parameter sets
+ParamSet::PN10QP27  // Standard, ~128-bit security
+ParamSet::PN11QP54  // Higher precision
+```
+
+### Key Generation
+
+```rust
+// Generate individually
+let sk = ctx.keygen_secret()?;
+let pk = ctx.keygen_public(&sk)?;
+let bsk = ctx.keygen_bootstrap(&sk)?;
+
+// Generate all at once
+let (sk, pk, bsk) = ctx.keygen_all()?;
+```
+
+### Encryption
+
+```rust
+// Public key encryption (anyone can encrypt)
+let enc = ctx.encryptor_pk(&pk)?;
+let ct = enc.encrypt(true)?;
+
+// Secret key encryption (faster)
+let enc = ctx.encryptor_sk(&sk)?;
+let ct = enc.encrypt(true)?;
+```
+
+### Decryption
+
+```rust
+let dec = ctx.decryptor(&sk)?;
+let plaintext: bool = dec.decrypt(&ct)?;
+```
+
+### Gate Operations
+
+```rust
+let eval = ctx.evaluator(&bsk, &sk)?;
+
+// Basic gates
+let ct_and = eval.and(&ct1, &ct2)?;
+let ct_or = eval.or(&ct1, &ct2)?;
+let ct_xor = eval.xor(&ct1, &ct2)?;
+let ct_not = eval.not(&ct1)?;
+
+// NAND/NOR/XNOR
+let ct_nand = eval.nand(&ct1, &ct2)?;
+let ct_nor = eval.nor(&ct1, &ct2)?;
+let ct_xnor = eval.xnor(&ct1, &ct2)?;
+
+// Multi-input gates
+let ct_mux = eval.mux(&ct_sel, &ct_true, &ct_false)?;
+let ct_maj = eval.majority(&ct1, &ct2, &ct3)?;
+```
+
+## Error Handling
+
+```rust
+use luxfhe::{Error, Result};
+
+fn process() -> Result<()> {
+    let ctx = Context::new(ParamSet::PN10QP27)?;
+    // ... operations
+    Ok(())
+}
+
+// Or handle specific errors
+match ctx.keygen_secret() {
+    Ok(sk) => println!("Key generated"),
+    Err(Error::NullPointer) => println!("Internal error"),
+    Err(Error::InvalidParam) => println!("Invalid parameter"),
+    Err(e) => println!("Other error: {:?}", e),
+}
+```
+
+## Memory Safety
+
+The Rust SDK ensures memory safety through:
+
+- RAII for all FHE objects (automatic cleanup via `Drop`)
+- Borrow checker prevents use-after-free
+- No raw pointer exposure in public API
+
+```rust
+{
+    let ctx = Context::new(ParamSet::PN10QP27)?;
+    let sk = ctx.keygen_secret()?;
+    // sk is valid here
+} // sk and ctx automatically freed here
+```
+
+## Thread Safety
+
+```rust
+use std::sync::Arc;
+use std::thread;
+
+// Share context across threads
+let ctx = Arc::new(Context::new(ParamSet::PN10QP27)?);
+
+let handles: Vec<_> = (0..4).map(|_| {
+    let ctx = Arc::clone(&ctx);
+    thread::spawn(move || {
+        let sk = ctx.keygen_secret().unwrap();
+        // Use sk...
+    })
+}).collect();
+
+for handle in handles {
+    handle.join().unwrap();
+}
+```
+
+## Ciphertext Cloning
+
+```rust
+// Clone a ciphertext for reuse
+let ct_copy = ct.try_clone()?;
+```
+
+## Feature Flags
+
+```toml
+[dependencies]
+luxfhe = { version = "0.1", features = ["system"] }
+```
+
+- `system`: Use system-installed library instead of bundled
+
+## Building from Source
+
+```bash
+cd tfhe/rust
+cargo build --release
+```
+
+Requirements:
+- Rust 1.70+
+- C compiler (for bindgen)
+- LuxFHE C library
+
+## Benchmarks
+
+Run benchmarks:
+
+```bash
+cargo bench
+```
+
+Example results (Apple M2):
+
+| Operation | Time |
+|-----------|------|
+| Keygen | ~100ms |
+| Encrypt | ~1ms |
+| AND gate | ~15ms |
+| Full bootstrap | ~15ms |

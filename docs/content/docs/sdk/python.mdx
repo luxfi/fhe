@@ -1,0 +1,215 @@
+---
+title: Python SDK
+description: Python SDK for LuxFHE using CFFI
+---
+
+# Python SDK
+
+The Python SDK provides FHE capabilities for data science, ML pipelines, and prototyping.
+
+## Installation
+
+```bash
+pip install luxfhe
+```
+
+Or from source:
+
+```bash
+cd tfhe/python
+pip install -e .
+```
+
+## Quick Start
+
+```python
+from luxfhe import Context, ParamSet
+
+# Create context with security parameters
+ctx = Context(ParamSet.PN10QP27)
+
+# Generate keys
+sk = ctx.keygen_secret()
+pk = ctx.keygen_public(sk)
+bk = ctx.keygen_bootstrap(sk)
+
+# Create encryptor/decryptor
+enc = ctx.encryptor(pk)  # Public key encryption
+dec = ctx.decryptor(sk)
+
+# Encrypt values
+ct_true = enc.encrypt(True)
+ct_false = enc.encrypt(False)
+
+# Decrypt
+print(dec.decrypt(ct_true))   # True
+print(dec.decrypt(ct_false))  # False
+```
+
+## Boolean Operations
+
+```python
+# Create evaluator for gate operations
+eval = ctx.evaluator(bk, sk)
+
+# Logic gates
+ct_and = eval.and_gate(ct_true, ct_false)   # False
+ct_or = eval.or_gate(ct_true, ct_false)     # True
+ct_xor = eval.xor_gate(ct_true, ct_false)   # True
+ct_not = eval.not_gate(ct_true)             # False
+ct_nand = eval.nand_gate(ct_true, ct_true)  # False
+
+# Decrypt results
+print(f"AND: {dec.decrypt(ct_and)}")
+print(f"OR: {dec.decrypt(ct_or)}")
+print(f"XOR: {dec.decrypt(ct_xor)}")
+```
+
+## Secret Key vs Public Key Encryption
+
+```python
+# Secret key encryption (faster, for owner)
+enc_sk = ctx.encryptor(sk)
+ct = enc_sk.encrypt(True)
+
+# Public key encryption (anyone can encrypt)
+enc_pk = ctx.encryptor(pk)
+ct = enc_pk.encrypt(True)
+
+# Both can be decrypted with secret key
+result = dec.decrypt(ct)
+```
+
+## Byte Encryption
+
+```python
+# Encrypt bytes (8 bits)
+ct_byte = enc.encrypt_byte(42)
+value = dec.decrypt_byte(ct_byte)
+print(value)  # 42
+
+# Encrypt multiple bytes
+data = [0, 127, 255]
+encrypted = [enc.encrypt_byte(b) for b in data]
+decrypted = [dec.decrypt_byte(ct) for ct in encrypted]
+```
+
+## NumPy Integration
+
+```python
+import numpy as np
+
+# Encrypt array of booleans
+arr = np.array([True, False, True, True])
+encrypted_arr = [enc.encrypt(bool(x)) for x in arr]
+
+# Perform homomorphic operations
+result_arr = []
+for i in range(len(encrypted_arr) - 1):
+    ct_and = eval.and_gate(encrypted_arr[i], encrypted_arr[i+1])
+    result_arr.append(ct_and)
+
+# Decrypt results
+decrypted = [dec.decrypt(ct) for ct in result_arr]
+```
+
+## Environment Variables
+
+```python
+import os
+
+# Set library path before import
+os.environ['LUXFHE_LIBRARY'] = '/path/to/libluxfhe.dylib'
+
+from luxfhe import Context
+```
+
+## Error Handling
+
+```python
+from luxfhe import Context, LuxFHEError
+
+try:
+    ctx = Context()
+    # ... operations
+except LuxFHEError as e:
+    print(f"FHE error: {e}")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+```
+
+## Parameter Sets
+
+```python
+from luxfhe import ParamSet
+
+# Standard security (~128-bit)
+ctx = Context(ParamSet.PN10QP27)
+
+# Higher precision
+ctx = Context(ParamSet.PN11QP54)
+```
+
+## Memory Management
+
+Python bindings handle memory automatically via context managers:
+
+```python
+# Keys are freed when out of scope
+def process():
+    ctx = Context()
+    sk = ctx.keygen_secret()
+    # ... use keys
+    # Keys freed here
+
+# Or use explicit cleanup
+ctx = Context()
+sk = ctx.keygen_secret()
+del sk  # Free immediately
+```
+
+## Performance Tips
+
+1. **Batch operations** when possible
+2. **Reuse encryptor/decryptor** instances
+3. **Use secret key encryption** when you own the data
+4. **Consider multiprocessing** for independent operations
+
+```python
+from multiprocessing import Pool
+
+def encrypt_batch(values, pk):
+    ctx = Context()
+    enc = ctx.encryptor(pk)
+    return [enc.encrypt(v) for v in values]
+
+# Parallel encryption
+with Pool(4) as p:
+    results = p.starmap(encrypt_batch, [(batch, pk) for batch in batches])
+```
+
+## Jupyter Notebook Example
+
+```python
+# Cell 1: Setup
+from luxfhe import Context
+
+ctx = Context()
+sk = ctx.keygen_secret()
+pk = ctx.keygen_public(sk)
+bk = ctx.keygen_bootstrap(sk)
+
+print("Keys generated!")
+
+# Cell 2: Encrypt
+enc = ctx.encryptor(pk)
+dec = ctx.decryptor(sk)
+eval = ctx.evaluator(bk, sk)
+
+a = enc.encrypt(True)
+b = enc.encrypt(False)
+
+# Cell 3: Compute
+result = eval.and_gate(a, b)
+print(f"True AND False = {dec.decrypt(result)}")
+```
