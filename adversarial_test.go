@@ -1054,8 +1054,8 @@ func TestBooleanGatesExhaustive(t *testing.T) {
 
 	for _, a := range inputs {
 		for _, b := range inputs {
-			ctA:= boolEnc.Encrypt(a)
-			ctB:= boolEnc.Encrypt(b)
+			ctA := boolEnc.Encrypt(a)
+			ctB := boolEnc.Encrypt(b)
 
 			t.Run(fmt.Sprintf("AND_%v_%v", a, b), func(t *testing.T) {
 				result, _ := boolEval.AND(ctA, ctB)
@@ -1116,7 +1116,7 @@ func TestBooleanGatesExhaustive(t *testing.T) {
 	// Test NOT
 	for _, a := range inputs {
 		t.Run(fmt.Sprintf("NOT_%v", a), func(t *testing.T) {
-			ctA:= boolEnc.Encrypt(a)
+			ctA := boolEnc.Encrypt(a)
 			result := boolEval.NOT(ctA)
 			got := boolDec.Decrypt(result)
 			expected := !a
@@ -1131,9 +1131,9 @@ func TestBooleanGatesExhaustive(t *testing.T) {
 		for _, a := range inputs {
 			for _, b := range inputs {
 				t.Run(fmt.Sprintf("MUX_%v_%v_%v", cond, a, b), func(t *testing.T) {
-					ctCond:= boolEnc.Encrypt(cond)
-					ctA:= boolEnc.Encrypt(a)
-					ctB:= boolEnc.Encrypt(b)
+					ctCond := boolEnc.Encrypt(cond)
+					ctA := boolEnc.Encrypt(a)
+					ctB := boolEnc.Encrypt(b)
 					result, _ := boolEval.MUX(ctCond, ctA, ctB)
 					got := boolDec.Decrypt(result)
 					var expected bool
@@ -1368,7 +1368,7 @@ func TestSelect(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Select_%v_%d_%d", tc.cond, tc.a, tc.b), func(t *testing.T) {
-			ctCond:= boolEnc.Encrypt(tc.cond)
+			ctCond := boolEnc.Encrypt(tc.cond)
 			ctA := enc.EncryptUint64(tc.a, FheUint8)
 			ctB := enc.EncryptUint64(tc.b, FheUint8)
 

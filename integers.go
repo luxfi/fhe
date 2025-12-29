@@ -396,10 +396,10 @@ func (eval *IntegerEvaluator) Add(a, b *RadixCiphertext) (*RadixCiphertext, erro
 func (eval *IntegerEvaluator) addCarryToBlock(block *ShortInt, carry *Ciphertext) (*ShortInt, *Ciphertext, error) {
 	// The carry is encoded as an encrypted boolean.
 	// We need to add it (as 0 or 1) to the block.
-	// 
+	//
 	// Create a ShortInt containing the carry value (0 or 1)
 	// by using a conditional: if carry then 1 else 0
-	
+
 	// Create trivial encryptions of 0 and 1
 	zero, err := eval.shortEval.EncryptTrivial(0)
 	if err != nil {
@@ -426,25 +426,25 @@ func (eval *IntegerEvaluator) selectShortInt(selector *Ciphertext, trueVal, fals
 	// Use MUX operation: result = selector ? trueVal : falseVal
 	// Implemented as: (selector AND trueVal) OR (NOT(selector) AND falseVal)
 	// For ShortInt, we use the underlying ciphertext operations
-	
+
 	// Since ShortInt holds a value in [0, msgSpace), we need to
 	// compute: result = selector * trueVal + (1-selector) * falseVal
 	// Using LUT-based evaluation
-	
+
 	msgSpace := trueVal.msgSpace
 	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace))
-	
+
 	// Combine selector with trueVal and falseVal for bivariate evaluation
 	// We add the ciphertexts in a specific encoding to enable LUT evaluation
-	
+
 	// Simpler approach: use the boolean selector directly with scalar multiplication
 	// result = selector * (trueVal - falseVal) + falseVal
 	//        = selector * delta + falseVal
 	// where delta = trueVal - falseVal
-	
+
 	// For our case (trueVal=1, falseVal=0), result = selector * 1 + 0 = selector
 	// So we just need to convert the boolean selector to a ShortInt
-	
+
 	// Create MUX LUT that evaluates the selection
 	selectLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
 		// x encodes the selector in [-1, 1] where -1 = false, 1 = true
@@ -455,12 +455,12 @@ func (eval *IntegerEvaluator) selectShortInt(selector *Ciphertext, trueVal, fals
 		// selector is false, return falseVal (0)
 		return float64(0)*2/float64(msgSpace) - 1
 	}, scale, eval.shortEval.ringQBR, -1, 1)
-	
+
 	resultCt, err := eval.shortEval.bootstrap(selector.Ciphertext, &selectLUT)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &ShortInt{
 		ct:       resultCt,
 		msgBits:  trueVal.msgBits,
