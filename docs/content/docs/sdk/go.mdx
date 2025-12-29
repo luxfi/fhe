@@ -1,0 +1,155 @@
+---
+title: Go SDK
+description: Native Go SDK for LuxFHE
+---
+
+# Go SDK
+
+The Go SDK is the native implementation of LuxFHE, offering the best performance and full feature access.
+
+## Installation
+
+```bash
+go get github.com/luxfi/tfhe
+```
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/luxfi/tfhe"
+)
+
+func main() {
+    // Initialize with security parameters
+    params, _ := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+    kgen := tfhe.NewKeyGenerator(params)
+
+    // Generate keys
+    sk := kgen.GenSecretKey()
+    pk := kgen.GenPublicKey(sk)
+    bsk := kgen.GenBootstrapKey(sk)
+
+    // Create encryptor/decryptor/evaluator
+    enc := tfhe.NewBitwisePublicEncryptor(params, pk)
+    dec := tfhe.NewBitwiseDecryptor(params, sk)
+    eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+
+    // Encrypt values
+    ct1 := enc.EncryptUint64(100, tfhe.FheUint32)
+    ct2 := enc.EncryptUint64(50, tfhe.FheUint32)
+
+    // Compute on encrypted data
+    ctSum, _ := eval.Add(ct1, ct2)
+
+    // Decrypt result
+    result := dec.DecryptUint64(ctSum)
+    fmt.Printf("100 + 50 = %d\n", result)
+}
+```
+
+## Parameter Sets
+
+| Parameter | Security | Performance | Use Case |
+|-----------|----------|-------------|----------|
+| `PN10QP27` | ~128-bit | Fast | General purpose |
+| `PN11QP54` | ~128-bit | Higher precision | Financial, scientific |
+
+## Boolean Operations
+
+```go
+// Single bit operations
+ctTrue := enc.Encrypt(true)
+ctFalse := enc.Encrypt(false)
+
+// Logic gates (with bootstrapping)
+ctAnd, _ := eval.And(ctTrue, ctFalse)   // false
+ctOr, _ := eval.Or(ctTrue, ctFalse)     // true
+ctXor, _ := eval.Xor(ctTrue, ctFalse)   // true
+ctNot, _ := eval.Not(ctTrue)            // false
+ctNand, _ := eval.Nand(ctTrue, ctTrue)  // false
+```
+
+## Integer Operations
+
+```go
+// Supported types
+ct8 := enc.EncryptUint64(255, tfhe.FheUint8)
+ct16 := enc.EncryptUint64(65535, tfhe.FheUint16)
+ct32 := enc.EncryptUint64(4294967295, tfhe.FheUint32)
+ct64 := enc.EncryptUint64(1000000, tfhe.FheUint64)
+
+// Arithmetic
+sum, _ := eval.Add(ct1, ct2)
+diff, _ := eval.Sub(ct1, ct2)
+
+// Comparisons
+isEqual, _ := eval.Eq(ct1, ct2)
+isLess, _ := eval.Lt(ct1, ct2)
+isGreater, _ := eval.Gt(ct1, ct2)
+```
+
+## GPU Acceleration
+
+GPU acceleration is automatic on supported platforms:
+
+```go
+import "github.com/luxfi/tfhe/gpu"
+
+// Check if GPU is available
+if gpu.Available() {
+    engine := gpu.NewEngine(params)
+    // Use engine.ParallelEvaluate for batched operations
+}
+```
+
+### Supported GPUs
+
+- **Apple Silicon**: M1/M2/M3/M4 via Metal
+- **NVIDIA**: CUDA-capable GPUs on Linux
+
+## Serialization
+
+```go
+// Serialize keys
+skBytes, _ := sk.MarshalBinary()
+pkBytes, _ := pk.MarshalBinary()
+bskBytes, _ := bsk.MarshalBinary()
+
+// Deserialize
+var sk2 tfhe.SecretKey
+sk2.UnmarshalBinary(skBytes)
+
+// Serialize ciphertexts
+ctBytes, _ := ct.MarshalBinary()
+```
+
+## Benchmarks
+
+On Apple M2 Pro:
+
+| Operation | Time |
+|-----------|------|
+| Key Generation | ~100ms |
+| Bootstrap (single gate) | ~15ms |
+| 32-bit Addition | ~500ms |
+| 32-bit Comparison | ~300ms |
+
+## Error Handling
+
+```go
+result, err := eval.Add(ct1, ct2)
+if err != nil {
+    log.Fatalf("FHE operation failed: %v", err)
+}
+```
+
+## Thread Safety
+
+- `KeyGenerator`: Thread-safe
+- `Encryptor`: Not thread-safe (create per goroutine)
+- `Decryptor`: Not thread-safe (create per goroutine)
+- `Evaluator`: Thread-safe for independent operations

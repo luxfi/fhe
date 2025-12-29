@@ -1,0 +1,52 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/luxfi/tfhe
+cpu: Apple M1 Max
+BenchmarkLatticeKeyGen-10                   	   28998	     41747 ns/op	   15600 B/op	      21 allocs/op
+BenchmarkLatticePublicKeyGen-10             	   66368	     17420 ns/op	   11936 B/op	      22 allocs/op
+BenchmarkLatticeBootstrapKeyGen-10          	       8	 131860630 ns/op	82447622 B/op	  151516 allocs/op
+BenchmarkLatticeEncryptBit-10               	   53984	     20809 ns/op	   15992 B/op	      29 allocs/op
+BenchmarkLatticeDecryptBit-10               	  253042	      4521 ns/op	    4736 B/op	       8 allocs/op
+BenchmarkLatticeAND-10                      	      21	  52519200 ns/op	 1202526 B/op	   38009 allocs/op
+BenchmarkLatticeOR-10                       	      22	  51721345 ns/op	 1209729 B/op	   38254 allocs/op
+BenchmarkLatticeXOR-10                      	       7	 161679381 ns/op	 3652602 B/op	  115121 allocs/op
+BenchmarkLatticeNOT-10                      	  990417	      1189 ns/op	    8856 B/op	      11 allocs/op
+BenchmarkLatticeNAND-10                     	      21	  52048927 ns/op	 1199232 B/op	   37931 allocs/op
+BenchmarkLatticeNOR-10                      	      22	  52189896 ns/op	 1201428 B/op	   37995 allocs/op
+BenchmarkLatticeXNOR-10                     	       7	 160594298 ns/op	 3648886 B/op	  115249 allocs/op
+BenchmarkLatticeMUX-10                      	       7	 158445155 ns/op	 3617170 B/op	  114060 allocs/op
+BenchmarkLatticeEncryptInt8-10              	    7239	    166821 ns/op	  128048 B/op	     234 allocs/op
+BenchmarkLatticeEncryptInt16-10             	    3524	    326558 ns/op	  256048 B/op	     466 allocs/op
+BenchmarkLatticeEncryptInt32-10             	    1676	    663523 ns/op	  512048 B/op	     930 allocs/op
+BenchmarkLatticeDecryptInt8-10              	   32006	     36523 ns/op	   37888 B/op	      64 allocs/op
+BenchmarkLatticeDecryptInt16-10             	   16202	     74022 ns/op	   75776 B/op	     128 allocs/op
+BenchmarkLatticeAdd8-10                     	       1	3502386500 ns/op	81194968 B/op	 2559530 allocs/op
+BenchmarkLatticeAdd16-10                    	       1	7295119084 ns/op	168213608 B/op	 5309943 allocs/op
+BenchmarkLatticeSub8-10                     	       1	5199911125 ns/op	115079360 B/op	 3629860 allocs/op
+BenchmarkLatticeScalarAdd8-10               	       1	1607502916 ns/op	36169352 B/op	 1140974 allocs/op
+BenchmarkLatticeEq8-10                      	       1	1739358750 ns/op	37334728 B/op	 1180304 allocs/op
+BenchmarkLatticeLt8-10                      	       1	2905434333 ns/op	63983496 B/op	 2021721 allocs/op
+BenchmarkLatticeLe8-10                      	       1	4524679625 ns/op	102752968 B/op	 3246519 allocs/op
+BenchmarkLatticeGt8-10                      	       1	2781826875 ns/op	64109536 B/op	 2025297 allocs/op
+BenchmarkLatticeMin8-10                     	       1	3999070792 ns/op	93132400 B/op	 2942093 allocs/op
+BenchmarkLatticeMax8-10                     	       1	4014468209 ns/op	93031712 B/op	 2939102 allocs/op
+BenchmarkLatticeBitwiseAnd8-10              	       3	 420482722 ns/op	 9683120 B/op	  306123 allocs/op
+BenchmarkLatticeBitwiseOr8-10               	       3	 429208861 ns/op	 9625712 B/op	  304241 allocs/op
+BenchmarkLatticeBitwiseXor8-10              	       1	1450445458 ns/op	29048048 B/op	  916361 allocs/op
+BenchmarkLatticeBitwiseNot8-10              	  105090	     10466 ns/op	   70960 B/op	      90 allocs/op
+BenchmarkLatticeShl8-10                     	  120087	      9946 ns/op	   35408 B/op	      42 allocs/op
+BenchmarkLatticeShr8-10                     	  112731	      9616 ns/op	   35408 B/op	      42 allocs/op
+BenchmarkLatticeSelect8-10                  	       1	1270980750 ns/op	29034016 B/op	  914268 allocs/op
+BenchmarkLatticeCastTo16-10                 	   30464	     40074 ns/op	  141360 B/op	     162 allocs/op
+BenchmarkLatticePublicEncrypt8-10           	    3892	    308228 ns/op	  134328 B/op	     274 allocs/op
+BenchmarkLatticePublicEncrypt16-10          	    1890	    597936 ns/op	  268606 B/op	     546 allocs/op
+BenchmarkLatticeSerializeCiphertext-10      	   81741	     14369 ns/op	   34891 B/op	      98 allocs/op
+BenchmarkLatticeDeserializeCiphertext-10    	   58243	     20344 ns/op	   28576 B/op	     255 allocs/op
+BenchmarkLatticeSerializeInteger8-10        	    8608	    126824 ns/op	  430756 B/op	     800 allocs/op
+BenchmarkLatticeSerializeInteger16-10       	    4105	    255930 ns/op	  873812 B/op	    1593 allocs/op
+BenchmarkLatticeRNGRandomUint8-10           	    7045	    173022 ns/op	  128080 B/op	     235 allocs/op
+BenchmarkLatticeRNGRandomUint16-10          	    3469	    340920 ns/op	  256080 B/op	     467 allocs/op
+BenchmarkLatticeAllocCiphertext-10          	   55743	     20827 ns/op	   15992 B/op	      29 allocs/op
+BenchmarkLatticeAllocInteger8-10            	    6997	    174253 ns/op	  128048 B/op	     234 allocs/op
+PASS
+ok  	github.com/luxfi/tfhe	89.128s

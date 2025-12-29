@@ -1,0 +1,61 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of go coverage tool
+*.out
+coverage.txt
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Docs
+docs/.next/
+docs/out/
+docs/node_modules/
+
+# Profiling
+*.prof
+*.pprof
+
+# Build artifacts
+bin/
+dist/
+
+# TypeScript SDK
+ts/node_modules/
+ts/dist/
+
+# Rust bindings
+rust/target/
+
+# Python
+python/__pycache__/
+python/*.egg-info/
+python/build/
+python/.venv/
+
+# C library binaries (keep headers)
+c/lib/*.so
+c/lib/*.dylib
+c/lib/*.a
+c/examples/cpp_test
+
+# WASM binaries (large, build from source)
+wasm/*.wasm
+ts/wasm/*.wasm

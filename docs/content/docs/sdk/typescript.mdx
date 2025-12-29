@@ -1,0 +1,220 @@
+---
+title: TypeScript SDK
+description: TypeScript SDK for Node.js and browsers
+---
+
+# TypeScript SDK
+
+The TypeScript SDK enables FHE in Node.js and browser environments via WebAssembly.
+
+## Installation
+
+```bash
+npm install @luxfi/tfhe
+# or
+pnpm add @luxfi/tfhe
+# or
+yarn add @luxfi/tfhe
+```
+
+## Quick Start
+
+```typescript
+import { LuxFHE } from '@luxfi/tfhe';
+
+async function main() {
+  // Initialize (loads WASM)
+  const fhe = await LuxFHE.init();
+  
+  // Generate keys
+  const keys = fhe.generateKeys();
+  
+  // Encrypt values
+  const ct1 = fhe.encrypt(100, 32, keys.publicKey);
+  const ct2 = fhe.encrypt(50, 32, keys.publicKey);
+  
+  // Compute on encrypted data
+  const ctSum = fhe.add(ct1, ct2, keys.bootstrapKey, keys.secretKey);
+  
+  // Decrypt result
+  const result = fhe.decrypt(ctSum, keys.secretKey);
+  console.log(`100 + 50 = ${result}`); // 150
+}
+
+main();
+```
+
+## Browser Usage
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="module">
+    import { LuxFHE } from './node_modules/@luxfi/tfhe/dist/index.mjs';
+    
+    async function run() {
+      const fhe = await LuxFHE.init({
+        wasmPath: './node_modules/@luxfi/tfhe/wasm/luxfhe.wasm',
+        execPath: './node_modules/@luxfi/tfhe/wasm/wasm_exec.js',
+      });
+      
+      const keys = fhe.generateKeys();
+      document.getElementById('status').textContent = 'FHE Ready!';
+    }
+    
+    run();
+  </script>
+</head>
+<body>
+  <div id="status">Loading...</div>
+</body>
+</html>
+```
+
+## API Reference
+
+### Initialization
+
+```typescript
+// Default initialization
+const fhe = await LuxFHE.init();
+
+// Custom paths (for bundlers)
+const fhe = await LuxFHE.init({
+  wasmPath: '/assets/luxfhe.wasm',
+  execPath: '/assets/wasm_exec.js',
+});
+
+// Singleton pattern
+const fhe = await LuxFHE.getInstance();
+```
+
+### Key Generation
+
+```typescript
+const keys = fhe.generateKeys();
+
+// Keys are base64-encoded strings
+console.log(keys.secretKey);    // Keep private!
+console.log(keys.publicKey);    // Share with clients
+console.log(keys.bootstrapKey); // Needed for operations
+
+// Store keys
+localStorage.setItem('fhe_keys', JSON.stringify(keys));
+```
+
+### Encryption
+
+```typescript
+// Encrypt with public key (anyone can encrypt)
+const ct = fhe.encrypt(value, bitWidth, keys.publicKey);
+
+// Supported bit widths
+fhe.encrypt(15, 4, pk);      // 4-bit (0-15)
+fhe.encrypt(255, 8, pk);     // 8-bit (0-255)
+fhe.encrypt(65535, 16, pk);  // 16-bit
+fhe.encrypt(value, 32, pk);  // 32-bit (most common)
+fhe.encrypt(value, 64, pk);  // 64-bit
+```
+
+### Decryption
+
+```typescript
+// Only secret key holder can decrypt
+const plaintext = fhe.decrypt(ciphertext, keys.secretKey);
+```
+
+### Homomorphic Operations
+
+```typescript
+// Arithmetic
+const ctSum = fhe.add(ct1, ct2, keys.bootstrapKey, keys.secretKey);
+const ctDiff = fhe.sub(ct1, ct2, keys.bootstrapKey, keys.secretKey);
+
+// Comparisons (return encrypted 0 or 1)
+const ctEqual = fhe.eq(ct1, ct2, keys.bootstrapKey, keys.secretKey);
+const ctLess = fhe.lt(ct1, ct2, keys.bootstrapKey, keys.secretKey);
+const ctGreater = fhe.gt(ct1, ct2, keys.bootstrapKey, keys.secretKey);
+```
+
+### Error Handling
+
+```typescript
+import { LuxFHEError } from '@luxfi/tfhe';
+
+try {
+  const ct = fhe.encrypt(value, 32, publicKey);
+} catch (error) {
+  if (error instanceof LuxFHEError) {
+    console.error('FHE error:', error.message);
+  }
+}
+```
+
+## TypeScript Types
+
+```typescript
+import type { 
+  KeyPair,
+  BitWidth,
+  Ciphertext,
+  InitOptions 
+} from '@luxfi/tfhe';
+
+// KeyPair
+interface KeyPair {
+  secretKey: string;    // base64
+  publicKey: string;    // base64
+  bootstrapKey: string; // base64
+}
+
+// BitWidth
+type BitWidth = 4 | 8 | 16 | 32 | 64 | 128 | 160 | 256;
+
+// Ciphertext is just a base64 string
+type Ciphertext = string;
+```
+
+## Web Worker Usage
+
+For heavy computations, use Web Workers:
+
+```typescript
+// worker.ts
+import { LuxFHE } from '@luxfi/tfhe';
+
+let fhe: LuxFHE;
+
+self.onmessage = async (e) => {
+  if (e.data.type === 'init') {
+    fhe = await LuxFHE.init();
+    self.postMessage({ type: 'ready' });
+  }
+  
+  if (e.data.type === 'compute') {
+    const { ct1, ct2, bsk, sk } = e.data;
+    const result = fhe.add(ct1, ct2, bsk, sk);
+    self.postMessage({ type: 'result', data: result });
+  }
+};
+```
+
+## Bundle Size
+
+| File | Size |
+|------|------|
+| `luxfhe.wasm` | ~12 MB |
+| `wasm_exec.js` | ~17 KB |
+| `index.mjs` | ~9 KB |
+
+Consider lazy loading the WASM module for better initial load times.
+
+## Browser Compatibility
+
+- Chrome 89+
+- Firefox 89+
+- Safari 15+
+- Edge 89+
+
+Requires WebAssembly support.

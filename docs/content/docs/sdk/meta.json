@@ -1,0 +1,12 @@
+{
+  "title": "SDKs",
+  "pages": [
+    "index",
+    "go",
+    "typescript",
+    "python",
+    "rust",
+    "c",
+    "wasm"
+  ]
+}
