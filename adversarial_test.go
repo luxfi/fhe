@@ -368,8 +368,21 @@ func TestPropertySelfOperations(t *testing.T) {
 	values := []uint64{0, 1, 42, 127, 255}
 
 	for _, v := range values {
-		// x - x = 0
+		// x - x = 0 (same ciphertext)
 		t.Run(fmt.Sprintf("SelfSubtraction_%d", v), func(t *testing.T) {
+			x := enc.EncryptUint64(v, FheUint8)
+			diff, err := eval.Sub(x, x) // True self-subtraction
+			if err != nil {
+				t.Fatal(err)
+			}
+			result := dec.DecryptUint64(diff)
+			if result != 0 {
+				t.Errorf("%d - %d = %d, want 0", v, v, result)
+			}
+		})
+
+		// v - v = 0 (independent encryptions of same value)
+		t.Run(fmt.Sprintf("IndependentSubtraction_%d", v), func(t *testing.T) {
 			x := enc.EncryptUint64(v, FheUint8)
 			y := enc.EncryptUint64(v, FheUint8)
 			diff, err := eval.Sub(x, y)
@@ -378,7 +391,7 @@ func TestPropertySelfOperations(t *testing.T) {
 			}
 			result := dec.DecryptUint64(diff)
 			if result != 0 {
-				t.Errorf("%d - %d = %d, want 0", v, v, result)
+				t.Errorf("encrypt(%d) - encrypt(%d) = %d, want 0", v, v, result)
 			}
 		})
 
