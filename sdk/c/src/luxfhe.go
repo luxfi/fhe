@@ -443,11 +443,11 @@ func luxfhe_encrypt_bool(enc uintptr, value C.bool, out *uintptr) C.int {
 	}
 
 	var ct *tfhe.Ciphertext
-	var err error
 	switch e := encV.(type) {
 	case *encryptorWrapper:
 		ct = e.enc.Encrypt(bool(value))
 	case *publicEncryptorWrapper:
+		var err error
 		ct, err = e.enc.Encrypt(bool(value))
 		if err != nil {
 			return LUXFHE_ERR_OPERATION

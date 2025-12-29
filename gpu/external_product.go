@@ -195,13 +195,13 @@ func (ctx *ExternalProductContext) ExternalProduct(
 	Q := int64(ctx.Q)
 
 	// Ensure batch dimension
-	shape := mlx.Shape(rlweA)
+	shape := epShape(rlweA)
 	batchSize := 1
 	if len(shape) == 2 {
 		batchSize = shape[0]
 	} else {
-		rlweA = mlx.Reshape(rlweA, []int{1, N})
-		rlweB = mlx.Reshape(rlweB, []int{1, N})
+		rlweA = epReshape(rlweA, []int{1, N})
+		rlweB = epReshape(rlweB, []int{1, N})
 	}
 
 	// Step 1: Decompose RLWE ciphertext
@@ -222,29 +222,29 @@ func (ctx *ExternalProductContext) ExternalProduct(
 
 	for l := 0; l < L; l++ {
 		// Extract level l
-		aL := mlx.Slice(aDecompNTT, []int{l, 0, 0}, []int{l + 1, batchSize, N}, []int{1, 1, 1})
-		aL = mlx.Reshape(aL, []int{batchSize, N})
+		aL := epSlice(aDecompNTT, []int{l, 0, 0}, []int{l + 1, batchSize, N}, []int{1, 1, 1})
+		aL = epReshape(aL, []int{batchSize, N})
 
-		bL := mlx.Slice(bDecompNTT, []int{l, 0, 0}, []int{l + 1, batchSize, N}, []int{1, 1, 1})
-		bL = mlx.Reshape(bL, []int{batchSize, N})
+		bL := epSlice(bDecompNTT, []int{l, 0, 0}, []int{l + 1, batchSize, N}, []int{1, 1, 1})
+		bL = epReshape(bL, []int{batchSize, N})
 
 		// Extract RGSW components for level l
 		// C0[l][0], C0[l][1]: [N]
-		c0_l_0 := mlx.Slice(rgswC0, []int{l, 0, 0}, []int{l + 1, 1, N}, []int{1, 1, 1})
-		c0_l_0 = mlx.Reshape(c0_l_0, []int{1, N})
-		c0_l_0 = mlx.Tile(c0_l_0, []int{batchSize, 1})
+		c0_l_0 := epSlice(rgswC0, []int{l, 0, 0}, []int{l + 1, 1, N}, []int{1, 1, 1})
+		c0_l_0 = epReshape(c0_l_0, []int{1, N})
+		c0_l_0 = epTile(c0_l_0, []int{batchSize, 1})
 
-		c0_l_1 := mlx.Slice(rgswC0, []int{l, 1, 0}, []int{l + 1, 2, N}, []int{1, 1, 1})
-		c0_l_1 = mlx.Reshape(c0_l_1, []int{1, N})
-		c0_l_1 = mlx.Tile(c0_l_1, []int{batchSize, 1})
+		c0_l_1 := epSlice(rgswC0, []int{l, 1, 0}, []int{l + 1, 2, N}, []int{1, 1, 1})
+		c0_l_1 = epReshape(c0_l_1, []int{1, N})
+		c0_l_1 = epTile(c0_l_1, []int{batchSize, 1})
 
-		c1_l_0 := mlx.Slice(rgswC1, []int{l, 0, 0}, []int{l + 1, 1, N}, []int{1, 1, 1})
-		c1_l_0 = mlx.Reshape(c1_l_0, []int{1, N})
-		c1_l_0 = mlx.Tile(c1_l_0, []int{batchSize, 1})
+		c1_l_0 := epSlice(rgswC1, []int{l, 0, 0}, []int{l + 1, 1, N}, []int{1, 1, 1})
+		c1_l_0 = epReshape(c1_l_0, []int{1, N})
+		c1_l_0 = epTile(c1_l_0, []int{batchSize, 1})
 
-		c1_l_1 := mlx.Slice(rgswC1, []int{l, 1, 0}, []int{l + 1, 2, N}, []int{1, 1, 1})
-		c1_l_1 = mlx.Reshape(c1_l_1, []int{1, N})
-		c1_l_1 = mlx.Tile(c1_l_1, []int{batchSize, 1})
+		c1_l_1 := epSlice(rgswC1, []int{l, 1, 0}, []int{l + 1, 2, N}, []int{1, 1, 1})
+		c1_l_1 = epReshape(c1_l_1, []int{1, N})
+		c1_l_1 = epTile(c1_l_1, []int{batchSize, 1})
 
 		// Multiply and accumulate for resultA
 		// aL * C0[l][0] + bL * C1[l][0]
@@ -331,17 +331,17 @@ func (ctx *ExternalProductContext) BlindRotation(
 	L := int(ctx.L)
 	Q := int64(ctx.Q)
 
-	shape := mlx.Shape(accA)
+	shape := epShape(accA)
 	batchSize := 1
 	if len(shape) == 2 {
 		batchSize = shape[0]
 	} else {
-		accA = mlx.Reshape(accA, []int{1, N})
-		accB = mlx.Reshape(accB, []int{1, N})
+		accA = epReshape(accA, []int{1, N})
+		accB = epReshape(accB, []int{1, N})
 	}
 
 	// Get number of secret key bits from bsk shape
-	bskShape := mlx.Shape(bsk)
+	bskShape := epShape(bsk)
 	numBits := bskShape[0] // n
 
 	// Current accumulator
@@ -351,30 +351,30 @@ func (ctx *ExternalProductContext) BlindRotation(
 	// Process each secret key bit
 	for i := 0; i < numBits; i++ {
 		// Extract rotation for this bit: [batch]
-		rot := mlx.Slice(rotations, []int{0, i}, []int{batchSize, i + 1}, []int{1, 1})
-		rot = mlx.Reshape(rot, []int{batchSize})
+		rot := epSlice(rotations, []int{0, i}, []int{batchSize, i + 1}, []int{1, 1})
+		rot = epReshape(rot, []int{batchSize})
 
 		// Extract RGSW ciphertext for this bit
 		// bsk[i]: [L, 2, N]
-		rgswC0 := mlx.Slice(bsk, []int{i, 0, 0, 0}, []int{i + 1, L, 1, N}, []int{1, 1, 1, 1})
-		rgswC0 = mlx.Reshape(rgswC0, []int{L, 1, N})
+		rgswC0 := epSlice(bsk, []int{i, 0, 0, 0}, []int{i + 1, L, 1, N}, []int{1, 1, 1, 1})
+		rgswC0 = epReshape(rgswC0, []int{L, 1, N})
 		// Expand second dimension
 		rgswC0_full := mlx.Zeros([]int{L, 2, N}, mlx.Int64)
 		// Copy to first slot
 		for l := 0; l < L; l++ {
-			sliceL := mlx.Slice(rgswC0, []int{l, 0, 0}, []int{l + 1, 1, N}, []int{1, 1, 1})
-			sliceL = mlx.Reshape(sliceL, []int{N})
+			sliceL := epSlice(rgswC0, []int{l, 0, 0}, []int{l + 1, 1, N}, []int{1, 1, 1})
+			sliceL = epReshape(sliceL, []int{N})
 			// This is a simplification - proper implementation would use Scatter
 			_ = sliceL
 		}
 
-		rgswC1 := mlx.Slice(bsk, []int{i, 0, 1, 0}, []int{i + 1, L, 2, N}, []int{1, 1, 1, 1})
-		rgswC1 = mlx.Reshape(rgswC1, []int{L, 1, N})
+		rgswC1 := epSlice(bsk, []int{i, 0, 1, 0}, []int{i + 1, L, 2, N}, []int{1, 1, 1, 1})
+		rgswC1 = epReshape(rgswC1, []int{L, 1, N})
 
 		// For now, use a simplified version that extracts the RGSW correctly
 		// The full implementation needs proper 4D slicing
-		rgswC0 = mlx.Slice(bsk, []int{i, 0, 0, 0}, []int{i + 1, L, 2, N}, []int{1, 1, 1, 1})
-		rgswC0 = mlx.Reshape(rgswC0, []int{L, 2, N})
+		rgswC0 = epSlice(bsk, []int{i, 0, 0, 0}, []int{i + 1, L, 2, N}, []int{1, 1, 1, 1})
+		rgswC0 = epReshape(rgswC0, []int{L, 2, N})
 
 		// Compute X^(rot) * acc for d1
 		// Polynomial multiplication by X^k is a cyclic rotation with sign flips
@@ -383,8 +383,8 @@ func (ctx *ExternalProductContext) BlindRotation(
 
 		// CMux: select between cur (if bit=0) and rotated (if bit=1)
 		// Split RGSW into C0 and C1 parts
-		c0 := mlx.Slice(rgswC0, []int{0, 0, 0}, []int{L, 1, N}, []int{1, 1, 1})
-		c0 = mlx.Reshape(c0, []int{L, 1, N})
+		c0 := epSlice(rgswC0, []int{0, 0, 0}, []int{L, 1, N}, []int{1, 1, 1})
+		c0 = epReshape(c0, []int{L, 1, N})
 		// Broadcast to [L, 2, N] for proper shape
 		c0Full := mlx.Zeros([]int{L, 2, N}, mlx.Int64)
 		c1Full := mlx.Zeros([]int{L, 2, N}, mlx.Int64)
@@ -413,7 +413,7 @@ func (ctx *ExternalProductContext) polyRotate(poly, k *mlx.Array, batchSize int)
 	Q := int64(ctx.Q)
 
 	// Get k values
-	kVals := mlx.AsSlice[int64](k)
+	kVals := epAsSlice(k)
 
 	// For each batch element, rotate by corresponding k
 	results := make([]*mlx.Array, batchSize)
@@ -425,8 +425,8 @@ func (ctx *ExternalProductContext) polyRotate(poly, k *mlx.Array, batchSize int)
 		}
 
 		// Extract this batch element
-		polyB := mlx.Slice(poly, []int{b, 0}, []int{b + 1, N}, []int{1, 1})
-		polyB = mlx.Reshape(polyB, []int{N})
+		polyB := epSlice(poly, []int{b, 0}, []int{b + 1, N}, []int{1, 1})
+		polyB = epReshape(polyB, []int{N})
 
 		// Build rotation indices
 		indices := make([]int32, N)
@@ -446,23 +446,23 @@ func (ctx *ExternalProductContext) polyRotate(poly, k *mlx.Array, batchSize int)
 		signArr := mlx.ArrayFromSlice(signs, []int{N}, mlx.Int64)
 
 		// Permute
-		rotated := mlx.Take(polyB, idxArr, 0)
+		rotated := epTake(polyB, idxArr, 0)
 
 		// Apply signs
 		rotated = mlx.Multiply(rotated, signArr)
 
 		// Handle modular arithmetic for negatives
 		// If sign was -1, we have -coeff. In mod Q, this is Q - coeff
-		qArr := mlx.Full([]int{N}, Q, mlx.Int64)
-		isNeg := mlx.Less(signArr, mlx.Zeros([]int{N}, mlx.Int64))
+		qArr := epFull([]int{N}, Q, mlx.Int64)
+		isNeg := epLess(signArr, mlx.Zeros([]int{N}, mlx.Int64))
 		adjusted := mlx.Add(rotated, qArr)
-		rotated = mlx.Where(isNeg, adjusted, rotated)
+		rotated = epWhere(isNeg, adjusted, rotated)
 
 		results[b] = rotated
 	}
 
 	// Stack results
-	return mlx.Stack(results, 0)
+	return epStack(results, 0)
 }
 
 // decompToNTT transforms decomposed coefficients to NTT domain
@@ -474,15 +474,15 @@ func (ctx *ExternalProductContext) decompToNTT(decomp *mlx.Array, batchSize int)
 
 	for l := 0; l < L; l++ {
 		// Extract level l: [batch, N]
-		level := mlx.Slice(decomp, []int{l, 0, 0}, []int{l + 1, batchSize, N}, []int{1, 1, 1})
-		level = mlx.Reshape(level, []int{batchSize, N})
+		level := epSlice(decomp, []int{l, 0, 0}, []int{l + 1, batchSize, N}, []int{1, 1, 1})
+		level = epReshape(level, []int{batchSize, N})
 
 		// Transform to NTT
 		levelNTT := ctx.nttCtx.NTTForward(level)
 		results[l] = levelNTT
 	}
 
-	return mlx.Stack(results, 0)
+	return epStack(results, 0)
 }
 
 // SampleExtract extracts an LWE sample from an RLWE ciphertext
@@ -500,18 +500,18 @@ func (ctx *ExternalProductContext) SampleExtract(rlweA, rlweB *mlx.Array) (*mlx.
 	N := int(ctx.N)
 	Q := int64(ctx.Q)
 
-	shape := mlx.Shape(rlweA)
+	shape := epShape(rlweA)
 	batchSize := 1
 	if len(shape) == 2 {
 		batchSize = shape[0]
 	} else {
-		rlweA = mlx.Reshape(rlweA, []int{1, N})
-		rlweB = mlx.Reshape(rlweB, []int{1, N})
+		rlweA = epReshape(rlweA, []int{1, N})
+		rlweB = epReshape(rlweB, []int{1, N})
 	}
 
 	// Extract coefficient 0 from b as the LWE b
-	lweB := mlx.Slice(rlweB, []int{0, 0}, []int{batchSize, 1}, []int{1, 1})
-	lweB = mlx.Reshape(lweB, []int{batchSize})
+	lweB := epSlice(rlweB, []int{0, 0}, []int{batchSize, 1}, []int{1, 1})
+	lweB = epReshape(lweB, []int{batchSize})
 
 	// LWE a is extracted from RLWE a with index reversal and negation
 	// a'[0] = a[0]
@@ -529,20 +529,20 @@ func (ctx *ExternalProductContext) SampleExtract(rlweA, rlweB *mlx.Array) (*mlx.
 
 	idxArr := mlx.ArrayFromSlice(indices, []int{N}, mlx.Int32)
 	signArr := mlx.ArrayFromSlice(signs, []int{1, N}, mlx.Int64)
-	signArr = mlx.Tile(signArr, []int{batchSize, 1})
+	signArr = epTile(signArr, []int{batchSize, 1})
 
 	// Permute a
-	lweA := mlx.Take(rlweA, idxArr, 1)
+	lweA := epTake(rlweA, idxArr, 1)
 
 	// Apply signs
 	lweA = mlx.Multiply(lweA, signArr)
 
 	// Handle negatives: convert -x to Q-x
-	qArr := mlx.Full([]int{batchSize, N}, Q, mlx.Int64)
+	qArr := epFull([]int{batchSize, N}, Q, mlx.Int64)
 	zeroArr := mlx.Zeros([]int{batchSize, N}, mlx.Int64)
-	isNeg := mlx.Less(lweA, zeroArr)
+	isNeg := epLess(lweA, zeroArr)
 	adjusted := mlx.Add(lweA, qArr)
-	lweA = mlx.Where(isNeg, adjusted, lweA)
+	lweA = epWhere(isNeg, adjusted, lweA)
 
 	mlx.Eval(lweA)
 	mlx.Eval(lweB)
@@ -571,11 +571,11 @@ func (ctx *ExternalProductContext) KeySwitch(
 	baseLog := int(ctx.BaseLog)
 	base := int64(ctx.base)
 
-	shape := mlx.Shape(lweA)
+	shape := epShape(lweA)
 	batchSize := shape[0]
 	nIn := shape[1]
 
-	kskShape := mlx.Shape(ksk)
+	kskShape := epShape(ksk)
 	nOut := kskShape[2]
 
 	// Initialize output
@@ -584,33 +584,33 @@ func (ctx *ExternalProductContext) KeySwitch(
 	// For each input dimension
 	for i := 0; i < nIn; i++ {
 		// Extract a[i] for all batches: [batch]
-		aI := mlx.Slice(lweA, []int{0, i}, []int{batchSize, i + 1}, []int{1, 1})
-		aI = mlx.Reshape(aI, []int{batchSize})
+		aI := epSlice(lweA, []int{0, i}, []int{batchSize, i + 1}, []int{1, 1})
+		aI = epReshape(aI, []int{batchSize})
 
 		// Decompose a[i] into L digits
 		for l := 0; l < L; l++ {
 			shift := l * baseLog
 			divisor := int64(1) << shift
-			divisorArr := mlx.Full([]int{batchSize}, divisor, mlx.Int64)
-			maskArr := mlx.Full([]int{batchSize}, base, mlx.Int64)
-			halfBase := mlx.Full([]int{batchSize}, base/2, mlx.Int64)
+			divisorArr := epFull([]int{batchSize}, divisor, mlx.Int64)
+			maskArr := epFull([]int{batchSize}, base, mlx.Int64)
+			halfBase := epFull([]int{batchSize}, base/2, mlx.Int64)
 
 			// Extract digit
-			shifted := mlx.FloorDivide(aI, divisorArr)
-			digit := mlx.Remainder(shifted, maskArr)
-			digit = mlx.Subtract(digit, halfBase)
+			shifted := epFloorDivide(aI, divisorArr)
+			digit := epRemainder(shifted, maskArr)
+			digit = epSubtract(digit, halfBase)
 
 			// Get KSK row: [n_out]
-			kskRow := mlx.Slice(ksk, []int{i, l, 0}, []int{i + 1, l + 1, nOut}, []int{1, 1, 1})
-			kskRow = mlx.Reshape(kskRow, []int{1, nOut})
-			kskRow = mlx.Tile(kskRow, []int{batchSize, 1})
+			kskRow := epSlice(ksk, []int{i, l, 0}, []int{i + 1, l + 1, nOut}, []int{1, 1, 1})
+			kskRow = epReshape(kskRow, []int{1, nOut})
+			kskRow = epTile(kskRow, []int{batchSize, 1})
 
 			// digit * ksk[i, l]: [batch, n_out]
-			digitExpanded := mlx.Reshape(digit, []int{batchSize, 1})
-			digitExpanded = mlx.Tile(digitExpanded, []int{1, nOut})
+			digitExpanded := epReshape(digit, []int{batchSize, 1})
+			digitExpanded = epTile(digitExpanded, []int{1, nOut})
 
 			prod := mlx.Multiply(digitExpanded, kskRow)
-			prod = mlx.Remainder(prod, mlx.Full([]int{batchSize, nOut}, Q, mlx.Int64))
+			prod = epRemainder(prod, epFull([]int{batchSize, nOut}, Q, mlx.Int64))
 
 			// Accumulate
 			outA = addModArray(outA, prod, Q)

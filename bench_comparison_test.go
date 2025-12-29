@@ -40,7 +40,7 @@ func setupBenchmark(b *testing.B) {
 	benchBSK = benchKGen.GenBootstrapKey(benchSK)
 	benchEnc = NewEncryptor(benchParams, benchSK)
 	benchDec = NewDecryptor(benchParams, benchSK)
-	benchEval = NewEvaluator(benchParams, benchBSK, benchSK)
+	benchEval = NewEvaluator(benchParams, benchBSK)
 	benchBitEnc = NewBitwiseEncryptor(benchParams, benchSK)
 	benchBitDec = NewBitwiseDecryptor(benchParams, benchSK)
 	benchBitEval = NewBitwiseEvaluator(benchParams, benchBSK, benchSK)
@@ -91,7 +91,7 @@ func BenchmarkLatticeEncryptBit(b *testing.B) {
 
 func BenchmarkLatticeDecryptBit(b *testing.B) {
 	setupBenchmark(b)
-	ct := benchEnc.Encrypt(true)
+	ct:= benchEnc.Encrypt(true)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = benchDec.Decrypt(ct)
@@ -429,7 +429,7 @@ func BenchmarkLatticePublicEncrypt8(b *testing.B) {
 	pubEnc := NewBitwisePublicEncryptor(benchParams, benchPK)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = pubEnc.EncryptUint64(42, FheUint8)
+		_, _ = pubEnc.EncryptUint64(42, FheUint8)
 	}
 }
 
@@ -438,7 +438,7 @@ func BenchmarkLatticePublicEncrypt16(b *testing.B) {
 	pubEnc := NewBitwisePublicEncryptor(benchParams, benchPK)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = pubEnc.EncryptUint64(12345, FheUint16)
+		_, _ = pubEnc.EncryptUint64(12345, FheUint16)
 	}
 }
 

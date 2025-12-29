@@ -19,7 +19,7 @@ func FuzzNTTRoundTrip(f *testing.F) {
 	f.Add([]byte{255, 255, 255, 255})
 	f.Add([]byte{1, 2, 3, 4, 5, 6, 7, 8})
 
-	engine := NewNTTEngine(1024, 1<<27)
+	engine, _ := NewNTTEngine(1024, 1<<27)
 
 	f.Fuzz(func(t *testing.T, data []byte) {
 		if len(data) < 8 {
@@ -64,7 +64,7 @@ func FuzzBarrettReduction(f *testing.F) {
 	f.Add(uint64(1<<27-1), uint64(1<<27-1))
 	f.Add(uint64(12345), uint64(67890))
 
-	engine := NewNTTEngine(1024, 1<<27)
+	engine, _ := NewNTTEngine(1024, 1<<27)
 	Q := engine.Q
 
 	f.Fuzz(func(t *testing.T, a, b uint64) {
@@ -88,7 +88,7 @@ func FuzzPolyAdd(f *testing.F) {
 
 	f.Add([]byte{1, 2, 3, 4}, []byte{5, 6, 7, 8})
 
-	engine := NewNTTEngine(1024, 1<<27)
+	engine, _ := NewNTTEngine(1024, 1<<27)
 	Q := engine.Q
 
 	f.Fuzz(func(t *testing.T, dataA, dataB []byte) {
@@ -123,7 +123,7 @@ func FuzzPolySub(f *testing.F) {
 
 	f.Add([]byte{1, 2, 3, 4}, []byte{5, 6, 7, 8})
 
-	engine := NewNTTEngine(1024, 1<<27)
+	engine, _ := NewNTTEngine(1024, 1<<27)
 	Q := engine.Q
 
 	f.Fuzz(func(t *testing.T, dataA, dataB []byte) {
@@ -163,7 +163,7 @@ func FuzzNTTConvolution(f *testing.F) {
 
 	f.Add([]byte{1, 2, 3}, []byte{4, 5, 6})
 
-	engine := NewNTTEngine(1024, 1<<27)
+	engine, _ := NewNTTEngine(1024, 1<<27)
 	Q := engine.Q
 
 	f.Fuzz(func(t *testing.T, dataA, dataB []byte) {
