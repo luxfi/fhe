@@ -247,7 +247,7 @@ type KeySwitchKey struct {
 func (e *Engine) GenerateSecretKey(params *Params) (*SecretKey, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	sk := &SecretKey{engine: e}
 	sk.ptr = C.luxfhe_keygen_secret(e.ptr, params.ptr)
 	if sk.ptr == nil {
@@ -269,7 +269,7 @@ func (sk *SecretKey) Free() {
 func (e *Engine) GeneratePublicKey(params *Params, sk *SecretKey) (*PublicKey, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	pk := &PublicKey{engine: e}
 	pk.ptr = C.luxfhe_keygen_public(e.ptr, params.ptr, sk.ptr)
 	if pk.ptr == nil {
@@ -291,7 +291,7 @@ func (pk *PublicKey) Free() {
 func (e *Engine) GenerateBootstrapKey(params *Params, sk *SecretKey) (*BootstrapKey, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	bsk := &BootstrapKey{engine: e}
 	bsk.ptr = C.luxfhe_keygen_bootstrap(e.ptr, params.ptr, sk.ptr)
 	if bsk.ptr == nil {
@@ -314,7 +314,7 @@ func (bsk *BootstrapKey) Free() {
 func (e *Engine) GenerateKeySwitchKey(params *Params, sk *SecretKey) (*KeySwitchKey, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	ksk := &KeySwitchKey{engine: e}
 	ksk.ptr = C.luxfhe_keygen_keyswitch(e.ptr, params.ptr, sk.ptr)
 	if ksk.ptr == nil {
@@ -346,12 +346,12 @@ type Ciphertext struct {
 func (e *Engine) EncryptBit(sk *SecretKey, bit bool) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	var b C.int = 0
 	if bit {
 		b = 1
 	}
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_encrypt_bit(e.ptr, sk.ptr, b)
 	if ct.ptr == nil {
@@ -365,12 +365,12 @@ func (e *Engine) EncryptBit(sk *SecretKey, bit bool) (*Ciphertext, error) {
 func (e *Engine) EncryptBitPublic(pk *PublicKey, bit bool) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	var b C.int = 0
 	if bit {
 		b = 1
 	}
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_encrypt_bit_public(e.ptr, pk.ptr, b)
 	if ct.ptr == nil {
@@ -384,7 +384,7 @@ func (e *Engine) EncryptBitPublic(pk *PublicKey, bit bool) (*Ciphertext, error) 
 func (e *Engine) DecryptBit(sk *SecretKey, ct *Ciphertext) (bool, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	result := C.luxfhe_decrypt_bit(e.ptr, sk.ptr, ct.ptr)
 	return result != 0, nil
 }
@@ -416,7 +416,7 @@ func (ct *Ciphertext) Clone() (*Ciphertext, error) {
 func (e *Engine) And(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_and(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -430,7 +430,7 @@ func (e *Engine) And(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 func (e *Engine) Or(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_or(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -444,7 +444,7 @@ func (e *Engine) Or(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 func (e *Engine) Xor(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_xor(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -458,7 +458,7 @@ func (e *Engine) Xor(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 func (e *Engine) Not(ct *Ciphertext) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	result := &Ciphertext{engine: e}
 	result.ptr = C.luxfhe_not(e.ptr, ct.ptr)
 	if result.ptr == nil {
@@ -472,7 +472,7 @@ func (e *Engine) Not(ct *Ciphertext) (*Ciphertext, error) {
 func (e *Engine) Nand(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_nand(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -486,7 +486,7 @@ func (e *Engine) Nand(bsk *BootstrapKey, a, b *Ciphertext) (*Ciphertext, error) 
 func (e *Engine) Mux(bsk *BootstrapKey, sel, a, b *Ciphertext) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_mux(e.ptr, bsk.ptr, sel.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -510,7 +510,7 @@ type Integer struct {
 func (e *Engine) EncryptU64(sk *SecretKey, value uint64) (*Integer, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_encrypt_u64(e.ptr, sk.ptr, C.uint64_t(value))
 	if i.ptr == nil {
@@ -524,7 +524,7 @@ func (e *Engine) EncryptU64(sk *SecretKey, value uint64) (*Integer, error) {
 func (e *Engine) EncryptU64Public(pk *PublicKey, value uint64) (*Integer, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_encrypt_u64_public(e.ptr, pk.ptr, C.uint64_t(value))
 	if i.ptr == nil {
@@ -538,7 +538,7 @@ func (e *Engine) EncryptU64Public(pk *PublicKey, value uint64) (*Integer, error)
 func (e *Engine) DecryptU64(sk *SecretKey, ct *Integer) (uint64, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	return uint64(C.luxfhe_decrypt_u64(e.ptr, sk.ptr, ct.ptr)), nil
 }
 
@@ -569,7 +569,7 @@ func (i *Integer) Clone() (*Integer, error) {
 func (e *Engine) AddU64(bsk *BootstrapKey, a, b *Integer) (*Integer, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_add_u64(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if i.ptr == nil {
@@ -583,7 +583,7 @@ func (e *Engine) AddU64(bsk *BootstrapKey, a, b *Integer) (*Integer, error) {
 func (e *Engine) SubU64(bsk *BootstrapKey, a, b *Integer) (*Integer, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_sub_u64(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if i.ptr == nil {
@@ -597,7 +597,7 @@ func (e *Engine) SubU64(bsk *BootstrapKey, a, b *Integer) (*Integer, error) {
 func (e *Engine) MulU64(bsk *BootstrapKey, a, b *Integer) (*Integer, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_mul_u64(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if i.ptr == nil {
@@ -611,7 +611,7 @@ func (e *Engine) MulU64(bsk *BootstrapKey, a, b *Integer) (*Integer, error) {
 func (e *Engine) AddScalarU64(a *Integer, scalar uint64) (*Integer, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_add_scalar_u64(e.ptr, a.ptr, C.uint64_t(scalar))
 	if i.ptr == nil {
@@ -629,7 +629,7 @@ func (e *Engine) AddScalarU64(a *Integer, scalar uint64) (*Integer, error) {
 func (e *Engine) Lt(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_lt(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -643,7 +643,7 @@ func (e *Engine) Lt(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 func (e *Engine) Le(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_le(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -657,7 +657,7 @@ func (e *Engine) Le(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 func (e *Engine) Gt(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_gt(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -671,7 +671,7 @@ func (e *Engine) Gt(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 func (e *Engine) Ge(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_ge(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -685,7 +685,7 @@ func (e *Engine) Ge(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 func (e *Engine) Eq(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_eq(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if ct.ptr == nil {
@@ -699,7 +699,7 @@ func (e *Engine) Eq(bsk *BootstrapKey, a, b *Integer) (*Ciphertext, error) {
 func (e *Engine) InRange(bsk *BootstrapKey, value *Integer, min, max uint64) (*Ciphertext, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_in_range(e.ptr, bsk.ptr, value.ptr, C.uint64_t(min), C.uint64_t(max))
 	if ct.ptr == nil {
@@ -723,7 +723,7 @@ type Uint256 struct {
 func (e *Engine) EncryptU256(sk *SecretKey, limbs [4]uint64) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	cLimbs := (*C.uint64_t)(unsafe.Pointer(&limbs[0]))
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_encrypt_u256(e.ptr, sk.ptr, cLimbs)
@@ -738,7 +738,7 @@ func (e *Engine) EncryptU256(sk *SecretKey, limbs [4]uint64) (*Uint256, error) {
 func (e *Engine) EncryptU256Public(pk *PublicKey, limbs [4]uint64) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	cLimbs := (*C.uint64_t)(unsafe.Pointer(&limbs[0]))
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_encrypt_u256_public(e.ptr, pk.ptr, cLimbs)
@@ -753,7 +753,7 @@ func (e *Engine) EncryptU256Public(pk *PublicKey, limbs [4]uint64) (*Uint256, er
 func (e *Engine) DecryptU256(sk *SecretKey, ct *Uint256) ([4]uint64, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	var limbs [4]uint64
 	C.luxfhe_decrypt_u256(e.ptr, sk.ptr, ct.ptr, (*C.uint64_t)(unsafe.Pointer(&limbs[0])))
 	return limbs, nil
@@ -771,7 +771,7 @@ func (u *Uint256) Free() {
 func (e *Engine) AddU256(a, b *Uint256) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_add_u256(e.ptr, a.ptr, b.ptr)
 	if u.ptr == nil {
@@ -785,7 +785,7 @@ func (e *Engine) AddU256(a, b *Uint256) (*Uint256, error) {
 func (e *Engine) SubU256(a, b *Uint256) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_sub_u256(e.ptr, a.ptr, b.ptr)
 	if u.ptr == nil {
@@ -799,7 +799,7 @@ func (e *Engine) SubU256(a, b *Uint256) (*Uint256, error) {
 func (e *Engine) MulU256(bsk *BootstrapKey, a, b *Uint256) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_mul_u256(e.ptr, bsk.ptr, a.ptr, b.ptr)
 	if u.ptr == nil {
@@ -813,7 +813,7 @@ func (e *Engine) MulU256(bsk *BootstrapKey, a, b *Uint256) (*Uint256, error) {
 func (e *Engine) AndU256(a, b *Uint256) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_and_u256(e.ptr, a.ptr, b.ptr)
 	if u.ptr == nil {
@@ -827,7 +827,7 @@ func (e *Engine) AndU256(a, b *Uint256) (*Uint256, error) {
 func (e *Engine) ShlU256(a *Uint256, shift uint32) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_shl_u256(e.ptr, a.ptr, C.uint32_t(shift))
 	if u.ptr == nil {
@@ -845,7 +845,7 @@ func (e *Engine) ShlU256(a *Uint256, shift uint32) (*Uint256, error) {
 func (e *Engine) EVMExecute(bsk *BootstrapKey, opcode EVMOpcode, a, b *Uint256) (*Uint256, error) {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	u := &Uint256{engine: e}
 	u.ptr = C.luxfhe_evm_execute(e.ptr, bsk.ptr, C.LuxFHEEVMOpcode(opcode), a.ptr, b.ptr)
 	if u.ptr == nil {
@@ -888,9 +888,9 @@ func (b *Bridge) Reencrypt(ct *Ciphertext, destPubkey []byte) (*Ciphertext, erro
 	if len(destPubkey) == 0 {
 		return nil, errors.New("empty destination public key")
 	}
-	
+
 	newCt := &Ciphertext{engine: ct.engine}
-	newCt.ptr = C.luxfhe_bridge_reencrypt(b.ptr, ct.ptr, 
+	newCt.ptr = C.luxfhe_bridge_reencrypt(b.ptr, ct.ptr,
 		(*C.uint8_t)(unsafe.Pointer(&destPubkey[0])), C.size_t(len(destPubkey)))
 	if newCt.ptr == nil {
 		return nil, errors.New("re-encryption failed")
@@ -921,7 +921,7 @@ type ValidatorSession struct {
 func (e *Engine) NewValidatorSession(attestType AttestationType) (*ValidatorSession, error) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	
+
 	vs := &ValidatorSession{engine: e}
 	vs.ptr = C.luxfhe_validator_create(e.ptr, C.LuxFHEAttestationType(attestType))
 	if vs.ptr == nil {
@@ -978,7 +978,7 @@ type Stats struct {
 func (e *Engine) GetStats() Stats {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	
+
 	cStats := C.luxfhe_get_stats(e.ptr)
 	return Stats{
 		NTTTimeMs:        float64(cStats.ntt_time_ms),
@@ -1020,7 +1020,7 @@ func (e *Engine) DeserializeCiphertext(data []byte) (*Ciphertext, error) {
 	if len(data) == 0 {
 		return nil, errors.New("empty data")
 	}
-	
+
 	ct := &Ciphertext{engine: e}
 	ct.ptr = C.luxfhe_deserialize_ciphertext(e.ptr, (*C.uint8_t)(unsafe.Pointer(&data[0])), C.size_t(len(data)))
 	if ct.ptr == nil {
@@ -1046,7 +1046,7 @@ func (e *Engine) DeserializeInteger(data []byte) (*Integer, error) {
 	if len(data) == 0 {
 		return nil, errors.New("empty data")
 	}
-	
+
 	i := &Integer{engine: e}
 	i.ptr = C.luxfhe_deserialize_integer(e.ptr, (*C.uint8_t)(unsafe.Pointer(&data[0])), C.size_t(len(data)))
 	if i.ptr == nil {
