@@ -7,6 +7,7 @@
 #include "luxfhe_bridge.h"
 #include <cstring>
 #include <cstdlib>
+#include <cmath>
 #include <atomic>
 #include <chrono>
 #include <memory>
@@ -32,9 +33,35 @@ inline uint64_t secure_rand_range(uint64_t max) {
     return dist(secure_rng);
 }
 
-inline int64_t secure_rand_noise(int range) {
+// DEPRECATED: Do not use uniform noise for LWE security!
+// Use sample_gaussian() with proper sigma derived from alpha_lwe * q
+inline int64_t secure_rand_noise_uniform(int range) {
     std::uniform_int_distribution<int> dist(-range, range);
     return dist(secure_rng);
+}
+
+// Box-Muller transform for discrete Gaussian sampling
+// Required for LWE security: sigma = alpha_lwe * q
+// For 128-bit security with n=630, q=2^32: sigma ≈ 13,744
+inline int64_t sample_gaussian(double sigma) {
+    // Box-Muller transform: generate two independent Gaussian samples
+    std::uniform_real_distribution<double> uniform(0.0, 1.0);
+    
+    double u1, u2;
+    do {
+        u1 = uniform(secure_rng);
+        u2 = uniform(secure_rng);
+    } while (u1 <= 1e-10); // Avoid log(0)
+    
+    double z0 = std::sqrt(-2.0 * std::log(u1)) * std::cos(2.0 * M_PI * u2);
+    
+    // Round to nearest integer for discrete Gaussian
+    return static_cast<int64_t>(std::round(z0 * sigma));
+}
+
+// Calculate sigma from alpha parameter and modulus
+inline double compute_sigma(double alpha, uint64_t q) {
+    return alpha * static_cast<double>(q);
 }
 
 } // anonymous namespace
@@ -43,15 +70,44 @@ inline int64_t secure_rand_noise(int range) {
 #include "../../mlx/fhe/backend.h"
 #include "../../mlx/fhe/fhe.h"
 
-// Include patent implementations
-#include "../../mlx/fhe/patents/dmafhe.hpp"
-#include "../../mlx/fhe/patents/ulfhe.hpp"
-#include "../../mlx/fhe/patents/evm256pp.hpp"
-#include "../../mlx/fhe/patents/xcfhe.hpp"
-#include "../../mlx/fhe/patents/vafhe.hpp"
+// Patent implementations are declared in fhe.h (namespaces xcfhe, vafhe, etc.)
+// The patent header files contain detailed implementations but have conflicting
+// class definitions. Use the fhe.h declarations which are sufficient for the bridge.
+// Full patent implementations are in patents/*.hpp for standalone GPU kernels.
 
 using namespace lux::fhe;
-using namespace lux::fhe::gpu;
+
+// Local definitions for FHE operations (bridge-specific structs with direct field access)
+// The fhe.h classes use opaque Impl patterns, but the bridge needs direct field access
+namespace {
+
+struct LWECiphertext {
+    uint64_t* a;   // Mask vector
+    uint64_t b;    // Body
+    int n;         // Dimension
+};
+
+// Bridge-local bootstrapping key with direct field access
+struct BridgeBootstrappingKey {
+    int n_lwe;        // LWE dimension
+    int N;            // Ring dimension
+    int k;            // GLWE dimension
+    int l;            // Decomposition length
+    int Bg_log;       // Decomposition base (log2)
+    std::vector<uint8_t> data;  // Serialized key data
+};
+
+// Bridge-local key switching key with direct field access
+struct BridgeKeySwitchingKey {
+    int n_lwe;        // LWE dimension
+    int l;            // Decomposition length  
+    int Bg_log;       // Decomposition base (log2)
+    int N;            // Ring dimension
+    int k;            // GLWE dimension
+    std::vector<uint8_t> data;  // Serialized key data
+};
+
+} // anonymous namespace
 
 // =============================================================================
 // Thread-local error handling
@@ -78,16 +134,13 @@ struct EngineWrapper {
     LuxFHEStats stats = {};
     std::mutex mtx;
     
-    // DMAFHE engine
-    std::unique_ptr<dmafhe::DualModeEngine> dual_engine;
+    // TFHE parameters including alpha_lwe for Gaussian noise
+    TFHEParams params = {};
     
-    // ULFHE engine
-    std::unique_ptr<ulfhe::ComparisonEngine> comparison_engine;
+    // Context for FHE operations (replaces individual patent engines)
+    std::unique_ptr<Context> ctx;
     
-    // EVM256PP engine
-    std::unique_ptr<evm256pp::ParallelEngine> parallel_engine;
-    
-    // VAFHE engine
+    // VAFHE engine (from fhe.h namespace)
     std::unique_ptr<vafhe::ValidatorEngine> validator_engine;
 };
 
@@ -99,20 +152,24 @@ struct ParamsWrapper {
 struct SecretKeyWrapper {
     std::vector<uint64_t> key;
     EngineWrapper* engine;
+    double alpha_lwe = 3.2e-3;  // Default for 128-bit security
+    uint64_t q = 1ULL << 32;    // Default modulus
 };
 
 struct PublicKeyWrapper {
     std::vector<uint64_t> key;
     EngineWrapper* engine;
+    double alpha_lwe = 3.2e-3;  // Default for 128-bit security
+    uint64_t q = 1ULL << 32;    // Default modulus
 };
 
 struct BootstrapKeyWrapper {
-    BootstrappingKey bsk;
+    BridgeBootstrappingKey bsk;  // Use bridge-local struct with direct field access
     EngineWrapper* engine;
 };
 
 struct KeySwitchKeyWrapper {
-    KeySwitchingKey ksk;
+    BridgeKeySwitchingKey ksk;  // Use bridge-local struct with direct field access
     EngineWrapper* engine;
 };
 
@@ -190,7 +247,7 @@ extern "C" LuxFHEEngine luxfhe_engine_create(LuxFHEBackend backend) {
         BackendType type;
         switch (backend) {
             case LUXFHE_BACKEND_MLX:
-                type = BackendType::METAL;
+                type = BackendType::MLX;
                 break;
             case LUXFHE_BACKEND_CUDA:
                 type = BackendType::CUDA;
@@ -204,18 +261,23 @@ extern "C" LuxFHEEngine luxfhe_engine_create(LuxFHEBackend backend) {
                 break;
         }
         
-        wrapper->backend = Backend::create(type);
+        wrapper->backend = Backend::create(static_cast<int>(type));
         if (!wrapper->backend || !wrapper->backend->initialize(0)) {
             delete wrapper;
             set_error(LUXFHE_ERR_BACKEND_INIT, "Failed to initialize backend");
             return nullptr;
         }
         
-        // Initialize patent engines
-        wrapper->dual_engine = std::make_unique<dmafhe::DualModeEngine>(*wrapper->backend);
-        wrapper->comparison_engine = std::make_unique<ulfhe::ComparisonEngine>(*wrapper->backend);
-        wrapper->parallel_engine = std::make_unique<evm256pp::ParallelEngine>(*wrapper->backend);
-        wrapper->validator_engine = std::make_unique<vafhe::ValidatorEngine>();
+        // Initialize FHE context
+        wrapper->ctx = Context::create(Scheme::TFHE, type);
+        if (!wrapper->ctx) {
+            delete wrapper;
+            set_error(LUXFHE_ERR_BACKEND_INIT, "Failed to create FHE context");
+            return nullptr;
+        }
+        
+        // VAFHE validator engine (for attestation, uses fhe.h definition)
+        // wrapper->validator_engine = vafhe::ValidatorEngine::create(...);
         
         return wrapper;
     } catch (const std::exception& e) {
@@ -255,8 +317,9 @@ extern "C" void luxfhe_engine_set_mode(LuxFHEEngine engine, LuxFHEMode mode) {
             break;
     }
     
-    if (wrapper->backend) {
-        wrapper->backend->setOperationMode(wrapper->mode);
+    // Note: setOperationMode is on Context, not Backend
+    if (wrapper->ctx) {
+        wrapper->ctx->setOperationMode(wrapper->mode);
     }
 }
 
@@ -279,10 +342,10 @@ extern "C" LuxFHEBackend luxfhe_engine_get_backend(LuxFHEEngine engine) {
     
     if (!wrapper->backend) return LUXFHE_BACKEND_AUTO;
     
-    switch (wrapper->backend->getBackendType()) {
-        case BackendType::METAL: return LUXFHE_BACKEND_MLX;
-        case BackendType::CUDA: return LUXFHE_BACKEND_CUDA;
-        case BackendType::CPU: return LUXFHE_BACKEND_CPU;
+    switch (wrapper->backend->getType()) {
+        case BACKEND_MLX: return LUXFHE_BACKEND_MLX;
+        case BACKEND_CUDA: return LUXFHE_BACKEND_CUDA;
+        case BACKEND_CPU: return LUXFHE_BACKEND_CPU;
         default: return LUXFHE_BACKEND_AUTO;
     }
 }
@@ -378,6 +441,8 @@ extern "C" LuxFHESecretKey luxfhe_keygen_secret(LuxFHEEngine engine, LuxFHEParam
     auto wrapper = new SecretKeyWrapper();
     wrapper->engine = eng;
     wrapper->key.resize(par->params.n_lwe);
+    wrapper->alpha_lwe = par->params.alpha_lwe;
+    wrapper->q = par->params.q;
     
     // Generate random secret key (binary or ternary)
     for (int i = 0; i < par->params.n_lwe; i++) {
@@ -409,6 +474,8 @@ extern "C" LuxFHEPublicKey luxfhe_keygen_public(LuxFHEEngine engine, LuxFHEParam
     auto wrapper = new PublicKeyWrapper();
     wrapper->engine = eng;
     wrapper->key.resize(par->params.n_lwe + 1);
+    wrapper->alpha_lwe = par->params.alpha_lwe;
+    wrapper->q = par->params.q;
     
     // Generate public key (simplified - real implementation uses RLWE encryption)
     for (size_t i = 0; i < wrapper->key.size(); i++) {
@@ -444,9 +511,12 @@ extern "C" LuxFHEBootstrapKey luxfhe_keygen_bootstrap(LuxFHEEngine engine, LuxFH
     wrapper->bsk.l = par->params.l_bsk;
     wrapper->bsk.Bg_log = par->params.Bg_bsk;
     
-    // Generate bootstrapping key (GPU-accelerated in real implementation)
-    if (eng->backend) {
-        eng->backend->generateBootstrappingKey(wrapper->bsk, secret->key.data());
+    // Generate bootstrapping key (GPU-accelerated via Context)
+    if (eng->ctx) {
+        // Context generates BootstrappingKey which we copy parameters from
+        auto bsk = eng->ctx->generateBootstrappingKey(SecretKey{});  // Stub - real impl uses proper SK
+        // Copy key data if available
+        wrapper->bsk.data = bsk.serialize();
     }
     
     auto end = std::chrono::high_resolution_clock::now();
@@ -508,7 +578,8 @@ extern "C" LuxFHECiphertext luxfhe_encrypt_bit(LuxFHEEngine engine, LuxFHESecret
     wrapper->ct.a = new uint64_t[wrapper->ct.n];
     
     // LWE encryption: b = <a, s> + m + e
-    uint64_t q = 1ULL << 32;
+    // Use params from secret key for proper security
+    uint64_t q = secret->q;
     uint64_t m = bit ? (q / 4) : 0; // Encode bit in phase
     
     uint64_t inner_product = 0;
@@ -517,9 +588,11 @@ extern "C" LuxFHECiphertext luxfhe_encrypt_bit(LuxFHEEngine engine, LuxFHESecret
         inner_product += wrapper->ct.a[i] * secret->key[i];
     }
     
-    // Add small Gaussian noise (simplified)
-    int noise = secure_rand_noise(50);
-    wrapper->ct.b = (inner_product + m + noise) % q;
+    // Add discrete Gaussian noise with proper sigma for LWE security
+    // sigma = alpha_lwe * q provides 128-bit security for n=630
+    double sigma = compute_sigma(secret->alpha_lwe, q);
+    int64_t noise = sample_gaussian(sigma);
+    wrapper->ct.b = (inner_product + m + static_cast<uint64_t>(noise)) % q;
     
     auto end = std::chrono::high_resolution_clock::now();
     {
@@ -545,15 +618,21 @@ extern "C" LuxFHECiphertext luxfhe_encrypt_bit_public(LuxFHEEngine engine, LuxFH
     wrapper->ct.n = pub->key.size() - 1;
     wrapper->ct.a = new uint64_t[wrapper->ct.n];
     
-    uint64_t q = 1ULL << 32;
+    // Use params from public key for proper security
+    uint64_t q = pub->q;
     uint64_t m = bit ? (q / 4) : 0;
+    
+    // Compute sigma for discrete Gaussian noise (128-bit security)
+    double sigma = compute_sigma(pub->alpha_lwe, q);
     
     // Public key encryption (simplified RLWE-based)
     uint64_t r = secure_rand_range(2); // Random ephemeral
     for (int i = 0; i < wrapper->ct.n; i++) {
-        wrapper->ct.a[i] = pub->key[i] * r + secure_rand_noise(50);
+        int64_t noise = sample_gaussian(sigma);
+        wrapper->ct.a[i] = pub->key[i] * r + static_cast<uint64_t>(noise);
     }
-    wrapper->ct.b = pub->key[wrapper->ct.n] * r + m + secure_rand_noise(50);
+    int64_t noise_b = sample_gaussian(sigma);
+    wrapper->ct.b = pub->key[wrapper->ct.n] * r + m + static_cast<uint64_t>(noise_b);
     
     {
         std::lock_guard<std::mutex> lock(eng->mtx);
@@ -876,6 +955,10 @@ extern "C" LuxFHEInteger luxfhe_int_encrypt_u64(LuxFHEEngine engine, LuxFHESecre
         uint8_t bit = (plaintext >> i) & 1;
         auto ct_handle = luxfhe_encrypt_bit(engine, sk, bit);
         if (!ct_handle) {
+            // Free already-allocated bits before returning
+            for (int j = 0; j < i; j++) {
+                delete[] result->bits[j].a;
+            }
             delete result;
             return nullptr;
         }
@@ -1083,9 +1166,9 @@ extern "C" LuxFHEInteger luxfhe_int_mul(LuxFHEEngine engine, LuxFHEBootstrapKey 
     }
     
     // Actual multiplication would iterate through partial products
-    // This is a stub - full impl in patent class
-    if (wrapper->comparison_engine) {
-        // Use ULFHE optimized multiplication
+    // This is a stub - full impl in patent class via Context
+    if (wrapper->ctx) {
+        // Use Context for optimized operations (DMAFHE auto-selects mode)
     }
     
     return result;
@@ -1101,10 +1184,10 @@ extern "C" LuxFHECiphertext luxfhe_int_lt(LuxFHEEngine engine, LuxFHEBootstrapKe
     
     auto wrapper = static_cast<EngineWrapper*>(engine);
     
-    // Use ULFHE O(1) comparison if available
-    if (wrapper->comparison_engine) {
-        // Delegate to ULFHE comparison engine
-        // return wrapper->comparison_engine->lessThan(a, b);
+    // Use Context O(1) comparison if available (ULFHE via Context::less)
+    if (wrapper->ctx) {
+        // Context provides comparison operations
+        // return wrapper->ctx->less(a_ct, b_ct) for O(1) comparison
     }
     
     // Fallback: bit-serial comparison
@@ -1202,9 +1285,9 @@ extern "C" LuxFHECiphertext luxfhe_int_in_range(LuxFHEEngine engine, LuxFHEBoots
     
     auto wrapper = static_cast<EngineWrapper*>(engine);
     
-    // Use ULFHE O(1) range check if available
-    if (wrapper->comparison_engine) {
-        // return wrapper->comparison_engine->inRange(value, min, max);
+    // Use Context O(1) range check if available (ULFHE via Context::rangeCheck)
+    if (wrapper->ctx) {
+        // return wrapper->ctx->rangeCheck(value_ct, min, max) for O(1) range check
     }
     
     // Fallback: value >= min AND value <= max
@@ -1247,6 +1330,12 @@ extern "C" LuxFHEUint256 luxfhe_u256_encrypt(LuxFHEEngine engine, LuxFHESecretKe
         // Encrypt this limb as 64-bit integer
         auto limb_ct = luxfhe_int_encrypt_u64(engine, sk, v, 64);
         if (!limb_ct) {
+            // Free already-encrypted limbs before returning
+            for (int j = 0; j < limb; j++) {
+                for (auto& ct : result->limbs[j].bits) {
+                    delete[] ct.a;
+                }
+            }
             delete result;
             return nullptr;
         }
@@ -1281,6 +1370,12 @@ extern "C" void luxfhe_u256_decrypt(LuxFHEEngine engine, LuxFHESecretKey sk,
 extern "C" void luxfhe_u256_free(LuxFHEUint256 cipher) {
     if (!cipher) return;
     auto wrapper = static_cast<Uint256Wrapper*>(cipher);
+    // Free the internal bit arrays in each limb
+    for (int limb = 0; limb < 4; limb++) {
+        for (auto& ct : wrapper->limbs[limb].bits) {
+            delete[] ct.a;
+        }
+    }
     delete wrapper;
 }
 
@@ -1298,9 +1393,9 @@ extern "C" LuxFHEUint256 luxfhe_u256_add(LuxFHEEngine engine, LuxFHEBootstrapKey
     auto result = new Uint256Wrapper();
     result->engine = wrapper;
     
-    // Use EVM256PP parallel addition if available
-    if (wrapper->parallel_engine) {
-        // wrapper->parallel_engine->add256(result, a_wrap, b_wrap);
+    // Use EVM256PP parallel addition if available via Context
+    if (wrapper->ctx) {
+        // EVM256 ops provided by Context::add256(a, b)
         // return result;
     }
     
@@ -1308,6 +1403,12 @@ extern "C" LuxFHEUint256 luxfhe_u256_add(LuxFHEEngine engine, LuxFHEBootstrapKey
     for (int limb = 0; limb < 4; limb++) {
         auto sum = luxfhe_int_add(engine, bsk, &a_wrap->limbs[limb], &b_wrap->limbs[limb]);
         if (!sum) {
+            // Free already-computed limbs before returning
+            for (int j = 0; j < limb; j++) {
+                for (auto& ct : result->limbs[j].bits) {
+                    delete[] ct.a;
+                }
+            }
             delete result;
             return nullptr;
         }
@@ -1339,6 +1440,12 @@ extern "C" LuxFHEUint256 luxfhe_u256_sub(LuxFHEEngine engine, LuxFHEBootstrapKey
     for (int limb = 0; limb < 4; limb++) {
         auto diff = luxfhe_int_sub(engine, bsk, &a_wrap->limbs[limb], &b_wrap->limbs[limb]);
         if (!diff) {
+            // Free already-computed limbs before returning
+            for (int j = 0; j < limb; j++) {
+                for (auto& ct : result->limbs[j].bits) {
+                    delete[] ct.a;
+                }
+            }
             delete result;
             return nullptr;
         }
@@ -1359,9 +1466,9 @@ extern "C" LuxFHEUint256 luxfhe_u256_mul(LuxFHEEngine engine, LuxFHEBootstrapKey
     
     auto wrapper = static_cast<EngineWrapper*>(engine);
     
-    // Use EVM256PP parallel Karatsuba multiplication if available
-    if (wrapper->parallel_engine) {
-        // return wrapper->parallel_engine->mul256(a, b);
+    // Use EVM256PP parallel Karatsuba multiplication via Context
+    if (wrapper->ctx) {
+        // Context::mul256(a, b) for parallel Karatsuba
     }
     
     // Stub implementation
@@ -1697,31 +1804,25 @@ extern "C" LuxFHEUint256 luxfhe_evm_shr(LuxFHEEngine engine, LuxFHEUint256 a, in
 // Bridge Operations (XCFHE - PAT-FHE-013)
 // =============================================================================
 
-extern "C" LuxFHEBridge luxfhe_bridge_create(LuxFHEEngine engine, uint32_t src_chain, uint32_t dst_chain) {
-    if (!engine) {
-        set_error(LUXFHE_ERR_INVALID_PARAM);
-        return nullptr;
-    }
-    
-    auto wrapper = static_cast<EngineWrapper*>(engine);
-    
+extern "C" LuxFHEBridgeContext luxfhe_bridge_create(uint64_t source_chain, uint64_t dest_chain) {
     auto bridge = new BridgeWrapper();
-    bridge->engine = wrapper;
-    bridge->src_chain_id = src_chain;
-    bridge->dst_chain_id = dst_chain;
+    bridge->engine = nullptr;  // Engine set separately if needed
+    bridge->src_chain_id = static_cast<uint32_t>(source_chain);
+    bridge->dst_chain_id = static_cast<uint32_t>(dest_chain);
     bridge->num_guardians = 0;
     bridge->threshold = 0;
     
     return bridge;
 }
 
-extern "C" void luxfhe_bridge_free(LuxFHEBridge bridge) {
-    if (!bridge) return;
-    delete static_cast<BridgeWrapper*>(bridge);
+extern "C" void luxfhe_bridge_free(LuxFHEBridgeContext ctx) {
+    if (!ctx) return;
+    delete static_cast<BridgeWrapper*>(ctx);
 }
 
-extern "C" int luxfhe_bridge_set_guardians(LuxFHEBridge bridge, const uint8_t** pubkeys,
+extern "C" int luxfhe_bridge_set_guardians(LuxFHEBridgeContext ctx, const uint8_t** pubkeys,
                                             int num_guardians, int threshold) {
+    auto bridge = ctx;  // Alias for compatibility
     if (!bridge || !pubkeys || num_guardians <= 0 || threshold <= 0 || threshold > num_guardians) {
         set_error(LUXFHE_ERR_INVALID_PARAM);
         return -1;
@@ -1741,8 +1842,9 @@ extern "C" int luxfhe_bridge_set_guardians(LuxFHEBridge bridge, const uint8_t** 
     return 0;
 }
 
-extern "C" uint8_t* luxfhe_bridge_prepare_transfer(LuxFHEBridge bridge, LuxFHECiphertext ct,
+extern "C" uint8_t* luxfhe_bridge_prepare_transfer(LuxFHEBridgeContext ctx, LuxFHECiphertext ct,
                                                      size_t* out_len) {
+    auto bridge = ctx;  // Alias for compatibility
     if (!bridge || !ct || !out_len) {
         set_error(LUXFHE_ERR_INVALID_PARAM);
         return nullptr;
@@ -1788,15 +1890,15 @@ extern "C" uint8_t* luxfhe_bridge_prepare_transfer(LuxFHEBridge bridge, LuxFHECi
     return data;
 }
 
-extern "C" LuxFHECiphertext luxfhe_bridge_receive_transfer(LuxFHEBridge bridge,
+extern "C" LuxFHECiphertext luxfhe_bridge_receive_transfer(LuxFHEBridgeContext ctx,
                                                             const uint8_t* data, size_t len,
                                                             const uint8_t** signatures, int num_sigs) {
-    if (!bridge || !data || len < 20 || !signatures || num_sigs <= 0) {
+    if (!ctx || !data || len < 20 || !signatures || num_sigs <= 0) {
         set_error(LUXFHE_ERR_INVALID_PARAM);
         return nullptr;
     }
     
-    auto bridge_wrap = static_cast<BridgeWrapper*>(bridge);
+    auto bridge_wrap = static_cast<BridgeWrapper*>(ctx);
     
     // Verify threshold signatures
     if (num_sigs < bridge_wrap->threshold) {
@@ -1834,19 +1936,29 @@ extern "C" LuxFHECiphertext luxfhe_bridge_receive_transfer(LuxFHEBridge bridge,
     return result;
 }
 
-extern "C" uint8_t* luxfhe_bridge_reencrypt(LuxFHEBridge bridge, LuxFHECiphertext ct,
-                                              LuxFHEPublicKey new_pk, size_t* out_len) {
-    if (!bridge || !ct || !new_pk || !out_len) {
+extern "C" LuxFHECiphertext luxfhe_bridge_reencrypt(LuxFHEBridgeContext ctx, LuxFHECiphertext ct,
+                                                      const uint8_t* dest_pubkey, size_t pubkey_len) {
+    if (!ctx || !ct || !dest_pubkey || pubkey_len == 0) {
         set_error(LUXFHE_ERR_INVALID_PARAM);
         return nullptr;
     }
+    
+    auto bridge_wrap = static_cast<BridgeWrapper*>(ctx);
+    auto ct_wrap = static_cast<CiphertextWrapper*>(ct);
     
     // Threshold re-encryption (XCFHE)
     // In production, this would involve distributed key generation
     // and threshold decryption/re-encryption by guardians
     
-    // For now, just serialize the ciphertext
-    return luxfhe_bridge_prepare_transfer(bridge, ct, out_len);
+    // For now, create a copy of the ciphertext
+    auto result = new CiphertextWrapper();
+    result->engine = ct_wrap->engine;
+    result->ct.n = ct_wrap->ct.n;
+    result->ct.b = ct_wrap->ct.b;
+    result->ct.a = new uint64_t[result->ct.n];
+    memcpy(result->ct.a, ct_wrap->ct.a, result->ct.n * sizeof(uint64_t));
+    
+    return result;
 }
 
 // =============================================================================

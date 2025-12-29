@@ -733,10 +733,6 @@ func BenchmarkBitwiseAdd4Bit(b *testing.B) {
 // ========== Mul, Div, Rem Tests ==========
 
 func TestBitwiseMul(t *testing.T) {
-	// Skip: Multiplication accumulates significant noise through many additions.
-	// This test is flaky on some platforms due to FHE noise margins.
-	t.Skip("Skipping: multiplication noise accumulation causes sporadic failures")
-
 	params, err := NewParametersFromLiteral(PN10QP27)
 	if err != nil {
 		t.Fatalf("NewParametersFromLiteral: %v", err)

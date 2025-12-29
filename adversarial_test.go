@@ -650,10 +650,6 @@ func TestConcurrentOperations(t *testing.T) {
 // ============================================================================
 
 func TestCrossValidationArithmetic(t *testing.T) {
-	// Skip: This test is flaky due to FHE noise accumulation in edge cases.
-	// The core arithmetic tests (TestBitwiseAdd, TestBitwiseSub) provide coverage.
-	t.Skip("Skipping cross-validation: FHE noise can cause sporadic failures on edge cases")
-
 	params, err := NewParametersFromLiteral(PN10QP27)
 	if err != nil {
 		t.Fatal(err)
