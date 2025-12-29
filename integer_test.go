@@ -164,7 +164,11 @@ func TestIntegerEncryptDecryptUint32(t *testing.T) {
 }
 
 func TestShortIntAdd(t *testing.T) {
-	t.Skip("Skipping - LUT-based bootstrap needs debugging. Use BitwiseEvaluator.Add instead.")
+	// TODO(fhe#1): LUT-based bootstrap produces incorrect results.
+	// The issue is in the polynomial evaluation during blind rotation.
+	// Workaround: Use BitwiseEvaluator.Add which uses gate-by-gate addition.
+	// See: TestPureGoMode/IntegerArithmetic for working alternative.
+	t.Skip("TODO(fhe#1): LUT-based bootstrap needs debugging")
 	params, err := NewParametersFromLiteral(PN10QP27)
 	if err != nil {
 		t.Fatalf("NewParametersFromLiteral: %v", err)
@@ -297,7 +301,9 @@ func TestShortIntScalarAdd(t *testing.T) {
 }
 
 func TestIntegerScalarAdd(t *testing.T) {
-	t.Skip("Skipping until ShortInt operations are fixed")
+	// TODO(fhe#1): Depends on ShortInt LUT-based operations.
+	// This test will pass once TestShortIntAdd is fixed.
+	t.Skip("TODO(fhe#1): blocked on ShortInt LUT operations")
 
 	params, err := NewParametersFromLiteral(PN10QP27)
 	if err != nil {

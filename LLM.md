@@ -90,8 +90,8 @@ luxfi/fhe (Pure Go FHE)
 import "github.com/luxfi/fhe"
 
 // Create parameters and key generator
-params, _ := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
-kgen := tfhe.NewKeyGenerator(params)
+params, _ := fhe.NewParametersFromLiteral(fhe.PN10QP27)
+kgen := fhe.NewKeyGenerator(params)
 
 // Generate keys
 sk := kgen.GenSecretKey()
@@ -99,9 +99,9 @@ pk := kgen.GenPublicKey(sk)
 bsk := kgen.GenBootstrapKey(sk)
 
 // Boolean operations
-enc := tfhe.NewEncryptor(params, sk)
-dec := tfhe.NewDecryptor(params, sk)
-eval := tfhe.NewEvaluator(params, bsk, sk)
+enc := fhe.NewEncryptor(params, sk)
+dec := fhe.NewDecryptor(params, sk)
+eval := fhe.NewEvaluator(params, bsk, sk)
 
 ct1 := enc.Encrypt(true)
 ct2 := enc.Encrypt(false)
@@ -113,13 +113,13 @@ value := dec.Decrypt(result) // false
 
 ```go
 // Bitwise integer encryption
-bitwiseEnc := tfhe.NewBitwiseEncryptor(params, sk)
-bitwiseDec := tfhe.NewBitwiseDecryptor(params, sk)
-bitwiseEval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+bitwiseEnc := fhe.NewBitwiseEncryptor(params, sk)
+bitwiseDec := fhe.NewBitwiseDecryptor(params, sk)
+bitwiseEval := fhe.NewBitwiseEvaluator(params, bsk, sk)
 
 // Encrypt integers
-ct1 := bitwiseEnc.EncryptUint64(42, tfhe.FheUint8)
-ct2 := bitwiseEnc.EncryptUint64(10, tfhe.FheUint8)
+ct1 := bitwiseEnc.EncryptUint64(42, fhe.FheUint8)
+ct2 := bitwiseEnc.EncryptUint64(10, fhe.FheUint8)
 
 // Operations
 sum, _ := bitwiseEval.Add(ct1, ct2)
@@ -137,8 +137,8 @@ result := bitwiseDec.DecryptUint64(sum) // 52
 pk := kgen.GenPublicKey(sk)
 
 // Encrypt with public key
-pubEnc := tfhe.NewBitwisePublicEncryptor(params, pk)
-ct := pubEnc.EncryptUint64(42, tfhe.FheUint8)
+pubEnc := fhe.NewBitwisePublicEncryptor(params, pk)
+ct := pubEnc.EncryptUint64(42, fhe.FheUint8)
 
 // Decrypt with secret key
 result := bitwiseDec.DecryptUint64(ct) // 42
@@ -149,13 +149,13 @@ result := bitwiseDec.DecryptUint64(ct) // 42
 ```go
 // Secret key RNG
 seed := []byte("block_hash+tx_hash")
-rng := tfhe.NewFheRNG(params, sk, seed)
+rng := fhe.NewFheRNG(params, sk, seed)
 randomBit := rng.RandomBit()
-randomUint := rng.RandomUint(tfhe.FheUint8)
+randomUint := rng.RandomUint(fhe.FheUint8)
 
 // Public key RNG
-rngPub := tfhe.NewFheRNGPublic(params, pk, seed)
-randomPub := rngPub.RandomUint(tfhe.FheUint8)
+rngPub := fhe.NewFheRNGPublic(params, pk, seed)
+randomPub := rngPub.RandomUint(fhe.FheUint8)
 
 // Reseed
 rng.Reseed(newSeed)
@@ -168,12 +168,12 @@ rng.Reseed(newSeed)
 data, _ := ct.MarshalBinary()
 
 // Deserialize
-ct2 := new(tfhe.BitCiphertext)
+ct2 := new(fhe.BitCiphertext)
 ct2.UnmarshalBinary(data)
 
 // Public key serialization
 pkData, _ := pk.MarshalBinary()
-pkRestored := new(tfhe.PublicKey)
+pkRestored := new(fhe.PublicKey)
 pkRestored.UnmarshalBinary(pkData)
 ```
 
@@ -334,9 +334,9 @@ GPUFHEEngine
 ### Files
 ```
 lux/fhe/src/core/
-    ├── include/math/hal/mlx/gpu_tfhe.h      - GPU FHE API
+    ├── include/math/hal/mlx/gpu_fhe.h      - GPU FHE API
     └── lib/math/hal/mlx/
-        ├── gpu_tfhe.cpp                      - Implementation
+        ├── gpu_fhe.cpp                      - Implementation
         └── tfhe_kernels.metal                - Metal shaders
 ```
 
@@ -351,7 +351,7 @@ lux/fhe/src/core/
 
 ### API Usage
 ```cpp
-#include "math/hal/mlx/gpu_tfhe.h"
+#include "math/hal/mlx/gpu_fhe.h"
 using namespace lbcrypto::gpu;
 
 // Initialize engine
@@ -445,15 +445,15 @@ const result = await fhe.evaluate('add', encrypted, encrypted)
 import "github.com/luxfi/fhe"
 
 type FHEPrecompile struct {
-    params      tfhe.Parameters
-    bsk         *tfhe.BootstrapKey
-    bitwiseEval *tfhe.BitwiseEvaluator
+    params      fhe.Parameters
+    bsk         *fhe.BootstrapKey
+    bitwiseEval *fhe.BitwiseEvaluator
 }
 
 func (p *FHEPrecompile) Add(input []byte) ([]byte, error) {
-    ct1 := new(tfhe.BitCiphertext)
+    ct1 := new(fhe.BitCiphertext)
     ct1.UnmarshalBinary(input[:len(input)/2])
-    ct2 := new(tfhe.BitCiphertext)
+    ct2 := new(fhe.BitCiphertext)
     ct2.UnmarshalBinary(input[len(input)/2:])
     
     result, err := p.bitwiseEval.Add(ct1, ct2)
@@ -583,8 +583,8 @@ Backend selection (automatic):
 - `tfhe/gpu/multigpu_stub.go` - Stub for non-CUDA platforms
 
 **C++ Backend** (advanced):
-- Header: `fhe/src/core/include/math/hal/mlx/gpu_tfhe.h`
-- Implementation: `fhe/src/core/lib/math/hal/mlx/gpu_tfhe.cpp`
+- Header: `fhe/src/core/include/math/hal/mlx/gpu_fhe.h`
+- Implementation: `fhe/src/core/lib/math/hal/mlx/gpu_fhe.cpp`
 - Metal Shaders: `fhe/src/core/lib/math/hal/mlx/tfhe_kernels.metal`
 - CUDA Backend: `fhe/src/core/lib/math/hal/cuda/gpu_tfhe_cuda.cu`
 
