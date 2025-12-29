@@ -417,7 +417,7 @@ func (e *Engine) ExecuteBatchGates(ops []BatchGateOp) error {
 //
 // Algorithm (per ciphertext):
 // 1. Compute phase = (b - sum(a_i * s_i)) mod Q
-// 2. Map phase to rotation index: idx = round(phase * N / Q) mod N
+// 2. Map phase to rotation index: idx = round(phase * 2N / Q) mod 2N
 // 3. Blind rotation: accumulator = X^(-idx) * testPoly via external products
 // 4. Sample extraction: extract LWE from RLWE accumulator
 // 5. Key switching: switch from RLWE key to LWE key
@@ -438,10 +438,8 @@ func (e *Engine) batchBootstrap(user *UserSession, gate GateType, count int) err
 
 	N := int(e.cfg.N)
 	n := int(e.cfg.n)
-	Q := int64(e.cfg.Q)
-	
+
 	// Get input LWE ciphertexts from user's pool
-	// For simplicity, use the first pool
 	pool := user.LWEPools[0]
 	if pool.Count == 0 {
 		return fmt.Errorf("LWE pool is empty")
@@ -452,244 +450,164 @@ func (e *Engine) batchBootstrap(user *UserSession, gate GateType, count int) err
 		count = int(pool.Count)
 	}
 
-	// Step 1: Extract LWE ciphertexts [count, n] and [count]
-	lweA := mlx.Slice(pool.A, []int{0, 0}, []int{count, n}, []int{1, 1})
-	lweB := mlx.Slice(pool.B, []int{0}, []int{count}, []int{1})
-
-	// Step 2: Compute phase = b - <a, s> mod Q
-	// For batch: phase[i] = lweB[i] - sum_j(lweA[i,j] * s[j]) mod Q
-	// We need the secret key bits from BSK
-	// BSK shape: [n, 2, L, 2, N]
-	// We extract the underlying secret key bits for phase computation
-	
-	// Compute inner product a * s
-	// Since s is binary, we can extract it from BSK structure
-	// For now, assume phase is precomputed or use a simplified approach
-	
-	// Compute rotation indices from phases
-	// rotIdx = round(phase * N / Q) mod N
-	// Simplified: we'll compute phases assuming random rotations for now
-	// In production, this would use actual LWE decryption structure
-	
-	// Create rotation indices based on LWE 'b' values as proxy for phase
-	// phase ≈ b (when noise is small and s contribution is factored)
-	bFloat := mlx.AsType(lweB, mlx.Float32)
-	nFloat := mlx.Full([]int{count}, float32(N), mlx.Float32)
-	qFloat := mlx.Full([]int{count}, float32(Q), mlx.Float32)
-	
-	// rotIdx = round(b * N / Q) mod N
-	scaled := mlx.Divide(mlx.Multiply(bFloat, nFloat), qFloat)
-	rotIdx := mlx.AsType(mlx.Round(scaled), mlx.Int64)
-	nArr := mlx.Full([]int{count}, int64(N), mlx.Int64)
-	rotIdx = mlx.Remainder(rotIdx, nArr)
-
-	// Step 3: Initialize accumulator with test polynomial
-	// Select test polynomial based on gate type
-	testPolyIdx := int(gate)
-	if testPolyIdx >= 6 {
-		testPolyIdx = 0 // Default to AND for unsupported gates
+	// Create BatchLWE input from pool
+	inputs := &BatchLWE{
+		A: mlx.Slice(pool.A, []mlx.SliceArg{
+			{Start: 0, Stop: count},
+			{Start: 0, Stop: n},
+		}),
+		B: mlx.Slice(pool.B, []mlx.SliceArg{
+			{Start: 0, Stop: count},
+		}),
+		Count: count,
 	}
-	
-	// Extract test polynomial [N]
-	testPoly := mlx.Slice(e.testPolynomials, []int{testPolyIdx, 0}, []int{testPolyIdx + 1, N}, []int{1, 1})
-	testPoly = mlx.Reshape(testPoly, []int{N})
-	
-	// Initialize accumulator: acc = X^(-rotIdx) * testPoly for each ciphertext
-	// accA = 0, accB = rotated testPoly
-	accA := mlx.Zeros([]int{count, N}, mlx.Int64)
-	accB := e.initAccumulatorBatch(testPoly, rotIdx, count)
 
-	// Step 4: Blind rotation using external products
-	// For each LWE dimension i in [0, n-1]:
-	//   acc = CMux(bsk[i], acc, X^(a[i]) * acc)
-	
-	// Extract rotation amounts from LWE 'a' coefficients
-	// a[i] contributes rotation of round(a[i] * N / Q) to the accumulator
-	
-	// Transform accumulators to NTT domain for efficient multiplication
-	accA_NTT := e.nttCtx.NTTForward(accA)
-	accB_NTT := e.nttCtx.NTTForward(accB)
-	
-	// Process each secret key bit
-	for i := 0; i < n; i++ {
-		// Extract a[i] for all ciphertexts: [count]
-		aI := mlx.Slice(lweA, []int{0, i}, []int{count, i + 1}, []int{1, 1})
-		aI = mlx.Reshape(aI, []int{count})
-		
-		// Compute rotation for this coefficient
-		aIFloat := mlx.AsType(aI, mlx.Float32)
-		rotI := mlx.Divide(mlx.Multiply(aIFloat, nFloat), qFloat)
-		rotI = mlx.AsType(mlx.Round(rotI), mlx.Int64)
-		rotI = mlx.Remainder(rotI, nArr)
-		
-		// Extract RGSW[i] from BSK: [L, 2, N]
-		// BSK shape: [n, 2, L, 2, N]
-		L := int(e.cfg.L)
-		bskI := mlx.Slice(user.BSK, []int{i, 0, 0, 0, 0}, []int{i + 1, 2, L, 2, N}, []int{1, 1, 1, 1, 1})
-		
-		// Reshape to [2, L, 2, N]
-		bskI = mlx.Reshape(bskI, []int{2, L, 2, N})
-		
-		// C0 = bskI[0]: [L, 2, N]
-		// C1 = bskI[1]: [L, 2, N]
-		rgswC0 := mlx.Slice(bskI, []int{0, 0, 0, 0}, []int{1, L, 2, N}, []int{1, 1, 1, 1})
-		rgswC0 = mlx.Reshape(rgswC0, []int{L, 2, N})
-		
-		rgswC1 := mlx.Slice(bskI, []int{1, 0, 0, 0}, []int{2, L, 2, N}, []int{1, 1, 1, 1})
-		rgswC1 = mlx.Reshape(rgswC1, []int{L, 2, N})
-		
-		// Compute X^(rotI) * acc for each batch element
-		rotatedA := e.batchPolyRotate(accA_NTT, rotI, count)
-		rotatedB := e.batchPolyRotate(accB_NTT, rotI, count)
-		
-		// CMux: acc = d0 + c * (d1 - d0)
-		// If secret bit = 0: acc stays the same
-		// If secret bit = 1: acc becomes rotated version
-		accA_NTT, accB_NTT = e.extProdCtx.CMux(
-			accA_NTT, accB_NTT,
-			rotatedA, rotatedB,
-			rgswC0, rgswC1,
-		)
-		
-		// Periodically evaluate to prevent graph buildup
-		if i%64 == 0 {
-			mlx.Eval(accA_NTT)
-			mlx.Eval(accB_NTT)
-		}
+	// Get test polynomial for this gate type
+	testPoly := e.getTestPolynomial(gate)
+	if testPoly == nil {
+		return fmt.Errorf("no test polynomial for gate type %d", gate)
 	}
-	
-	// Transform back from NTT domain
-	accA = e.nttCtx.NTTInverse(accA_NTT)
-	accB = e.nttCtx.NTTInverse(accB_NTT)
 
-	// Step 5: Sample extraction
-	// Extract LWE sample from RLWE accumulator
-	outA, outB := e.extProdCtx.SampleExtract(accA, accB)
+	// Create GPUBootstrapKey from user's BSK
+	bsk := &GPUBootstrapKey{
+		Data:    user.BSK,
+		n:       n,
+		L:       int(e.cfg.L),
+		N:       N,
+		Base:    1 << e.cfg.BaseLog,
+		BaseLog: int(e.cfg.BaseLog),
+	}
 
-	// Step 6: Key switching (if KSK is available)
+	// Perform batch blind rotation
+	rlweResult, err := e.BatchBlindRotate(inputs, bsk, testPoly)
+	if err != nil {
+		return fmt.Errorf("blind rotation failed: %w", err)
+	}
+
+	// Sample extraction: extract LWE from RLWE results
+	lweResult, err := e.BatchSampleExtract(rlweResult)
+	if err != nil {
+		return fmt.Errorf("sample extraction failed: %w", err)
+	}
+
+	// Key switching (if KSK is available)
 	if user.KSK != nil {
-		outA, outB = e.extProdCtx.KeySwitch(outA, outB, user.KSK)
+		lweResult, err = e.batchKeySwitch(lweResult, user.KSK)
+		if err != nil {
+			return fmt.Errorf("key switching failed: %w", err)
+		}
 	}
 
 	// Store results back to pool
-	// Update pool.A and pool.B with bootstrapped values
-	// For now, we just ensure the computation completes
-	mlx.Eval(outA)
-	mlx.Eval(outB)
+	pool.A = lweResult.A
+	pool.B = lweResult.B
 
-	// Copy results back (would use Scatter in full implementation)
-	// For demonstration, we just ensure GPU computation is complete
-	mlx.Synchronize()
+	// Ensure computation is complete
+	mlx.Eval(pool.A)
+	mlx.Eval(pool.B)
 
 	return nil
 }
 
-// initAccumulatorBatch initializes accumulators with rotated test polynomials
-// For each ciphertext i, acc[i] = X^(-rotIdx[i]) * testPoly
-func (e *Engine) initAccumulatorBatch(testPoly, rotIdx *mlx.Array, count int) *mlx.Array {
-	N := int(e.cfg.N)
-	Q := int64(e.cfg.Q)
-
-	// Get rotation indices
-	rotVals := mlx.AsSlice[int64](rotIdx)
-
-	results := make([]*mlx.Array, count)
-
-	for i := 0; i < count; i++ {
-		k := int(rotVals[i]) % N
-		if k < 0 {
-			k += N
-		}
-
-		// X^(-k) * poly = cyclic left rotation by k with sign flips
-		// coeff[j] = -testPoly[(j+k) mod N] if j+k >= N, else testPoly[(j+k) mod N]
-		indices := make([]int32, N)
-		signs := make([]int64, N)
-		for j := 0; j < N; j++ {
-			srcIdx := (j + k) % N
-			indices[j] = int32(srcIdx)
-			if j+k >= N {
-				signs[j] = -1
-			} else {
-				signs[j] = 1
-			}
-		}
-
-		idxArr := mlx.ArrayFromSlice(indices, []int{N}, mlx.Int32)
-		signArr := mlx.ArrayFromSlice(signs, []int{N}, mlx.Int64)
-
-		// Permute
-		rotated := mlx.Take(testPoly, idxArr, 0)
-
-		// Apply signs
-		rotated = mlx.Multiply(rotated, signArr)
-
-		// Handle modular arithmetic for negatives
-		qArr := mlx.Full([]int{N}, Q, mlx.Int64)
-		zeroArr := mlx.Zeros([]int{N}, mlx.Int64)
-		isNeg := mlx.Less(rotated, zeroArr)
-		adjusted := mlx.Add(rotated, qArr)
-		rotated = mlx.Where(isNeg, adjusted, rotated)
-
-		results[i] = rotated
+// getTestPolynomial returns the precomputed test polynomial for a gate type
+func (e *Engine) getTestPolynomial(gate GateType) *mlx.Array {
+	if e.testPolynomials == nil {
+		return nil
 	}
 
-	return mlx.Stack(results, 0)
+	N := int(e.cfg.N)
+	gateIdx := int(gate)
+
+	// Bounds check
+	if gateIdx < 0 || gateIdx >= 6 {
+		gateIdx = 0 // Default to AND
+	}
+
+	// testPolynomials has shape [numGates, N]
+	poly := mlx.Slice(e.testPolynomials, []mlx.SliceArg{
+		{Start: gateIdx, Stop: gateIdx + 1},
+		{Start: 0, Stop: N},
+	})
+	poly = mlx.Squeeze(poly, 0)
+
+	return poly
 }
 
-// batchPolyRotate rotates polynomials by different amounts per batch element
-func (e *Engine) batchPolyRotate(poly, rotations *mlx.Array, batchSize int) *mlx.Array {
-	N := int(e.cfg.N)
-	Q := int64(e.cfg.Q)
-
-	// Get rotation values
-	rotVals := mlx.AsSlice[int64](rotations)
-
-	results := make([]*mlx.Array, batchSize)
-
-	for b := 0; b < batchSize; b++ {
-		k := int(rotVals[b]) % N
-		if k < 0 {
-			k += N
-		}
-
-		// Extract this batch element
-		polyB := mlx.Slice(poly, []int{b, 0}, []int{b + 1, N}, []int{1, 1})
-		polyB = mlx.Reshape(polyB, []int{N})
-
-		// Build rotation indices
-		indices := make([]int32, N)
-		signs := make([]int64, N)
-		for i := 0; i < N; i++ {
-			srcIdx := (i - k + N) % N
-			indices[i] = int32(srcIdx)
-			if i < k {
-				signs[i] = -1
-			} else {
-				signs[i] = 1
-			}
-		}
-
-		idxArr := mlx.ArrayFromSlice(indices, []int{N}, mlx.Int32)
-		signArr := mlx.ArrayFromSlice(signs, []int{N}, mlx.Int64)
-
-		// Permute
-		rotated := mlx.Take(polyB, idxArr, 0)
-
-		// Apply signs
-		rotated = mlx.Multiply(rotated, signArr)
-
-		// Handle negatives
-		qArr := mlx.Full([]int{N}, Q, mlx.Int64)
-		zeroArr := mlx.Zeros([]int{N}, mlx.Int64)
-		isNeg := mlx.Less(rotated, zeroArr)
-		adjusted := mlx.Add(rotated, qArr)
-		rotated = mlx.Where(isNeg, adjusted, rotated)
-
-		results[b] = rotated
+// batchKeySwitch performs key switching on a batch of LWE ciphertexts
+func (e *Engine) batchKeySwitch(input *BatchLWE, ksk *mlx.Array) (*BatchLWE, error) {
+	if input == nil {
+		return nil, fmt.Errorf("nil input")
+	}
+	if ksk == nil {
+		return nil, fmt.Errorf("nil key switching key")
 	}
 
-	return mlx.Stack(results, 0)
+	batchSize := input.Count
+	N := int(e.cfg.N)
+	n := int(e.cfg.n)
+	Q := e.cfg.Q
+
+	// Key switching: convert from dimension N to dimension n
+	// KSK has shape [N, L_ks, n] where L_ks is key switch decomposition levels
+	// For each coefficient of the RLWE key, we have decomposed encryptions under LWE key
+
+	L_ks := 3                // Typical key switch decomposition levels
+	baseKS := uint64(1 << 8) // Key switch base
+
+	// Initialize output
+	outA := mlx.Zeros([]int{batchSize, n}, mlx.Int64)
+	outB := input.B // B component stays the same initially
+
+	qArray := mlx.Full([]int{batchSize, n}, int64(Q), mlx.Int64)
+
+	// For each coefficient of input.A (dimension N)
+	for i := 0; i < N; i++ {
+		// Get coefficient i for all batch elements: [batchSize]
+		coeff := mlx.Slice(input.A, []mlx.SliceArg{
+			{Start: 0, Stop: batchSize},
+			{Start: i, Stop: i + 1},
+		})
+		coeff = mlx.Squeeze(coeff, 1)
+
+		// Decompose coefficient into L_ks digits
+		for l := 0; l < L_ks; l++ {
+			shift := l * 8
+			shiftArray := mlx.Full([]int{batchSize}, int64(shift), mlx.Int64)
+			baseArray := mlx.Full([]int{batchSize}, int64(baseKS), mlx.Int64)
+
+			digit := mlx.RightShift(coeff, shiftArray)
+			digit = mlx.Remainder(digit, baseArray)
+
+			// Get KSK entry: ksk[i, l] which has shape [n]
+			kskEntry := mlx.Slice(ksk, []mlx.SliceArg{
+				{Start: i, Stop: i + 1},
+				{Start: l, Stop: l + 1},
+				{Start: 0, Stop: n},
+			})
+			kskEntry = mlx.Squeeze(kskEntry, 0)
+			kskEntry = mlx.Squeeze(kskEntry, 0)
+
+			// Broadcast to batch
+			kskBatch := mlx.Broadcast(kskEntry, []int{batchSize, n})
+			digitBatch := mlx.Reshape(digit, []int{batchSize, 1})
+			digitBatch = mlx.Broadcast(digitBatch, []int{batchSize, n})
+
+			// Accumulate: outA -= digit * kskEntry
+			prod := mlx.Multiply(digitBatch, kskBatch)
+			outA = mlx.Subtract(outA, prod)
+			outA = mlx.Add(outA, qArray)
+			outA = mlx.Remainder(outA, qArray)
+		}
+	}
+
+	mlx.Eval(outA)
+	mlx.Eval(outB)
+
+	return &BatchLWE{
+		A:     outA,
+		B:     outB,
+		Count: batchSize,
+	}, nil
 }
 
 // Sync waits for all GPU operations to complete
