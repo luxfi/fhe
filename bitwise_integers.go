@@ -278,7 +278,12 @@ func (eval *BitwiseEvaluator) ScalarAdd(a *BitCiphertext, scalar uint64) (*BitCi
 	if scalarBit0 {
 		// a + 1: sum = NOT a, carry = a
 		result[0] = eval.eval.NOT(a.bits[0])
-		carry = a.bits[0] // carry = a.bits[0] (if a=1, there's a carry)
+		// Bootstrap the carry to refresh noise before using in subsequent operations
+		// This prevents noise accumulation from affecting the carry chain
+		carry, err = eval.eval.Refresh(a.bits[0])
+		if err != nil {
+			return nil, fmt.Errorf("bit 0 refresh: %w", err)
+		}
 	} else {
 		// a + 0: sum = a, carry = 0
 		result[0] = a.bits[0]
