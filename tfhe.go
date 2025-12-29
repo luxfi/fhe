@@ -245,9 +245,10 @@ func (kg *KeyGenerator) GenBootstrapKey(sk *SecretKey) *BootstrapKey {
 	// - true+false:  middle x (∈ [-0.25, 0.25])
 	// - false+false: lowest x (< -0.25)
 
-	// AND: output 1 only when both inputs are 1 (x > 0.25)
+	// AND: output 1 only when both inputs are 1 (x >= 0.25)
+	// Use >= to handle exact boundary case when sum of two TRUE = 0.25
 	testPolyAND := blindrot.InitTestPolynomial(func(x float64) float64 {
-		if x > 0.25 {
+		if x >= 0.25 {
 			return 1.0
 		}
 		return -1.0
@@ -275,8 +276,9 @@ func (kg *KeyGenerator) GenBootstrapKey(sk *SecretKey) *BootstrapKey {
 	}, scale, kg.ringQBR, -1, 1)
 
 	// NAND: output 0 only when both inputs are 1
+	// Use >= to handle exact boundary case when sum of two TRUE = 0.25
 	testPolyNAND := blindrot.InitTestPolynomial(func(x float64) float64 {
-		if x > 0.25 {
+		if x >= 0.25 {
 			return -1.0
 		}
 		return 1.0
