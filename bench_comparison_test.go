@@ -91,7 +91,7 @@ func BenchmarkLatticeEncryptBit(b *testing.B) {
 
 func BenchmarkLatticeDecryptBit(b *testing.B) {
 	setupBenchmark(b)
-	ct:= benchEnc.Encrypt(true)
+	ct := benchEnc.Encrypt(true)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = benchDec.Decrypt(ct)

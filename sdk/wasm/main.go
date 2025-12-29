@@ -77,7 +77,10 @@ func encrypt(this js.Value, args []js.Value) interface{} {
 	// Encrypt
 	enc := tfhe.NewBitwisePublicEncryptor(params, pk)
 	fheType := bitWidthToType(bitWidth)
-	ct := enc.EncryptUint64(value, fheType)
+	ct, err := enc.EncryptUint64(value, fheType)
+	if err != nil {
+		return js.ValueOf("error: encryption failed: " + err.Error())
+	}
 
 	ctBytes, err := ct.MarshalBinary()
 	if err != nil {
