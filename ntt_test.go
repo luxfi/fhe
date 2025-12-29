@@ -28,7 +28,7 @@ const (
 
 func TestNTTEngineCreation(t *testing.T) {
 	t.Skip("Skipping experimental NTT optimization tests")
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	if engine.N != testN {
 		t.Errorf("expected N=%d, got %d", testN, engine.N)
@@ -51,7 +51,7 @@ func TestNTTEngineCreation(t *testing.T) {
 
 func TestNTTRoundTrip(t *testing.T) {
 	t.Skip("Skipping experimental NTT optimization tests")
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	// Create random polynomial
 	original := make([]uint64, testN)
@@ -91,7 +91,7 @@ func TestNTTRoundTrip(t *testing.T) {
 }
 
 func TestNTTZeroPolynomial(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	coeffs := make([]uint64, testN)
 
@@ -106,7 +106,7 @@ func TestNTTZeroPolynomial(t *testing.T) {
 }
 
 func TestNTTConstantPolynomial(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	// f(x) = c (constant polynomial)
 	c := uint64(12345)
@@ -136,7 +136,7 @@ func TestNTTConstantPolynomial(t *testing.T) {
 }
 
 func TestNTTConvolution(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	// Test that multiplication in NTT domain = convolution in coefficient domain
 	// For negacyclic convolution: (a * b)(x) = a(x) * b(x) mod (x^N + 1)
@@ -182,7 +182,7 @@ func TestNTTConvolution(t *testing.T) {
 }
 
 func TestNTTNegacyclicWrap(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	// Test negacyclic property: x^N = -1 mod (x^N + 1)
 	// So multiplying by x^N should negate the polynomial
@@ -218,7 +218,7 @@ func TestNTTNegacyclicWrap(t *testing.T) {
 }
 
 func TestPolyAdd(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	a := make([]uint64, testN)
 	b := make([]uint64, testN)
@@ -240,7 +240,7 @@ func TestPolyAdd(t *testing.T) {
 }
 
 func TestPolySub(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	a := make([]uint64, testN)
 	b := make([]uint64, testN)
@@ -267,7 +267,7 @@ func TestPolySub(t *testing.T) {
 }
 
 func TestPolyNeg(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	a := make([]uint64, testN)
 	result := make([]uint64, testN)
@@ -292,7 +292,7 @@ func TestPolyNeg(t *testing.T) {
 }
 
 func TestPolyMulScalar(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	a := make([]uint64, testN)
 	result := make([]uint64, testN)
@@ -313,7 +313,7 @@ func TestPolyMulScalar(t *testing.T) {
 }
 
 func TestNTTBatch(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	batchSize := 16
 
 	// Create batch of random polynomials
@@ -346,7 +346,7 @@ func TestNTTBatch(t *testing.T) {
 }
 
 func TestBarrettReduction(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	// Test cases
 	cases := []struct {
@@ -385,7 +385,7 @@ func TestBarrettReduction(t *testing.T) {
 // ========== Edge Case Tests ==========
 
 func TestNTTEdgeCases(t *testing.T) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 
 	t.Run("all_ones", func(t *testing.T) {
 		coeffs := make([]uint64, testN)
@@ -467,7 +467,7 @@ func TestNTTEdgeCases(t *testing.T) {
 // ========== Benchmarks ==========
 
 func BenchmarkNTT(b *testing.B) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	coeffs := make([]uint64, testN)
 	for i := range coeffs {
 		coeffs[i] = uint64(rand.Int63n(int64(testQ)))
@@ -480,7 +480,7 @@ func BenchmarkNTT(b *testing.B) {
 }
 
 func BenchmarkINTT(b *testing.B) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	coeffs := make([]uint64, testN)
 	for i := range coeffs {
 		coeffs[i] = uint64(rand.Int63n(int64(testQ)))
@@ -493,7 +493,7 @@ func BenchmarkINTT(b *testing.B) {
 }
 
 func BenchmarkNTTRoundTrip(b *testing.B) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	coeffs := make([]uint64, testN)
 	for i := range coeffs {
 		coeffs[i] = uint64(rand.Int63n(int64(testQ)))
@@ -507,7 +507,7 @@ func BenchmarkNTTRoundTrip(b *testing.B) {
 }
 
 func BenchmarkPolyMulNTT(b *testing.B) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	a := make([]uint64, testN)
 	bb := make([]uint64, testN)
 	result := make([]uint64, testN)
@@ -527,7 +527,7 @@ func BenchmarkPolyMulNTT(b *testing.B) {
 }
 
 func BenchmarkBarrettMul(b *testing.B) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	a := uint64(rand.Int63n(int64(testQ)))
 	bb := uint64(rand.Int63n(int64(testQ)))
 
@@ -538,7 +538,7 @@ func BenchmarkBarrettMul(b *testing.B) {
 }
 
 func BenchmarkNTTBatch(b *testing.B) {
-	engine := NewNTTEngine(testN, testQ)
+	engine, _ := NewNTTEngine(testN, testQ)
 	batchSize := 16
 
 	polys := make([][]uint64, batchSize)

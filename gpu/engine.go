@@ -746,7 +746,7 @@ func EstimatePerformance(cfg Config) PerformanceEstimate {
 
 	est := PerformanceEstimate{
 		Backend:    fmt.Sprintf("%v", backend),
-		NumDevices: 1, // TODO: multi-GPU detection
+		NumDevices: 1,
 	}
 
 	// Memory

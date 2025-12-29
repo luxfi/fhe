@@ -76,7 +76,10 @@ func TestEdgeCaseZeroValues(t *testing.T) {
 	// Test public key encryption of zero
 	t.Run("PublicKeyZero", func(t *testing.T) {
 		pubEnc := NewBitwisePublicEncryptor(params, pk)
-		ct := pubEnc.EncryptUint64(0, FheUint8)
+		ct, err := pubEnc.EncryptUint64(0, FheUint8)
+		if err != nil {
+			t.Fatal(err)
+		}
 		result := dec.DecryptUint64(ct)
 		if result != 0 {
 			t.Errorf("Public key zero encryption failed: got %d, want 0", result)
@@ -488,7 +491,10 @@ func TestSerializationRoundTrip(t *testing.T) {
 
 		// Verify by encrypting with restored key
 		pubEnc := NewBitwisePublicEncryptor(params, pk2)
-		ct := pubEnc.EncryptUint64(42, FheUint8)
+		ct, err := pubEnc.EncryptUint64(42, FheUint8)
+		if err != nil {
+			t.Fatalf("Encrypt failed: %v", err)
+		}
 		result := dec.DecryptUint64(ct)
 		if result != 42 {
 			t.Errorf("Encryption with restored key failed: got %d, want 42", result)
@@ -572,7 +578,11 @@ func TestConcurrentEncryption(t *testing.T) {
 			pubEnc := NewBitwisePublicEncryptor(params, pk)
 			for j := 0; j < numOperations; j++ {
 				value := uint64((id*numOperations + j) % 256)
-				ct := pubEnc.EncryptUint64(value, FheUint8)
+				ct, err := pubEnc.EncryptUint64(value, FheUint8)
+				if err != nil {
+					errors <- fmt.Errorf("goroutine %d op %d: encrypt failed: %v", id, j, err)
+					continue
+				}
 				result := dec.DecryptUint64(ct)
 				if result != value {
 					errors <- fmt.Errorf("goroutine %d op %d: got %d, want %d", id, j, result, value)
@@ -1044,8 +1054,8 @@ func TestBooleanGatesExhaustive(t *testing.T) {
 
 	for _, a := range inputs {
 		for _, b := range inputs {
-			ctA := boolEnc.Encrypt(a)
-			ctB := boolEnc.Encrypt(b)
+			ctA:= boolEnc.Encrypt(a)
+			ctB:= boolEnc.Encrypt(b)
 
 			t.Run(fmt.Sprintf("AND_%v_%v", a, b), func(t *testing.T) {
 				result, _ := boolEval.AND(ctA, ctB)
@@ -1106,7 +1116,7 @@ func TestBooleanGatesExhaustive(t *testing.T) {
 	// Test NOT
 	for _, a := range inputs {
 		t.Run(fmt.Sprintf("NOT_%v", a), func(t *testing.T) {
-			ctA := boolEnc.Encrypt(a)
+			ctA:= boolEnc.Encrypt(a)
 			result := boolEval.NOT(ctA)
 			got := boolDec.Decrypt(result)
 			expected := !a
@@ -1121,9 +1131,9 @@ func TestBooleanGatesExhaustive(t *testing.T) {
 		for _, a := range inputs {
 			for _, b := range inputs {
 				t.Run(fmt.Sprintf("MUX_%v_%v_%v", cond, a, b), func(t *testing.T) {
-					ctCond := boolEnc.Encrypt(cond)
-					ctA := boolEnc.Encrypt(a)
-					ctB := boolEnc.Encrypt(b)
+					ctCond:= boolEnc.Encrypt(cond)
+					ctA:= boolEnc.Encrypt(a)
+					ctB:= boolEnc.Encrypt(b)
 					result, _ := boolEval.MUX(ctCond, ctA, ctB)
 					got := boolDec.Decrypt(result)
 					var expected bool
@@ -1358,7 +1368,7 @@ func TestSelect(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("Select_%v_%d_%d", tc.cond, tc.a, tc.b), func(t *testing.T) {
-			ctCond := boolEnc.Encrypt(tc.cond)
+			ctCond:= boolEnc.Encrypt(tc.cond)
 			ctA := enc.EncryptUint64(tc.a, FheUint8)
 			ctB := enc.EncryptUint64(tc.b, FheUint8)
 

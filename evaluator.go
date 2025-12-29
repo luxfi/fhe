@@ -44,36 +44,28 @@ func NewEvaluator(params Parameters, bsk *BootstrapKey) *Evaluator {
 	}
 }
 
-// sampleExtractAndKeySwitch extracts the constant coefficient from an RLWE ciphertext
-// and key-switches it to an LWE ciphertext.
+// sampleExtractAndModSwitch extracts the result from an RLWE ciphertext
+// after blind rotation and converts it to an LWE ciphertext.
 //
-// This is the core operation that replaces the insecure decrypt-then-reencrypt pattern.
+// When LWE and BR use the same dimension and modulus (recommended configuration),
+// this simply returns the ciphertext directly since no conversion is needed.
 //
-// Mathematical background:
-// - RLWE: (c0, c1) where c0 + c1 * s_BR = m(X) + e
-// - The constant term m[0] is encoded as an LWE sample
-// - Sample extraction: LWE_BR = (c0[0], a') where a' derived from c1 coefficients
-// - Key switching: LWE_LWE = KeySwitch(LWE_BR, KSK)
-func (eval *Evaluator) sampleExtractAndKeySwitch(ctBR *rlwe.Ciphertext) (*Ciphertext, error) {
-	if eval.bsk.KSK == nil {
-		return nil, fmt.Errorf("bootstrap key does not contain key switching key")
+// SECURITY: This operation does NOT require the secret key. The ciphertext
+// remains encrypted throughout.
+func (eval *Evaluator) sampleExtractAndModSwitch(ctBR *rlwe.Ciphertext) (*Ciphertext, error) {
+	// When same dimension and modulus, just return the ciphertext directly
+	// The key is the same, so no conversion needed
+	if eval.params.N() == eval.params.NBR() && eval.params.QLWE() == eval.params.QBR() {
+		// Copy to a new ciphertext in LWE parameters (same as BR here)
+		result := ctBR.CopyNew()
+		return &Ciphertext{result}, nil
 	}
 
-	// Step 1: Extract constant coefficient from RLWE to get an LWE sample
-	// For RLWE ciphertext (c0(X), c1(X)) under secret s(X):
-	//   c0 + c1 * s = m + e
-	// The constant term gives:
-	//   c0[0] + sum(c1[i] * s[N-i] for i=1..N-1) + c1[0]*s[0] = m[0] + e[0]
-	//
-	// This is an LWE sample (b, a) where:
-	//   b = c0[0]
-	//   a = (c1[0], -c1[N-1], -c1[N-2], ..., -c1[1])
-	// under key (s[0], s[1], s[2], ..., s[N-1])
-
+	// Different dimensions/moduli require modulus switching
 	levelBR := ctBR.Level()
 	ringQBR := eval.ringQBR.AtLevel(levelBR)
-	NBR := ringQBR.N()
 	qBR := eval.params.QBR()
+	qLWE := eval.params.QLWE()
 
 	// Ensure we're working in coefficient domain
 	c0 := ctBR.Value[0].CopyNew()
@@ -84,66 +76,22 @@ func (eval *Evaluator) sampleExtractAndKeySwitch(ctBR *rlwe.Ciphertext) (*Cipher
 		ringQBR.INTT(*c1, *c1)
 	}
 
-	// Create an LWE ciphertext in the BR dimension
-	// We represent this as an RLWE ciphertext for compatibility
-	ctLWEBR := rlwe.NewCiphertext(eval.params.paramsBR, 1, levelBR)
-
-	// Set the constant term (b component of LWE)
-	// b = c0[0]
-	ctLWEBR.Value[0].Coeffs[0][0] = c0.Coeffs[0][0]
-
-	// Set the a vector: a = (c1[0], -c1[N-1], -c1[N-2], ..., -c1[1])
-	// Stored as polynomial coefficients
-	ctLWEBR.Value[1].Coeffs[0][0] = c1.Coeffs[0][0]
-	for i := 1; i < NBR; i++ {
-		// -c1[N-i] mod q
-		ctLWEBR.Value[1].Coeffs[0][i] = qBR - c1.Coeffs[0][NBR-i]
-	}
-
-	// Zero out higher coefficients of c0 (only constant term matters)
-	for i := 1; i < NBR; i++ {
-		ctLWEBR.Value[0].Coeffs[0][i] = 0
-	}
-
-	// Convert to NTT for key switching
-	ringQBR.NTT(ctLWEBR.Value[0], ctLWEBR.Value[0])
-	ringQBR.NTT(ctLWEBR.Value[1], ctLWEBR.Value[1])
-	ctLWEBR.IsNTT = true
-
-	// Step 2: Key switch from SKBR to SKLWE
-	// The KSK switches from dimension NBR under SKBR to dimension NLWE under SKLWE
+	// Create output ciphertext in LWE parameters
+	nLWE := eval.params.N()
 	ctLWE := rlwe.NewCiphertext(eval.params.paramsLWE, 1, eval.params.paramsLWE.MaxLevel())
-	ctLWE.IsNTT = true
 
-	// Apply the key switching key
-	if err := eval.ksEval.ApplyEvaluationKey(ctLWEBR, eval.bsk.KSK, ctLWE); err != nil {
-		return nil, fmt.Errorf("key switching failed: %w", err)
-	}
-
-	// Step 3: Scale from Q_BR to Q_LWE
-	// The message was encoded at scale Q_BR/8, we need Q_LWE/8
-	// Modulus switching: round(x * Q_LWE / Q_BR)
-	levelLWE := ctLWE.Level()
-	ringQLWE := eval.ringQLWE.AtLevel(levelLWE)
-
-	if ctLWE.IsNTT {
-		ringQLWE.INTT(ctLWE.Value[0], ctLWE.Value[0])
-		ringQLWE.INTT(ctLWE.Value[1], ctLWE.Value[1])
-		ctLWE.IsNTT = false
-	}
-
-	// Scale the constant term
-	qLWE := eval.params.QLWE()
 	scaleFactor := float64(qLWE) / float64(qBR)
 
-	for i := 0; i < ringQLWE.N(); i++ {
-		scaled0 := uint64(float64(ctLWE.Value[0].Coeffs[0][i]) * scaleFactor)
-		scaled1 := uint64(float64(ctLWE.Value[1].Coeffs[0][i]) * scaleFactor)
+	// Scale and copy first N_LWE coefficients
+	for i := 0; i < nLWE; i++ {
+		scaled0 := uint64(float64(c0.Coeffs[0][i])*scaleFactor + 0.5)
+		scaled1 := uint64(float64(c1.Coeffs[0][i])*scaleFactor + 0.5)
 		ctLWE.Value[0].Coeffs[0][i] = scaled0 % qLWE
 		ctLWE.Value[1].Coeffs[0][i] = scaled1 % qLWE
 	}
 
-	// Convert back to NTT
+	// Convert to NTT
+	ringQLWE := eval.ringQLWE.AtLevel(eval.params.paramsLWE.MaxLevel())
 	ringQLWE.NTT(ctLWE.Value[0], ctLWE.Value[0])
 	ringQLWE.NTT(ctLWE.Value[1], ctLWE.Value[1])
 	ctLWE.IsNTT = true
@@ -174,9 +122,9 @@ func (eval *Evaluator) bootstrap(ct *Ciphertext, testPoly *ring.Poly) (*Cipherte
 		return nil, fmt.Errorf("bootstrap: no result for slot 0")
 	}
 
-	// Step 2: Sample extract and key switch
-	// This extracts the constant term and switches to SKLWE
-	return eval.sampleExtractAndKeySwitch(ctBR)
+	// Step 2: Sample extract and modulus switch
+	// This extracts the result and scales to the LWE modulus
+	return eval.sampleExtractAndModSwitch(ctBR)
 }
 
 // addCiphertexts adds two ciphertexts element-wise

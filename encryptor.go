@@ -24,6 +24,7 @@ func NewEncryptor(params Parameters, sk *SecretKey) *Encryptor {
 }
 
 // Encrypt encrypts a boolean value
+// Note: Panics on error (should not happen with valid parameters)
 func (enc *Encryptor) Encrypt(value bool) *Ciphertext {
 	pt := rlwe.NewPlaintext(enc.params.paramsLWE, enc.params.paramsLWE.MaxLevel())
 

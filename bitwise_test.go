@@ -436,8 +436,14 @@ func TestPublicKeyEncryption(t *testing.T) {
 
 	// Test single bit encryption
 	t.Run("SingleBit", func(t *testing.T) {
-		ctTrue := pubEnc.Encrypt(true)
-		ctFalse := pubEnc.Encrypt(false)
+		ctTrue, err := pubEnc.Encrypt(true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ctFalse, err := pubEnc.Encrypt(false)
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		if !dec.dec.Decrypt(ctTrue) {
 			t.Error("Public key encrypt(true) decrypted to false")
@@ -462,7 +468,10 @@ func TestPublicKeyEncryption(t *testing.T) {
 		}
 
 		for _, tc := range testCases {
-			ct := pubEnc.EncryptUint64(tc.value, tc.ftype)
+			ct, err := pubEnc.EncryptUint64(tc.value, tc.ftype)
+			if err != nil {
+				t.Fatalf("EncryptUint64: %v", err)
+			}
 			got := dec.DecryptUint64(ct)
 			if got != tc.value {
 				t.Errorf("PublicKey Encrypt/Decrypt(%d, %s): got %d", tc.value, tc.ftype, got)
@@ -487,8 +496,14 @@ func TestPublicKeyWithOperations(t *testing.T) {
 	eval := NewBitwiseEvaluator(params, bsk, sk)
 
 	// Encrypt two values with public key
-	ctA := pubEnc.EncryptUint64(5, FheUint4)
-	ctB := pubEnc.EncryptUint64(3, FheUint4)
+	ctA, err := pubEnc.EncryptUint64(5, FheUint4)
+	if err != nil {
+		t.Fatalf("EncryptUint64: %v", err)
+	}
+	ctB, err := pubEnc.EncryptUint64(3, FheUint4)
+	if err != nil {
+		t.Fatalf("EncryptUint64: %v", err)
+	}
 
 	// Perform operation using evaluator
 	ctSum, err := eval.Add(ctA, ctB)
@@ -528,7 +543,10 @@ func TestPublicKeySerialization(t *testing.T) {
 	pubEnc := NewBitwisePublicEncryptor(params, restored)
 	dec := NewBitwiseDecryptor(params, sk)
 
-	ct := pubEnc.EncryptUint64(42, FheUint8)
+	ct, err := pubEnc.EncryptUint64(42, FheUint8)
+	if err != nil {
+		t.Fatalf("EncryptUint64: %v", err)
+	}
 	got := dec.DecryptUint64(ct)
 	if got != 42 {
 		t.Errorf("PublicKey serialization: expected 42, got %d", got)
@@ -660,7 +678,10 @@ func TestFheRNGPublic(t *testing.T) {
 	t.Run("RandomUint", func(t *testing.T) {
 		// Generate random values and verify they decrypt
 		for i := 0; i < 10; i++ {
-			ct := rng.RandomUint(FheUint8)
+			ct, err := rng.RandomUint(FheUint8)
+			if err != nil {
+				t.Fatal(err)
+			}
 			v := dec.DecryptUint64(ct)
 			if v > 255 {
 				t.Errorf("RandomUint(FheUint8): got value %d > 255", v)
@@ -674,8 +695,14 @@ func TestFheRNGPublic(t *testing.T) {
 		rng2 := NewFheRNGPublic(params, pk, seed)
 
 		for i := 0; i < 10; i++ {
-			ct1 := rng1.RandomUint(FheUint4)
-			ct2 := rng2.RandomUint(FheUint4)
+			ct1, err := rng1.RandomUint(FheUint4)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ct2, err := rng2.RandomUint(FheUint4)
+			if err != nil {
+				t.Fatal(err)
+			}
 			v1 := dec.DecryptUint64(ct1)
 			v2 := dec.DecryptUint64(ct2)
 			if v1 != v2 {

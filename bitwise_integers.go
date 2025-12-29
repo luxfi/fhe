@@ -164,7 +164,9 @@ type BitwiseEvaluator struct {
 }
 
 // NewBitwiseEvaluator creates a new bitwise evaluator
+// NOTE: The sk parameter is deprecated and ignored - evaluator no longer needs secret key
 func NewBitwiseEvaluator(params Parameters, bsk *BootstrapKey, sk *SecretKey) *BitwiseEvaluator {
+	_ = sk // deprecated, not used - evaluator operates without secret key
 	return &BitwiseEvaluator{
 		params: params,
 		eval:   NewEvaluator(params, bsk),

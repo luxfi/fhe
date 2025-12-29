@@ -47,23 +47,24 @@ type ParametersLiteral struct {
 // Standard parameter sets
 var (
 	// PN10QP27 provides ~128-bit security with good performance
-	// LWE: N=512, Q=12289
-	// BR:  N=1024, Q=134217729
+	// Uses same dimension for LWE and BR to avoid key switching complexity.
+	// This simplifies bootstrapping while maintaining security.
+	// N=1024, Q=134215681
 	PN10QP27 = ParametersLiteral{
-		LogNLWE:              9,
+		LogNLWE:              10, // Same as BR for simplified key switching
 		LogNBR:               10,
-		QLWE:                 0x3001,    // 12289
+		QLWE:                 0x7fff801, // Same modulus for direct compatibility
 		QBR:                  0x7fff801, // ~134M
 		BaseTwoDecomposition: 7,
 	}
 
 	// PN11QP54 provides ~128-bit security with higher precision
-	// LWE: N=1024, Q=65537
-	// BR:  N=2048, Q=~2^54
+	// Uses same dimension for LWE and BR.
+	// N=2048, Q=~2^54
 	PN11QP54 = ParametersLiteral{
-		LogNLWE:              10,
+		LogNLWE:              11, // Same as BR
 		LogNBR:               11,
-		QLWE:                 0x10001,           // 65537
+		QLWE:                 0x3FFFFFFFFFC0001, // Same modulus
 		QBR:                  0x3FFFFFFFFFC0001, // ~2^54
 		BaseTwoDecomposition: 10,
 	}
@@ -185,6 +186,16 @@ func NewKeyGenerator(params Parameters) *KeyGenerator {
 
 // GenSecretKey generates a new secret key pair
 func (kg *KeyGenerator) GenSecretKey() *SecretKey {
+	// When LWE and BR have the same dimension, use the same key for both
+	// This simplifies bootstrapping by eliminating key switching
+	if kg.params.N() == kg.params.NBR() {
+		sk := kg.kgenBR.GenSecretKeyNew()
+		return &SecretKey{
+			SKLWE: sk,
+			SKBR:  sk,
+		}
+	}
+	// Different dimensions require separate keys
 	return &SecretKey{
 		SKLWE: kg.kgenLWE.GenSecretKeyNew(),
 		SKBR:  kg.kgenBR.GenSecretKeyNew(),

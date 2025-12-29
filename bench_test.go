@@ -125,7 +125,7 @@ func BenchmarkGates(b *testing.B) {
 	sk := kg.GenSecretKey()
 	bk := kg.GenBootstrapKey(sk)
 	enc := NewEncryptor(params, sk)
-	eval := NewEvaluator(params, bk, sk)
+	eval := NewEvaluator(params, bk)
 
 	ct1 := enc.Encrypt(true)
 	ct2 := enc.Encrypt(false)
@@ -186,7 +186,7 @@ func BenchmarkMultiInputGates(b *testing.B) {
 	sk := kg.GenSecretKey()
 	bk := kg.GenBootstrapKey(sk)
 	enc := NewEncryptor(params, sk)
-	eval := NewEvaluator(params, bk, sk)
+	eval := NewEvaluator(params, bk)
 
 	ct1 := enc.Encrypt(true)
 	ct2 := enc.Encrypt(false)
@@ -289,7 +289,7 @@ func BenchmarkCircuit(b *testing.B) {
 	sk := kg.GenSecretKey()
 	bk := kg.GenBootstrapKey(sk)
 	enc := NewEncryptor(params, sk)
-	eval := NewEvaluator(params, bk, sk)
+	eval := NewEvaluator(params, bk)
 
 	a := enc.Encrypt(true)
 	cIn := enc.Encrypt(false)
@@ -348,7 +348,7 @@ func BenchmarkThroughput(b *testing.B) {
 	sk := kg.GenSecretKey()
 	bk := kg.GenBootstrapKey(sk)
 	enc := NewEncryptor(params, sk)
-	eval := NewEvaluator(params, bk, sk)
+	eval := NewEvaluator(params, bk)
 
 	// Prepare many ciphertexts
 	const n = 100

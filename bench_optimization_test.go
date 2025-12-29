@@ -77,7 +77,7 @@ func BenchmarkNTTComparison(b *testing.B) {
 
 	for _, N := range sizes {
 		b.Run(fmt.Sprintf("N=%d", N), func(b *testing.B) {
-			engine := NewNTTEngine(uint32(N), Q)
+			engine, _ := NewNTTEngine(uint32(N), Q)
 			coeffs := make([]uint64, N)
 			for i := range coeffs {
 				coeffs[i] = uint64(rand.Int63n(int64(Q)))
@@ -95,7 +95,7 @@ func BenchmarkNTTComparison(b *testing.B) {
 func BenchmarkBatchNTT(b *testing.B) {
 	N := 1024
 	Q := uint64(1 << 27)
-	engine := NewNTTEngine(uint32(N), Q)
+	engine, _ := NewNTTEngine(uint32(N), Q)
 
 	batchSizes := []int{1, 4, 16, 64, 256}
 
@@ -121,7 +121,7 @@ func BenchmarkBatchNTT(b *testing.B) {
 func BenchmarkPolyMulScaling(b *testing.B) {
 	N := 1024
 	Q := uint64(1 << 27)
-	engine := NewNTTEngine(uint32(N), Q)
+	engine, _ := NewNTTEngine(uint32(N), Q)
 
 	a := make([]uint64, N)
 	bb := make([]uint64, N)
@@ -150,7 +150,7 @@ func BenchmarkPolyMulScaling(b *testing.B) {
 
 // BenchmarkModularOps measures modular arithmetic performance
 func BenchmarkModularOps(b *testing.B) {
-	engine := NewNTTEngine(1024, 1<<27)
+	engine, _ := NewNTTEngine(1024, 1<<27)
 	a := uint64(rand.Int63n(int64(engine.Q)))
 	bb := uint64(rand.Int63n(int64(engine.Q)))
 
