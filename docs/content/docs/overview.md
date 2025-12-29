@@ -1,13 +1,13 @@
 ---
 title: Overview
-description: What is TFHE and how does it work?
+description: What is FHE and how does it work?
 ---
 
 # Overview
 
-## What is TFHE?
+## What is FHE?
 
-**Threshold Fully Homomorphic Encryption (TFHE)** is a cryptographic technique that allows computation on encrypted data without decryption. The result of the computation is also encrypted, and only the holder of the secret key can decrypt it.
+**Threshold Fully Homomorphic Encryption (FHE)** is a cryptographic technique that allows computation on encrypted data without decryption. The result of the computation is also encrypted, and only the holder of the secret key can decrypt it.
 
 This enables privacy-preserving computation where:
 - Users encrypt their data with a public key
@@ -54,7 +54,7 @@ plaintext := dec.DecryptUint64(result)
 
 ## Boolean Circuit Approach
 
-Lux TFHE uses a **boolean circuit approach** for integer operations:
+Lux FHE uses a **boolean circuit approach** for integer operations:
 
 1. Each integer is represented as a vector of encrypted bits
 2. Operations are built from basic boolean gates (AND, OR, XOR, NOT)
@@ -67,7 +67,7 @@ This approach is:
 
 ## Security
 
-TFHE security is based on the **Learning With Errors (LWE)** problem, which is believed to be resistant to both classical and quantum computers.
+FHE security is based on the **Learning With Errors (LWE)** problem, which is believed to be resistant to both classical and quantum computers.
 
 Key security features:
 - 128-bit security level

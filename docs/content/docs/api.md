@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: Complete API documentation for Lux TFHE
+description: Complete API documentation for Lux FHE
 ---
 
 # API Reference

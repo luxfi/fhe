@@ -3,7 +3,7 @@
 
 //go:build profile
 
-// Command profile runs performance profiling on TFHE operations.
+// Command profile runs performance profiling on FHE operations.
 //
 // Usage:
 //
@@ -23,7 +23,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
 var (
@@ -38,12 +38,12 @@ func main() {
 	flag.Parse()
 
 	// Configure profiling
-	config := tfhe.ProfileConfig{
+	config := fhe.ProfileConfig{
 		CPUProfile: *cpuProfile,
 		MemProfile: *memProfile,
 	}
 
-	profiler := tfhe.NewProfiler(config)
+	profiler := fhe.NewProfiler(config)
 	if err := profiler.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to start profiler: %v\n", err)
 		os.Exit(1)
@@ -70,7 +70,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	tfhe.PrintMemStats()
+	fhe.PrintMemStats()
 }
 
 func profileAll() {
@@ -83,14 +83,14 @@ func profileAll() {
 func profileKeyGen() {
 	fmt.Println("\n=== Key Generation ===")
 
-	params, err := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
 		panic(err)
 	}
-	kg := tfhe.NewKeyGenerator(params)
+	kg := fhe.NewKeyGenerator(params)
 
 	// Secret key generation
-	timer := tfhe.NewTimer("SecretKey generation")
+	timer := fhe.NewTimer("SecretKey generation")
 	for i := 0; i < *iterations; i++ {
 		kg.GenSecretKey()
 	}
@@ -99,7 +99,7 @@ func profileKeyGen() {
 
 	// Public key generation
 	sk := kg.GenSecretKey()
-	timer = tfhe.NewTimer("PublicKey generation")
+	timer = fhe.NewTimer("PublicKey generation")
 	for i := 0; i < *iterations; i++ {
 		kg.GenPublicKey(sk)
 	}
@@ -111,7 +111,7 @@ func profileKeyGen() {
 	if bkIter < 1 {
 		bkIter = 1
 	}
-	timer = tfhe.NewTimer(fmt.Sprintf("BootstrapKey generation (%d iter)", bkIter))
+	timer = fhe.NewTimer(fmt.Sprintf("BootstrapKey generation (%d iter)", bkIter))
 	for i := 0; i < bkIter; i++ {
 		kg.GenBootstrapKey(sk)
 	}
@@ -122,17 +122,17 @@ func profileKeyGen() {
 func profileEncrypt() {
 	fmt.Println("\n=== Encryption/Decryption ===")
 
-	params, err := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
 		panic(err)
 	}
-	kg := tfhe.NewKeyGenerator(params)
+	kg := fhe.NewKeyGenerator(params)
 	sk := kg.GenSecretKey()
-	enc := tfhe.NewEncryptor(params, sk)
-	dec := tfhe.NewDecryptor(params, sk)
+	enc := fhe.NewEncryptor(params, sk)
+	dec := fhe.NewDecryptor(params, sk)
 
 	// Bit encryption
-	timer := tfhe.NewTimer("Bit encryption")
+	timer := fhe.NewTimer("Bit encryption")
 	for i := 0; i < *iterations; i++ {
 		enc.Encrypt(true)
 	}
@@ -141,7 +141,7 @@ func profileEncrypt() {
 
 	// Bit decryption
 	ct := enc.Encrypt(true)
-	timer = tfhe.NewTimer("Bit decryption")
+	timer = fhe.NewTimer("Bit decryption")
 	for i := 0; i < *iterations; i++ {
 		dec.Decrypt(ct)
 	}
@@ -149,7 +149,7 @@ func profileEncrypt() {
 	fmt.Printf("  Average: %v/op\n", d/time.Duration(*iterations))
 
 	// Byte encryption
-	timer = tfhe.NewTimer("Byte encryption")
+	timer = fhe.NewTimer("Byte encryption")
 	for i := 0; i < *iterations; i++ {
 		enc.EncryptByte(0x42)
 	}
@@ -158,7 +158,7 @@ func profileEncrypt() {
 
 	// Byte decryption
 	ctByte := enc.EncryptByte(0x42)
-	timer = tfhe.NewTimer("Byte decryption")
+	timer = fhe.NewTimer("Byte decryption")
 	for i := 0; i < *iterations; i++ {
 		dec.DecryptByte(ctByte)
 	}
@@ -169,15 +169,15 @@ func profileEncrypt() {
 func profileGates() {
 	fmt.Println("\n=== Boolean Gates ===")
 
-	params, err := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
 		panic(err)
 	}
-	kg := tfhe.NewKeyGenerator(params)
+	kg := fhe.NewKeyGenerator(params)
 	sk := kg.GenSecretKey()
 	bk := kg.GenBootstrapKey(sk)
-	enc := tfhe.NewEncryptor(params, sk)
-	eval := tfhe.NewEvaluator(params, bk, sk)
+	enc := fhe.NewEncryptor(params, sk)
+	eval := fhe.NewEvaluator(params, bk, sk)
 
 	ct1 := enc.Encrypt(true)
 	ct2 := enc.Encrypt(false)
@@ -196,7 +196,7 @@ func profileGates() {
 	}
 
 	for _, gate := range gates {
-		timer := tfhe.NewTimer(gate.name)
+		timer := fhe.NewTimer(gate.name)
 		for i := 0; i < *iterations; i++ {
 			if err := gate.fn(); err != nil {
 				panic(err)
@@ -208,7 +208,7 @@ func profileGates() {
 
 	// MUX
 	ct3 := enc.Encrypt(true)
-	timer := tfhe.NewTimer("MUX")
+	timer := fhe.NewTimer("MUX")
 	for i := 0; i < *iterations; i++ {
 		_, err := eval.MUX(ct1, ct2, ct3)
 		if err != nil {
@@ -222,21 +222,21 @@ func profileGates() {
 func profileCircuit() {
 	fmt.Println("\n=== Circuit Evaluation ===")
 
-	params, err := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
 		panic(err)
 	}
-	kg := tfhe.NewKeyGenerator(params)
+	kg := fhe.NewKeyGenerator(params)
 	sk := kg.GenSecretKey()
 	bk := kg.GenBootstrapKey(sk)
-	enc := tfhe.NewEncryptor(params, sk)
-	eval := tfhe.NewEvaluator(params, bk, sk)
+	enc := fhe.NewEncryptor(params, sk)
+	eval := fhe.NewEvaluator(params, bk, sk)
 
 	// 8-bit adder circuit
 	a := enc.EncryptByte(0x42)
 	b := enc.EncryptByte(0x37)
 
-	timer := tfhe.NewTimer("8-bit Addition")
+	timer := fhe.NewTimer("8-bit Addition")
 	for i := 0; i < *iterations; i++ {
 		carry := enc.Encrypt(false)
 		for bit := 0; bit < 8; bit++ {
@@ -268,12 +268,12 @@ func profileCircuit() {
 
 	// Gate chain (simulating complex circuit)
 	n := 16
-	cts := make([]*tfhe.Ciphertext, n)
+	cts := make([]*fhe.Ciphertext, n)
 	for i := 0; i < n; i++ {
 		cts[i] = enc.Encrypt(i%2 == 0)
 	}
 
-	timer = tfhe.NewTimer(fmt.Sprintf("AND chain (%d gates)", n-1))
+	timer = fhe.NewTimer(fmt.Sprintf("AND chain (%d gates)", n-1))
 	for i := 0; i < *iterations; i++ {
 		result := cts[0]
 		for j := 1; j < n; j++ {

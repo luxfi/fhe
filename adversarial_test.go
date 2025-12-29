@@ -1,10 +1,10 @@
 // Copyright (c) 2025, Lux Partners Limited
 // SPDX-License-Identifier: BSD-3-Clause
 //
-// Adversarial tests for TFHE implementation.
+// Adversarial tests for FHE implementation.
 // These tests are designed to find edge cases, race conditions, and bugs.
 
-package tfhe
+package fhe
 
 import (
 	"bytes"

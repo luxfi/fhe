@@ -1,15 +1,15 @@
-# @luxfi/tfhe
+# @luxfi/fhe
 
 TypeScript bindings for LuxFHE - Fully Homomorphic Encryption for Node.js and browsers.
 
 ## Installation
 
 ```bash
-npm install @luxfi/tfhe
+npm install @luxfi/fhe
 # or
-pnpm add @luxfi/tfhe
+pnpm add @luxfi/fhe
 # or
-yarn add @luxfi/tfhe
+yarn add @luxfi/fhe
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ yarn add @luxfi/tfhe
 ### Basic Example
 
 ```typescript
-import { LuxFHE } from '@luxfi/tfhe';
+import { LuxFHE } from '@luxfi/fhe';
 
 async function main() {
   // Initialize the FHE library
@@ -46,11 +46,11 @@ main();
 
 ```html
 <script type="module">
-import { LuxFHE } from './node_modules/@luxfi/tfhe/dist/index.mjs';
+import { LuxFHE } from './node_modules/@luxfi/fhe/dist/index.mjs';
 
 const fhe = await LuxFHE.init({
-  wasmPath: './node_modules/@luxfi/tfhe/wasm/luxfhe.wasm',
-  execPath: './node_modules/@luxfi/tfhe/wasm/wasm_exec.js',
+  wasmPath: './node_modules/@luxfi/fhe/wasm/luxfhe.wasm',
+  execPath: './node_modules/@luxfi/fhe/wasm/wasm_exec.js',
 });
 
 const keys = fhe.generateKeys();

@@ -16,7 +16,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
 // =============================================================================
@@ -62,28 +62,28 @@ func (s *handleStore) delete(id uintptr) {
 // =============================================================================
 
 type contextWrapper struct {
-	params tfhe.Parameters
-	kgen   *tfhe.KeyGenerator
+	params fhe.Parameters
+	kgen   *fhe.KeyGenerator
 }
 
 type encryptorWrapper struct {
-	enc    *tfhe.Encryptor
-	params tfhe.Parameters
+	enc    *fhe.Encryptor
+	params fhe.Parameters
 }
 
 type publicEncryptorWrapper struct {
-	enc    *tfhe.BitwisePublicEncryptor
-	params tfhe.Parameters
+	enc    *fhe.BitwisePublicEncryptor
+	params fhe.Parameters
 }
 
 type decryptorWrapper struct {
-	dec    *tfhe.Decryptor
-	params tfhe.Parameters
+	dec    *fhe.Decryptor
+	params fhe.Parameters
 }
 
 type evaluatorWrapper struct {
-	eval   *tfhe.Evaluator
-	params tfhe.Parameters
+	eval   *fhe.Evaluator
+	params fhe.Parameters
 }
 
 // =============================================================================
@@ -157,24 +157,24 @@ func luxfhe_context_new(paramSet C.int, out *uintptr) C.int {
 		return LUXFHE_ERR_NULL_POINTER
 	}
 
-	var lit tfhe.ParametersLiteral
+	var lit fhe.ParametersLiteral
 	switch paramSet {
 	case 0: // LUXFHE_PARAMS_PN10QP27
-		lit = tfhe.PN10QP27
+		lit = fhe.PN10QP27
 	case 1: // LUXFHE_PARAMS_PN11QP54
-		lit = tfhe.PN11QP54
+		lit = fhe.PN11QP54
 	default:
 		return LUXFHE_ERR_INVALID_PARAM
 	}
 
-	params, err := tfhe.NewParametersFromLiteral(lit)
+	params, err := fhe.NewParametersFromLiteral(lit)
 	if err != nil {
 		return LUXFHE_ERR_ALLOCATION
 	}
 
 	ctx := &contextWrapper{
 		params: params,
-		kgen:   tfhe.NewKeyGenerator(params),
+		kgen:   fhe.NewKeyGenerator(params),
 	}
 
 	*out = store.put(ctx)
@@ -246,7 +246,7 @@ func luxfhe_keygen_public(ctx uintptr, sk uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	skPtr := skV.(*tfhe.SecretKey)
+	skPtr := skV.(*fhe.SecretKey)
 
 	pk := ctxW.kgen.GenPublicKey(skPtr)
 	*out = store.put(pk)
@@ -269,7 +269,7 @@ func luxfhe_keygen_bootstrap(ctx uintptr, sk uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	skPtr := skV.(*tfhe.SecretKey)
+	skPtr := skV.(*fhe.SecretKey)
 
 	bsk := ctxW.kgen.GenBootstrapKey(skPtr)
 	*out = store.put(bsk)
@@ -332,9 +332,9 @@ func luxfhe_encryptor_new_sk(ctx uintptr, sk uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	skPtr := skV.(*tfhe.SecretKey)
+	skPtr := skV.(*fhe.SecretKey)
 
-	enc := tfhe.NewEncryptor(ctxW.params, skPtr)
+	enc := fhe.NewEncryptor(ctxW.params, skPtr)
 	*out = store.put(&encryptorWrapper{enc: enc, params: ctxW.params})
 	return LUXFHE_OK
 }
@@ -355,9 +355,9 @@ func luxfhe_encryptor_new_pk(ctx uintptr, pk uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	pkPtr := pkV.(*tfhe.PublicKey)
+	pkPtr := pkV.(*fhe.PublicKey)
 
-	enc := tfhe.NewBitwisePublicEncryptor(ctxW.params, pkPtr)
+	enc := fhe.NewBitwisePublicEncryptor(ctxW.params, pkPtr)
 	*out = store.put(&publicEncryptorWrapper{enc: enc, params: ctxW.params})
 	return LUXFHE_OK
 }
@@ -378,9 +378,9 @@ func luxfhe_decryptor_new(ctx uintptr, sk uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	skPtr := skV.(*tfhe.SecretKey)
+	skPtr := skV.(*fhe.SecretKey)
 
-	dec := tfhe.NewDecryptor(ctxW.params, skPtr)
+	dec := fhe.NewDecryptor(ctxW.params, skPtr)
 	*out = store.put(&decryptorWrapper{dec: dec, params: ctxW.params})
 	return LUXFHE_OK
 }
@@ -401,13 +401,13 @@ func luxfhe_evaluator_new(ctx uintptr, bsk uintptr, sk uintptr, out *uintptr) C.
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	bskPtr := bskV.(*tfhe.BootstrapKey)
+	bskPtr := bskV.(*fhe.BootstrapKey)
 
 	// NOTE: sk parameter is no longer needed - evaluator uses only public key switching
 	// The sk parameter is kept in the C API for backward compatibility but ignored
 	_, _ = store.get(sk) // Validate sk handle but don't use it
 
-	eval := tfhe.NewEvaluator(ctxW.params, bskPtr)
+	eval := fhe.NewEvaluator(ctxW.params, bskPtr)
 	*out = store.put(&evaluatorWrapper{eval: eval, params: ctxW.params})
 	return LUXFHE_OK
 }
@@ -442,7 +442,7 @@ func luxfhe_encrypt_bool(enc uintptr, value C.bool, out *uintptr) C.int {
 		return LUXFHE_ERR_NULL_POINTER
 	}
 
-	var ct *tfhe.Ciphertext
+	var ct *fhe.Ciphertext
 	switch e := encV.(type) {
 	case *encryptorWrapper:
 		ct = e.enc.Encrypt(bool(value))
@@ -476,7 +476,7 @@ func luxfhe_decrypt_bool(dec uintptr, ct uintptr, out *C.bool) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ctPtr := ctV.(*tfhe.Ciphertext)
+	ctPtr := ctV.(*fhe.Ciphertext)
 
 	result := decW.dec.Decrypt(ctPtr)
 	*out = C.bool(result)
@@ -498,10 +498,10 @@ func luxfhe_ciphertext_clone(ct uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ctPtr := ctV.(*tfhe.Ciphertext)
+	ctPtr := ctV.(*fhe.Ciphertext)
 
 	clone := ctPtr.CopyNew()
-	*out = store.put(&tfhe.Ciphertext{Ciphertext: clone})
+	*out = store.put(&fhe.Ciphertext{Ciphertext: clone})
 	return LUXFHE_OK
 }
 
@@ -520,7 +520,7 @@ func luxfhe_encrypt_byte(enc uintptr, value C.uint8_t, out *uintptr) C.int {
 		return LUXFHE_ERR_NULL_POINTER
 	}
 
-	var cts [8]*tfhe.Ciphertext
+	var cts [8]*fhe.Ciphertext
 	switch e := encV.(type) {
 	case *encryptorWrapper:
 		cts = e.enc.EncryptByte(byte(value))
@@ -559,7 +559,7 @@ func luxfhe_decrypt_byte(dec uintptr, ct uintptr, out *C.uint8_t) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	cts := ctV.([8]*tfhe.Ciphertext)
+	cts := ctV.([8]*fhe.Ciphertext)
 
 	result := decW.dec.DecryptByte(cts)
 	*out = C.uint8_t(result)
@@ -586,7 +586,7 @@ func luxfhe_not(eval uintptr, ct uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ctPtr := ctV.(*tfhe.Ciphertext)
+	ctPtr := ctV.(*fhe.Ciphertext)
 
 	result := evalW.eval.NOT(ctPtr)
 	*out = store.put(result)
@@ -609,13 +609,13 @@ func luxfhe_and(eval uintptr, ct1 uintptr, ct2 uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.AND(ct1Ptr, ct2Ptr)
 	if err != nil {
@@ -641,13 +641,13 @@ func luxfhe_or(eval uintptr, ct1 uintptr, ct2 uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.OR(ct1Ptr, ct2Ptr)
 	if err != nil {
@@ -673,13 +673,13 @@ func luxfhe_xor(eval uintptr, ct1 uintptr, ct2 uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.XOR(ct1Ptr, ct2Ptr)
 	if err != nil {
@@ -705,13 +705,13 @@ func luxfhe_nand(eval uintptr, ct1 uintptr, ct2 uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.NAND(ct1Ptr, ct2Ptr)
 	if err != nil {
@@ -737,13 +737,13 @@ func luxfhe_nor(eval uintptr, ct1 uintptr, ct2 uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.NOR(ct1Ptr, ct2Ptr)
 	if err != nil {
@@ -769,13 +769,13 @@ func luxfhe_xnor(eval uintptr, ct1 uintptr, ct2 uintptr, out *uintptr) C.int {
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.XNOR(ct1Ptr, ct2Ptr)
 	if err != nil {
@@ -801,19 +801,19 @@ func luxfhe_mux(eval uintptr, sel uintptr, ctTrue uintptr, ctFalse uintptr, out 
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	selPtr := selV.(*tfhe.Ciphertext)
+	selPtr := selV.(*fhe.Ciphertext)
 
 	ctTrueV, ok := store.get(ctTrue)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ctTruePtr := ctTrueV.(*tfhe.Ciphertext)
+	ctTruePtr := ctTrueV.(*fhe.Ciphertext)
 
 	ctFalseV, ok := store.get(ctFalse)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ctFalsePtr := ctFalseV.(*tfhe.Ciphertext)
+	ctFalsePtr := ctFalseV.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.MUX(selPtr, ctTruePtr, ctFalsePtr)
 	if err != nil {
@@ -843,19 +843,19 @@ func luxfhe_and3(eval uintptr, ct1 uintptr, ct2 uintptr, ct3 uintptr, out *uintp
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	ct3V, ok := store.get(ct3)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct3Ptr := ct3V.(*tfhe.Ciphertext)
+	ct3Ptr := ct3V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.AND3(ct1Ptr, ct2Ptr, ct3Ptr)
 	if err != nil {
@@ -881,19 +881,19 @@ func luxfhe_or3(eval uintptr, ct1 uintptr, ct2 uintptr, ct3 uintptr, out *uintpt
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	ct3V, ok := store.get(ct3)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct3Ptr := ct3V.(*tfhe.Ciphertext)
+	ct3Ptr := ct3V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.OR3(ct1Ptr, ct2Ptr, ct3Ptr)
 	if err != nil {
@@ -919,19 +919,19 @@ func luxfhe_majority(eval uintptr, ct1 uintptr, ct2 uintptr, ct3 uintptr, out *u
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct1Ptr := ct1V.(*tfhe.Ciphertext)
+	ct1Ptr := ct1V.(*fhe.Ciphertext)
 
 	ct2V, ok := store.get(ct2)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct2Ptr := ct2V.(*tfhe.Ciphertext)
+	ct2Ptr := ct2V.(*fhe.Ciphertext)
 
 	ct3V, ok := store.get(ct3)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ct3Ptr := ct3V.(*tfhe.Ciphertext)
+	ct3Ptr := ct3V.(*fhe.Ciphertext)
 
 	result, err := evalW.eval.MAJORITY(ct1Ptr, ct2Ptr, ct3Ptr)
 	if err != nil {
@@ -962,7 +962,7 @@ func luxfhe_secretkey_serialize(sk uintptr, data **C.uint8_t, length *C.size_t) 
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	skPtr := skV.(*tfhe.SecretKey)
+	skPtr := skV.(*fhe.SecretKey)
 
 	bytes, err := skPtr.MarshalBinary()
 	if err != nil {
@@ -993,7 +993,7 @@ func luxfhe_ciphertext_serialize(ct uintptr, data **C.uint8_t, length *C.size_t)
 	if !ok {
 		return LUXFHE_ERR_NULL_POINTER
 	}
-	ctPtr := ctV.(*tfhe.Ciphertext)
+	ctPtr := ctV.(*fhe.Ciphertext)
 
 	bytes, err := ctPtr.MarshalBinary()
 	if err != nil {

@@ -3,7 +3,7 @@
 
 //go:build profile
 
-package tfhe
+package fhe
 
 import (
 	"fmt"

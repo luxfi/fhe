@@ -1,6 +1,6 @@
-# TFHE Benchmarks
+# FHE Benchmarks
 
-Benchmarks for the Lux TFHE implementation on Apple M1 Max (ARM64).
+Benchmarks for the Lux FHE implementation on Apple M1 Max (ARM64).
 
 ## Summary Comparison
 

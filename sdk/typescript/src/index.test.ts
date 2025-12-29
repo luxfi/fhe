@@ -1,5 +1,5 @@
 /**
- * Tests for @luxfi/tfhe TypeScript bindings
+ * Tests for @luxfi/fhe TypeScript bindings
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';

@@ -1,7 +1,7 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"fmt"
@@ -99,7 +99,7 @@ func (rc *RadixCiphertext) NumBits() int {
 
 // IntegerParams holds parameters for radix integer operations
 type IntegerParams struct {
-	tfheParams  Parameters
+	fheParams  Parameters
 	shortParams *ShortIntParams
 	blockBits   int // Bits per radix block (2 or 4)
 }
@@ -116,7 +116,7 @@ func NewIntegerParams(params Parameters, blockBits int) (*IntegerParams, error) 
 	}
 
 	return &IntegerParams{
-		tfheParams:  params,
+		fheParams:  params,
 		shortParams: shortParams,
 		blockBits:   blockBits,
 	}, nil
@@ -324,7 +324,7 @@ func NewIntegerEvaluator(params *IntegerParams, bsk *BootstrapKey) *IntegerEvalu
 	return &IntegerEvaluator{
 		params:    params,
 		shortEval: NewShortIntEvaluator(params.shortParams, bsk),
-		boolEval:  NewEvaluator(params.tfheParams, bsk),
+		boolEval:  NewEvaluator(params.fheParams, bsk),
 	}
 }
 
@@ -432,7 +432,7 @@ func (eval *IntegerEvaluator) selectShortInt(selector *Ciphertext, trueVal, fals
 	// Using LUT-based evaluation
 
 	msgSpace := trueVal.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace))
 
 	// Combine selector with trueVal and falseVal for bivariate evaluation
 	// We add the ciphertexts in a specific encoding to enable LUT evaluation
@@ -734,7 +734,7 @@ func (eval *IntegerEvaluator) mulBlocks(a, b *ShortInt) (*ShortInt, error) {
 	// Then use LUT to compute (a * b) mod msgSpace
 	sum := eval.shortEval.addCiphertexts(a.ct, b.ct)
 
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace*msgSpace))
 
 	mulLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
 		// Decode combined input to get a and b
@@ -967,7 +967,7 @@ func (eval *IntegerEvaluator) maxRadix(t FheUintType) (*RadixCiphertext, error) 
 // extractBit extracts a single bit from a ShortInt block
 func (eval *IntegerEvaluator) extractBit(block *ShortInt, bitIdx int) (*Ciphertext, error) {
 	msgSpace := block.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace))
 
 	extractLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
 		val := int((x + 1) * float64(msgSpace) / 2)
@@ -999,7 +999,7 @@ func (eval *IntegerEvaluator) setLSB(r *RadixCiphertext, bit *Ciphertext) error 
 	// Simpler: for division, we can clear LSB and OR in the bit
 
 	msgSpace := r.blocks[0].msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace))
 
 	// First, clear LSB of block 0
 	clearLUT := blindrot.InitTestPolynomial(func(x float64) float64 {

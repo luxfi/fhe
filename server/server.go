@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
 // Config holds server configuration
@@ -25,11 +25,11 @@ type Config struct {
 // Server is the Lux FHE server
 type Server struct {
 	cfg    Config
-	params tfhe.Parameters
-	kgen   *tfhe.KeyGenerator
-	sk     *tfhe.SecretKey
-	pk     *tfhe.PublicKey
-	bsk    *tfhe.BootstrapKey
+	params fhe.Parameters
+	kgen   *fhe.KeyGenerator
+	sk     *fhe.SecretKey
+	pk     *fhe.PublicKey
+	bsk    *fhe.BootstrapKey
 
 	// For threshold mode
 	thresholdMu sync.RWMutex
@@ -44,18 +44,18 @@ type ThresholdParty struct {
 	ID        int
 	PublicKey []byte
 	// Partial secret key share (never transmitted)
-	share *tfhe.SecretKey
+	share *fhe.SecretKey
 }
 
 // New creates a new FHE server
 func New(cfg Config) (*Server, error) {
-	// Initialize TFHE parameters
-	params, err := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	// Initialize FHE parameters
+	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create parameters: %w", err)
 	}
 
-	kgen := tfhe.NewKeyGenerator(params)
+	kgen := fhe.NewKeyGenerator(params)
 	sk := kgen.GenSecretKey()
 	pk := kgen.GenPublicKey(sk)
 	bsk := kgen.GenBootstrapKey(sk)
@@ -69,7 +69,7 @@ func New(cfg Config) (*Server, error) {
 		bsk:    bsk,
 		evalPool: sync.Pool{
 			New: func() interface{} {
-				return tfhe.NewEvaluator(params, bsk)
+				return fhe.NewEvaluator(params, bsk)
 			},
 		},
 	}
@@ -178,7 +178,7 @@ func (s *Server) handleEncrypt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Use public key encryption
-	enc := tfhe.NewBitwisePublicEncryptor(s.params, s.pk)
+	enc := fhe.NewBitwisePublicEncryptor(s.params, s.pk)
 	fheType := bitWidthToType(req.BitWidth)
 	ct, err := enc.EncryptUint64(req.Value, fheType)
 	if err != nil {
@@ -227,38 +227,38 @@ func (s *Server) handleEvaluate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get evaluator from pool
-	eval := s.evalPool.Get().(*tfhe.Evaluator)
+	eval := s.evalPool.Get().(*fhe.Evaluator)
 	defer s.evalPool.Put(eval)
 
 	// Deserialize ciphertexts
-	left := new(tfhe.BitCiphertext)
+	left := new(fhe.BitCiphertext)
 	if err := left.UnmarshalBinary(req.Left); err != nil {
 		http.Error(w, "invalid left ciphertext", http.StatusBadRequest)
 		return
 	}
 
-	var result *tfhe.BitCiphertext
+	var result *fhe.BitCiphertext
 	var err error
 
-	bitwiseEval := tfhe.NewBitwiseEvaluator(s.params, s.bsk, s.sk)
+	bitwiseEval := fhe.NewBitwiseEvaluator(s.params, s.bsk, s.sk)
 
 	switch req.Operation {
 	case "add":
-		right := new(tfhe.BitCiphertext)
+		right := new(fhe.BitCiphertext)
 		if err := right.UnmarshalBinary(req.Right); err != nil {
 			http.Error(w, "invalid right ciphertext", http.StatusBadRequest)
 			return
 		}
 		result, err = bitwiseEval.Add(left, right)
 	case "sub":
-		right := new(tfhe.BitCiphertext)
+		right := new(fhe.BitCiphertext)
 		if err := right.UnmarshalBinary(req.Right); err != nil {
 			http.Error(w, "invalid right ciphertext", http.StatusBadRequest)
 			return
 		}
 		result, err = bitwiseEval.Sub(left, right)
 	case "eq":
-		right := new(tfhe.BitCiphertext)
+		right := new(fhe.BitCiphertext)
 		if err := right.UnmarshalBinary(req.Right); err != nil {
 			http.Error(w, "invalid right ciphertext", http.StatusBadRequest)
 			return
@@ -267,10 +267,10 @@ func (s *Server) handleEvaluate(w http.ResponseWriter, r *http.Request) {
 		if eqErr != nil {
 			err = eqErr
 		} else {
-			result = tfhe.WrapBoolCiphertext(eqResult)
+			result = fhe.WrapBoolCiphertext(eqResult)
 		}
 	case "lt":
-		right := new(tfhe.BitCiphertext)
+		right := new(fhe.BitCiphertext)
 		if err := right.UnmarshalBinary(req.Right); err != nil {
 			http.Error(w, "invalid right ciphertext", http.StatusBadRequest)
 			return
@@ -279,7 +279,7 @@ func (s *Server) handleEvaluate(w http.ResponseWriter, r *http.Request) {
 		if ltErr != nil {
 			err = ltErr
 		} else {
-			result = tfhe.WrapBoolCiphertext(ltResult)
+			result = fhe.WrapBoolCiphertext(ltResult)
 		}
 	default:
 		http.Error(w, "unsupported operation: "+req.Operation, http.StatusBadRequest)
@@ -330,25 +330,25 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func bitWidthToType(bits int) tfhe.FheUintType {
+func bitWidthToType(bits int) fhe.FheUintType {
 	switch bits {
 	case 4:
-		return tfhe.FheUint4
+		return fhe.FheUint4
 	case 8:
-		return tfhe.FheUint8
+		return fhe.FheUint8
 	case 16:
-		return tfhe.FheUint16
+		return fhe.FheUint16
 	case 32:
-		return tfhe.FheUint32
+		return fhe.FheUint32
 	case 64:
-		return tfhe.FheUint64
+		return fhe.FheUint64
 	case 128:
-		return tfhe.FheUint128
+		return fhe.FheUint128
 	case 160:
-		return tfhe.FheUint160
+		return fhe.FheUint160
 	case 256:
-		return tfhe.FheUint256
+		return fhe.FheUint256
 	default:
-		return tfhe.FheUint32
+		return fhe.FheUint32
 	}
 }

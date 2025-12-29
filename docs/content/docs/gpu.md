@@ -1,11 +1,11 @@
 ---
 title: GPU Acceleration
-description: Multi-GPU TFHE acceleration with Metal (macOS) and CUDA (Linux/Windows)
+description: Multi-GPU FHE acceleration with Metal (macOS) and CUDA (Linux/Windows)
 ---
 
 # GPU Acceleration
 
-Lux TFHE supports massively parallel bootstrapping on GPUs, providing 10-100x speedup for batch operations.
+Lux FHE supports massively parallel bootstrapping on GPUs, providing 10-100x speedup for batch operations.
 
 ## Supported Backends
 
@@ -20,7 +20,7 @@ Lux TFHE supports massively parallel bootstrapping on GPUs, providing 10-100x sp
 Metal acceleration works out of the box on Apple Silicon Macs:
 
 ```go
-import "github.com/luxfi/tfhe/gpu"
+import "github.com/luxfi/fhe/gpu"
 
 // Auto-detect Metal GPU
 cfg := gpu.Config{
@@ -183,10 +183,10 @@ if err != nil {
 
 ```bash
 # Run GPU benchmarks
-go test -bench=BenchmarkGPU -benchmem github.com/luxfi/tfhe/gpu
+go test -bench=BenchmarkGPU -benchmem github.com/luxfi/fhe/gpu
 
 # Compare with CPU
-go test -bench=BenchmarkLattice -benchmem github.com/luxfi/tfhe
+go test -bench=BenchmarkLattice -benchmem github.com/luxfi/fhe
 ```
 
 ## Platform-Specific Notes

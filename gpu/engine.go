@@ -1,6 +1,6 @@
 //go:build cgo
 
-// Package gpu provides accelerated TFHE operations using MLX.
+// Package gpu provides accelerated FHE operations using MLX.
 // MLX supports CPU and GPU execution on all platforms via CGO bindings.
 // When CGO is disabled, falls back to pure Go implementation.
 //
@@ -15,12 +15,12 @@ import (
 	"sync/atomic"
 
 	"github.com/luxfi/mlx"
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
-// Config holds GPU TFHE engine configuration
+// Config holds GPU FHE engine configuration
 type Config struct {
-	// TFHE parameters
+	// FHE parameters
 	N       uint32 // Ring dimension (default: 1024)
 	n       uint32 // LWE dimension (default: 512)
 	L       uint32 // Decomposition digits (default: 4, reduced from 7)
@@ -108,10 +108,10 @@ type LWEPool struct {
 	Cap   uint32
 }
 
-// Engine is the main GPU TFHE engine
+// Engine is the main GPU FHE engine
 type Engine struct {
 	cfg    Config
-	params tfhe.Parameters
+	params fhe.Parameters
 
 	// MLX backend info
 	backend mlx.Backend
@@ -138,21 +138,21 @@ type Engine struct {
 	totalGates      atomic.Uint64
 }
 
-// New creates a new GPU TFHE engine
+// New creates a new GPU FHE engine
 func New(cfg Config) (*Engine, error) {
 	// Initialize MLX (auto-detects Metal/CUDA/CPU)
 	backend := mlx.GetBackend()
 	device := mlx.GetDevice()
 
-	fmt.Printf("GPU TFHE Engine initializing...\n")
+	fmt.Printf("GPU FHE Engine initializing...\n")
 	fmt.Printf("  Backend: %s\n", backend)
 	fmt.Printf("  Device: %s\n", device.Name)
 	fmt.Printf("  Memory: %.1f GB\n", float64(device.Memory)/(1024*1024*1024))
 
-	// Create TFHE parameters
-	params, err := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	// Create FHE parameters
+	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create TFHE params: %w", err)
+		return nil, fmt.Errorf("failed to create FHE params: %w", err)
 	}
 
 	e := &Engine{
@@ -186,7 +186,7 @@ func New(cfg Config) (*Engine, error) {
 	}
 	e.extProdCtx = extProdCtx
 
-	fmt.Printf("GPU TFHE Engine ready\n")
+	fmt.Printf("GPU FHE Engine ready\n")
 	fmt.Printf("  NTT context: N=%d, Q=%d\n", nttCtx.N, nttCtx.Q)
 	fmt.Printf("  External product: L=%d, BaseLog=%d\n", cfg.L, cfg.BaseLog)
 	return e, nil
@@ -302,7 +302,7 @@ func (e *Engine) DeleteUser(userID uint64) {
 }
 
 // UploadBootstrapKey uploads a user's bootstrap key to GPU
-func (e *Engine) UploadBootstrapKey(userID uint64, bsk *tfhe.BootstrapKey) error {
+func (e *Engine) UploadBootstrapKey(userID uint64, bsk *fhe.BootstrapKey) error {
 	e.usersMu.RLock()
 	user, ok := e.users[userID]
 	e.usersMu.RUnlock()
@@ -321,7 +321,7 @@ func (e *Engine) UploadBootstrapKey(userID uint64, bsk *tfhe.BootstrapKey) error
 	N := e.cfg.N
 
 	data := make([]int64, n*2*L*2*N)
-	// ... fill from bsk (implementation depends on tfhe.BootstrapKey structure)
+	// ... fill from bsk (implementation depends on fhe.BootstrapKey structure)
 
 	user.BSK = mlx.ArrayFromSlice(data, []int{int(n), 2, int(L), 2, int(N)}, mlx.Int64)
 	mlx.Eval(user.BSK)
@@ -412,7 +412,7 @@ func (e *Engine) ExecuteBatchGates(ops []BatchGateOp) error {
 
 // batchBootstrap performs batch programmable bootstrapping on GPU
 //
-// TFHE bootstrapping computes: LUT[phase(ct)] where phase = b - <a, s> mod Q
+// FHE bootstrapping computes: LUT[phase(ct)] where phase = b - <a, s> mod Q
 // For batch processing, we perform all operations in parallel using MLX.
 //
 // Algorithm (per ciphertext):

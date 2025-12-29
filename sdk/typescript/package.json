@@ -1,5 +1,5 @@
 {
-  "name": "@luxfi/tfhe",
+  "name": "@luxfi/fhe",
   "version": "1.0.0",
   "description": "TypeScript bindings for LuxFHE - Fully Homomorphic Encryption",
   "main": "dist/index.js",
@@ -36,7 +36,7 @@
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "https://github.com/luxfi/tfhe"
+    "url": "https://github.com/luxfi/fhe"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

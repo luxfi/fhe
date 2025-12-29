@@ -108,7 +108,7 @@ func (e *Engine) UploadBatchLWE(aVecs [][]uint64, bVals []uint64) (*BatchLWE, er
 }
 
 // BatchBlindRotate performs blind rotation on a batch of LWE ciphertexts
-// This is the core of TFHE bootstrapping.
+// This is the core of FHE bootstrapping.
 //
 // Algorithm for each ciphertext:
 //  1. Compute rotation index from b: rotIdx = round(b * 2N / Q)

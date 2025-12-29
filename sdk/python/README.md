@@ -1,6 +1,6 @@
 # LuxFHE Python Bindings
 
-Python bindings for the Lux TFHE (Fully Homomorphic Encryption) library.
+Python bindings for the Lux FHE (Fully Homomorphic Encryption) library.
 
 ## Installation
 

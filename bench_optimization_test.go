@@ -1,7 +1,7 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"fmt"
@@ -72,15 +72,28 @@ func BenchmarkBootstrapParallelGates(b *testing.B) {
 
 // BenchmarkNTTComparison compares NTT implementations
 func BenchmarkNTTComparison(b *testing.B) {
-	sizes := []int{512, 1024, 2048, 4096}
-	Q := uint64(1 << 27)
+	// Use NTT-friendly primes: Q = k*2N + 1 for some k
+	// These primes support the required primitive roots of unity
+	testCases := []struct {
+		N int
+		Q uint64
+	}{
+		{512, 12289},   // 12289 = 12*1024 + 1
+		{1024, 12289},  // 12289 = 6*2048 + 1
+		{2048, 12289},  // 12289 = 3*4096 + 1
+		{4096, 40961},  // 40961 = 5*8192 + 1
+	}
 
-	for _, N := range sizes {
-		b.Run(fmt.Sprintf("N=%d", N), func(b *testing.B) {
-			engine, _ := NewNTTEngine(uint32(N), Q)
-			coeffs := make([]uint64, N)
+	for _, tc := range testCases {
+		b.Run(fmt.Sprintf("N=%d", tc.N), func(b *testing.B) {
+			engine, err := NewNTTEngine(uint32(tc.N), tc.Q)
+			if err != nil {
+				b.Skipf("NTT engine init failed for N=%d, Q=%d: %v", tc.N, tc.Q, err)
+				return
+			}
+			coeffs := make([]uint64, tc.N)
 			for i := range coeffs {
-				coeffs[i] = uint64(rand.Int63n(int64(Q)))
+				coeffs[i] = uint64(rand.Int63n(int64(tc.Q)))
 			}
 
 			b.ResetTimer()
@@ -94,8 +107,12 @@ func BenchmarkNTTComparison(b *testing.B) {
 // BenchmarkBatchNTT measures batch NTT performance scaling
 func BenchmarkBatchNTT(b *testing.B) {
 	N := 1024
-	Q := uint64(1 << 27)
-	engine, _ := NewNTTEngine(uint32(N), Q)
+	Q := uint64(12289) // NTT-friendly prime
+	engine, err := NewNTTEngine(uint32(N), Q)
+	if err != nil {
+		b.Skipf("NTT engine init failed: %v", err)
+		return
+	}
 
 	batchSizes := []int{1, 4, 16, 64, 256}
 
@@ -120,8 +137,12 @@ func BenchmarkBatchNTT(b *testing.B) {
 // BenchmarkPolyMulScaling measures polynomial multiplication scaling
 func BenchmarkPolyMulScaling(b *testing.B) {
 	N := 1024
-	Q := uint64(1 << 27)
-	engine, _ := NewNTTEngine(uint32(N), Q)
+	Q := uint64(12289) // NTT-friendly prime
+	engine, err := NewNTTEngine(uint32(N), Q)
+	if err != nil {
+		b.Skipf("NTT engine init failed: %v", err)
+		return
+	}
 
 	a := make([]uint64, N)
 	bb := make([]uint64, N)
@@ -150,7 +171,11 @@ func BenchmarkPolyMulScaling(b *testing.B) {
 
 // BenchmarkModularOps measures modular arithmetic performance
 func BenchmarkModularOps(b *testing.B) {
-	engine, _ := NewNTTEngine(1024, 1<<27)
+	engine, err := NewNTTEngine(1024, 12289) // NTT-friendly prime
+	if err != nil {
+		b.Skipf("NTT engine init failed: %v", err)
+		return
+	}
 	a := uint64(rand.Int63n(int64(engine.Q)))
 	bb := uint64(rand.Int63n(int64(engine.Q)))
 
@@ -490,7 +515,7 @@ func TestPerformanceReport(t *testing.T) {
 	gateResults["MAJORITY"] = time.Since(start) / time.Duration(numIter)
 
 	// Print report
-	fmt.Println("\n========== TFHE Performance Report ==========")
+	fmt.Println("\n========== FHE Performance Report ==========")
 	fmt.Printf("Parameters: PN10QP27 (N=%d, Q=%d)\n", params.N(), params.QLWE())
 	fmt.Println()
 	fmt.Println("Key Generation:")

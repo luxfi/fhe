@@ -7,7 +7,7 @@
 // This file contains experimental NTT optimization tests.
 // To run: go test -tags ntt_experimental ./...
 
-package tfhe
+package fhe
 
 import (
 	"math/rand"
@@ -16,7 +16,7 @@ import (
 
 // Test parameters for NTT
 // Note: Q must satisfy (Q-1) % 2N == 0 for NTT to work
-// For TFHE, the lattice library handles this internally with proper moduli
+// For FHE, the lattice library handles this internally with proper moduli
 const (
 	testN = 1024
 	// Q must have (Q-1) divisible by 2N = 2048

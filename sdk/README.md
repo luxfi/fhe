@@ -17,24 +17,24 @@ Multi-language SDK for Fully Homomorphic Encryption.
 ### Go (Core Library)
 
 ```go
-import "github.com/luxfi/tfhe"
+import "github.com/luxfi/fhe"
 
-params := tfhe.ParamsPN10QP27
-sk, pk := tfhe.NewKeyGenerator(params).GenKeyPair()
-enc := tfhe.NewBitwisePublicEncryptor(params, pk)
-eval := tfhe.NewBitwiseEvaluator(params, sk.BootstrapKey(), sk)
+params := fhe.ParamsPN10QP27
+sk, pk := fhe.NewKeyGenerator(params).GenKeyPair()
+enc := fhe.NewBitwisePublicEncryptor(params, pk)
+eval := fhe.NewBitwiseEvaluator(params, sk.BootstrapKey(), sk)
 
 ct1 := enc.EncryptUint(42, 8)
 ct2 := enc.EncryptUint(8, 8)
 ctSum := eval.Add(ct1, ct2)
-result := tfhe.NewBitwiseDecryptor(params, sk).DecryptUint(ctSum)
+result := fhe.NewBitwiseDecryptor(params, sk).DecryptUint(ctSum)
 // result = 50
 ```
 
 ### TypeScript
 
 ```typescript
-import { LuxFHE } from '@luxfi/tfhe';
+import { LuxFHE } from '@luxfi/fhe';
 
 const fhe = await LuxFHE.init();
 const keys = fhe.generateKeys();
@@ -145,4 +145,4 @@ GOOS=js GOARCH=wasm go build -o luxfhe.wasm ./main.go
 
 ## Documentation
 
-See https://tfhe.lux.network/docs/sdk for full documentation.
+See https://fhe.lux.network/docs/sdk for full documentation.

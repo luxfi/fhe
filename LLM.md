@@ -1,8 +1,8 @@
-# Lux TFHE - Pure Go TFHE Implementation
+# Lux FHE - Pure Go FHE Implementation
 
 ## Overview
 
-Novel TFHE implementation built on our own lattice cryptography stack (`luxfi/lattice`), designed for blockchain/EVM integration with multi-GPU acceleration.
+Novel FHE implementation built on our own lattice cryptography stack (`luxfi/lattice`), designed for blockchain/EVM integration with multi-GPU acceleration.
 
 **Key differentiators:**
 - Pure Go implementation from first principles using `luxfi/lattice/v6` primitives
@@ -14,10 +14,10 @@ Novel TFHE implementation built on our own lattice cryptography stack (`luxfi/la
 ## Architecture
 
 ```
-luxfi/tfhe (Pure Go TFHE)
+luxfi/fhe (Pure Go FHE)
     │
     ├── Core Types
-    │   ├── tfhe.go           - Parameters, KeyGenerator, SecretKey, PublicKey
+    │   ├── fhe.go            - Parameters, KeyGenerator, SecretKey, PublicKey
     │   ├── encryptor.go      - Bit/Boolean encryption
     │   ├── decryptor.go      - Bit/Boolean decryption
     │   └── evaluator.go      - Boolean gates (AND, OR, XOR, NOT, NAND, NOR, MUX)
@@ -87,7 +87,7 @@ luxfi/tfhe (Pure Go TFHE)
 ### Quick Start
 
 ```go
-import "github.com/luxfi/tfhe"
+import "github.com/luxfi/fhe"
 
 // Create parameters and key generator
 params, _ := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
@@ -201,7 +201,7 @@ pkRestored.UnmarshalBinary(pkData)
 === RUN   TestPublicKeySerialization     --- PASS
 === RUN   TestFheRNG                     --- PASS (6 subtests)
 === RUN   TestFheRNGPublic               --- PASS (2 subtests)
-PASS - ok  github.com/luxfi/tfhe  35.876s
+PASS - ok  github.com/luxfi/fhe  35.876s
 ```
 
 ## Implementation Status
@@ -286,7 +286,7 @@ lux/fhe (OpenFHE fork with MLX)
 ### Key Classes
 - `MLXNTT` - NTT/INTT with batch operations
 - `MLXPolyOps` - Polynomial arithmetic (add, sub, mult, automorphism)
-- `MLXBlindRotation` - TFHE bootstrapping infrastructure
+- `MLXBlindRotation` - FHE bootstrapping infrastructure
 
 ### Design Decisions
 1. **Integer NTT**: Uses exact modular arithmetic (uint64_t) - MLX float64 not available on GPU
@@ -301,20 +301,20 @@ lux/fhe (OpenFHE fork with MLX)
 | Batch NTT (32 × n=512) | 14 µs/poly | Amortized |
 | Throughput | 33K trans/s | Sequential |
 
-### GPU Optimization Guidelines (TFHE/PBS)
+### GPU Optimization Guidelines (FHE/PBS)
 - Batch PBS aggressively (levelize circuits)
 - Keep bootstrap key resident (avoid host/device churn)
 - Use SoA layout for coalescing
 - Fuse kernels (decomp → extprod → accumulate)
 - Prefer RNS + NTT for exactness (MLX float64 unsupported on GPU)
 
-## GPU TFHE Engine (Massive Parallelism)
+## GPU FHE Engine (Massive Parallelism)
 
-Enterprise-grade GPU TFHE for 1000+ concurrent users with 100GB+ GPU memory.
+Enterprise-grade GPU FHE for 1000+ concurrent users with 100GB+ GPU memory.
 
 ### Architecture
 ```
-GPUTFHEEngine
+GPUFHEEngine
     ├── UserSession[]           - Per-user isolated contexts
     │   ├── BootstrapKeyGPU     - BK resident on GPU [n, 2, L, 2, N]
     │   ├── KeySwitchKeyGPU     - KSK on GPU
@@ -334,7 +334,7 @@ GPUTFHEEngine
 ### Files
 ```
 lux/fhe/src/core/
-    ├── include/math/hal/mlx/gpu_tfhe.h      - GPU TFHE API
+    ├── include/math/hal/mlx/gpu_tfhe.h      - GPU FHE API
     └── lib/math/hal/mlx/
         ├── gpu_tfhe.cpp                      - Implementation
         └── tfhe_kernels.metal                - Metal shaders
@@ -355,13 +355,13 @@ lux/fhe/src/core/
 using namespace lbcrypto::gpu;
 
 // Initialize engine
-TFHEConfig config;
+FHEConfig config;
 config.N = 1024;
 config.L = 4;  // Reduced!
 config.maxUsers = 10000;
 config.gpuMemoryBudget = 100ULL * 1024 * 1024 * 1024;  // 100GB
 
-GPUTFHEEngine engine(config);
+GPUFHEEngine engine(config);
 engine.initialize();
 
 // Create users
@@ -442,7 +442,7 @@ const result = await fhe.evaluate('add', encrypted, encrypted)
 ## fhEVM Integration
 
 ```go
-import "github.com/luxfi/tfhe"
+import "github.com/luxfi/fhe"
 
 type FHEPrecompile struct {
     params      tfhe.Parameters
@@ -464,9 +464,9 @@ func (p *FHEPrecompile) Add(input []byte) ([]byte, error) {
 }
 ```
 
-## GPU TFHE Engine (MLX Backend)
+## GPU FHE Engine (MLX Backend)
 
-Massively parallel TFHE engine using MLX (Metal + CUDA + CPU backends).
+Massively parallel FHE engine using MLX (Metal + CUDA + CPU backends).
 
 ### Performance
 
@@ -480,7 +480,7 @@ Massively parallel TFHE engine using MLX (Metal + CUDA + CPU backends).
 ### Architecture
 
 ```
-GPU TFHE Engine
+GPU FHE Engine
     │
     ├── Multi-Tenant Management
     │   ├── UserSession      - Isolated per-user context
@@ -506,7 +506,7 @@ GPU TFHE Engine
 ### Configuration
 
 ```cpp
-TFHEConfig config;
+FHEConfig config;
 config.N = 1024;           // Ring dimension
 config.n = 512;            // LWE dimension
 config.L = 4;              // Decomposition digits (reduced from 7)
@@ -518,7 +518,7 @@ config.gpuMemoryBudget = 100ULL * 1024 * 1024 * 1024;  // 100GB
 
 ```cpp
 // Initialize engine
-GPUTFHEEngine engine(config);
+GPUFHEEngine engine(config);
 engine.initialize();
 
 // Create user session
@@ -557,7 +557,7 @@ scheduler.flush();  // Execute all at once
 ### Multi-Backend Support (via luxfi/mlx)
 
 ```go
-import "github.com/luxfi/tfhe/gpu"
+import "github.com/luxfi/fhe/gpu"
 
 // Auto-detects: Metal (macOS) → CUDA (Linux/Windows) → CPU
 engine, _ := gpu.New(gpu.DefaultConfig())
@@ -578,7 +578,7 @@ Backend selection (automatic):
 ### Files
 
 **Go API** (recommended):
-- `tfhe/gpu/engine.go` - Unified GPU TFHE engine using luxfi/mlx
+- `tfhe/gpu/engine.go` - Unified GPU FHE engine using luxfi/mlx
 - `tfhe/gpu/multigpu.go` - Multi-GPU orchestration (CUDA with NVLink/NCCL)
 - `tfhe/gpu/multigpu_stub.go` - Stub for non-CUDA platforms
 
@@ -593,7 +593,7 @@ Backend selection (automatic):
 For 8-GPU configurations with NVLink:
 
 ```go
-import "github.com/luxfi/tfhe/gpu"
+import "github.com/luxfi/fhe/gpu"
 
 // Initialize multi-GPU engine
 engine, _ := gpu.NewMultiGPU(gpu.H200x8Config())
@@ -637,7 +637,7 @@ go test ./...
 # With OpenFHE acceleration (optional)
 CGO_ENABLED=1 go build -tags openfhe ./...
 
-# GPU TFHE (MLX backend)
+# GPU FHE (MLX backend)
 cd fhe && mkdir build-gpu && cd build-gpu
 cmake .. -DWITH_MLX=ON
 make -j8 OPENFHEcore

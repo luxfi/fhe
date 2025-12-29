@@ -1,6 +1,6 @@
 //go:build (linux || windows) && cgo && cuda
 
-// Package gpu provides multi-GPU TFHE operations
+// Package gpu provides multi-GPU FHE operations
 package gpu
 
 import (

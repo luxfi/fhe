@@ -1,13 +1,13 @@
 //go:build cgo
 
-// Package gpu provides accelerated TFHE operations using MLX.
+// Package gpu provides accelerated FHE operations using MLX.
 // This file implements NTT (Number Theoretic Transform) operations with:
 // - Fast CPU implementation using Cooley-Tukey/Gentleman-Sande algorithms
 // - GPU acceleration via MLX where available
 // - Batch processing for throughput
 //
 // The NTT is the core operation for efficient polynomial multiplication in
-// lattice-based cryptography (TFHE, BFV, BGV, CKKS).
+// lattice-based cryptography (FHE, BFV, BGV, CKKS).
 //
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause

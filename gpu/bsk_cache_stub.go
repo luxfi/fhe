@@ -1,6 +1,6 @@
 //go:build !(linux && cgo && cuda) && !(windows && cgo && cuda)
 
-// Package gpu provides multi-GPU TFHE operations
+// Package gpu provides multi-GPU FHE operations
 // This is a stub for platforms without CUDA support
 package gpu
 

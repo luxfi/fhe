@@ -1,7 +1,7 @@
 //! # LuxFHE - Rust Bindings for Fully Homomorphic Encryption
 //!
 //! This crate provides safe Rust bindings for the LuxFHE library,
-//! enabling computation on encrypted data using TFHE (Threshold FHE).
+//! enabling computation on encrypted data using FHE (Threshold FHE).
 //!
 //! ## Example
 //!
@@ -94,7 +94,7 @@ fn check(code: i32) -> Result<()> {
     }
 }
 
-/// TFHE parameter sets
+/// FHE parameter sets
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum ParamSet {
@@ -104,7 +104,7 @@ pub enum ParamSet {
     PN11QP54 = 1,
 }
 
-/// TFHE Context - manages parameters and provides key generation
+/// FHE Context - manages parameters and provides key generation
 pub struct Context {
     handle: usize,
 }
@@ -239,7 +239,7 @@ impl Drop for Context {
     }
 }
 
-/// TFHE Secret Key
+/// FHE Secret Key
 pub struct SecretKey {
     handle: usize,
 }
@@ -252,7 +252,7 @@ impl Drop for SecretKey {
     }
 }
 
-/// TFHE Public Key
+/// FHE Public Key
 pub struct PublicKey {
     handle: usize,
 }
@@ -265,7 +265,7 @@ impl Drop for PublicKey {
     }
 }
 
-/// TFHE Bootstrap Key (evaluation key)
+/// FHE Bootstrap Key (evaluation key)
 pub struct BootstrapKey {
     handle: usize,
 }

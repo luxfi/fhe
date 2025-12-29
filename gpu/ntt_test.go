@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// Test parameters - TFHE standard
+// Test parameters - FHE standard
 const (
 	testN = 1024
 	testQ = 1 << 27 // 134217728 - a prime where Q-1 is divisible by 2N
@@ -14,10 +14,10 @@ const (
 
 // Actually use Q = 132120577 which is prime and Q-1 = 132120576 = 2^11 * 64509 = 2048 * 64509
 // For N=1024, we need Q-1 divisible by 2048, which works.
-const tfheQ = 132120577
+const fheQ = 132120577
 
 func TestNewNTTContext(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -25,8 +25,8 @@ func TestNewNTTContext(t *testing.T) {
 	if ctx.N != testN {
 		t.Errorf("N = %d, want %d", ctx.N, testN)
 	}
-	if ctx.Q != tfheQ {
-		t.Errorf("Q = %d, want %d", ctx.Q, tfheQ)
+	if ctx.Q != fheQ {
+		t.Errorf("Q = %d, want %d", ctx.Q, fheQ)
 	}
 	if ctx.Log2N != 10 { // log2(1024) = 10
 		t.Errorf("Log2N = %d, want 10", ctx.Log2N)
@@ -56,7 +56,7 @@ func TestNewNTTContext(t *testing.T) {
 }
 
 func TestNTTRoundtrip(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -64,7 +64,7 @@ func TestNTTRoundtrip(t *testing.T) {
 	// Create test polynomial
 	poly := make([]uint64, testN)
 	for i := 0; i < testN; i++ {
-		poly[i] = uint64(i * 17 % int(tfheQ))
+		poly[i] = uint64(i * 17 % int(fheQ))
 	}
 
 	// Forward NTT
@@ -91,7 +91,7 @@ func TestNTTRoundtrip(t *testing.T) {
 }
 
 func TestNTTBatch(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestNTTBatch(t *testing.T) {
 	for b := 0; b < batchSize; b++ {
 		polys[b] = make([]uint64, testN)
 		for i := 0; i < testN; i++ {
-			polys[b][i] = uint64((b*1000 + i) % int(tfheQ))
+			polys[b][i] = uint64((b*1000 + i) % int(fheQ))
 		}
 	}
 
@@ -132,7 +132,7 @@ func TestNTTBatch(t *testing.T) {
 }
 
 func TestPolyMul(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestPolyMul(t *testing.T) {
 }
 
 func TestPolyAdd(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestPolyAdd(t *testing.T) {
 }
 
 func TestPolySub(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -202,7 +202,7 @@ func TestPolySub(t *testing.T) {
 }
 
 func TestPolyRotate(t *testing.T) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		t.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -226,7 +226,7 @@ func TestPolyRotate(t *testing.T) {
 }
 
 func TestModularArithmetic(t *testing.T) {
-	Q := uint64(tfheQ)
+	Q := uint64(fheQ)
 
 	// Test addMod
 	if addModNTT(Q-1, 2, Q) != 1 {
@@ -263,7 +263,7 @@ func TestModularArithmetic(t *testing.T) {
 }
 
 func BenchmarkNTTSingle(b *testing.B) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		b.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -280,7 +280,7 @@ func BenchmarkNTTSingle(b *testing.B) {
 }
 
 func BenchmarkNTTBatch8(b *testing.B) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		b.Fatalf("NewNTTContext failed: %v", err)
 	}
@@ -300,7 +300,7 @@ func BenchmarkNTTBatch8(b *testing.B) {
 }
 
 func BenchmarkPolyMul(b *testing.B) {
-	ctx, err := NewNTTContext(testN, tfheQ)
+	ctx, err := NewNTTContext(testN, fheQ)
 	if err != nil {
 		b.Fatalf("NewNTTContext failed: %v", err)
 	}

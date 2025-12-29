@@ -1,6 +1,6 @@
 ---
 title: License
-description: Licensing information for Lux TFHE
+description: Licensing information for Lux FHE
 ---
 
 # License
@@ -52,7 +52,7 @@ For commercial licensing inquiries: [licensing@lux.partners](mailto:licensing@lu
 
 ## Implementation Notice
 
-This is an **ORIGINAL implementation** of TFHE written from scratch in Go, based on published academic research:
+This is an **ORIGINAL implementation** of FHE written from scratch in Go, based on published academic research:
 
 - Built entirely on [github.com/luxfi/lattice](https://github.com/luxfi/lattice) (our own cryptographic primitives)
 - Implements algorithms from peer-reviewed publications
@@ -60,7 +60,7 @@ This is an **ORIGINAL implementation** of TFHE written from scratch in Go, based
 
 ### Referenced Academic Works
 
-- Chillotti et al. "TFHE: Fast Fully Homomorphic Encryption Over the Torus" (Journal of Cryptology, 2020)
+- Chillotti et al. "FHE: Fast Fully Homomorphic Encryption Over the Torus" (Journal of Cryptology, 2020)
 - Ducas & Micciancio "FHEW: Bootstrapping Homomorphic Encryption in Less Than a Second" (EUROCRYPT 2015)
 
 ## Disclaimer

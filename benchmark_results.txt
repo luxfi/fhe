@@ -1,6 +1,6 @@
 goos: darwin
 goarch: arm64
-pkg: github.com/luxfi/tfhe
+pkg: github.com/luxfi/fhe
 cpu: Apple M1 Max
 BenchmarkBitwiseAdd4Bit-10         	       1	1616760125 ns/op	37581360 B/op	 1182665 allocs/op
 BenchmarkShortIntEncrypt-10        	   56146	     22166 ns/op	   16008 B/op	      29 allocs/op
@@ -15,4 +15,4 @@ BenchmarkOR-10                     	      22	  54273616 ns/op	 1231148 B/op	   3
 BenchmarkXOR-10                    	       7	 157962637 ns/op	 3590484 B/op	  112912 allocs/op
 BenchmarkMUX-10                    	       7	 155910143 ns/op	 3648014 B/op	  114574 allocs/op
 PASS
-ok  	github.com/luxfi/tfhe	18.051s
+ok  	github.com/luxfi/fhe	18.051s

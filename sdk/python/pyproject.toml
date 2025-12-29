@@ -48,10 +48,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/luxfi/tfhe"
+Homepage = "https://github.com/luxfi/fhe"
 Documentation = "https://tfhe.lux.dev"
-Repository = "https://github.com/luxfi/tfhe"
-Changelog = "https://github.com/luxfi/tfhe/blob/main/CHANGELOG.md"
+Repository = "https://github.com/luxfi/fhe"
+Changelog = "https://github.com/luxfi/fhe/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]

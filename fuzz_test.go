@@ -3,7 +3,7 @@
 
 //go:build go1.18
 
-package tfhe
+package fhe
 
 import (
 	"testing"

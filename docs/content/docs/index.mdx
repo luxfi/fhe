@@ -26,7 +26,7 @@ Compute on encrypted data without ever decrypting it. Built for the Lux Network 
 ## Quick Start
 
 ```bash
-go get github.com/luxfi/tfhe
+go get github.com/luxfi/fhe
 ```
 
 ```go
@@ -34,7 +34,7 @@ package main
 
 import (
     "fmt"
-    "github.com/luxfi/tfhe"
+    "github.com/luxfi/fhe"
 )
 
 func main() {
@@ -63,7 +63,7 @@ func main() {
 ## GPU Acceleration (macOS)
 
 ```go
-import "github.com/luxfi/tfhe/gpu"
+import "github.com/luxfi/fhe/gpu"
 
 // Configure GPU engine
 cfg := gpu.Config{
@@ -103,7 +103,7 @@ results, _ := engine.BatchBootstrap(ciphertexts, bsk)
 
 ```
 tfhe/
-├── tfhe.go           # Core TFHE types and parameters
+├── fhe.go            # Core FHE types and parameters
 ├── keygen.go         # Key generation (secret, public, bootstrap)
 ├── encryptor.go      # Encryption with secret/public keys
 ├── decryptor.go      # Decryption

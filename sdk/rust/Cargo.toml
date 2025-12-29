@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["Lux Industries Inc"]
 description = "Rust bindings for LuxFHE - Fully Homomorphic Encryption"
 license = "BSD-3-Clause"
-repository = "https://github.com/luxfi/tfhe"
+repository = "https://github.com/luxfi/fhe"
 keywords = ["fhe", "homomorphic", "encryption", "cryptography", "privacy"]
 categories = ["cryptography", "api-bindings"]
 

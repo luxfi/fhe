@@ -1,8 +1,8 @@
-# TFHE Optimization Guide
+# FHE Optimization Guide
 
 ## Performance Optimization Strategies
 
-This document describes the optimizations implemented in the Lux TFHE library and provides guidance for achieving maximum performance.
+This document describes the optimizations implemented in the Lux FHE library and provides guidance for achieving maximum performance.
 
 ## Architecture Overview
 
@@ -34,7 +34,7 @@ This document describes the optimizations implemented in the Lux TFHE library an
 
 ### 1. NTT Optimization
 
-The Number Theoretic Transform is the core operation in TFHE, used extensively in polynomial multiplication during bootstrapping.
+The Number Theoretic Transform is the core operation in FHE, used extensively in polynomial multiplication during bootstrapping.
 
 **Cooley-Tukey NTT Algorithm**:
 - O(N log N) complexity

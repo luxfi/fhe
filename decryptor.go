@@ -1,14 +1,14 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"github.com/luxfi/lattice/v6/core/rlwe"
 	"github.com/luxfi/lattice/v6/ring"
 )
 
-// Decryptor decrypts TFHE ciphertexts to boolean values
+// Decryptor decrypts FHE ciphertexts to boolean values
 type Decryptor struct {
 	params    Parameters
 	decryptor *rlwe.Decryptor

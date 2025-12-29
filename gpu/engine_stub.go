@@ -1,6 +1,6 @@
 //go:build !cgo
 
-// Package gpu provides accelerated TFHE operations using MLX.
+// Package gpu provides accelerated FHE operations using MLX.
 // This is the pure Go stub used when CGO is disabled.
 // For MLX acceleration, build with CGO_ENABLED=1.
 package gpu
@@ -8,13 +8,13 @@ package gpu
 import (
 	"errors"
 
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
 // ErrNotSupported is returned when MLX acceleration is not available
 var ErrNotSupported = errors.New("MLX acceleration not available (build with CGO_ENABLED=1)")
 
-// Config holds GPU TFHE engine configuration
+// Config holds GPU FHE engine configuration
 type Config struct {
 	N       uint32
 	n       uint32
@@ -34,7 +34,7 @@ type UserSession struct {
 // LWEPool holds a batch of LWE ciphertexts on GPU
 type LWEPool struct{}
 
-// Engine is the main GPU TFHE engine
+// Engine is the main GPU FHE engine
 type Engine struct{}
 
 // DefaultConfig returns the default GPU engine configuration
@@ -51,7 +51,7 @@ func DefaultConfig() Config {
 	}
 }
 
-// New creates a new GPU TFHE engine (stub - returns error)
+// New creates a new GPU FHE engine (stub - returns error)
 func New(cfg Config) (*Engine, error) {
 	return nil, ErrNotSupported
 }
@@ -65,7 +65,7 @@ func (e *Engine) CreateUser() (uint64, error) {
 func (e *Engine) DeleteUser(userID uint64) {}
 
 // UploadBootstrapKey uploads a user's bootstrap key to GPU (stub)
-func (e *Engine) UploadBootstrapKey(userID uint64, bsk *tfhe.BootstrapKey) error {
+func (e *Engine) UploadBootstrapKey(userID uint64, bsk *fhe.BootstrapKey) error {
 	return ErrNotSupported
 }
 

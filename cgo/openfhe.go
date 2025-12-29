@@ -32,7 +32,7 @@ const (
 	SecuritySTD256
 )
 
-// Method represents the TFHE method/variant
+// Method represents the FHE method/variant
 type Method int
 
 const (
@@ -41,7 +41,7 @@ const (
 	MethodLMKCDEY               // LMKCDEY bootstrapping
 )
 
-// Context holds OpenFHE TFHE context
+// Context holds OpenFHE FHE context
 type Context struct {
 	ptr C.TfheContext
 	mu  sync.RWMutex
@@ -72,12 +72,12 @@ type Integer struct {
 	bitLen int
 }
 
-// NewContext creates a new TFHE context with given security level and method
+// NewContext creates a new FHE context with given security level and method
 func NewContext(level SecurityLevel, method Method) (*Context, error) {
 	ctx := &Context{}
 	ctx.ptr = C.tfhe_context_new(C.TfheSecurityLevel(level), C.TfheMethod(method))
 	if ctx.ptr == nil {
-		return nil, errors.New("failed to create TFHE context")
+		return nil, errors.New("failed to create FHE context")
 	}
 	runtime.SetFinalizer(ctx, (*Context).Free)
 	return ctx, nil

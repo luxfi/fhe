@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2025, Lux Industries Inc
 //
-// LuxFHE C API - Production-ready C bindings for the Lux TFHE library
+// LuxFHE C API - Production-ready C bindings for the Lux FHE library
 //
 // This header provides a stable C ABI for integrating LuxFHE into C/C++ projects.
 // All functions are thread-safe unless documented otherwise.

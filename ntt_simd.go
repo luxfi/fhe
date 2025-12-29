@@ -1,7 +1,7 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"fmt"
@@ -387,7 +387,7 @@ func mul64(a, b uint64) (hi, lo uint64) {
 // div128 divides a 128-bit number (hi, lo) by a 64-bit divisor
 // Returns the remainder (we don't need the quotient for modular reduction)
 func div128(hi, lo, d uint64) uint64 {
-	// For TFHE parameters, hi is usually small or zero
+	// For FHE parameters, hi is usually small or zero
 	// This is a simplified version for the common case
 	if hi == 0 {
 		return lo % d

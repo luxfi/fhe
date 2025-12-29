@@ -1,13 +1,13 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"testing"
 )
 
-func TestTFHE(t *testing.T) {
+func TestFHE(t *testing.T) {
 	// Use fast parameters for testing
 	params, err := NewParametersFromLiteral(PN10QP27)
 	if err != nil {

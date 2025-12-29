@@ -1,13 +1,13 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"github.com/luxfi/lattice/v6/core/rlwe"
 )
 
-// Encryptor encrypts boolean values into TFHE ciphertexts
+// Encryptor encrypts boolean values into FHE ciphertexts
 type Encryptor struct {
 	params    Parameters
 	encryptor *rlwe.Encryptor

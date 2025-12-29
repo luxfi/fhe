@@ -7,7 +7,7 @@ description: Security model and guarantees
 
 ## Cryptographic Foundation
 
-Lux TFHE is built on the **Learning With Errors (LWE)** problem, a lattice-based cryptographic assumption that is:
+Lux FHE is built on the **Learning With Errors (LWE)** problem, a lattice-based cryptographic assumption that is:
 
 - **Classically secure**: No known polynomial-time classical algorithms
 - **Quantum resistant**: No known polynomial-time quantum algorithms
@@ -33,13 +33,13 @@ Each operation adds "noise" to ciphertexts. Bootstrapping resets the noise level
 
 ## Threat Model
 
-### What TFHE Protects Against
+### What FHE Protects Against
 
 - **Data exposure**: Servers never see plaintext values
 - **Traffic analysis**: Ciphertext sizes are uniform
 - **Side-channel attacks**: Operations are data-independent (constant-time)
 
-### What TFHE Does NOT Protect Against
+### What FHE Does NOT Protect Against
 
 - **Access patterns**: The sequence of operations may leak information
 - **Output size**: The number of output bits reveals information
@@ -78,7 +78,7 @@ Each operation adds "noise" to ciphertexts. Bootstrapping resets the noise level
 
 ### No Patented Techniques
 
-Lux TFHE uses only pre-2020 techniques:
+Lux FHE uses only pre-2020 techniques:
 
 - Boolean circuit approach (Chillotti et al. 2016)
 - GINX bootstrapping method

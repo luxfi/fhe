@@ -1,7 +1,7 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
-package tfhe
+package fhe
 
 import (
 	"fmt"
@@ -395,7 +395,7 @@ func (eval *IntegerEvaluator) Select(cond, a, b *RadixCiphertext) (*RadixCiphert
 func (eval *IntegerEvaluator) xorBlocks(a, b *ShortInt) (*ShortInt, error) {
 	// Use LUT for XOR on each possible pair
 	msgSpace := a.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace*msgSpace))
 
 	// Create XOR LUT (depends on both a and b encoded in single input)
 	// This is a simplified approach - proper implementation would use tensor product
@@ -425,7 +425,7 @@ func (eval *IntegerEvaluator) xorBlocks(a, b *ShortInt) (*ShortInt, error) {
 // andBlocks ANDs two shortint blocks
 func (eval *IntegerEvaluator) andBlocks(a, b *ShortInt) (*ShortInt, error) {
 	msgSpace := a.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace*msgSpace))
 
 	sum := eval.shortEval.addCiphertexts(a.ct, b.ct)
 
@@ -452,7 +452,7 @@ func (eval *IntegerEvaluator) andBlocks(a, b *ShortInt) (*ShortInt, error) {
 // orBlocks ORs two shortint blocks
 func (eval *IntegerEvaluator) orBlocks(a, b *ShortInt) (*ShortInt, error) {
 	msgSpace := a.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace*msgSpace))
 
 	sum := eval.shortEval.addCiphertexts(a.ct, b.ct)
 
@@ -482,7 +482,7 @@ func (eval *IntegerEvaluator) notBlock(a *ShortInt) (*ShortInt, error) {
 	mask := msgSpace - 1
 
 	// NOT via LUT
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace))
 
 	notLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
 		val := int((x + 1) * float64(msgSpace) / 2)
@@ -508,7 +508,7 @@ func (eval *IntegerEvaluator) notBlock(a *ShortInt) (*ShortInt, error) {
 // isZeroBlock returns 1 if block is 0, else 0
 func (eval *IntegerEvaluator) isZeroBlock(a *ShortInt) (*Ciphertext, error) {
 	msgSpace := a.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / 8.0)
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / 8.0)
 
 	isZeroLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
 		val := int((x + 1) * float64(msgSpace) / 2)
@@ -529,7 +529,7 @@ func (eval *IntegerEvaluator) isZeroBlock(a *ShortInt) (*Ciphertext, error) {
 // blockLt returns 1 if a < b, else 0 (for single blocks)
 func (eval *IntegerEvaluator) blockLt(a, b *ShortInt) (*Ciphertext, error) {
 	msgSpace := a.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace*msgSpace))
 
 	sum := eval.shortEval.addCiphertexts(a.ct, b.ct)
 
@@ -554,7 +554,7 @@ func (eval *IntegerEvaluator) blockLt(a, b *ShortInt) (*Ciphertext, error) {
 // blockEq returns 1 if a == b, else 0 (for single blocks)
 func (eval *IntegerEvaluator) blockEq(a, b *ShortInt) (*Ciphertext, error) {
 	msgSpace := a.msgSpace
-	scale := rlwe.NewScale(float64(eval.params.tfheParams.QBR()) / float64(2*msgSpace*msgSpace))
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace*msgSpace))
 
 	sum := eval.shortEval.addCiphertexts(a.ct, b.ct)
 
@@ -618,7 +618,7 @@ func (eval *IntegerEvaluator) zeroRadix(t FheUintType) (*RadixCiphertext, error)
 	for i := 0; i < numBlocks; i++ {
 		zero, err := eval.shortEval.ScalarMul(
 			&ShortInt{
-				ct:       rlwe.NewCiphertext(eval.params.tfheParams.paramsLWE, 1, eval.params.tfheParams.paramsLWE.MaxLevel()),
+				ct:       rlwe.NewCiphertext(eval.params.fheParams.paramsLWE, 1, eval.params.fheParams.paramsLWE.MaxLevel()),
 				msgBits:  eval.params.blockBits,
 				msgSpace: 1 << eval.params.blockBits,
 			}, 0)

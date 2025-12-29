@@ -181,12 +181,12 @@ func (e *Engine) GetBackend() Backend {
 // Parameters
 // =============================================================================
 
-// Params holds TFHE parameters
+// Params holds FHE parameters
 type Params struct {
 	ptr C.LuxFHEParams
 }
 
-// NewParams creates TFHE parameters
+// NewParams creates FHE parameters
 func NewParams(security Security, mode Mode) (*Params, error) {
 	p := &Params{}
 	p.ptr = C.luxfhe_params_create(C.LuxFHESecurity(security), C.LuxFHEMode(mode))

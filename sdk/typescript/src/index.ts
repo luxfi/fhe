@@ -1,11 +1,11 @@
 /**
- * @luxfi/tfhe - TypeScript bindings for LuxFHE
+ * @luxfi/fhe - TypeScript bindings for LuxFHE
  * 
  * Fully Homomorphic Encryption for Node.js and browsers.
  * 
  * @example
  * ```typescript
- * import { LuxFHE } from '@luxfi/tfhe';
+ * import { LuxFHE } from '@luxfi/fhe';
  * 
  * const fhe = await LuxFHE.init();
  * const keys = fhe.generateKeys();

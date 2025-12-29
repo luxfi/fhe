@@ -1,4 +1,4 @@
-module github.com/luxfi/tfhe
+module github.com/luxfi/fhe
 
 go 1.25.5
 

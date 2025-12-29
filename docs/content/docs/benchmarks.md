@@ -1,6 +1,6 @@
 ---
 title: Benchmarks
-description: Performance characteristics of Lux TFHE
+description: Performance characteristics of Lux FHE
 ---
 
 # Benchmarks

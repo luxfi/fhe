@@ -1,6 +1,6 @@
 //go:build js && wasm
 
-// Package main provides WASM bindings for Lux TFHE
+// Package main provides WASM bindings for Lux FHE
 //
 // Exports FHE operations to JavaScript:
 // - generateKeys() -> {publicKey, secretKey}
@@ -16,21 +16,21 @@ import (
 	"encoding/base64"
 	"syscall/js"
 
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
 var (
-	params tfhe.Parameters
-	kgen   *tfhe.KeyGenerator
+	params fhe.Parameters
+	kgen   *fhe.KeyGenerator
 )
 
 func init() {
 	var err error
-	params, err = tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
+	params, err = fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
-		panic("failed to init TFHE params: " + err.Error())
+		panic("failed to init FHE params: " + err.Error())
 	}
-	kgen = tfhe.NewKeyGenerator(params)
+	kgen = fhe.NewKeyGenerator(params)
 }
 
 // generateKeys creates a new key pair
@@ -69,13 +69,13 @@ func encrypt(this js.Value, args []js.Value) interface{} {
 		return js.ValueOf("error: invalid public key")
 	}
 
-	pk := new(tfhe.PublicKey)
+	pk := new(fhe.PublicKey)
 	if err := pk.UnmarshalBinary(pkBytes); err != nil {
 		return js.ValueOf("error: failed to parse public key")
 	}
 
 	// Encrypt
-	enc := tfhe.NewBitwisePublicEncryptor(params, pk)
+	enc := fhe.NewBitwisePublicEncryptor(params, pk)
 	fheType := bitWidthToType(bitWidth)
 	ct, err := enc.EncryptUint64(value, fheType)
 	if err != nil {
@@ -112,18 +112,18 @@ func decrypt(this js.Value, args []js.Value) interface{} {
 		return js.ValueOf("error: invalid secret key")
 	}
 
-	ct := new(tfhe.BitCiphertext)
+	ct := new(fhe.BitCiphertext)
 	if err := ct.UnmarshalBinary(ctBytes); err != nil {
 		return js.ValueOf("error: failed to parse ciphertext")
 	}
 
-	sk := new(tfhe.SecretKey)
+	sk := new(fhe.SecretKey)
 	if err := sk.UnmarshalBinary(skBytes); err != nil {
 		return js.ValueOf("error: failed to parse secret key")
 	}
 
 	// Decrypt
-	dec := tfhe.NewBitwiseDecryptor(params, sk)
+	dec := fhe.NewBitwiseDecryptor(params, sk)
 	result := dec.DecryptUint64(ct)
 
 	return js.ValueOf(int64(result))
@@ -147,20 +147,20 @@ func fheAdd(this js.Value, args []js.Value) interface{} {
 	bskBytes, _ := base64.StdEncoding.DecodeString(bskB64)
 	skBytes, _ := base64.StdEncoding.DecodeString(skB64)
 
-	ct1 := new(tfhe.BitCiphertext)
+	ct1 := new(fhe.BitCiphertext)
 	ct1.UnmarshalBinary(ct1Bytes)
 
-	ct2 := new(tfhe.BitCiphertext)
+	ct2 := new(fhe.BitCiphertext)
 	ct2.UnmarshalBinary(ct2Bytes)
 
-	bsk := new(tfhe.BootstrapKey)
+	bsk := new(fhe.BootstrapKey)
 	bsk.UnmarshalBinary(bskBytes)
 
-	sk := new(tfhe.SecretKey)
+	sk := new(fhe.SecretKey)
 	sk.UnmarshalBinary(skBytes)
 
 	// Evaluate
-	eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+	eval := fhe.NewBitwiseEvaluator(params, bsk, sk)
 	result, err := eval.Add(ct1, ct2)
 	if err != nil {
 		return js.ValueOf("error: " + err.Error())
@@ -186,19 +186,19 @@ func fheSub(this js.Value, args []js.Value) interface{} {
 	bskBytes, _ := base64.StdEncoding.DecodeString(bskB64)
 	skBytes, _ := base64.StdEncoding.DecodeString(skB64)
 
-	ct1 := new(tfhe.BitCiphertext)
+	ct1 := new(fhe.BitCiphertext)
 	ct1.UnmarshalBinary(ct1Bytes)
 
-	ct2 := new(tfhe.BitCiphertext)
+	ct2 := new(fhe.BitCiphertext)
 	ct2.UnmarshalBinary(ct2Bytes)
 
-	bsk := new(tfhe.BootstrapKey)
+	bsk := new(fhe.BootstrapKey)
 	bsk.UnmarshalBinary(bskBytes)
 
-	sk := new(tfhe.SecretKey)
+	sk := new(fhe.SecretKey)
 	sk.UnmarshalBinary(skBytes)
 
-	eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+	eval := fhe.NewBitwiseEvaluator(params, bsk, sk)
 	result, err := eval.Sub(ct1, ct2)
 	if err != nil {
 		return js.ValueOf("error: " + err.Error())
@@ -224,25 +224,25 @@ func fheEq(this js.Value, args []js.Value) interface{} {
 	bskBytes, _ := base64.StdEncoding.DecodeString(bskB64)
 	skBytes, _ := base64.StdEncoding.DecodeString(skB64)
 
-	ct1 := new(tfhe.BitCiphertext)
+	ct1 := new(fhe.BitCiphertext)
 	ct1.UnmarshalBinary(ct1Bytes)
 
-	ct2 := new(tfhe.BitCiphertext)
+	ct2 := new(fhe.BitCiphertext)
 	ct2.UnmarshalBinary(ct2Bytes)
 
-	bsk := new(tfhe.BootstrapKey)
+	bsk := new(fhe.BootstrapKey)
 	bsk.UnmarshalBinary(bskBytes)
 
-	sk := new(tfhe.SecretKey)
+	sk := new(fhe.SecretKey)
 	sk.UnmarshalBinary(skBytes)
 
-	eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+	eval := fhe.NewBitwiseEvaluator(params, bsk, sk)
 	result, err := eval.Eq(ct1, ct2)
 	if err != nil {
 		return js.ValueOf("error: " + err.Error())
 	}
 
-	resultBytes, _ := tfhe.WrapBoolCiphertext(result).MarshalBinary()
+	resultBytes, _ := fhe.WrapBoolCiphertext(result).MarshalBinary()
 	return js.ValueOf(base64.StdEncoding.EncodeToString(resultBytes))
 }
 
@@ -262,53 +262,53 @@ func fheLt(this js.Value, args []js.Value) interface{} {
 	bskBytes, _ := base64.StdEncoding.DecodeString(bskB64)
 	skBytes, _ := base64.StdEncoding.DecodeString(skB64)
 
-	ct1 := new(tfhe.BitCiphertext)
+	ct1 := new(fhe.BitCiphertext)
 	ct1.UnmarshalBinary(ct1Bytes)
 
-	ct2 := new(tfhe.BitCiphertext)
+	ct2 := new(fhe.BitCiphertext)
 	ct2.UnmarshalBinary(ct2Bytes)
 
-	bsk := new(tfhe.BootstrapKey)
+	bsk := new(fhe.BootstrapKey)
 	bsk.UnmarshalBinary(bskBytes)
 
-	sk := new(tfhe.SecretKey)
+	sk := new(fhe.SecretKey)
 	sk.UnmarshalBinary(skBytes)
 
-	eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+	eval := fhe.NewBitwiseEvaluator(params, bsk, sk)
 	result, err := eval.Lt(ct1, ct2)
 	if err != nil {
 		return js.ValueOf("error: " + err.Error())
 	}
 
-	resultBytes, _ := tfhe.WrapBoolCiphertext(result).MarshalBinary()
+	resultBytes, _ := fhe.WrapBoolCiphertext(result).MarshalBinary()
 	return js.ValueOf(base64.StdEncoding.EncodeToString(resultBytes))
 }
 
-// getVersion returns the TFHE version
+// getVersion returns the FHE version
 func getVersion(this js.Value, args []js.Value) interface{} {
 	return js.ValueOf("1.0.0")
 }
 
-func bitWidthToType(bits int) tfhe.FheUintType {
+func bitWidthToType(bits int) fhe.FheUintType {
 	switch bits {
 	case 4:
-		return tfhe.FheUint4
+		return fhe.FheUint4
 	case 8:
-		return tfhe.FheUint8
+		return fhe.FheUint8
 	case 16:
-		return tfhe.FheUint16
+		return fhe.FheUint16
 	case 32:
-		return tfhe.FheUint32
+		return fhe.FheUint32
 	case 64:
-		return tfhe.FheUint64
+		return fhe.FheUint64
 	case 128:
-		return tfhe.FheUint128
+		return fhe.FheUint128
 	case 160:
-		return tfhe.FheUint160
+		return fhe.FheUint160
 	case 256:
-		return tfhe.FheUint256
+		return fhe.FheUint256
 	default:
-		return tfhe.FheUint32
+		return fhe.FheUint32
 	}
 }
 

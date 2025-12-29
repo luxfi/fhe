@@ -1,7 +1,7 @@
-// Lux FHE Server - Standalone TFHE service node
+// Lux FHE Server - Standalone FHE service node
 //
 // Provides:
-// - TFHE operations (encrypt, decrypt, evaluate)
+// - FHE operations (encrypt, decrypt, evaluate)
 // - Threshold FHE decryption network
 // - ZK verification service
 // - Key management
@@ -18,7 +18,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/tfhe/server"
+	"github.com/luxfi/fhe/server"
 )
 
 func main() {

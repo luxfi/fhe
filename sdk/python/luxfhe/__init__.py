@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025, Lux Industries Inc
 """
-LuxFHE - Python bindings for the Lux TFHE library.
+LuxFHE - Python bindings for the Lux FHE library.
 
 This package provides Python bindings for fully homomorphic encryption (FHE)
-operations using the TFHE scheme. It enables computation on encrypted data
+operations using the FHE scheme. It enables computation on encrypted data
 without decryption.
 
 Example:

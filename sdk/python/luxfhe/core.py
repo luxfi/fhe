@@ -178,7 +178,7 @@ def _check(code: int) -> None:
 
 
 class ParamSet(IntEnum):
-    """TFHE parameter sets."""
+    """FHE parameter sets."""
     
     # ~128-bit security, good performance
     PN10QP27 = 0
@@ -202,7 +202,7 @@ def version_info() -> Tuple[int, int, int]:
 
 
 class SecretKey:
-    """TFHE secret key."""
+    """FHE secret key."""
     
     def __init__(self, handle):
         self._handle = handle
@@ -223,7 +223,7 @@ class SecretKey:
 
 
 class PublicKey:
-    """TFHE public key."""
+    """FHE public key."""
     
     def __init__(self, handle):
         self._handle = handle
@@ -234,7 +234,7 @@ class PublicKey:
 
 
 class BootstrapKey:
-    """TFHE bootstrap key (evaluation key)."""
+    """FHE bootstrap key (evaluation key)."""
     
     def __init__(self, handle):
         self._handle = handle
@@ -427,7 +427,7 @@ class Evaluator:
 
 
 class Context:
-    """TFHE context holding parameters and providing key generation."""
+    """FHE context holding parameters and providing key generation."""
     
     def __init__(self, params: ParamSet = ParamSet.PN10QP27):
         """Create a new context with the given parameter set."""

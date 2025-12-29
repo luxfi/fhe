@@ -266,7 +266,7 @@ export class LuxFHE {
  * 
  * @example
  * ```typescript
- * import { createLuxFHE } from '@luxfi/tfhe';
+ * import { createLuxFHE } from '@luxfi/fhe';
  * 
  * const fhe = await createLuxFHE();
  * const keys = fhe.generateKeys();

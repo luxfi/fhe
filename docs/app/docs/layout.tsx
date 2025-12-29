@@ -22,7 +22,7 @@ function XIcon({ className }: { className?: string }) {
 
 const DOCS_CONFIG = {
   name: 'Lux TFHE',
-  github: 'https://github.com/luxfi/tfhe',
+  github: 'https://github.com/luxfi/fhe',
   socials: {
     website: 'https://lux.network',
     discord: 'https://discord.gg/luxfi',
@@ -31,7 +31,7 @@ const DOCS_CONFIG = {
   footerLinks: [
     {
       text: 'View on GitHub',
-      url: 'https://github.com/luxfi/tfhe',
+      url: 'https://github.com/luxfi/fhe',
       icon: 'github',
     },
     {

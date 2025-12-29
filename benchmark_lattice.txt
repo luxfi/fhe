@@ -1,6 +1,6 @@
 goos: darwin
 goarch: arm64
-pkg: github.com/luxfi/tfhe
+pkg: github.com/luxfi/fhe
 cpu: Apple M1 Max
 BenchmarkLatticeKeyGen-10                   	   28998	     41747 ns/op	   15600 B/op	      21 allocs/op
 BenchmarkLatticePublicKeyGen-10             	   66368	     17420 ns/op	   11936 B/op	      22 allocs/op
@@ -49,4 +49,4 @@ BenchmarkLatticeRNGRandomUint16-10          	    3469	    340920 ns/op	  256080 
 BenchmarkLatticeAllocCiphertext-10          	   55743	     20827 ns/op	   15992 B/op	      29 allocs/op
 BenchmarkLatticeAllocInteger8-10            	    6997	    174253 ns/op	  128048 B/op	     234 allocs/op
 PASS
-ok  	github.com/luxfi/tfhe	89.128s
+ok  	github.com/luxfi/fhe	89.128s

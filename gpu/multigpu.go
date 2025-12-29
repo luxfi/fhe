@@ -1,6 +1,6 @@
 //go:build (linux || windows) && cgo && cuda
 
-// Package gpu provides multi-GPU TFHE operations with BSK sharing and load balancing
+// Package gpu provides multi-GPU FHE operations with BSK sharing and load balancing
 package gpu
 
 import (
@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/luxfi/mlx"
-	"github.com/luxfi/tfhe"
+	"github.com/luxfi/fhe"
 )
 
 // MultiGPUConfig configures the multi-GPU engine
 type MultiGPUConfig struct {
-	// TFHE configuration
-	TFHEConfig Config
+	// FHE configuration
+	FHEConfig Config
 
 	// Number of GPUs to use (0 = all available)
 	NumGPUs int
@@ -41,7 +41,7 @@ type MultiGPUConfig struct {
 // DefaultMultiGPUConfig returns sensible defaults
 func DefaultMultiGPUConfig() MultiGPUConfig {
 	return MultiGPUConfig{
-		TFHEConfig:         DefaultConfig(),
+		FHEConfig:         DefaultConfig(),
 		NumGPUs:            0, // Use all
 		BSKCacheMemory:     0, // Auto
 		Scheduler:          DefaultSchedulerConfig(),
@@ -54,7 +54,7 @@ func DefaultMultiGPUConfig() MultiGPUConfig {
 // H200x8MultiGPUConfig returns configuration for HGX H200 x8
 func H200x8MultiGPUConfig() MultiGPUConfig {
 	cfg := DefaultMultiGPUConfig()
-	cfg.TFHEConfig = H200x8Config()
+	cfg.FHEConfig = H200x8Config()
 	cfg.NumGPUs = 8
 	cfg.MaxUsersPerGPU = 1000 // 8000 total users
 	cfg.Scheduler.BatchSize = 512
@@ -62,7 +62,7 @@ func H200x8MultiGPUConfig() MultiGPUConfig {
 	return cfg
 }
 
-// MultiGPUEngine coordinates TFHE operations across multiple GPUs
+// MultiGPUEngine coordinates FHE operations across multiple GPUs
 type MultiGPUEngine struct {
 	cfg     MultiGPUConfig
 	mgpu    *mlx.MultiGPU
@@ -114,7 +114,7 @@ type MultiGPUUser struct {
 	keysMu  sync.Mutex
 }
 
-// NewMultiGPUEngine creates a new multi-GPU TFHE engine with full configuration
+// NewMultiGPUEngine creates a new multi-GPU FHE engine with full configuration
 func NewMultiGPUEngine(cfg MultiGPUConfig) (*MultiGPUEngine, error) {
 	// Initialize multi-GPU
 	numGPUs := cfg.NumGPUs
@@ -159,7 +159,7 @@ func NewMultiGPUEngine(cfg MultiGPUConfig) (*MultiGPUEngine, error) {
 	// Initialize per-GPU engines
 	for i := 0; i < numGPUs; i++ {
 		mgpu.SetDevice(i)
-		engine, err := New(cfg.TFHEConfig)
+		engine, err := New(cfg.FHEConfig)
 		if err != nil {
 			me.Shutdown()
 			return nil, fmt.Errorf("failed to init engine on GPU %d: %w", i, err)
@@ -175,7 +175,7 @@ func NewMultiGPUEngine(cfg MultiGPUConfig) (*MultiGPUEngine, error) {
 	schedCfg.EnableStealing = cfg.EnableWorkStealing
 	me.scheduler = NewScheduler(me.engines, mgpu, me.bskCache, schedCfg)
 
-	fmt.Printf("Multi-GPU TFHE Engine ready with %d GPUs\n", numGPUs)
+	fmt.Printf("Multi-GPU FHE Engine ready with %d GPUs\n", numGPUs)
 	fmt.Printf("  Total memory: %.1f GB\n", float64(mgpu.TotalMemory())/(1024*1024*1024))
 	fmt.Printf("  Max users: %d\n", cfg.MaxUsersPerGPU*numGPUs)
 	fmt.Printf("  P2P enabled: %v\n", cfg.EnableP2P)
@@ -184,10 +184,10 @@ func NewMultiGPUEngine(cfg MultiGPUConfig) (*MultiGPUEngine, error) {
 	return me, nil
 }
 
-// NewMultiGPU creates a multi-GPU TFHE engine (backward compatible)
+// NewMultiGPU creates a multi-GPU FHE engine (backward compatible)
 func NewMultiGPU(cfg Config) (*MultiGPUEngine, error) {
 	mcfg := DefaultMultiGPUConfig()
-	mcfg.TFHEConfig = cfg
+	mcfg.FHEConfig = cfg
 	return NewMultiGPUEngine(mcfg)
 }
 
@@ -321,7 +321,7 @@ func (me *MultiGPUEngine) CreateUserWithIDOnGPU(userID string, gpuID int) error 
 }
 
 // UploadBootstrapKey uploads a user's bootstrap and key-switching keys
-func (me *MultiGPUEngine) UploadBootstrapKey(userID string, bsk *tfhe.BootstrapKey, ksk *tfhe.KeySwitchingKey) error {
+func (me *MultiGPUEngine) UploadBootstrapKey(userID string, bsk *fhe.BootstrapKey, ksk *fhe.KeySwitchingKey) error {
 	me.usersMu.RLock()
 	user, ok := me.users[userID]
 	me.usersMu.RUnlock()
@@ -331,8 +331,8 @@ func (me *MultiGPUEngine) UploadBootstrapKey(userID string, bsk *tfhe.BootstrapK
 	}
 
 	// Serialize keys to bytes
-	bskData := serializeBSK(bsk, me.cfg.TFHEConfig)
-	kskData := serializeKSK(ksk, me.cfg.TFHEConfig)
+	bskData := serializeBSK(bsk, me.cfg.FHEConfig)
+	kskData := serializeKSK(ksk, me.cfg.FHEConfig)
 
 	// Store for lazy loading
 	user.keysMu.Lock()
@@ -749,7 +749,7 @@ func (me *MultiGPUEngine) Shutdown() {
 }
 
 // serializeBSK converts a BootstrapKey to bytes for GPU upload
-func serializeBSK(bsk *tfhe.BootstrapKey, cfg Config) []byte {
+func serializeBSK(bsk *fhe.BootstrapKey, cfg Config) []byte {
 	if bsk == nil {
 		return nil
 	}
@@ -789,7 +789,7 @@ func serializeBSK(bsk *tfhe.BootstrapKey, cfg Config) []byte {
 }
 
 // serializeKSK converts a KeySwitchingKey to bytes for GPU upload
-func serializeKSK(ksk *tfhe.KeySwitchingKey, cfg Config) []byte {
+func serializeKSK(ksk *fhe.KeySwitchingKey, cfg Config) []byte {
 	if ksk == nil {
 		return nil
 	}

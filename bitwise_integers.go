@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 // This file implements integer operations using bit-level boolean circuits.
-// This approach uses the working TFHE boolean gates (AND, OR, XOR, NOT) as
+// This approach uses the working FHE boolean gates (AND, OR, XOR, NOT) as
 // building blocks, avoiding any patented LUT-based integer techniques.
 //
 // Based on classic FHE techniques from Chillotti et al. (pre-2020 prior art).
 
-package tfhe
+package fhe
 
 import (
 	"fmt"

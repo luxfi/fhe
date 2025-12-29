@@ -1,6 +1,6 @@
 //go:build cgo
 
-// Package gpu provides accelerated TFHE operations using MLX.
+// Package gpu provides accelerated FHE operations using MLX.
 // This file provides additional array operations that wrap or extend MLX core.
 //
 // These are placeholder implementations until the full MLX C API is bound.

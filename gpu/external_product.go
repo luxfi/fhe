@@ -1,9 +1,9 @@
 //go:build cgo
 
-// Package gpu provides accelerated TFHE operations using MLX.
+// Package gpu provides accelerated FHE operations using MLX.
 // This file implements external product (RGSW x RLWE -> RLWE) operations.
 //
-// The external product is the core operation in TFHE bootstrapping.
+// The external product is the core operation in FHE bootstrapping.
 // It computes the product of an RGSW ciphertext (encrypting a bit) with an
 // RLWE ciphertext (the accumulator), producing a new RLWE ciphertext.
 //
@@ -22,7 +22,7 @@ import (
 type ExternalProductContext struct {
 	nttCtx *NTTContext
 
-	// TFHE parameters
+	// FHE parameters
 	N       uint32 // Ring dimension
 	L       uint32 // Decomposition levels
 	BaseLog uint32 // Log2 of decomposition base

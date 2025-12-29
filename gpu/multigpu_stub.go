@@ -1,6 +1,6 @@
 //go:build !(linux && cgo && cuda) && !(windows && cgo && cuda)
 
-// Package gpu provides multi-GPU TFHE operations
+// Package gpu provides multi-GPU FHE operations
 // This is a stub for platforms without CUDA support
 package gpu
 
@@ -14,7 +14,7 @@ var ErrNoCUDA = errors.New("CUDA multi-GPU not available on this platform")
 
 // MultiGPUConfig configures the multi-GPU engine
 type MultiGPUConfig struct {
-	TFHEConfig         Config
+	FHEConfig         Config
 	NumGPUs            int
 	BSKCacheMemory     int64
 	Scheduler          SchedulerConfig
@@ -25,7 +25,7 @@ type MultiGPUConfig struct {
 
 func DefaultMultiGPUConfig() MultiGPUConfig {
 	return MultiGPUConfig{
-		TFHEConfig:         DefaultConfig(),
+		FHEConfig:         DefaultConfig(),
 		NumGPUs:            0,
 		BSKCacheMemory:     0,
 		Scheduler:          DefaultSchedulerConfig(),

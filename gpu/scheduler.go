@@ -1,6 +1,6 @@
 //go:build (linux || windows) && cgo && cuda
 
-// Package gpu provides multi-GPU TFHE operations
+// Package gpu provides multi-GPU FHE operations
 package gpu
 
 import (
@@ -23,7 +23,7 @@ var (
 	ErrOperationTimeout = errors.New("operation timed out")
 )
 
-// Operation represents a TFHE operation to be scheduled
+// Operation represents a FHE operation to be scheduled
 type Operation struct {
 	// Operation identity
 	ID     uint64

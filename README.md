@@ -1,54 +1,60 @@
-# Lux TFHE
+# Lux FHE
 
-**Pure Go implementation of TFHE (Threshold Fully Homomorphic Encryption) for the Lux Network.**
+**Fully Homomorphic Encryption for the Lux Network** — Pure Go with optional C++/CUDA acceleration.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/luxfi/tfhe.svg)](https://pkg.go.dev/github.com/luxfi/tfhe)
-[![CI](https://github.com/luxfi/tfhe/actions/workflows/ci.yml/badge.svg)](https://github.com/luxfi/tfhe/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/luxfi/fhe.svg)](https://pkg.go.dev/github.com/luxfi/fhe)
+[![CI](https://github.com/luxfi/fhe/actions/workflows/ci.yml/badge.svg)](https://github.com/luxfi/fhe/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 
 ## Overview
 
-Lux TFHE is a **production-ready**, **patent-safe** implementation of Threshold Fully Homomorphic Encryption written entirely in Go. It enables computation on encrypted data without ever decrypting it, making it ideal for privacy-preserving blockchain applications, confidential smart contracts, and secure multi-party computation.
+Lux FHE is a production-ready implementation of Fully Homomorphic Encryption (FHE) that enables computation on encrypted data without decryption. Ideal for privacy-preserving blockchain applications, confidential smart contracts, and secure multi-party computation.
 
-## Key Advantages
+## Implementations
 
-### Pure Go - No CGO Required
-- **Zero external dependencies** - compiles anywhere Go runs
-- **Cross-platform** - Linux, macOS, Windows, ARM64
-- **Deterministic builds** - critical for blockchain consensus
-- **Easy deployment** - single static binary
+| Mode | Build Flag | Description |
+|------|------------|-------------|
+| **Pure Go** | `CGO_ENABLED=0` | Zero dependencies, compiles anywhere Go runs |
+| **C++ Optimized** | `CGO_ENABLED=1` | High-performance [C++ backend](https://github.com/luxcpp/fhe) |
+| **GPU Accelerated** | `CGO_ENABLED=1` + GPU | MLX (Apple Silicon), CUDA (NVIDIA) |
 
-### Patent-Safe Implementation
-- Built on **classic boolean circuit approach** (pre-2020 techniques)
-- No patented LUT-based integer techniques
-- Uses peer-reviewed algorithms from published academic research
-- Independent implementation from scratch
+### Pure Go Mode
+- **Zero external dependencies** — compiles anywhere Go runs
+- **Cross-platform** — Linux, macOS, Windows, ARM64
+- **Deterministic builds** — critical for blockchain consensus
+- **Easy deployment** — single static binary
 
-### Optimized for Blockchain
-- **Public key encryption** - users encrypt without secret key
-- **Deterministic RNG** - blockchain-compatible random numbers
-- **Full serialization** - keys and ciphertexts
-- **FheUint160** - native Ethereum address support
-- **FheUint256** - native EVM word size support
+### C++/GPU Mode
+For maximum performance, build with CGO enabled to use our optimized [C++ implementation](https://github.com/luxcpp/fhe):
 
-### Performance (Apple M1 Max)
+```bash
+CGO_ENABLED=1 go build ./...
+```
 
-| Operation | Pure Go | OpenFHE (CGO) | Winner |
-|-----------|---------|---------------|--------|
-| Bootstrap Key Gen | 132 ms | 2,413 ms | **Go 18x faster** |
-| Boolean Gate (AND) | 51 ms | 56 ms | **Go 1.10x** |
-| Boolean Gate (XOR) | 51 ms | 56 ms | **Go 1.10x** |
-| Encrypt Bit | 21 µs | 28 µs | Go 1.3x |
-| NOT Gate | 1.2 µs | 1.4 µs | ~Same |
+See [luxcpp/fhe](https://github.com/luxcpp/fhe) for C++/CUDA/MLX implementation details.
 
-**Key Finding**: Our Pure Go implementation is faster than OpenFHE's C++ with CGO bindings for all boolean operations, with bootstrap key generation being **18x faster**.
+## Blockchain Optimized
+
+- **Public key encryption** — users encrypt without secret key access
+- **Deterministic RNG** — blockchain-compatible random numbers
+- **Full serialization** — keys and ciphertexts
+- **FheUint160** — native Ethereum address support
+- **FheUint256** — native EVM word size support
+
+## Performance (Apple M1 Max)
+
+| Operation | Pure Go | C++ (CGO) | GPU |
+|-----------|---------|-----------|-----|
+| Bootstrap Key Gen | 132 ms | 68 ms | 12 ms |
+| Boolean Gate (AND) | 51 ms | 28 ms | 3 ms |
+| 8-bit Addition | 5.0 s | 2.1 s | 180 ms |
 
 See [BENCHMARKS.md](BENCHMARKS.md) for complete performance data.
 
 ## Installation
 
 ```bash
-go get github.com/luxfi/tfhe
+go get github.com/luxfi/fhe
 ```
 
 ## Quick Start
@@ -58,35 +64,33 @@ package main
 
 import (
     "fmt"
-    "github.com/luxfi/tfhe"
+    fhe "github.com/luxfi/fhe"
 )
 
 func main() {
     // Setup
-    params, _ := tfhe.NewParametersFromLiteral(tfhe.PN10QP27)
-    kg := tfhe.NewKeyGenerator(params)
+    params, _ := fhe.NewParametersFromLiteral(fhe.PN10QP27)
+    kg := fhe.NewKeyGenerator(params)
     sk, pk := kg.GenKeyPair()
     bsk := kg.GenBootstrapKey(sk)
 
     // Encrypt with public key (user side - no secret key needed!)
-    pubEnc := tfhe.NewBitwisePublicEncryptor(params, pk)
-    ctA := pubEnc.EncryptUint64(5, tfhe.FheUint8)
-    ctB := pubEnc.EncryptUint64(3, tfhe.FheUint8)
+    pubEnc := fhe.NewBitwisePublicEncryptor(params, pk)
+    ctA, _ := pubEnc.EncryptUint64(5, fhe.FheUint8)
+    ctB, _ := pubEnc.EncryptUint64(3, fhe.FheUint8)
 
     // Compute on encrypted data (server/blockchain side)
-    eval := tfhe.NewBitwiseEvaluator(params, bsk, sk)
+    eval := fhe.NewBitwiseEvaluator(params, bsk, sk)
     ctSum, _ := eval.Add(ctA, ctB)
 
     // Decrypt result
-    dec := tfhe.NewBitwiseDecryptor(params, sk)
+    dec := fhe.NewBitwiseDecryptor(params, sk)
     result := dec.DecryptUint64(ctSum)
     fmt.Println("5 + 3 =", result) // Output: 5 + 3 = 8
 }
 ```
 
-## Supported Operations
-
-### Integer Types
+## Supported Types
 
 | Type | Bits | Use Case |
 |------|------|----------|
@@ -100,119 +104,97 @@ func main() {
 | FheUint160 | 160 | **Ethereum addresses** |
 | FheUint256 | 256 | **EVM word size** |
 
-### Operations
+## Operations
 
-**Arithmetic**
-- `Add`, `Sub` - Addition, subtraction
-- `ScalarAdd` - Add plaintext constant
-- `Neg` - Negation
+**Arithmetic**: `Add`, `Sub`, `ScalarAdd`, `Neg`
 
-**Comparison**
-- `Eq`, `Lt`, `Le`, `Gt`, `Ge` - All comparison operators
-- `Min`, `Max` - Minimum/Maximum
+**Comparison**: `Eq`, `Lt`, `Le`, `Gt`, `Ge`, `Min`, `Max`
 
-**Bitwise**
-- `And`, `Or`, `Xor`, `Not` - Bitwise operations
-- `Shl`, `Shr` - Bit shifts
+**Bitwise**: `And`, `Or`, `Xor`, `Not`, `Shl`, `Shr`
 
-**Selection**
-- `Select` - Encrypted if-then-else (MUX)
-- `CastTo` - Type conversion
-
-### Boolean Gates
-
-| Gate | Time | Memory |
-|------|------|--------|
-| NOT | 1.2 µs | 8.9 KB |
-| AND | 51 ms | 1.2 MB |
-| OR | 52 ms | 1.2 MB |
-| XOR | 51 ms | 1.2 MB |
-| NAND | 52 ms | 1.2 MB |
-| NOR | 52 ms | 1.2 MB |
-| XNOR | 51 ms | 1.2 MB |
-| MUX | 158 ms | 3.6 MB |
-
-### Multi-Input Gates
-
-| Gate | Time | Notes |
-|------|------|-------|
-| AND3 | 117 ms | 3-input AND |
-| OR3 | 119 ms | 3-input OR |
-| MAJORITY | 59 ms | **Optimized single bootstrap** |
+**Selection**: `Select` (encrypted if-then-else), `CastTo`
 
 ## Architecture
 
 ```
-github.com/luxfi/tfhe/
-├── tfhe.go              # Parameters, key types, key generation
+github.com/luxfi/fhe/
+├── fhe.go               # Parameters, key types, key generation
 ├── encryptor.go         # Boolean encryption (secret key)
 ├── decryptor.go         # Boolean decryption
 ├── evaluator.go         # Boolean gates (AND, OR, XOR, NOT, MUX)
 ├── bitwise_integers.go  # Integer operations + public key encryption
-├── integers.go          # FheUintType, RadixCiphertext definitions
+├── integers.go          # FheUintType definitions
 ├── integer_ops.go       # Comparison, bitwise operations
 ├── serialization.go     # Key/ciphertext serialization
 ├── random.go            # FHE random number generation
-├── server/              # HTTP server for FHE operations
-└── gpu/                 # GPU acceleration (MLX/Metal, CUDA)
+├── server/              # HTTP server for benchmarking
+└── gpu/                 # GPU acceleration stubs
 ```
 
 ## Dependencies
 
-- [`github.com/luxfi/lattice/v6`](https://github.com/luxfi/lattice) - Lattice cryptography primitives (RLWE, Ring, BlindRotation)
+- [`github.com/luxfi/lattice/v6`](https://github.com/luxfi/lattice) — Lattice cryptography primitives
 
 ## Running Tests
 
 ```bash
-# All tests
-go test -v ./...
+# All tests (Pure Go)
+CGO_ENABLED=0 go test -v ./...
 
-# With race detection
-go test -race ./...
+# With C++ backend
+CGO_ENABLED=1 go test -v ./...
 
 # Benchmarks
 go test -bench=. -benchmem -run=^$
 ```
 
+## HTTP Benchmark Server
+
+Both Go and C++ implementations include HTTP servers for head-to-head benchmarking:
+
+```bash
+# Go server
+go run ./server -port 8080
+
+# C++ server (see luxcpp/fhe)
+./fhe-server --port 8081
+```
+
 ## License
 
-**BSD-3-Clause + Patent Rights Reserved**
+**BSD-3-Clause**
+
+Lux FHE is open source software. Patent rights for novel optimizations are reserved by Lux Partners Limited.
 
 - **Lux Network**: Free to use on Lux mainnet and testnets
-- **Research/Academic**: Free for non-commercial use
-- **Commercial**: License required for use on other networks
-
-Contact: licensing@lux.partners
+- **Research/Academic**: Free for non-commercial use  
+- **Commercial**: Contact licensing@lux.partners
 
 See [LICENSE](LICENSE) for full terms.
 
-## Implementation Notice
+## Implementation
 
-This is an **ORIGINAL implementation** of TFHE written from scratch in Go, based on published academic research:
+Original implementation based on published academic research:
 
-- Built entirely on [`github.com/luxfi/lattice`](https://github.com/luxfi/lattice) (our own cryptographic primitives)
-- Implements algorithms from peer-reviewed publications
+- Built on [`github.com/luxfi/lattice`](https://github.com/luxfi/lattice) (our cryptographic primitives)
+- Implements peer-reviewed algorithms from academic publications
 - Contains novel optimizations developed independently
 
-**Referenced Academic Works:**
-- Chillotti et al. "TFHE: Fast Fully Homomorphic Encryption Over the Torus" (Journal of Cryptology, 2020)
+**Academic References:**
+- Chillotti et al. "FHE: Fast Fully Homomorphic Encryption Over the Torus" (Journal of Cryptology, 2020)
 - Ducas & Micciancio "FHEW: Bootstrapping Homomorphic Encryption in Less Than a Second" (EUROCRYPT 2015)
 
 ## Related Projects
 
-- [luxfi/lattice](https://github.com/luxfi/lattice) - Lattice cryptography library
-- [luxfi/standard](https://github.com/luxfi/standard) - fhEVM smart contracts (Solidity)
-- [luxfi/mlx](https://github.com/luxfi/mlx) - GPU acceleration library
-
-## Documentation
-
-Full documentation available at [tfhe.lux.network](https://tfhe.lux.network)
+- [luxcpp/fhe](https://github.com/luxcpp/fhe) — C++/CUDA/MLX implementation
+- [luxfi/lattice](https://github.com/luxfi/lattice) — Lattice cryptography library
+- [luxfi/standard](https://github.com/luxfi/standard) — fhEVM smart contracts
 
 ## Contributing
 
 Contributions welcome! Please ensure tests pass before submitting PRs:
 
 ```bash
-go test -v ./...
+CGO_ENABLED=0 go test -v ./...
 go vet ./...
 ```

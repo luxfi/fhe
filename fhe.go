@@ -1,7 +1,7 @@
-// Package tfhe implements the TFHE (Threshold Fully Homomorphic Encryption) scheme
+// Package fhe implements the FHE (Threshold Fully Homomorphic Encryption) scheme
 // for boolean circuit evaluation on encrypted data.
 //
-// TFHE enables computation on encrypted bits with bootstrapping after each gate,
+// FHE enables computation on encrypted bits with bootstrapping after each gate,
 // making it ideal for arbitrary boolean circuits including EVM execution.
 //
 // This implementation is built on luxfi/lattice primitives:
@@ -11,7 +11,7 @@
 //
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
-package tfhe
+package fhe
 
 import (
 	"github.com/luxfi/lattice/v6/core/rgsw/blindrot"
@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/lattice/v6/utils"
 )
 
-// Parameters defines the TFHE parameter set
+// Parameters defines the FHE parameter set
 type Parameters struct {
 	// paramsLWE defines parameters for LWE samples (encrypted bits)
 	paramsLWE rlwe.Parameters
@@ -164,7 +164,7 @@ type Ciphertext struct {
 	*rlwe.Ciphertext
 }
 
-// KeyGenerator generates TFHE keys
+// KeyGenerator generates FHE keys
 type KeyGenerator struct {
 	params  Parameters
 	kgenLWE *rlwe.KeyGenerator
@@ -239,7 +239,7 @@ func (kg *KeyGenerator) GenBootstrapKey(sk *SecretKey) *BootstrapKey {
 	// Scale for test polynomials
 	scale := rlwe.NewScale(kg.scaleBR)
 
-	// Test polynomials for TFHE gates
+	// Test polynomials for FHE gates
 	// With Q/8 encoding, after adding two bits the normalized positions are:
 	// - true+true:   highest x (> 0.25)
 	// - true+false:  middle x (∈ [-0.25, 0.25])
@@ -268,8 +268,9 @@ func (kg *KeyGenerator) GenBootstrapKey(sk *SecretKey) *BootstrapKey {
 	// - (T,F) or (F,T): 2*(0) = 0
 	// - (T,T): 2*(0.25) = 0.5 → wraps to -0.5
 	// So XOR = TRUE only when x ≈ 0
+	// Use 0.30 boundaries for noise margin in carry chains (FALSE at ±0.5 has 0.20 margin)
 	testPolyXOR := blindrot.InitTestPolynomial(func(x float64) float64 {
-		if x > -0.25 && x < 0.25 {
+		if x > -0.30 && x < 0.30 {
 			return 1.0
 		}
 		return -1.0
@@ -297,8 +298,9 @@ func (kg *KeyGenerator) GenBootstrapKey(sk *SecretKey) *BootstrapKey {
 	// - (F,F): -0.5 → TRUE
 	// - (T,F) or (F,T): 0 → FALSE
 	// - (T,T): -0.5 (wrapped) → TRUE
+	// Use 0.30 boundaries to match XOR noise margin
 	testPolyXNOR := blindrot.InitTestPolynomial(func(x float64) float64 {
-		if x > -0.25 && x < 0.25 {
+		if x > -0.30 && x < 0.30 {
 			return -1.0
 		}
 		return 1.0
