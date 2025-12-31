@@ -60,6 +60,7 @@ jobs:
           CGO_ENABLED: '0'
         run: |
           # Pure Go binaries (no CGO required)
+          go build -ldflags="-s -w" -o luxfhe-server-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./server/standalone/
           go build -ldflags="-s -w" -o luxfhe-gateway-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/fhe-gateway/
           go build -ldflags="-s -w" -o luxfhe-worker-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/fhe-worker/
 
@@ -68,6 +69,7 @@ jobs:
         with:
           name: luxfhe-${{ matrix.os }}-${{ matrix.arch }}
           path: |
+            luxfhe-server-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
             luxfhe-gateway-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
             luxfhe-worker-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
 
@@ -140,6 +142,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install and build
         working-directory: sdk/typescript
@@ -151,11 +154,44 @@ jobs:
         working-directory: sdk/typescript
         run: npm pack
 
+      - name: Publish to npm
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: sdk/typescript
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
           name: luxfhe-typescript
           path: sdk/typescript/*.tgz
+
+  publish-python:
+    name: Python SDK
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build package
+        working-directory: sdk/python
+        run: python -m build
+
+      - name: Publish to PyPI
+        working-directory: sdk/python
+        run: twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
   create-release:
     name: Create Release
@@ -227,13 +263,13 @@ jobs:
             ### Downloads
 
             #### Binaries (Pure Go - no dependencies)
-            | Platform | Architecture | Gateway | Worker |
-            |----------|--------------|---------|--------|
-            | Linux | amd64 | `luxfhe-gateway-linux-amd64` | `luxfhe-worker-linux-amd64` |
-            | Linux | arm64 | `luxfhe-gateway-linux-arm64` | `luxfhe-worker-linux-arm64` |
-            | macOS | amd64 | `luxfhe-gateway-darwin-amd64` | `luxfhe-worker-darwin-amd64` |
-            | macOS | arm64 | `luxfhe-gateway-darwin-arm64` | `luxfhe-worker-darwin-arm64` |
-            | Windows | amd64 | `luxfhe-gateway-windows-amd64.exe` | `luxfhe-worker-windows-amd64.exe` |
+            | Platform | Architecture | Server | Gateway | Worker |
+            |----------|--------------|--------|---------|--------|
+            | Linux | amd64 | `luxfhe-server-linux-amd64` | `luxfhe-gateway-linux-amd64` | `luxfhe-worker-linux-amd64` |
+            | Linux | arm64 | `luxfhe-server-linux-arm64` | `luxfhe-gateway-linux-arm64` | `luxfhe-worker-linux-arm64` |
+            | macOS | amd64 | `luxfhe-server-darwin-amd64` | `luxfhe-gateway-darwin-amd64` | `luxfhe-worker-darwin-amd64` |
+            | macOS | arm64 | `luxfhe-server-darwin-arm64` | `luxfhe-gateway-darwin-arm64` | `luxfhe-worker-darwin-arm64` |
+            | Windows | amd64 | `luxfhe-server-windows-amd64.exe` | `luxfhe-gateway-windows-amd64.exe` | `luxfhe-worker-windows-amd64.exe` |
 
             #### SDK Libraries
             - `libluxfhe-linux.tar.gz` - C shared library for Linux
