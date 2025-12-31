@@ -53,19 +53,23 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Build binary
+      - name: Build binaries
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
           CGO_ENABLED: '0'
         run: |
-          go build -ldflags="-s -w" -o luxfhe-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/fhe-server/
+          # Pure Go binaries (no CGO required)
+          go build -ldflags="-s -w" -o luxfhe-gateway-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/fhe-gateway/
+          go build -ldflags="-s -w" -o luxfhe-worker-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/fhe-worker/
 
-      - name: Upload binary
+      - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
           name: luxfhe-${{ matrix.os }}-${{ matrix.arch }}
-          path: luxfhe-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
+          path: |
+            luxfhe-gateway-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
+            luxfhe-worker-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
 
   build-c-libraries:
     name: C Library (${{ matrix.os }})
@@ -217,29 +221,35 @@ jobs:
           name: LuxFHE ${{ steps.tag.outputs.tag }}
           body: |
             ## LuxFHE ${{ steps.tag.outputs.tag }}
-            
+
             Pure Go implementation of TFHE (Torus Fully Homomorphic Encryption).
-            
+
             ### Downloads
-            
-            #### CLI Binary
-            | Platform | Architecture | Download |
-            |----------|--------------|----------|
-            | Linux | amd64 | `luxfhe-linux-amd64` |
-            | Linux | arm64 | `luxfhe-linux-arm64` |
-            | macOS | amd64 | `luxfhe-darwin-amd64` |
-            | macOS | arm64 | `luxfhe-darwin-arm64` |
-            | Windows | amd64 | `luxfhe-windows-amd64.exe` |
-            
+
+            #### Binaries (Pure Go - no dependencies)
+            | Platform | Architecture | Gateway | Worker |
+            |----------|--------------|---------|--------|
+            | Linux | amd64 | `luxfhe-gateway-linux-amd64` | `luxfhe-worker-linux-amd64` |
+            | Linux | arm64 | `luxfhe-gateway-linux-arm64` | `luxfhe-worker-linux-arm64` |
+            | macOS | amd64 | `luxfhe-gateway-darwin-amd64` | `luxfhe-worker-darwin-amd64` |
+            | macOS | arm64 | `luxfhe-gateway-darwin-arm64` | `luxfhe-worker-darwin-arm64` |
+            | Windows | amd64 | `luxfhe-gateway-windows-amd64.exe` | `luxfhe-worker-windows-amd64.exe` |
+
             #### SDK Libraries
             - `libluxfhe-linux.tar.gz` - C shared library for Linux
             - `libluxfhe-darwin.tar.gz` - C shared library for macOS
             - `libluxfhe-windows.tar.gz` - C DLL for Windows
             - `luxfhe-wasm.tar.gz` - WebAssembly build
             - `luxfhe-*.tgz` - TypeScript/JavaScript SDK
-            
+
+            #### GPU-Accelerated Server
+            Build from source with CGO and [luxcpp/fhe](https://github.com/luxcpp/fhe):
+            ```bash
+            CGO_ENABLED=1 go build ./cmd/fhe-server
+            ```
+
             ### Verification
-            
+
             Verify downloads with checksums:
             ```bash
             sha256sum -c checksums.txt

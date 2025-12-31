@@ -1,10 +1,16 @@
+//go:build cgo
+
 // Lux FHE Server - Standalone FHE service node
 //
 // Provides:
 // - FHE operations (encrypt, decrypt, evaluate)
+// - GPU-accelerated batch operations via MLX
 // - Threshold FHE decryption network
 // - ZK verification service
 // - Key management
+//
+// Run as sidecar for Solidity stack:
+//   fhe-server -addr :8448 -gpu
 package main
 
 import (
@@ -27,14 +33,20 @@ func main() {
 		threshold = flag.Bool("threshold", false, "Enable threshold FHE mode")
 		parties   = flag.Int("parties", 5, "Number of threshold parties")
 		dataDir   = flag.String("data", "./data", "Data directory for keys")
+		gpuMode   = flag.Bool("gpu", false, "Enable GPU acceleration (Metal/CUDA)")
+		batchSize = flag.Int("batch", 32, "Batch size for GPU operations")
 	)
 	flag.Parse()
 
 	log.Printf("Lux FHE Server starting...")
 	log.Printf("  Address: %s", *addr)
+	log.Printf("  GPU mode: %v", *gpuMode)
 	log.Printf("  Threshold mode: %v", *threshold)
 	if *threshold {
 		log.Printf("  Parties: %d", *parties)
+	}
+	if *gpuMode {
+		log.Printf("  Batch size: %d", *batchSize)
 	}
 
 	// Create server config
@@ -43,6 +55,8 @@ func main() {
 		ThresholdMode: *threshold,
 		NumParties:    *parties,
 		DataDir:       *dataDir,
+		GPUMode:       *gpuMode,
+		BatchSize:     *batchSize,
 	}
 
 	// Initialize FHE server

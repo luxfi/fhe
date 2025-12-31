@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/lattice/v6/core/rgsw/blindrot"
-	"github.com/luxfi/lattice/v6/core/rlwe"
+	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
+	"github.com/luxfi/lattice/v7/core/rlwe"
 )
 
 // FheUintType represents the type of encrypted integer
@@ -99,7 +99,7 @@ func (rc *RadixCiphertext) NumBits() int {
 
 // IntegerParams holds parameters for radix integer operations
 type IntegerParams struct {
-	fheParams  Parameters
+	fheParams   Parameters
 	shortParams *ShortIntParams
 	blockBits   int // Bits per radix block (2 or 4)
 }
@@ -116,7 +116,7 @@ func NewIntegerParams(params Parameters, blockBits int) (*IntegerParams, error) 
 	}
 
 	return &IntegerParams{
-		fheParams:  params,
+		fheParams:   params,
 		shortParams: shortParams,
 		blockBits:   blockBits,
 	}, nil

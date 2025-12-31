@@ -59,3 +59,7 @@ c/examples/cpp_test
 # WASM binaries (large, build from source)
 wasm/*.wasm
 ts/wasm/*.wasm
+target/
+*.o
+*.a
+

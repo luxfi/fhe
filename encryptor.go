@@ -4,7 +4,7 @@
 package fhe
 
 import (
-	"github.com/luxfi/lattice/v6/core/rlwe"
+	"github.com/luxfi/lattice/v7/core/rlwe"
 )
 
 // Encryptor encrypts boolean values into FHE ciphertexts

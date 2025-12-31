@@ -6,8 +6,8 @@ package fhe
 import (
 	"fmt"
 
-	"github.com/luxfi/lattice/v6/core/rgsw/blindrot"
-	"github.com/luxfi/lattice/v6/core/rlwe"
+	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
+	"github.com/luxfi/lattice/v7/core/rlwe"
 )
 
 // ========== Comparison Operations ==========

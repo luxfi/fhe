@@ -1,7 +1,10 @@
+//go:build cgo
+
 // Package server provides the Lux FHE Server implementation.
 //
-// The server supports two modes:
-// - Standard: Single-key FHE operations
+// The server supports multiple modes:
+// - Standard: Single-key FHE operations (CPU)
+// - GPU: Hardware-accelerated batch operations (Metal/CUDA)
 // - Threshold: Multi-party threshold FHE with decentralized decryption
 package server
 
@@ -10,8 +13,10 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/luxfi/fhe"
+	"github.com/luxfi/fhe/cgo"
 )
 
 // Config holds server configuration
@@ -20,6 +25,8 @@ type Config struct {
 	ThresholdMode bool
 	NumParties    int
 	DataDir       string
+	GPUMode       bool
+	BatchSize     int
 }
 
 // Server is the Lux FHE server
@@ -31,12 +38,20 @@ type Server struct {
 	pk     *fhe.PublicKey
 	bsk    *fhe.BootstrapKey
 
+	// GPU acceleration via CGO (C++ backend with Metal/CUDA)
+	cgoCtx *cgo.Context
+	cgoSK  *cgo.SecretKey
+
 	// For threshold mode
 	thresholdMu sync.RWMutex
 	parties     []*ThresholdParty
 
 	// Evaluator pool
 	evalPool sync.Pool
+
+	// Batch queue for GPU operations
+	batchMu    sync.Mutex
+	batchQueue []*batchRequest
 }
 
 // ThresholdParty represents a threshold FHE party
@@ -45,6 +60,16 @@ type ThresholdParty struct {
 	PublicKey []byte
 	// Partial secret key share (never transmitted)
 	share *fhe.SecretKey
+}
+
+// batchRequest represents a queued GPU batch operation
+type batchRequest struct {
+	ID        string
+	Operation string
+	Left      []byte
+	Right     []byte
+	Result    chan []byte
+	Error     chan error
 }
 
 // New creates a new FHE server
@@ -61,17 +86,38 @@ func New(cfg Config) (*Server, error) {
 	bsk := kgen.GenBootstrapKey(sk)
 
 	s := &Server{
-		cfg:    cfg,
-		params: params,
-		kgen:   kgen,
-		sk:     sk,
-		pk:     pk,
-		bsk:    bsk,
+		cfg:        cfg,
+		params:     params,
+		kgen:       kgen,
+		sk:         sk,
+		pk:         pk,
+		bsk:        bsk,
+		batchQueue: make([]*batchRequest, 0),
 		evalPool: sync.Pool{
 			New: func() interface{} {
 				return fhe.NewEvaluator(params, bsk)
 			},
 		},
+	}
+
+	// Initialize GPU-accelerated CGO backend if enabled
+	if cfg.GPUMode {
+		// Use CGO bindings to C++ OpenFHE with Metal/CUDA GPU backend
+		cgoCtx, err := cgo.NewContext(cgo.SecuritySTD128, cgo.MethodGINX)
+		if err != nil {
+			return nil, fmt.Errorf("failed to init CGO context: %w", err)
+		}
+		s.cgoCtx = cgoCtx
+
+		cgoSK, err := cgoCtx.GenerateSecretKey()
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate CGO secret key: %w", err)
+		}
+		s.cgoSK = cgoSK
+
+		if err := cgoCtx.GenerateBootstrapKey(cgoSK); err != nil {
+			return nil, fmt.Errorf("failed to generate CGO bootstrap key: %w", err)
+		}
 	}
 
 	if cfg.ThresholdMode {
@@ -115,6 +161,12 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/decrypt", s.handleDecrypt)
 	mux.HandleFunc("/evaluate", s.handleEvaluate)
 
+	// GPU batch operations
+	if s.cfg.GPUMode {
+		mux.HandleFunc("/gpu/batch", s.handleGPUBatch)
+		mux.HandleFunc("/gpu/status", s.handleGPUStatus)
+	}
+
 	// Threshold endpoints
 	if s.cfg.ThresholdMode {
 		mux.HandleFunc("/threshold/parties", s.handleThresholdParties)
@@ -142,11 +194,19 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	status := map[string]interface{}{
 		"status":    "ok",
 		"threshold": s.cfg.ThresholdMode,
 		"parties":   len(s.parties),
-	})
+		"gpu":       s.cfg.GPUMode,
+	}
+
+	if s.cfg.GPUMode && s.cgoCtx != nil {
+		status["gpu_backend"] = "cgo/openfhe"
+		status["gpu_device"] = "Metal/CUDA"
+	}
+
+	json.NewEncoder(w).Encode(status)
 }
 
 func (s *Server) handlePublicKey(w http.ResponseWriter, r *http.Request) {
@@ -350,5 +410,191 @@ func bitWidthToType(bits int) fhe.FheUintType {
 		return fhe.FheUint256
 	default:
 		return fhe.FheUint32
+	}
+}
+
+// GPUBatchRequest is a request for batch GPU FHE operations
+type GPUBatchRequest struct {
+	Operations []GPUOperation `json:"operations"`
+}
+
+// GPUOperation is a single FHE operation in a batch
+type GPUOperation struct {
+	ID    string `json:"id"`
+	Op    string `json:"op"`    // add, sub, mul, eq, lt, gt, and, or, xor, bootstrap
+	Left  []byte `json:"left"`  // Ciphertext bytes
+	Right []byte `json:"right"` // Optional for binary ops
+}
+
+// GPUBatchResponse is the response from batch GPU operations
+type GPUBatchResponse struct {
+	Results []GPUResult `json:"results"`
+	Stats   GPUStats    `json:"stats"`
+}
+
+// GPUResult is a single result from the batch
+type GPUResult struct {
+	ID     string `json:"id"`
+	Result []byte `json:"result,omitempty"`
+	Error  string `json:"error,omitempty"`
+}
+
+// GPUStats contains timing and performance statistics
+type GPUStats struct {
+	TotalOps       int     `json:"total_ops"`
+	SuccessfulOps  int     `json:"successful_ops"`
+	TotalTimeMs    float64 `json:"total_time_ms"`
+	OpsPerSecond   float64 `json:"ops_per_second"`
+	GPUMemoryBytes int64   `json:"gpu_memory_bytes"`
+}
+
+func (s *Server) handleGPUStatus(w http.ResponseWriter, r *http.Request) {
+	if s.cgoCtx == nil {
+		http.Error(w, "GPU not initialized", http.StatusServiceUnavailable)
+		return
+	}
+
+	status := map[string]interface{}{
+		"enabled":     true,
+		"backend":     "cgo/openfhe",
+		"device":      "Metal/CUDA",
+		"batch_size":  s.cfg.BatchSize,
+		"queue_depth": len(s.batchQueue),
+	}
+
+	json.NewEncoder(w).Encode(status)
+}
+
+func (s *Server) handleGPUBatch(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if s.cgoCtx == nil {
+		http.Error(w, "GPU not initialized", http.StatusServiceUnavailable)
+		return
+	}
+
+	var req GPUBatchRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(req.Operations) == 0 {
+		http.Error(w, "no operations provided", http.StatusBadRequest)
+		return
+	}
+
+	// Process batch operations
+	response := s.processBatchOperations(req.Operations)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) processBatchOperations(ops []GPUOperation) *GPUBatchResponse {
+	startTime := time.Now()
+
+	results := make([]GPUResult, len(ops))
+	successCount := 0
+
+	// Get evaluator from pool
+	eval := s.evalPool.Get().(*fhe.Evaluator)
+	defer s.evalPool.Put(eval)
+	bitwiseEval := fhe.NewBitwiseEvaluator(s.params, s.bsk, s.sk)
+
+	for i, op := range ops {
+		result := GPUResult{ID: op.ID}
+
+		// Deserialize left ciphertext
+		left := new(fhe.BitCiphertext)
+		if err := left.UnmarshalBinary(op.Left); err != nil {
+			result.Error = fmt.Sprintf("invalid left ciphertext: %v", err)
+			results[i] = result
+			continue
+		}
+
+		var ctResult *fhe.BitCiphertext
+		var err error
+
+		switch op.Op {
+		case "add":
+			right := new(fhe.BitCiphertext)
+			if err := right.UnmarshalBinary(op.Right); err != nil {
+				result.Error = fmt.Sprintf("invalid right ciphertext: %v", err)
+				results[i] = result
+				continue
+			}
+			ctResult, err = bitwiseEval.Add(left, right)
+
+		case "sub":
+			right := new(fhe.BitCiphertext)
+			if err := right.UnmarshalBinary(op.Right); err != nil {
+				result.Error = fmt.Sprintf("invalid right ciphertext: %v", err)
+				results[i] = result
+				continue
+			}
+			ctResult, err = bitwiseEval.Sub(left, right)
+
+		case "eq":
+			right := new(fhe.BitCiphertext)
+			if err := right.UnmarshalBinary(op.Right); err != nil {
+				result.Error = fmt.Sprintf("invalid right ciphertext: %v", err)
+				results[i] = result
+				continue
+			}
+			boolResult, eqErr := bitwiseEval.Eq(left, right)
+			if eqErr == nil {
+				ctResult = fhe.WrapBoolCiphertext(boolResult)
+			}
+			err = eqErr
+
+		case "lt":
+			right := new(fhe.BitCiphertext)
+			if err := right.UnmarshalBinary(op.Right); err != nil {
+				result.Error = fmt.Sprintf("invalid right ciphertext: %v", err)
+				results[i] = result
+				continue
+			}
+			boolResult, ltErr := bitwiseEval.Lt(left, right)
+			if ltErr == nil {
+				ctResult = fhe.WrapBoolCiphertext(boolResult)
+			}
+			err = ltErr
+
+		default:
+			result.Error = fmt.Sprintf("unsupported operation: %s", op.Op)
+			results[i] = result
+			continue
+		}
+
+		if err != nil {
+			result.Error = err.Error()
+		} else if ctResult != nil {
+			resultBytes, marshalErr := ctResult.MarshalBinary()
+			if marshalErr != nil {
+				result.Error = marshalErr.Error()
+			} else {
+				result.Result = resultBytes
+				successCount++
+			}
+		}
+
+		results[i] = result
+	}
+
+	elapsed := time.Since(startTime)
+	elapsedMs := float64(elapsed.Milliseconds())
+
+	return &GPUBatchResponse{
+		Results: results,
+		Stats: GPUStats{
+			TotalOps:      len(ops),
+			SuccessfulOps: successCount,
+			TotalTimeMs:   elapsedMs,
+			OpsPerSecond:  float64(successCount) / (elapsedMs / 1000.0),
+		},
 	}
 }

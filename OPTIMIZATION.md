@@ -82,8 +82,8 @@ Input LWE → Batch NTT → External Products → Blind Rotation → INTT → Ke
 
    // Good: Structure of Arrays
    type LWEPool struct {
-       A *mlx.Array  // [batch, n] - contiguous
-       B *mlx.Array  // [batch]    - contiguous
+       A *gpulib.Array  // [batch, n] - contiguous
+       B *gpulib.Array  // [batch]    - contiguous
    }
    ```
 

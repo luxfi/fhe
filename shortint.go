@@ -6,9 +6,9 @@ package fhe
 import (
 	"fmt"
 
-	"github.com/luxfi/lattice/v6/core/rgsw/blindrot"
-	"github.com/luxfi/lattice/v6/core/rlwe"
-	"github.com/luxfi/lattice/v6/ring"
+	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
+	"github.com/luxfi/lattice/v7/core/rlwe"
+	"github.com/luxfi/lattice/v7/ring"
 )
 
 // ShortInt represents a small encrypted integer (1-4 bits) in a single ciphertext.

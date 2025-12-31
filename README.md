@@ -16,7 +16,9 @@ Lux FHE is a production-ready implementation of Fully Homomorphic Encryption (FH
 |------|------------|-------------|
 | **Pure Go** | `CGO_ENABLED=0` | Zero dependencies, compiles anywhere Go runs |
 | **C++ Optimized** | `CGO_ENABLED=1` | High-performance [C++ backend](https://github.com/luxcpp/fhe) |
-| **GPU Accelerated** | `CGO_ENABLED=1` + GPU | MLX (Apple Silicon), CUDA (NVIDIA) |
+| **GPU Accelerated** | `CGO_ENABLED=1` + GPU | Metal (macOS), CUDA (Linux/Windows) |
+
+> **Enterprise:** Multi-GPU, cloud deployments, and advanced optimizations available through enterprise licensing.
 
 ### Pure Go Mode
 - **Zero external dependencies** — compiles anywhere Go runs
@@ -28,6 +30,13 @@ Lux FHE is a production-ready implementation of Fully Homomorphic Encryption (FH
 For maximum performance, build with CGO enabled to use our optimized [C++ implementation](https://github.com/luxcpp/fhe):
 
 ```bash
+# macOS (Metal GPU automatic)
+CGO_ENABLED=1 go build ./...
+
+# Linux/Windows with CUDA
+CGO_ENABLED=1 go build -tags cuda ./...
+
+# Linux/Windows CPU-only
 CGO_ENABLED=1 go build ./...
 ```
 
@@ -138,23 +147,35 @@ github.com/luxfi/fhe/
 ## Running Tests
 
 ```bash
-# All tests (Pure Go)
+# Pure Go tests (all core packages)
 CGO_ENABLED=0 go test -v ./...
 
-# With C++ backend
+# With C++ backend + GPU (requires luxcpp/fhe)
 CGO_ENABLED=1 go test -v ./...
 
 # Benchmarks
 go test -bench=. -benchmem -run=^$
 ```
 
+## Package Structure
+
+| Package | CGO Required | Description |
+|---------|--------------|-------------|
+| `github.com/luxfi/fhe` | No | Core FHE library (pure Go) |
+| `github.com/luxfi/fhe/cgo` | Yes | C++ bridge to OpenFHE |
+| `github.com/luxfi/fhe/gpu` | Yes | GPU acceleration (MLX) |
+| `github.com/luxfi/fhe/server` | Yes | HTTP server with GPU support |
+| `github.com/luxfi/fhe/cmd/fhe-server` | Yes | Standalone FHE server |
+| `github.com/luxfi/fhe/cmd/fhe-gateway` | No | Pure Go gateway |
+| `github.com/luxfi/fhe/cmd/fhe-worker` | No | Pure Go worker |
+
 ## HTTP Benchmark Server
 
-Both Go and C++ implementations include HTTP servers for head-to-head benchmarking:
+GPU-accelerated server (requires CGO):
 
 ```bash
-# Go server
-go run ./server -port 8080
+# Build and run server
+CGO_ENABLED=1 go run ./cmd/fhe-server -addr :8448 -gpu
 
 # C++ server (see luxcpp/fhe)
 ./fhe-server --port 8081

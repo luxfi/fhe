@@ -7,7 +7,7 @@ Novel FHE implementation built on our own lattice cryptography stack (`luxfi/lat
 **Key differentiators:**
 - Pure Go implementation from first principles using `luxfi/lattice/v6` primitives
 - Native blockchain integration (FheUint160 for addresses, FheUint256 for EVM words)
-- Multi-GPU parallelism via MLX backend (Metal/CUDA/CPU)
+- Multi-GPU parallelism via luxfi/gpu backend (Metal/CUDA/CPU)
 - 10,000+ concurrent user support with 100GB+ GPU memory
 - Independent implementation - no external FHE library dependencies for core operations
 
@@ -32,11 +32,11 @@ luxfi/fhe (Pure Go FHE)
     │   ├── random.go         - FheRNG, FheRNGPublic (deterministic RNG)
     │   └── serialization.go  - Binary serialization for keys/ciphertexts
     │
-    ├── CGO Backend (optional)
+    ├── CGO Backend (GPU-accelerated via luxcpp/fhe)
     │   └── cgo/
-    │       ├── openfhe.go    - OpenFHE bindings (CGO_ENABLED=1 -tags openfhe)
-    │       ├── stub.go       - Stubs when CGO disabled
-    │       └── internal/     - C++ bridge files
+    │       ├── fhe.go        - OpenFHE bindings with Metal/CUDA GPU support
+    │       ├── fhe_test.go   - Comprehensive tests
+    │       └── tfhe_bridge.h - C header for C++ bridge
     │
     └── github.com/luxfi/lattice/v6  - Cryptographic primitives
         ├── core/rlwe         - Ring-LWE encryption
@@ -260,39 +260,38 @@ See `BENCHMARKS.md` for full results.
 - [ ] Multi-party threshold decryption (MPC protocol)
 - [x] MLX GPU backend for OpenFHE fork ✓
 
-## MLX GPU Backend (OpenFHE Fork)
+## GPU Backend (OpenFHE Fork)
 
-Apple Silicon GPU acceleration via MLX framework in `~/work/lux/fhe`:
+Apple Silicon GPU acceleration via luxfi/gpu framework in `~/work/lux/fhe`:
 
 ```bash
-# Build with MLX support
+# Build with GPU support
 cd ~/work/lux/fhe
-uv venv .venv && source .venv/bin/activate && uv pip install mlx
-mkdir build-mlx && cd build-mlx
-cmake -DWITH_MLX=ON -DCMAKE_BUILD_TYPE=Release ..
+mkdir build-gpu && cd build-gpu
+cmake -DWITH_GPU=ON -DGPU_ROOT=../../luxfi/gpu -DCMAKE_BUILD_TYPE=Release ..
 make -j8
 ```
 
 ### Architecture
 ```
-lux/fhe (OpenFHE fork with MLX)
+lux/fhe (OpenFHE fork with GPU backend)
     └── src/core/
-        ├── include/math/hal/mlx/mlx_backend.h
-        └── lib/math/hal/mlx/
-            ├── mlx_backend.cpp
+        ├── include/math/hal/gpu/gpu_backend.h
+        └── lib/math/hal/gpu/
+            ├── gpu_backend.cpp
             └── CMakeLists.txt
 ```
 
 ### Key Classes
-- `MLXNTT` - NTT/INTT with batch operations
-- `MLXPolyOps` - Polynomial arithmetic (add, sub, mult, automorphism)
-- `MLXBlindRotation` - FHE bootstrapping infrastructure
+- `GPUNTT` - NTT/INTT with batch operations
+- `GPUPolyOps` - Polynomial arithmetic (add, sub, mult, automorphism)
+- `GPUBlindRotation` - FHE bootstrapping infrastructure
 
 ### Design Decisions
-1. **Integer NTT**: Uses exact modular arithmetic (uint64_t) - MLX float64 not available on GPU
+1. **Integer NTT**: Uses exact modular arithmetic (uint64_t) - float64 not available on GPU
 2. **Batch-First**: API designed for batch PBS (levelize circuits, process all gates at depth)
 3. **RNS Path**: Integer/RNS approach preferred over FFT/float for exactness
-4. **Custom Kernels (TODO)**: Hot loops (NTT butterfly, external product) need Metal kernels
+4. **Custom Kernels (TODO)**: Hot loops (NTT butterfly, external product) need Metal/CUDA kernels
 
 ### Benchmarks (Apple M1 Max)
 | Operation | Time | Notes |
@@ -306,7 +305,7 @@ lux/fhe (OpenFHE fork with MLX)
 - Keep bootstrap key resident (avoid host/device churn)
 - Use SoA layout for coalescing
 - Fuse kernels (decomp → extprod → accumulate)
-- Prefer RNS + NTT for exactness (MLX float64 unsupported on GPU)
+- Prefer RNS + NTT for exactness (float64 unsupported on GPU)
 
 ## GPU FHE Engine (Massive Parallelism)
 
@@ -314,7 +313,7 @@ Enterprise-grade GPU FHE for 1000+ concurrent users with 100GB+ GPU memory.
 
 ### Architecture
 ```
-GPUFHEEngine
+FHEEngine
     ├── UserSession[]           - Per-user isolated contexts
     │   ├── BootstrapKeyGPU     - BK resident on GPU [n, 2, L, 2, N]
     │   ├── KeySwitchKeyGPU     - KSK on GPU
@@ -334,10 +333,10 @@ GPUFHEEngine
 ### Files
 ```
 lux/fhe/src/core/
-    ├── include/math/hal/mlx/gpu_fhe.h      - GPU FHE API
-    └── lib/math/hal/mlx/
-        ├── gpu_fhe.cpp                      - Implementation
-        └── tfhe_kernels.metal                - Metal shaders
+    ├── include/math/hal/gpu/fhe.h      - GPU FHE API
+    └── lib/math/hal/gpu/
+        ├── fhe.cpp                      - Implementation
+        └── fhe_kernels.metal            - Metal shaders
 ```
 
 ### Key Optimizations
@@ -351,7 +350,7 @@ lux/fhe/src/core/
 
 ### API Usage
 ```cpp
-#include "math/hal/mlx/gpu_fhe.h"
+#include "math/hal/mlx/fhe.h"
 using namespace lbcrypto::gpu;
 
 // Initialize engine
@@ -361,7 +360,7 @@ config.L = 4;  // Reduced!
 config.maxUsers = 10000;
 config.gpuMemoryBudget = 100ULL * 1024 * 1024 * 1024;  // 100GB
 
-GPUFHEEngine engine(config);
+FHEEngine engine(config);
 engine.initialize();
 
 // Create users
@@ -402,28 +401,63 @@ BootstrapKey [n RGSW ciphertexts]:
 
 ## FHE Server
 
-Standalone HTTP server for FHE operations:
+Standalone HTTP server for FHE operations, designed as a sidecar for the Solidity stack.
 
 ```bash
-# Standard mode
-go run ./cmd/fhe-server -addr :8448
+# Build
+go build ./cmd/fhe-server
+
+# Standard CPU mode
+./fhe-server -addr :8448
+
+# GPU-accelerated mode (Metal/CUDA via MLX)
+./fhe-server -addr :8448 -gpu -batch 32
 
 # Threshold mode
-go run ./cmd/fhe-server -addr :8448 -threshold -parties 5
+./fhe-server -addr :8448 -threshold -parties 5
 ```
 
 ### Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/health` | GET | Health check |
+| `/health` | GET | Health check (includes GPU status) |
 | `/publickey` | GET | Get FHE public key |
 | `/encrypt` | POST | Encrypt value |
 | `/decrypt` | POST | Decrypt (non-threshold) |
 | `/evaluate` | POST | Evaluate FHE operation |
+| `/gpu/status` | GET | GPU engine status (memory, backend, device) |
+| `/gpu/batch` | POST | Batch GPU operations |
 | `/threshold/parties` | GET | List threshold parties |
 | `/threshold/decrypt` | POST | Threshold decryption |
 | `/verify` | POST | ZK verification |
+
+### GPU Batch Operations
+
+```bash
+# Check GPU status
+curl http://localhost:8448/gpu/status
+# {"enabled":true,"backend":"Metal","device":"Apple M-series GPU","memory_gb":64}
+
+# Batch operations
+curl -X POST http://localhost:8448/gpu/batch \
+  -H "Content-Type: application/json" \
+  -d '{"operations": [
+    {"id": "op1", "op": "add", "left": "<base64>", "right": "<base64>"},
+    {"id": "op2", "op": "eq", "left": "<base64>", "right": "<base64>"}
+  ]}'
+```
+
+### Command Line Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-addr` | `:8448` | HTTP server address |
+| `-gpu` | `false` | Enable GPU acceleration (Metal/CUDA) |
+| `-batch` | `32` | Batch size for GPU operations |
+| `-threshold` | `false` | Enable threshold FHE mode |
+| `-parties` | `5` | Number of threshold parties |
+| `-data` | `./data` | Data directory for keys |
 
 ### JavaScript SDK Integration
 
@@ -464,9 +498,9 @@ func (p *FHEPrecompile) Add(input []byte) ([]byte, error) {
 }
 ```
 
-## GPU FHE Engine (MLX Backend)
+## GPU FHE Engine (luxfi/gpu Backend)
 
-Massively parallel FHE engine using MLX (Metal + CUDA + CPU backends).
+Massively parallel FHE engine using luxfi/gpu (Metal + CUDA + CPU backends).
 
 ### Performance
 
@@ -518,7 +552,7 @@ config.gpuMemoryBudget = 100ULL * 1024 * 1024 * 1024;  // 100GB
 
 ```cpp
 // Initialize engine
-GPUFHEEngine engine(config);
+FHEEngine engine(config);
 engine.initialize();
 
 // Create user session
@@ -554,78 +588,59 @@ scheduler.flush();  // Execute all at once
 4. **Fused Kernels**: External product fused with decomposition and accumulation
 5. **Zero CPU Roundtrips**: Entire PBS chain executes on GPU
 
-### Multi-Backend Support (via luxfi/mlx)
+### Backend Support
+
+**luxfi/gpu** provides multi-backend support via `gpu::core::{metal,cuda}::is_available()`.
 
 ```go
 import "github.com/luxfi/fhe/gpu"
 
-// Auto-detects: Metal (macOS) → CUDA (Linux/Windows) → CPU
+// Auto-detects: Metal (macOS) → CUDA (Linux/Windows) → CPU (fallback)
 engine, _ := gpu.New(gpu.DefaultConfig())
-
-// Or configure for specific hardware
-engine, _ := gpu.New(gpu.H200x8Config())  // 8x H200 optimized
 
 // Check what's running
 stats := engine.GetStats()
 fmt.Printf("Backend: %s, Device: %s\n", stats.Backend, stats.DeviceName)
 ```
 
-Backend selection (automatic):
-1. **Metal** (macOS ARM64) - Apple M1/M2/M3/M4
-2. **CUDA** (Linux/Windows) - NVIDIA H100/H200/A100
-3. **CPU** (fallback) - Any platform
+Backend support:
+| Platform | Backend | Notes |
+|----------|---------|-------|
+| Apple Silicon (M1/M2/M3/M4) | Metal | Via MLX Metal backend |
+| NVIDIA GPUs | CUDA | Via MLX CUDA backend |
+| CPU | Fallback | Pure Go or MLX CPU |
+
+**Note:** Multi-GPU configurations (HGX H200 x8) with NVLink/NCCL optimizations
+are maintained in `~/work/luxnext` for patent reasons.
 
 ### Files
 
 **Go API** (recommended):
-- `tfhe/gpu/engine.go` - Unified GPU FHE engine using luxfi/mlx
-- `tfhe/gpu/multigpu.go` - Multi-GPU orchestration (CUDA with NVLink/NCCL)
-- `tfhe/gpu/multigpu_stub.go` - Stub for non-CUDA platforms
+- `gpu/engine.go` - Unified GPU FHE engine using luxfi/gpu
+- `gpu/multigpu.go` - Multi-GPU orchestration (CUDA with NVLink/NCCL)
+- `gpu/multigpu_stub.go` - Stub for non-CUDA platforms
 
 **C++ Backend** (advanced):
-- Header: `fhe/src/core/include/math/hal/mlx/gpu_fhe.h`
-- Implementation: `fhe/src/core/lib/math/hal/mlx/gpu_fhe.cpp`
-- Metal Shaders: `fhe/src/core/lib/math/hal/mlx/tfhe_kernels.metal`
-- CUDA Backend: `fhe/src/core/lib/math/hal/cuda/gpu_tfhe_cuda.cu`
+- Header: `fhe/src/core/include/math/hal/gpu/fhe.h`
+- Implementation: `fhe/src/core/lib/math/hal/gpu/fhe.cpp`
+- Metal Shaders: `fhe/src/core/lib/math/hal/gpu/fhe_kernels.metal`
+- CUDA Backend: `fhe/src/core/lib/math/hal/gpu/fhe_cuda.cu`
 
 ### Multi-GPU Support (HGX H200 x8)
 
-For 8-GPU configurations with NVLink:
+Single-GPU CUDA support is in `luxfi/gpu`. Advanced multi-GPU with NVLink is in `~/work/luxnext`.
 
-```go
-import "github.com/luxfi/fhe/gpu"
+**luxnext features** (patent-protected):
+- 8x H200 with NVLink (900 GB/s per link)
+- NCCL for collective operations
+- User distribution across GPUs
+- Optimized memory layout for NVSwitch
 
-// Initialize multi-GPU engine
-engine, _ := gpu.NewMultiGPU(gpu.H200x8Config())
-
-// Users are automatically distributed across GPUs
-userID, _ := engine.CreateUser()     // Least-loaded GPU
-userID2, _ := engine.CreateUserOnGPU(3)  // Specific GPU
-
-// Batch operations execute in parallel across GPUs
-ops := []gpu.BatchGateOp{
-    {Gate: gpu.GateAND, UserIDs: []uint64{user1, user2}, ...},
-}
-engine.ExecuteBatchGates(ops)  // Parallel on all GPUs
-
-// Check stats
-stats := engine.GetStats()
-fmt.Printf("GPUs: %d, NVLink: %v, Users: %v\n", 
-    stats.NumGPUs, stats.HasNVLink, stats.UsersPerGPU)
-```
-
-**NVLink Benefits** (HGX H200):
-- 900 GB/s GPU-to-GPU bandwidth per link
-- 18 NVLink connections per GPU
-- Direct peer access without CPU involvement
-- NCCL for collective operations (AllReduce, etc.)
-
-**Scaling**:
 | GPUs | Throughput | Memory | Max Users |
 |------|------------|--------|-----------|
-| 1 | ~250K gates/sec | 141GB | 800 |
-| 4 | ~1M gates/sec | 564GB | 3,200 |
-| 8 | ~1.5M gates/sec | 1.1TB | 6,400 |
+| 1 H200 | ~250K gates/sec | 141GB | 800 |
+| 4 H200 | ~1M gates/sec | 564GB | 3,200 |
+| 8 H200 | ~1.5M gates/sec | 1.1TB | 6,400 |
 
 ## Build
 
@@ -637,9 +652,9 @@ go test ./...
 # With OpenFHE acceleration (optional)
 CGO_ENABLED=1 go build -tags openfhe ./...
 
-# GPU FHE (MLX backend)
+# GPU FHE (luxfi/gpu backend)
 cd fhe && mkdir build-gpu && cd build-gpu
-cmake .. -DWITH_MLX=ON
+cmake .. -DWITH_GPU=ON -DGPU_ROOT=../../luxfi/gpu
 make -j8 OPENFHEcore
 ```
 

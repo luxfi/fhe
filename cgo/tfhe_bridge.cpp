@@ -7,6 +7,7 @@
 #include "tfhe_bridge.h"
 
 #include <binfhecontext.h>
+#include <utils/serial.h>
 #include <vector>
 #include <sstream>
 #include <cstring>
@@ -28,7 +29,7 @@ struct TfheContextInternal {
     LWEPrivateKey secretKey;
     bool hasSecretKey;
     bool hasBootstrapKey;
-    
+
     TfheContextInternal() : hasSecretKey(false), hasBootstrapKey(false) {}
 };
 
@@ -36,11 +37,23 @@ struct TfheContextInternal {
 struct TfheIntegerInternal {
     std::vector<LWECiphertext> bits;
     TfheIntType itype;
-    
+
     TfheIntegerInternal(TfheIntType t) : itype(t) {
         bits.resize(static_cast<int>(t));
     }
-    
+
+    TfheIntegerInternal(int bitLen) {
+        if (bitLen <= 4) itype = TFHE_UINT4;
+        else if (bitLen <= 8) itype = TFHE_UINT8;
+        else if (bitLen <= 16) itype = TFHE_UINT16;
+        else if (bitLen <= 32) itype = TFHE_UINT32;
+        else if (bitLen <= 64) itype = TFHE_UINT64;
+        else if (bitLen <= 128) itype = TFHE_UINT128;
+        else if (bitLen <= 160) itype = TFHE_UINT160;
+        else itype = TFHE_UINT256;
+        bits.resize(static_cast<int>(itype));
+    }
+
     int numBits() const { return static_cast<int>(itype); }
 };
 
@@ -102,7 +115,7 @@ extern "C" uint32_t tfhe_version(void) {
 
 extern "C" TfheSecretKey tfhe_keygen(TfheContext ctx) {
     if (!ctx) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto sk = internal->context.KeyGen();
@@ -121,9 +134,13 @@ extern "C" void tfhe_secretkey_free(TfheSecretKey sk) {
     }
 }
 
+extern "C" void tfhe_secret_key_free(TfheSecretKey sk) {
+    tfhe_secretkey_free(sk);
+}
+
 extern "C" int tfhe_bootstrap_keygen(TfheContext ctx, TfheSecretKey sk) {
     if (!ctx || !sk) return -1;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
@@ -137,7 +154,7 @@ extern "C" int tfhe_bootstrap_keygen(TfheContext ctx, TfheSecretKey sk) {
 
 extern "C" int tfhe_keyswitch_keygen(TfheContext ctx, TfheSecretKey sk) {
     if (!ctx || !sk) return -1;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
@@ -155,12 +172,43 @@ extern "C" bool tfhe_has_bootstrap_key(TfheContext ctx) {
 }
 
 // =============================================================================
+// Public Key Generation
+// =============================================================================
+
+extern "C" TfhePublicKey tfhe_public_keygen(TfheContext ctx, TfheSecretKey sk) {
+    // OpenFHE BinFHE doesn't have separate public key - return nullptr
+    // Public key encryption uses a different mechanism
+    (void)ctx;
+    (void)sk;
+    return nullptr;
+}
+
+extern "C" void tfhe_public_key_free(TfhePublicKey pk) {
+    (void)pk;
+    // No-op for now
+}
+
+extern "C" int tfhe_publickey_serialize(TfhePublicKey pk, uint8_t** out, size_t* out_len) {
+    (void)pk;
+    (void)out;
+    (void)out_len;
+    return -1; // Not implemented
+}
+
+extern "C" TfhePublicKey tfhe_publickey_deserialize(TfheContext ctx, const uint8_t* data, size_t len) {
+    (void)ctx;
+    (void)data;
+    (void)len;
+    return nullptr; // Not implemented
+}
+
+// =============================================================================
 // Boolean Encryption / Decryption
 // =============================================================================
 
 extern "C" TfheCiphertext tfhe_encrypt(TfheContext ctx, TfheSecretKey sk, int value) {
     if (!ctx || !sk) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
@@ -172,9 +220,21 @@ extern "C" TfheCiphertext tfhe_encrypt(TfheContext ctx, TfheSecretKey sk, int va
     }
 }
 
+extern "C" TfheCiphertext tfhe_encrypt_bit(TfheContext ctx, TfheSecretKey sk, int value) {
+    return tfhe_encrypt(ctx, sk, value);
+}
+
+extern "C" TfheCiphertext tfhe_encrypt_bit_public(TfheContext ctx, TfhePublicKey pk, int value) {
+    // BinFHE doesn't have public key encryption in the traditional sense
+    (void)ctx;
+    (void)pk;
+    (void)value;
+    return nullptr;
+}
+
 extern "C" int tfhe_decrypt(TfheContext ctx, TfheSecretKey sk, TfheCiphertext ct) {
     if (!ctx || !sk || !ct) return -1;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
@@ -185,6 +245,10 @@ extern "C" int tfhe_decrypt(TfheContext ctx, TfheSecretKey sk, TfheCiphertext ct
     } catch (...) {
         return -1;
     }
+}
+
+extern "C" int tfhe_decrypt_bit(TfheContext ctx, TfheSecretKey sk, TfheCiphertext ct) {
+    return tfhe_decrypt(ctx, sk, ct);
 }
 
 extern "C" void tfhe_ciphertext_free(TfheCiphertext ct) {
@@ -209,7 +273,7 @@ extern "C" TfheCiphertext tfhe_ciphertext_clone(TfheCiphertext ct) {
 
 extern "C" TfheCiphertext tfhe_and(TfheContext ctx, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
@@ -223,7 +287,7 @@ extern "C" TfheCiphertext tfhe_and(TfheContext ctx, TfheCiphertext ct1, TfheCiph
 
 extern "C" TfheCiphertext tfhe_or(TfheContext ctx, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
@@ -237,7 +301,7 @@ extern "C" TfheCiphertext tfhe_or(TfheContext ctx, TfheCiphertext ct1, TfheCiphe
 
 extern "C" TfheCiphertext tfhe_xor(TfheContext ctx, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
@@ -251,7 +315,7 @@ extern "C" TfheCiphertext tfhe_xor(TfheContext ctx, TfheCiphertext ct1, TfheCiph
 
 extern "C" TfheCiphertext tfhe_nand(TfheContext ctx, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
@@ -265,7 +329,7 @@ extern "C" TfheCiphertext tfhe_nand(TfheContext ctx, TfheCiphertext ct1, TfheCip
 
 extern "C" TfheCiphertext tfhe_nor(TfheContext ctx, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
@@ -279,7 +343,7 @@ extern "C" TfheCiphertext tfhe_nor(TfheContext ctx, TfheCiphertext ct1, TfheCiph
 
 extern "C" TfheCiphertext tfhe_xnor(TfheContext ctx, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
@@ -293,7 +357,7 @@ extern "C" TfheCiphertext tfhe_xnor(TfheContext ctx, TfheCiphertext ct1, TfheCip
 
 extern "C" TfheCiphertext tfhe_not(TfheContext ctx, TfheCiphertext ct) {
     if (!ctx || !ct) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* ctPtr = static_cast<LWECiphertext*>(ct);
@@ -306,13 +370,13 @@ extern "C" TfheCiphertext tfhe_not(TfheContext ctx, TfheCiphertext ct) {
 
 extern "C" TfheCiphertext tfhe_mux(TfheContext ctx, TfheCiphertext sel, TfheCiphertext ct1, TfheCiphertext ct2) {
     if (!ctx || !sel || !ct1 || !ct2) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* selPtr = static_cast<LWECiphertext*>(sel);
         auto* ct1Ptr = static_cast<LWECiphertext*>(ct1);
         auto* ct2Ptr = static_cast<LWECiphertext*>(ct2);
-        
+
         // MUX(sel, ct1, ct2) = (sel AND ct1) OR ((NOT sel) AND ct2)
         auto notSel = internal->context.EvalNOT(*selPtr);
         auto branch1 = internal->context.EvalBinGate(AND, *selPtr, *ct1Ptr);
@@ -328,36 +392,46 @@ extern "C" TfheCiphertext tfhe_mux(TfheContext ctx, TfheCiphertext sel, TfheCiph
 // Integer Operations
 // =============================================================================
 
-extern "C" TfheInteger tfhe_encrypt_integer(TfheContext ctx, TfheSecretKey sk, uint64_t value, TfheIntType itype) {
+extern "C" TfheInteger tfhe_encrypt_integer(TfheContext ctx, TfheSecretKey sk, int64_t value, int bitLen) {
     if (!ctx || !sk) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
-        
-        auto* integer = new TfheIntegerInternal(itype);
+
+        auto* integer = new TfheIntegerInternal(bitLen);
         int numBits = integer->numBits();
-        
+
         // Encrypt each bit
+        uint64_t uval = static_cast<uint64_t>(value);
         for (int i = 0; i < numBits; i++) {
-            int bit = (value >> i) & 1;
+            int bit = (uval >> i) & 1;
             integer->bits[i] = internal->context.Encrypt(*skPtr, bit);
         }
-        
+
         return static_cast<TfheInteger>(integer);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" uint64_t tfhe_decrypt_integer(TfheContext ctx, TfheSecretKey sk, TfheInteger ct) {
+extern "C" TfheInteger tfhe_encrypt_integer_public(TfheContext ctx, TfhePublicKey pk, int64_t value, int bitLen) {
+    // BinFHE doesn't have public key encryption
+    (void)ctx;
+    (void)pk;
+    (void)value;
+    (void)bitLen;
+    return nullptr;
+}
+
+extern "C" int64_t tfhe_decrypt_integer(TfheContext ctx, TfheSecretKey sk, TfheInteger ct) {
     if (!ctx || !sk || !ct) return 0;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
         auto* integer = static_cast<TfheIntegerInternal*>(ct);
-        
+
         uint64_t result = 0;
         for (size_t i = 0; i < integer->bits.size() && i < 64; i++) {
             LWEPlaintext bit;
@@ -366,8 +440,8 @@ extern "C" uint64_t tfhe_decrypt_integer(TfheContext ctx, TfheSecretKey sk, Tfhe
                 result |= (1ULL << i);
             }
         }
-        
-        return result;
+
+        return static_cast<int64_t>(result);
     } catch (...) {
         return 0;
     }
@@ -411,37 +485,37 @@ static std::pair<LWECiphertext, LWECiphertext> fullAdder(
     // sum = a XOR b XOR cin
     auto axorb = ctx->context.EvalBinGate(XOR, a, b);
     auto sum = ctx->context.EvalBinGate(XOR, axorb, cin);
-    
+
     // carry = (a AND b) OR (cin AND (a XOR b))
     auto aandb = ctx->context.EvalBinGate(AND, a, b);
     auto cinandaxorb = ctx->context.EvalBinGate(AND, cin, axorb);
     auto carry = ctx->context.EvalBinGate(OR, aandb, cinandaxorb);
-    
+
     return {sum, carry};
 }
 
 extern "C" TfheInteger tfhe_add(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         // Initialize carry to encrypted 0
         LWECiphertext carry = internal->context.Encrypt(internal->secretKey, 0);
-        
+
         for (int i = 0; i < numBits; i++) {
             auto [sum, newCarry] = fullAdder(internal, intA->bits[i], intB->bits[i], carry);
             result->bits[i] = sum;
             carry = newCarry;
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -450,21 +524,21 @@ extern "C" TfheInteger tfhe_add(TfheContext ctx, TfheInteger a, TfheInteger b) {
 
 extern "C" TfheInteger tfhe_sub(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         // a - b = a + (~b) + 1
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         // Initialize carry to encrypted 1 (for two's complement)
         LWECiphertext carry = internal->context.Encrypt(internal->secretKey, 1);
-        
+
         for (int i = 0; i < numBits; i++) {
             // NOT b
             auto notB = internal->context.EvalNOT(intB->bits[i]);
@@ -472,7 +546,7 @@ extern "C" TfheInteger tfhe_sub(TfheContext ctx, TfheInteger a, TfheInteger b) {
             result->bits[i] = sum;
             carry = newCarry;
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -481,71 +555,73 @@ extern "C" TfheInteger tfhe_sub(TfheContext ctx, TfheInteger a, TfheInteger b) {
 
 extern "C" TfheInteger tfhe_neg(TfheContext ctx, TfheInteger a) {
     if (!ctx || !a) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         // -a = ~a + 1
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         LWECiphertext carry = internal->context.Encrypt(internal->secretKey, 1);
         LWECiphertext zero = internal->context.Encrypt(internal->secretKey, 0);
-        
+
         for (int i = 0; i < numBits; i++) {
             auto notA = internal->context.EvalNOT(intA->bits[i]);
             auto [sum, newCarry] = fullAdder(internal, notA, zero, carry);
             result->bits[i] = sum;
             carry = newCarry;
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" TfheInteger tfhe_add_scalar(TfheContext ctx, TfheInteger a, uint64_t scalar) {
+extern "C" TfheInteger tfhe_add_scalar(TfheContext ctx, TfheInteger a, int64_t scalar) {
     if (!ctx || !a) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         LWECiphertext carry = internal->context.Encrypt(internal->secretKey, 0);
-        
+        uint64_t uval = static_cast<uint64_t>(scalar);
+
         for (int i = 0; i < numBits; i++) {
-            int bit = (scalar >> i) & 1;
+            int bit = (uval >> i) & 1;
             auto scalarBit = internal->context.Encrypt(internal->secretKey, bit);
             auto [sum, newCarry] = fullAdder(internal, intA->bits[i], scalarBit, carry);
             result->bits[i] = sum;
             carry = newCarry;
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" TfheInteger tfhe_sub_scalar(TfheContext ctx, TfheInteger a, uint64_t scalar) {
+extern "C" TfheInteger tfhe_sub_scalar(TfheContext ctx, TfheInteger a, int64_t scalar) {
     if (!ctx || !a) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         // a - scalar = a + (~scalar) + 1
-        uint64_t notScalar = ~scalar;
+        uint64_t uval = static_cast<uint64_t>(scalar);
+        uint64_t notScalar = ~uval;
         LWECiphertext carry = internal->context.Encrypt(internal->secretKey, 1);
-        
+
         for (int i = 0; i < numBits; i++) {
             int bit = (notScalar >> i) & 1;
             auto scalarBit = internal->context.Encrypt(internal->secretKey, bit);
@@ -553,31 +629,32 @@ extern "C" TfheInteger tfhe_sub_scalar(TfheContext ctx, TfheInteger a, uint64_t 
             result->bits[i] = sum;
             carry = newCarry;
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" TfheInteger tfhe_mul_scalar(TfheContext ctx, TfheInteger a, uint64_t scalar) {
+extern "C" TfheInteger tfhe_mul_scalar(TfheContext ctx, TfheInteger a, int64_t scalar) {
     if (!ctx || !a) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+        uint64_t uval = static_cast<uint64_t>(scalar);
+
         // Initialize result to 0
         for (int i = 0; i < numBits; i++) {
             result->bits[i] = internal->context.Encrypt(internal->secretKey, 0);
         }
-        
+
         // Shift-and-add multiplication
-        for (int i = 0; i < numBits && (scalar >> i) != 0; i++) {
-            if ((scalar >> i) & 1) {
+        for (int i = 0; i < numBits && (uval >> i) != 0; i++) {
+            if ((uval >> i) & 1) {
                 // Add shifted a to result
                 LWECiphertext carry = internal->context.Encrypt(internal->secretKey, 0);
                 for (int j = i; j < numBits; j++) {
@@ -587,7 +664,7 @@ extern "C" TfheInteger tfhe_mul_scalar(TfheContext ctx, TfheInteger a, uint64_t 
                 }
             }
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -600,22 +677,22 @@ extern "C" TfheInteger tfhe_mul_scalar(TfheContext ctx, TfheInteger a, uint64_t 
 
 extern "C" TfheCiphertext tfhe_eq(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         // eq = AND of all (a[i] XNOR b[i])
         LWECiphertext result = internal->context.Encrypt(internal->secretKey, 1);
-        
+
         for (size_t i = 0; i < intA->bits.size(); i++) {
             auto xnor = internal->context.EvalBinGate(XNOR, intA->bits[i], intB->bits[i]);
             result = internal->context.EvalBinGate(AND, result, xnor);
         }
-        
+
         return static_cast<TfheCiphertext>(new LWECiphertext(result));
     } catch (...) {
         return nullptr;
@@ -624,16 +701,16 @@ extern "C" TfheCiphertext tfhe_eq(TfheContext ctx, TfheInteger a, TfheInteger b)
 
 extern "C" TfheCiphertext tfhe_ne(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto eq = tfhe_eq(ctx, a, b);
         if (!eq) return nullptr;
-        
+
         auto* eqPtr = static_cast<LWECiphertext*>(eq);
         auto result = internal->context.EvalNOT(*eqPtr);
         delete eqPtr;
-        
+
         return static_cast<TfheCiphertext>(new LWECiphertext(result));
     } catch (...) {
         return nullptr;
@@ -642,31 +719,31 @@ extern "C" TfheCiphertext tfhe_ne(TfheContext ctx, TfheInteger a, TfheInteger b)
 
 extern "C" TfheCiphertext tfhe_lt(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         // Compute a < b using bit comparison from MSB to LSB
         // lt = 0, eq = 1
         LWECiphertext lt = internal->context.Encrypt(internal->secretKey, 0);
         LWECiphertext eq = internal->context.Encrypt(internal->secretKey, 1);
-        
-        for (int i = intA->bits.size() - 1; i >= 0; i--) {
+
+        for (int i = static_cast<int>(intA->bits.size()) - 1; i >= 0; i--) {
             // lt = lt OR (eq AND (NOT a[i]) AND b[i])
             auto notA = internal->context.EvalNOT(intA->bits[i]);
             auto notAandB = internal->context.EvalBinGate(AND, notA, intB->bits[i]);
             auto eqAndNotAandB = internal->context.EvalBinGate(AND, eq, notAandB);
             lt = internal->context.EvalBinGate(OR, lt, eqAndNotAandB);
-            
+
             // eq = eq AND (a[i] XNOR b[i])
             auto xnor = internal->context.EvalBinGate(XNOR, intA->bits[i], intB->bits[i]);
             eq = internal->context.EvalBinGate(AND, eq, xnor);
         }
-        
+
         return static_cast<TfheCiphertext>(new LWECiphertext(lt));
     } catch (...) {
         return nullptr;
@@ -675,10 +752,10 @@ extern "C" TfheCiphertext tfhe_lt(TfheContext ctx, TfheInteger a, TfheInteger b)
 
 extern "C" TfheCiphertext tfhe_le(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
-        
+
         // le = lt OR eq
         auto lt = tfhe_lt(ctx, a, b);
         auto eq = tfhe_eq(ctx, a, b);
@@ -687,13 +764,13 @@ extern "C" TfheCiphertext tfhe_le(TfheContext ctx, TfheInteger a, TfheInteger b)
             if (eq) tfhe_ciphertext_free(eq);
             return nullptr;
         }
-        
+
         auto* ltPtr = static_cast<LWECiphertext*>(lt);
         auto* eqPtr = static_cast<LWECiphertext*>(eq);
         auto result = internal->context.EvalBinGate(OR, *ltPtr, *eqPtr);
         delete ltPtr;
         delete eqPtr;
-        
+
         return static_cast<TfheCiphertext>(new LWECiphertext(result));
     } catch (...) {
         return nullptr;
@@ -710,11 +787,11 @@ extern "C" TfheCiphertext tfhe_ge(TfheContext ctx, TfheInteger a, TfheInteger b)
 
 extern "C" TfheInteger tfhe_min(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto lt = tfhe_lt(ctx, a, b);
         if (!lt) return nullptr;
-        
+
         auto result = tfhe_select(ctx, lt, a, b);
         tfhe_ciphertext_free(lt);
         return result;
@@ -725,11 +802,11 @@ extern "C" TfheInteger tfhe_min(TfheContext ctx, TfheInteger a, TfheInteger b) {
 
 extern "C" TfheInteger tfhe_max(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto lt = tfhe_lt(ctx, a, b);
         if (!lt) return nullptr;
-        
+
         auto result = tfhe_select(ctx, lt, b, a);
         tfhe_ciphertext_free(lt);
         return result;
@@ -744,19 +821,19 @@ extern "C" TfheInteger tfhe_max(TfheContext ctx, TfheInteger a, TfheInteger b) {
 
 extern "C" TfheInteger tfhe_bitwise_and(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         for (size_t i = 0; i < intA->bits.size(); i++) {
             result->bits[i] = internal->context.EvalBinGate(AND, intA->bits[i], intB->bits[i]);
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -765,19 +842,19 @@ extern "C" TfheInteger tfhe_bitwise_and(TfheContext ctx, TfheInteger a, TfheInte
 
 extern "C" TfheInteger tfhe_bitwise_or(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         for (size_t i = 0; i < intA->bits.size(); i++) {
             result->bits[i] = internal->context.EvalBinGate(OR, intA->bits[i], intB->bits[i]);
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -786,19 +863,19 @@ extern "C" TfheInteger tfhe_bitwise_or(TfheContext ctx, TfheInteger a, TfheInteg
 
 extern "C" TfheInteger tfhe_bitwise_xor(TfheContext ctx, TfheInteger a, TfheInteger b) {
     if (!ctx || !a || !b) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
         auto* intB = static_cast<TfheIntegerInternal*>(b);
-        
+
         if (intA->itype != intB->itype) return nullptr;
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         for (size_t i = 0; i < intA->bits.size(); i++) {
             result->bits[i] = internal->context.EvalBinGate(XOR, intA->bits[i], intB->bits[i]);
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -807,64 +884,64 @@ extern "C" TfheInteger tfhe_bitwise_xor(TfheContext ctx, TfheInteger a, TfheInte
 
 extern "C" TfheInteger tfhe_bitwise_not(TfheContext ctx, TfheInteger a) {
     if (!ctx || !a) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         for (size_t i = 0; i < intA->bits.size(); i++) {
             result->bits[i] = internal->context.EvalNOT(intA->bits[i]);
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" TfheInteger tfhe_shl(TfheContext ctx, TfheInteger a, uint32_t bits) {
-    if (!ctx || !a) return nullptr;
-    
+extern "C" TfheInteger tfhe_shl(TfheContext ctx, TfheInteger a, int bits) {
+    if (!ctx || !a || bits < 0) return nullptr;
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         for (int i = 0; i < numBits; i++) {
-            if (i < static_cast<int>(bits)) {
+            if (i < bits) {
                 result->bits[i] = internal->context.Encrypt(internal->secretKey, 0);
             } else {
                 result->bits[i] = intA->bits[i - bits];
             }
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" TfheInteger tfhe_shr(TfheContext ctx, TfheInteger a, uint32_t bits) {
-    if (!ctx || !a) return nullptr;
-    
+extern "C" TfheInteger tfhe_shr(TfheContext ctx, TfheInteger a, int bits) {
+    if (!ctx || !a || bits < 0) return nullptr;
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
+
         auto* result = new TfheIntegerInternal(intA->itype);
         int numBits = result->numBits();
-        
+
         for (int i = 0; i < numBits; i++) {
-            if (i + static_cast<int>(bits) >= numBits) {
+            if (i + bits >= numBits) {
                 result->bits[i] = internal->context.Encrypt(internal->secretKey, 0);
             } else {
                 result->bits[i] = intA->bits[i + bits];
             }
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -877,42 +954,42 @@ extern "C" TfheInteger tfhe_shr(TfheContext ctx, TfheInteger a, uint32_t bits) {
 
 extern "C" TfheInteger tfhe_select(TfheContext ctx, TfheCiphertext cond, TfheInteger if_true, TfheInteger if_false) {
     if (!ctx || !cond || !if_true || !if_false) return nullptr;
-    
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* condPtr = static_cast<LWECiphertext*>(cond);
         auto* intTrue = static_cast<TfheIntegerInternal*>(if_true);
         auto* intFalse = static_cast<TfheIntegerInternal*>(if_false);
-        
+
         if (intTrue->itype != intFalse->itype) return nullptr;
-        
+
         auto* result = new TfheIntegerInternal(intTrue->itype);
         auto notCond = internal->context.EvalNOT(*condPtr);
-        
+
         for (size_t i = 0; i < intTrue->bits.size(); i++) {
             // result[i] = (cond AND true[i]) OR ((NOT cond) AND false[i])
             auto condAndTrue = internal->context.EvalBinGate(AND, *condPtr, intTrue->bits[i]);
             auto notCondAndFalse = internal->context.EvalBinGate(AND, notCond, intFalse->bits[i]);
             result->bits[i] = internal->context.EvalBinGate(OR, condAndTrue, notCondAndFalse);
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" TfheInteger tfhe_cast_to(TfheContext ctx, TfheInteger a, TfheIntType target_type) {
-    if (!ctx || !a) return nullptr;
-    
+extern "C" TfheInteger tfhe_cast_to(TfheContext ctx, TfheInteger a, int target_bitlen) {
+    if (!ctx || !a || target_bitlen <= 0) return nullptr;
+
     try {
         auto* internal = static_cast<TfheContextInternal*>(ctx);
         auto* intA = static_cast<TfheIntegerInternal*>(a);
-        
-        auto* result = new TfheIntegerInternal(target_type);
+
+        auto* result = new TfheIntegerInternal(target_bitlen);
         int srcBits = intA->numBits();
         int dstBits = result->numBits();
-        
+
         for (int i = 0; i < dstBits; i++) {
             if (i < srcBits) {
                 result->bits[i] = intA->bits[i];
@@ -920,7 +997,7 @@ extern "C" TfheInteger tfhe_cast_to(TfheContext ctx, TfheInteger a, TfheIntType 
                 result->bits[i] = internal->context.Encrypt(internal->secretKey, 0);
             }
         }
-        
+
         return static_cast<TfheInteger>(result);
     } catch (...) {
         return nullptr;
@@ -928,130 +1005,147 @@ extern "C" TfheInteger tfhe_cast_to(TfheContext ctx, TfheInteger a, TfheIntType 
 }
 
 // =============================================================================
-// Serialization
+// Serialization (using OpenFHE's serialization)
 // =============================================================================
 
-extern "C" int tfhe_ciphertext_serialize(TfheCiphertext ct, uint8_t** out, size_t* out_len) {
-    if (!ct || !out || !out_len) return -1;
-    
+extern "C" uint8_t* tfhe_serialize_ciphertext(TfheContext ctx, TfheCiphertext ct, size_t* out_len) {
+    if (!ctx || !ct || !out_len) return nullptr;
+
     try {
         auto* ctPtr = static_cast<LWECiphertext*>(ct);
         std::stringstream ss;
-        Serial::Serialize(*ctPtr, ss, SerType::BINARY);
+
+        // Use OpenFHE's serialization
+        lbcrypto::Serial::Serialize(*ctPtr, ss, lbcrypto::SerType::BINARY);
+
         std::string data = ss.str();
-        
         *out_len = data.size();
-        *out = new uint8_t[*out_len];
-        std::memcpy(*out, data.data(), *out_len);
-        return 0;
+        uint8_t* out = static_cast<uint8_t*>(malloc(*out_len));
+        if (out) {
+            std::memcpy(out, data.data(), *out_len);
+        }
+        return out;
     } catch (...) {
-        return -1;
+        return nullptr;
     }
 }
 
-extern "C" TfheCiphertext tfhe_ciphertext_deserialize(TfheContext ctx, const uint8_t* data, size_t len) {
+extern "C" TfheCiphertext tfhe_deserialize_ciphertext(TfheContext ctx, const uint8_t* data, size_t len) {
     if (!ctx || !data || len == 0) return nullptr;
-    
+
     try {
         std::stringstream ss(std::string(reinterpret_cast<const char*>(data), len));
         LWECiphertext ct;
-        Serial::Deserialize(ct, ss, SerType::BINARY);
+        lbcrypto::Serial::Deserialize(ct, ss, lbcrypto::SerType::BINARY);
         return static_cast<TfheCiphertext>(new LWECiphertext(ct));
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" int tfhe_secretkey_serialize(TfheSecretKey sk, uint8_t** out, size_t* out_len) {
-    if (!sk || !out || !out_len) return -1;
-    
+extern "C" uint8_t* tfhe_serialize_secret_key(TfheContext ctx, TfheSecretKey sk, size_t* out_len) {
+    if (!ctx || !sk || !out_len) return nullptr;
+
     try {
         auto* skPtr = static_cast<LWEPrivateKey*>(sk);
         std::stringstream ss;
-        Serial::Serialize(*skPtr, ss, SerType::BINARY);
+        lbcrypto::Serial::Serialize(*skPtr, ss, lbcrypto::SerType::BINARY);
+
         std::string data = ss.str();
-        
         *out_len = data.size();
-        *out = new uint8_t[*out_len];
-        std::memcpy(*out, data.data(), *out_len);
-        return 0;
+        uint8_t* out = static_cast<uint8_t*>(malloc(*out_len));
+        if (out) {
+            std::memcpy(out, data.data(), *out_len);
+        }
+        return out;
     } catch (...) {
-        return -1;
+        return nullptr;
     }
 }
 
-extern "C" TfheSecretKey tfhe_secretkey_deserialize(TfheContext ctx, const uint8_t* data, size_t len) {
+extern "C" TfheSecretKey tfhe_deserialize_secret_key(TfheContext ctx, const uint8_t* data, size_t len) {
     if (!ctx || !data || len == 0) return nullptr;
-    
+
     try {
         std::stringstream ss(std::string(reinterpret_cast<const char*>(data), len));
         LWEPrivateKey sk;
-        Serial::Deserialize(sk, ss, SerType::BINARY);
+        lbcrypto::Serial::Deserialize(sk, ss, lbcrypto::SerType::BINARY);
         return static_cast<TfheSecretKey>(new LWEPrivateKey(sk));
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" int tfhe_integer_serialize(TfheInteger ct, uint8_t** out, size_t* out_len) {
-    if (!ct || !out || !out_len) return -1;
-    
+extern "C" uint8_t* tfhe_serialize_public_key(TfheContext ctx, TfhePublicKey pk, size_t* out_len) {
+    (void)ctx;
+    (void)pk;
+    (void)out_len;
+    return nullptr; // Not implemented for BinFHE
+}
+
+extern "C" TfhePublicKey tfhe_deserialize_public_key(TfheContext ctx, const uint8_t* data, size_t len) {
+    (void)ctx;
+    (void)data;
+    (void)len;
+    return nullptr; // Not implemented for BinFHE
+}
+
+extern "C" uint8_t* tfhe_serialize_integer(TfheContext ctx, TfheInteger ct, size_t* out_len) {
+    if (!ctx || !ct || !out_len) return nullptr;
+
     try {
         auto* integer = static_cast<TfheIntegerInternal*>(ct);
         std::stringstream ss;
-        
+
         // Write type
-        ss.write(reinterpret_cast<const char*>(&integer->itype), sizeof(integer->itype));
-        
+        int32_t itype = static_cast<int32_t>(integer->itype);
+        ss.write(reinterpret_cast<const char*>(&itype), sizeof(itype));
+
         // Write number of bits
-        uint32_t numBits = integer->bits.size();
+        uint32_t numBits = static_cast<uint32_t>(integer->bits.size());
         ss.write(reinterpret_cast<const char*>(&numBits), sizeof(numBits));
-        
+
         // Serialize each bit
         for (const auto& bit : integer->bits) {
-            Serial::Serialize(bit, ss, SerType::BINARY);
+            lbcrypto::Serial::Serialize(bit, ss, lbcrypto::SerType::BINARY);
         }
-        
+
         std::string data = ss.str();
         *out_len = data.size();
-        *out = new uint8_t[*out_len];
-        std::memcpy(*out, data.data(), *out_len);
-        return 0;
-    } catch (...) {
-        return -1;
-    }
-}
-
-extern "C" TfheInteger tfhe_integer_deserialize(TfheContext ctx, const uint8_t* data, size_t len) {
-    if (!ctx || !data || len == 0) return nullptr;
-    
-    try {
-        std::stringstream ss(std::string(reinterpret_cast<const char*>(data), len));
-        
-        // Read type
-        TfheIntType itype;
-        ss.read(reinterpret_cast<char*>(&itype), sizeof(itype));
-        
-        // Read number of bits
-        uint32_t numBits;
-        ss.read(reinterpret_cast<char*>(&numBits), sizeof(numBits));
-        
-        auto* integer = new TfheIntegerInternal(itype);
-        integer->bits.resize(numBits);
-        
-        // Deserialize each bit
-        for (uint32_t i = 0; i < numBits; i++) {
-            Serial::Deserialize(integer->bits[i], ss, SerType::BINARY);
+        uint8_t* out = static_cast<uint8_t*>(malloc(*out_len));
+        if (out) {
+            std::memcpy(out, data.data(), *out_len);
         }
-        
-        return static_cast<TfheInteger>(integer);
+        return out;
     } catch (...) {
         return nullptr;
     }
 }
 
-extern "C" void tfhe_free_bytes(uint8_t* data) {
-    if (data) {
-        delete[] data;
+extern "C" TfheInteger tfhe_deserialize_integer(TfheContext ctx, const uint8_t* data, size_t len) {
+    if (!ctx || !data || len == 0) return nullptr;
+
+    try {
+        std::stringstream ss(std::string(reinterpret_cast<const char*>(data), len));
+
+        // Read type
+        int32_t itype;
+        ss.read(reinterpret_cast<char*>(&itype), sizeof(itype));
+
+        // Read number of bits
+        uint32_t numBits;
+        ss.read(reinterpret_cast<char*>(&numBits), sizeof(numBits));
+
+        auto* integer = new TfheIntegerInternal(static_cast<TfheIntType>(itype));
+        integer->bits.resize(numBits);
+
+        // Deserialize each bit
+        for (uint32_t i = 0; i < numBits; i++) {
+            lbcrypto::Serial::Deserialize(integer->bits[i], ss, lbcrypto::SerType::BINARY);
+        }
+
+        return static_cast<TfheInteger>(integer);
+    } catch (...) {
+        return nullptr;
     }
 }

@@ -14,10 +14,10 @@
 package fhe
 
 import (
-	"github.com/luxfi/lattice/v6/core/rgsw/blindrot"
-	"github.com/luxfi/lattice/v6/core/rlwe"
-	"github.com/luxfi/lattice/v6/ring"
-	"github.com/luxfi/lattice/v6/utils"
+	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
+	"github.com/luxfi/lattice/v7/core/rlwe"
+	"github.com/luxfi/lattice/v7/ring"
+	"github.com/luxfi/lattice/v7/utils"
 )
 
 // Parameters defines the FHE parameter set
@@ -67,6 +67,31 @@ var (
 		QLWE:                 0x3FFFFFFFFFC0001, // Same modulus
 		QBR:                  0x3FFFFFFFFFC0001, // ~2^54
 		BaseTwoDecomposition: 10,
+	}
+
+	// PN9QP28_STD128 matches OpenFHE's STD128_LMKCDEY as closely as possible
+	// OpenFHE uses LWEDim=447, we use 512 (nearest power of 2)
+	// This enables apples-to-apples comparison with C++ OpenFHE
+	// Security: 128-bit classical
+	// Note: Uses NTT-friendly prime Q ≡ 1 (mod 2048)
+	PN9QP28_STD128 = ParametersLiteral{
+		LogNLWE:              9,          // N=512 (OpenFHE uses 447)
+		LogNBR:               10,         // N=1024 (matches OpenFHE)
+		QLWE:                 0x10001801, // Prime ~2^28 ≡ 1 (mod 2048)
+		QBR:                  0x10001801, // Prime ~2^28 ≡ 1 (mod 2048)
+		BaseTwoDecomposition: 5,          // Base 32 = 2^5 (matches OpenFHE)
+	}
+
+	// PN9QP27_STD128Q matches OpenFHE's STD128Q_LMKCDEY (post-quantum)
+	// OpenFHE uses LWEDim=483, we use 512 (nearest power of 2)
+	// Security: 128-bit post-quantum
+	// Note: Uses NTT-friendly prime Q ≡ 1 (mod 2048)
+	PN9QP27_STD128Q = ParametersLiteral{
+		LogNLWE:              9,         // N=512 (OpenFHE uses 483)
+		LogNBR:               10,        // N=1024 (matches OpenFHE)
+		QLWE:                 0x8007001, // Prime ~2^27 ≡ 1 (mod 2048)
+		QBR:                  0x8007001, // Prime ~2^27 ≡ 1 (mod 2048)
+		BaseTwoDecomposition: 5,         // Base 32 = 2^5 (matches OpenFHE)
 	}
 )
 

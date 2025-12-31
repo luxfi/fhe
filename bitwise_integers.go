@@ -12,7 +12,7 @@ package fhe
 import (
 	"fmt"
 
-	"github.com/luxfi/lattice/v6/core/rlwe"
+	"github.com/luxfi/lattice/v7/core/rlwe"
 )
 
 // BitCiphertext represents an encrypted integer as a vector of encrypted bits.
