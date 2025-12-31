@@ -124,7 +124,12 @@ jobs:
         run: |
           mkdir -p dist
           GOOS=js GOARCH=wasm go build -o dist/luxfhe.wasm ./sdk/wasm/main.go
-          cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+          # wasm_exec.js may not exist in Go 1.25 toolchain, download if needed
+          if [ -f "$(go env GOROOT)/misc/wasm/wasm_exec.js" ]; then
+            cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+          else
+            curl -sL "https://raw.githubusercontent.com/golang/go/go$(go version | awk '{print $3}' | sed 's/go//')/misc/wasm/wasm_exec.js" -o dist/wasm_exec.js
+          fi
 
       - name: Upload WASM
         uses: actions/upload-artifact@v4
