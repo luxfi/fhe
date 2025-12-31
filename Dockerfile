@@ -1,5 +1,5 @@
 # Lux FHE - Multi-target Dockerfile
-# Builds: server, gateway, worker
+# Builds: server (pure-go), gateway, worker
 
 FROM golang:1.23-alpine AS builder
 
@@ -8,6 +8,9 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates
 
+# Enable toolchain auto-download for newer Go versions
+ENV GOTOOLCHAIN=auto
+
 # Copy go mod files
 COPY go.mod go.sum ./
 RUN go mod download
@@ -15,13 +18,15 @@ RUN go mod download
 # Copy source
 COPY . .
 
-# Build all binaries
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/fhe-server ./cmd/fhe-server/
+# Build binaries (pure Go, no CGO)
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/fhe-gateway ./cmd/fhe-gateway/
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/fhe-worker ./cmd/fhe-worker/
 
+# Build pure-go server (creates standalone server without C acceleration)
+RUN CGO_ENABLED=0 GOOS=linux go build -tags purgo -o /bin/fhe-server ./server/standalone/
+
 # =============================================================================
-# Server image
+# Server image (pure Go implementation)
 # =============================================================================
 FROM alpine:3.19 AS server
 
@@ -72,4 +77,4 @@ RUN mkdir -p /app/data
 EXPOSE 9090
 
 ENTRYPOINT ["./fhe-worker"]
-CMD ["-metrics", ":9090", "-workers", "4"]
+CMD ["-workers", "4"]
