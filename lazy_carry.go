@@ -663,10 +663,10 @@ func (lce *LazyCarryEvaluator) BatchAdd(values []*LazyCarryInteger) (*LazyCarryI
 
 // PerformanceMetrics tracks lazy carry performance statistics.
 type PerformanceMetrics struct {
-	TotalAdditions        int
-	PropagationCount      int
-	PBSOperations         int // Estimated PBS calls
-	AmortizationRatio     float64
+	TotalAdditions         int
+	PropagationCount       int
+	PBSOperations          int // Estimated PBS calls
+	AmortizationRatio      float64
 	TraditionalPBSEstimate int
 }
 
@@ -687,10 +687,10 @@ func (lci *LazyCarryInteger) GetMetrics() PerformanceMetrics {
 	}
 
 	return PerformanceMetrics{
-		TotalAdditions:        lci.OpsWithoutPropagate,
-		PropagationCount:      0, // This value, not counting historical
-		PBSOperations:         lazyPBS,
-		AmortizationRatio:     ratio,
+		TotalAdditions:         lci.OpsWithoutPropagate,
+		PropagationCount:       0, // This value, not counting historical
+		PBSOperations:          lazyPBS,
+		AmortizationRatio:      ratio,
 		TraditionalPBSEstimate: traditionalPBS,
 	}
 }

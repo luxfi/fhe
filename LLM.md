@@ -221,12 +221,12 @@ PASS - ok  github.com/luxfi/fhe  35.876s
 - [x] OpenFHE CGO backend (C++ bridge + Go bindings)
 - [x] GitHub Actions CI workflow
 
-### CGO Backend
-The OpenFHE CGO backend provides optional C++ acceleration:
-- `cgo/tfhe_bridge.h` - C header defining the API
-- `cgo/tfhe_bridge.cpp` - Full C++ implementation with OpenFHE bindings
-- `cgo/openfhe.go` - Go CGO wrapper (build with `-tags "cgo openfhe"`)
-- `cgo/openfhe_test.go` - Comprehensive tests for CGO backend
+### CGO Backend (Primary GPU Path)
+The CGO backend provides GPU-accelerated FHE via C++ (`luxcpp/fhe`):
+- `cgo/fhe.go` - ~1000 lines of thin CGO wrappers
+- `cgo/tfhe_bridge.h` - C header for the C++ bridge
+- Links to `libFHEbin`, `libFHEpke`, `libFHEcore` with Metal/CUDA support
+- All gate operations run on GPU automatically
 
 ## Benchmark Comparison (Apple M1 Max)
 
@@ -498,149 +498,110 @@ func (p *FHEPrecompile) Add(input []byte) ([]byte, error) {
 }
 ```
 
-## GPU FHE Engine (luxfi/gpu Backend)
+## GPU Acceleration (C++ First Architecture)
 
-Massively parallel FHE engine using luxfi/gpu (Metal + CUDA + CPU backends).
-
-### Performance
-
-| Configuration | Throughput | Notes |
-|--------------|------------|-------|
-| Apple M3 Max | ~60K gates/sec | Metal backend |
-| Single H100 | ~180K gates/sec | CUDA backend |
-| Single H200 | ~250K gates/sec | CUDA backend |
-| **HGX H200 x8** | **~1.5M gates/sec** | Multi-GPU NVLink |
+GPU acceleration is handled entirely in C++ (`luxcpp/fhe`) with Go bindings via CGO.
 
 ### Architecture
 
 ```
-GPU FHE Engine
-    │
-    ├── Multi-Tenant Management
-    │   ├── UserSession      - Isolated per-user context
-    │   ├── BootstrapKeyGPU  - User's BK in GPU memory [n, 2, L, 2, N]
-    │   └── KeySwitchKeyGPU  - User's KSK in GPU memory
-    │
-    ├── GPU Memory Layout (Structure of Arrays)
-    │   ├── LWECiphertextGPU  - Batch of LWE: a[B, n], b[B]
-    │   ├── RLWECiphertextGPU - Batch of RLWE: c0[B, N], c1[B, N]
-    │   └── All data in NTT domain for fast polynomial ops
-    │
-    ├── Fused GPU Kernels
-    │   ├── batchNTT           - Parallel NTT on all polynomials
-    │   ├── batchExternalProduct - Fused decompose→mul→acc
-    │   ├── batchBlindRotate   - Parallel blind rotation
-    │   └── batchBootstrap     - Full PBS pipeline
-    │
-    └── Batch Scheduler
-        ├── BatchPBSScheduler  - Groups operations by gate type
-        └── GPUCircuitEvaluator - High-level integer ops
+luxcpp/
+├── gpu/          ← Foundation (MLX/Metal/CUDA)
+├── lattice/      ← NTT acceleration (uses gpu)
+├── fhe/          ← TFHE/CKKS/BGV (uses lattice)
+│   └── Metal Shaders:
+│       ├── ntt_kernels.metal
+│       ├── fhe_kernels.metal
+│       ├── external_product_fused.metal
+│       ├── four_step_ntt.metal
+│       ├── bsk_prefetch.metal
+│       └── scheme_switch.metal
+│
+└── crypto/       ← BLS pairings (uses gpu directly)
+
+luxfi/fhe (Go)
+└── cgo/          ← Thin CGO bindings to luxcpp/fhe
+    ├── fhe.go    ← ~1000 lines of thin wrappers
+    └── tfhe_bridge.h
 ```
 
-### Configuration
+### Key Points
 
-```cpp
-FHEConfig config;
-config.N = 1024;           // Ring dimension
-config.n = 512;            // LWE dimension
-config.L = 4;              // Decomposition digits (reduced from 7)
-config.maxUsers = 10000;   // Concurrent users
-config.gpuMemoryBudget = 100ULL * 1024 * 1024 * 1024;  // 100GB
-```
+1. **All GPU code in C++**: No Go GPU reimplementation - removed redundant `engine/` package
+2. **Thin CGO bindings**: Go just wraps C++ calls, ~10-20ms per gate
+3. **Metal + CUDA support**: Handled in C++ via luxcpp/gpu (MLX backend)
+4. **Automatic backend detection**: C++ detects Metal (macOS) or CUDA (Linux)
+
+### Performance (Apple M1 Max via CGO)
+
+| Operation | Latency | Notes |
+|-----------|---------|-------|
+| Context creation | <1ms | Fast init |
+| Key generation | 240ms | Bootstrap key included |
+| AND/OR/NAND/NOR | ~10-20ms | GPU-accelerated |
+| XOR/XNOR | ~10-20ms | GPU-accelerated |
+| NOT | <1ms | Free operation |
 
 ### Usage
 
-```cpp
-// Initialize engine
-FHEEngine engine(config);
-engine.initialize();
-
-// Create user session
-uint64_t userId = engine.createUser();
-engine.uploadBootstrapKey(userId, bskData);
-
-// Allocate ciphertexts on GPU
-uint32_t poolIdx = engine.allocateCiphertexts(userId, 1000);
-engine.uploadCiphertexts(userId, poolIdx, ciphertexts);
-
-// Batch gate operations
-BatchPBSScheduler scheduler(&engine);
-scheduler.queueGate(userId, GateType::AND, ct1, ct2, result);
-scheduler.queueGate(userId, GateType::XOR, ct3, ct4, result2);
-scheduler.flush();  // Execute all at once
-```
-
-### Performance Targets
-
-| Metric | Target |
-|--------|--------|
-| Concurrent users | 10,000+ |
-| GPU memory | 100GB+ |
-| Batch size | 256+ operations |
-| Bootstrap keys per user | ~170 MB |
-| Latency (1000 gates) | <1s |
-
-### Key Optimizations
-
-1. **L=4 Decomposition**: Reduced from L=7, ~1.75× faster
-2. **NTT Domain**: All BK stored in NTT for O(N) instead of O(N log N) per multiply
-3. **SoA Layout**: Structure of Arrays for coalesced GPU memory access
-4. **Fused Kernels**: External product fused with decomposition and accumulation
-5. **Zero CPU Roundtrips**: Entire PBS chain executes on GPU
-
-### Backend Support
-
-**luxfi/gpu** provides multi-backend support via `gpu::core::{metal,cuda}::is_available()`.
-
 ```go
-import "github.com/luxfi/fhe/gpu"
+import "github.com/luxfi/fhe/cgo"
 
-// Auto-detects: Metal (macOS) → CUDA (Linux/Windows) → CPU (fallback)
-engine, _ := gpu.New(gpu.DefaultConfig())
+// Create GPU-accelerated context
+ctx, _ := cgo.NewContext(cgo.SecuritySTD128, cgo.MethodGINX)
+defer ctx.Free()
 
-// Check what's running
-stats := engine.GetStats()
-fmt.Printf("Backend: %s, Device: %s\n", stats.Backend, stats.DeviceName)
+// Generate keys (uses Metal/CUDA internally)
+sk, _ := ctx.GenerateSecretKey()
+ctx.GenerateBootstrapKey(sk)
+
+// GPU-accelerated gate operations
+ct1, _ := ctx.EncryptBit(sk, true)
+ct2, _ := ctx.EncryptBit(sk, false)
+result, _ := ctx.And(ct1, ct2)  // Runs on GPU
+
+// Integer operations
+int1, _ := ctx.EncryptInteger(sk, 42, 8)
+int2, _ := ctx.EncryptInteger(sk, 10, 8)
+sum, _ := ctx.Add(int1, int2)  // GPU-accelerated
 ```
 
-Backend support:
-| Platform | Backend | Notes |
-|----------|---------|-------|
-| Apple Silicon (M1/M2/M3/M4) | Metal | Via MLX Metal backend |
-| NVIDIA GPUs | CUDA | Via MLX CUDA backend |
-| CPU | Fallback | Pure Go or MLX CPU |
+### Build Requirements
 
-**Note:** Multi-GPU configurations (HGX H200 x8) with NVLink/NCCL optimizations
-are maintained in `~/work/luxnext` for patent reasons.
+```bash
+# 1. Build MLX in luxcpp/gpu (foundation layer)
+cd ~/work/luxcpp/gpu
+mkdir build && cd build
+cmake .. -DMLX_BUILD_TESTS=OFF
+make -j$(sysctl -n hw.ncpu)
+mkdir -p ../install/lib
+cp libmlx.dylib mlx.metallib ../install/lib/
 
-### Files
+# 2. Build FHE library (links to MLX)
+cd ~/work/luxcpp/fhe
+mkdir build && cd build
+cmake .. -DWITH_MLX=ON
+make -j$(sysctl -n hw.ncpu)
+make install  # Installs to luxcpp/fhe/install/
 
-**Go API** (recommended):
-- `gpu/engine.go` - Unified GPU FHE engine using luxfi/gpu
-- `gpu/multigpu.go` - Multi-GPU orchestration (CUDA with NVLink/NCCL)
-- `gpu/multigpu_stub.go` - Stub for non-CUDA platforms
+# 3. Go CGO bindings work automatically
+cd ~/work/lux/fhe
+CGO_ENABLED=1 go test ./cgo/...
+```
 
-**C++ Backend** (advanced):
-- Header: `fhe/src/core/include/math/hal/gpu/fhe.h`
-- Implementation: `fhe/src/core/lib/math/hal/gpu/fhe.cpp`
-- Metal Shaders: `fhe/src/core/lib/math/hal/gpu/fhe_kernels.metal`
-- CUDA Backend: `fhe/src/core/lib/math/hal/gpu/fhe_cuda.cu`
+### Library Dependency Chain
 
-### Multi-GPU Support (HGX H200 x8)
+```
+luxfi/fhe/cgo (Go)
+    ↓ CGO links to
+luxcpp/fhe/install/lib/libFHE*.dylib
+    ↓ rpath links to
+luxcpp/gpu/install/lib/libmlx.dylib
+```
 
-Single-GPU CUDA support is in `luxfi/gpu`. Advanced multi-GPU with NVLink is in `~/work/luxnext`.
-
-**luxnext features** (patent-protected):
-- 8x H200 with NVLink (900 GB/s per link)
-- NCCL for collective operations
-- User distribution across GPUs
-- Optimized memory layout for NVSwitch
-
-| GPUs | Throughput | Memory | Max Users |
-|------|------------|--------|-----------|
-| 1 H200 | ~250K gates/sec | 141GB | 800 |
-| 4 H200 | ~1M gates/sec | 564GB | 3,200 |
-| 8 H200 | ~1.5M gates/sec | 1.1TB | 6,400 |
+Install locations:
+- `luxcpp/gpu/install/lib/` - MLX dylib + Metal shaders
+- `luxcpp/fhe/install/lib/` - FHE libs (libFHEcore, libFHEbin, libFHEpke)
 
 ## Build
 

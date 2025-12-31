@@ -65,8 +65,8 @@ type ThresholdRNG struct {
 	config   *ThresholdRNGConfig
 
 	// Fallback state
-	fallbackMu sync.Mutex
-	fallbackState [32]byte
+	fallbackMu      sync.Mutex
+	fallbackState   [32]byte
 	fallbackCounter uint64
 
 	// Cache for recent randomness requests
@@ -285,7 +285,7 @@ const DefaultThreshold = 4
 // CalculateThreshold returns the minimum threshold for a given percentage and party count.
 // For example: CalculateThreshold(69, 5) returns 4 (since ceil(5 * 0.69) = 4).
 func CalculateThreshold(percentRequired int, numParties int) int {
-	required := (numParties * percentRequired + 99) / 100 // Ceiling division
+	required := (numParties*percentRequired + 99) / 100 // Ceiling division
 	if required < 1 {
 		return 1
 	}

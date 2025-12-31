@@ -10,7 +10,8 @@
 // - Key management
 //
 // Run as sidecar for Solidity stack:
-//   fhe-server -addr :8448 -gpu
+//
+//	fhe-server -addr :8448 -gpu
 package main
 
 import (
