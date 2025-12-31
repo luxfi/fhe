@@ -7,10 +7,11 @@
 package cgo
 
 /*
-#cgo CXXFLAGS: -std=c++17 -O3 -I${SRCDIR}/../../../luxcpp/fhe/install/include/openfhe -I${SRCDIR}/../../../luxcpp/fhe/install/include/openfhe/core -I${SRCDIR}/../../../luxcpp/fhe/install/include/openfhe/binfhe -I${SRCDIR}/../../../luxcpp/fhe/install/include/openfhe/pke
-#cgo darwin LDFLAGS: -L${SRCDIR}/../../../luxcpp/fhe/install/lib -Wl,-rpath,${SRCDIR}/../../../luxcpp/fhe/install/lib -Wl,-rpath,${SRCDIR}/../../../luxcpp/fhe/.venv/lib/python3.12/site-packages/mlx/lib -lFHEbin -lFHEpke -lFHEcore -framework Accelerate -framework Metal -framework MetalPerformanceShaders -lstdc++
-#cgo linux LDFLAGS: -L${SRCDIR}/../../../luxcpp/fhe/install/lib -lFHEbin -lFHEpke -lFHEcore -lstdc++
-#cgo windows LDFLAGS: -L${SRCDIR}/../../../luxcpp/fhe/install/lib -lFHEbin -lFHEpke -lFHEcore -lstdc++
+#cgo pkg-config: lux-fhe
+#cgo CXXFLAGS: -std=c++17 -O3
+#cgo darwin LDFLAGS: -framework Accelerate -framework Metal -framework MetalPerformanceShaders -lstdc++
+#cgo linux LDFLAGS: -lstdc++
+#cgo windows LDFLAGS: -lstdc++
 
 #include "tfhe_bridge.h"
 #include <stdlib.h>
