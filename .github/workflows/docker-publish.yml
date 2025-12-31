@@ -22,11 +22,11 @@ jobs:
       matrix:
         include:
           - target: server
-            image: luxfi/fhe
+            image: luxfi/fhe/server
           - target: gateway
-            image: luxfi/fhe-gateway
+            image: luxfi/fhe/gateway
           - target: worker
-            image: luxfi/fhe-worker
+            image: luxfi/fhe/worker
 
     steps:
       - name: Checkout
