@@ -205,9 +205,9 @@ func TestThresholdRNGNoFallback(t *testing.T) {
 
 func TestCalculateThreshold(t *testing.T) {
 	tests := []struct {
-		percent   int
-		parties   int
-		expected  int
+		percent  int
+		parties  int
+		expected int
 	}{
 		{69, 5, 4},    // 4/5 = 80% >= 69%
 		{69, 100, 69}, // 69/100 = 69%
