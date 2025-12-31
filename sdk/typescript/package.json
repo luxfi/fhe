@@ -1,6 +1,6 @@
 {
   "name": "@luxfi/fhe",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "TypeScript bindings for LuxFHE - Fully Homomorphic Encryption",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
