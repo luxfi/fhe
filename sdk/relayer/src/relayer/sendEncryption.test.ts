@@ -1,0 +1,434 @@
+import {
+  createRelayerEncryptedInput,
+  currentCiphertextVersion,
+  RelayerEncryptedInput,
+} from './sendEncryption';
+import { publicKey, publicParams } from '../test';
+import fetchMock from 'fetch-mock';
+import { createRelayerProvider } from '../relayer-provider/createRelayerFhevm';
+import { InvalidPropertyError } from '../errors/InvalidPropertyError';
+import { TEST_CONFIG } from '../test/config';
+import { FhevmHandle } from '../sdk/FhevmHandle';
+import { FhevmInstanceOptions } from '../types/relayer';
+
+// Jest Command line
+// =================
+// npx jest --colors --passWithNoTests ./src/relayer/sendEncryption.test.ts --testNamePattern=xxx
+// npx jest --colors --passWithNoTests ./src/relayer/sendEncryption.test.ts
+// npx jest --colors --passWithNoTests --coverage ./src/relayer/sendEncryption.test.ts --collectCoverageFrom=./src/relayer/sendEncryption.ts --testNamePattern=xxx
+// npx jest --colors --passWithNoTests --coverage ./src/relayer/sendEncryption.test.ts --collectCoverageFrom=./src/relayer/sendEncryption.ts
+//
+// Devnet:
+// =======
+// npx jest --config jest.devnet.config.cjs --colors --passWithNoTests ./src/relayer/sendEncryption.test.ts
+//
+
+const aclContractAddress = TEST_CONFIG.fhevmInstanceConfig.aclContractAddress;
+const verifyingContractAddressInputVerification =
+  TEST_CONFIG.fhevmInstanceConfig.verifyingContractAddressInputVerification;
+const chainId = TEST_CONFIG.fhevmInstanceConfig.chainId!;
+const gatewayChainId = TEST_CONFIG.fhevmInstanceConfig.gatewayChainId;
+const relayerProvider = createRelayerProvider(TEST_CONFIG.v1.urls.base, 1);
+
+const autoMock = (
+  input: RelayerEncryptedInput,
+  opts?: FhevmInstanceOptions,
+) => {
+  fetchMock.postOnce(relayerProvider.inputProof, function (params: any) {
+    if (opts?.auth) {
+      switch (opts.auth.__type) {
+        case 'BearerToken':
+          if (
+            params.options.headers['Authorization'] !==
+            `Bearer ${opts.auth.token}`
+          ) {
+            return { status: 401 };
+          }
+          break;
+
+        case 'ApiKeyHeader':
+          if (
+            params.options.headers[opts.auth.header || 'x-api-key'] !==
+            opts.auth.value
+          ) {
+            return { status: 401 };
+          }
+          break;
+
+        case 'ApiKeyCookie':
+          if (
+            params.options.headers['Cookie'] !==
+            `${opts.auth.cookie || 'x-api-key'}=${opts.auth.value};`
+          ) {
+            return { status: 401 };
+          }
+          break;
+      }
+    }
+    const body = JSON.parse(params.options.body);
+    const ciphertextWithInputVerification: string =
+      body.ciphertextWithInputVerification;
+    const options = {
+      params: { ciphertextWithInputVerification },
+    };
+
+    const handles = FhevmHandle.fromZKProof({
+      ciphertextWithZKProof: ciphertextWithInputVerification as `0x${string}`,
+      aclAddress: aclContractAddress as `0x{string}`,
+      chainId,
+      fheTypeEncryptionBitwidths: input.getBits(),
+      ciphertextVersion: currentCiphertextVersion(),
+    }).map((handle: FhevmHandle) => handle.toBytes32Hex());
+
+    return {
+      options: options,
+      response: {
+        handles: handles,
+        signatures: [],
+      },
+    };
+  });
+};
+
+const describeIfFetchMock =
+  TEST_CONFIG.type === 'fetch-mock' ? describe : describe.skip;
+
+const consoleLogSpy = jest
+  .spyOn(console, 'log')
+  .mockImplementation((message) => {
+    process.stdout.write(`${message}\n`);
+  });
+
+describeIfFetchMock('encrypt', () => {
+  beforeEach(() => {
+    fetchMock.removeRoutes();
+  });
+
+  afterAll(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it('encrypt', async () => {
+    const input = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    input.addBool(false);
+    input.add8(BigInt(43));
+    input.add16(BigInt(87));
+    input.add32(BigInt(2339389323));
+    input.add64(BigInt(23393893233));
+    input.add128(BigInt(233938932390));
+    input.addAddress('0xa5e1defb98EFe38EBb2D958CEe052410247F4c80');
+    input.add256(BigInt('2339389323922393930'));
+    autoMock(input);
+    const { inputProof, handles } = await input.encrypt();
+    expect(inputProof).toBeDefined();
+    expect(handles.length).toBe(8);
+  }, 60000);
+
+  it('encrypt one 0 value', async () => {
+    const input = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    input.add128(BigInt(0));
+    autoMock(input);
+    const { inputProof, handles } = await input.encrypt();
+    expect(inputProof).toBeDefined();
+    expect(handles.length).toBe(1);
+  });
+
+  it('throws errors', async () => {
+    expect(() =>
+      createRelayerEncryptedInput(
+        aclContractAddress,
+        verifyingContractAddressInputVerification,
+        chainId,
+        gatewayChainId,
+        relayerProvider,
+        publicKey,
+        publicParams,
+        [],
+        0,
+      )('0xa5e1defb98EFe38EBb2D958CEe052410247F4c80', '0'),
+    ).toThrow('User address is not a valid address.');
+    expect(() =>
+      createRelayerEncryptedInput(
+        aclContractAddress,
+        verifyingContractAddressInputVerification,
+        chainId,
+        gatewayChainId,
+        relayerProvider,
+        publicKey,
+        publicParams,
+        [],
+        0,
+      )('0x0', '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80'),
+    ).toThrow('Contract address is not a valid address.');
+
+    expect(() =>
+      createRelayerEncryptedInput(
+        aclContractAddress,
+        verifyingContractAddressInputVerification,
+        chainId,
+        gatewayChainId,
+        relayerProvider,
+        publicKey,
+        publicParams,
+        [],
+        0,
+      )(
+        '0x8ba1f109551bd432803012645ac136ddd64dba72',
+        '0xa5e1defb98EFe38EBb2D958CEe052410247F4c',
+      ),
+    ).toThrow('User address is not a valid address.');
+
+    const input = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    expect(() => input.addBool('hello' as any)).toThrow(
+      'The value must be a boolean, a number or a bigint.',
+    );
+    expect(() => input.addBool({} as any)).toThrow(
+      'The value must be a boolean, a number or a bigint.',
+    );
+    expect(() => input.addBool(29393 as any)).toThrow(
+      'The value must be 1 or 0.',
+    );
+    expect(() => input.add8(2 ** 8)).toThrow(
+      'The value exceeds the limit for 8bits integer (255)',
+    );
+    expect(() => input.add16(2 ** 16)).toThrow(
+      `The value exceeds the limit for 16bits integer (65535).`,
+    );
+    expect(() => input.add32(2 ** 32)).toThrow(
+      'The value exceeds the limit for 32bits integer (4294967295).',
+    );
+    expect(() => input.add64(BigInt('0xffffffffffffffff') + BigInt(1))).toThrow(
+      'The value exceeds the limit for 64bits integer (18446744073709551615).',
+    );
+    expect(() =>
+      input.add128(BigInt('0xffffffffffffffffffffffffffffffff') + BigInt(1)),
+    ).toThrow(
+      'The value exceeds the limit for 128bits integer (340282366920938463463374607431768211455).',
+    );
+
+    expect(() => input.addAddress('0x00')).toThrow(
+      'The value must be a valid address.',
+    );
+  });
+
+  it('throws if total bits is above 2048', async () => {
+    const input2 = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    input2.add256(242);
+    input2.add256(242);
+    input2.add256(242);
+    input2.add256(242);
+    input2.add256(242);
+    input2.add256(242);
+    input2.add256(242);
+    input2.add256(242);
+    expect(() => input2.addBool(false)).toThrow(
+      'Packing more than 2048 bits in a single input ciphertext is unsupported',
+    );
+  });
+
+  it('throws if incorrect handles list size', async () => {
+    const input = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    input.add128(BigInt(0));
+    autoMock(input);
+    const input2 = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    input2.add128(BigInt(0));
+    input2.add128(BigInt(0));
+    await expect(input2.encrypt()).rejects.toThrow(
+      'Incorrect Handles list sizes: (expected) 2 != 1 (received)',
+    );
+  });
+
+  it('throws if incorrect handle', async () => {
+    const input = createRelayerEncryptedInput(
+      aclContractAddress,
+      verifyingContractAddressInputVerification,
+      chainId,
+      gatewayChainId,
+      relayerProvider,
+      publicKey,
+      publicParams,
+      [],
+      0,
+    )(
+      '0x8ba1f109551bd432803012645ac136ddd64dba72',
+      '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+    );
+    input.add128(BigInt(1));
+    fetchMock.postOnce(relayerProvider.inputProof, (params: any) => {
+      const body = JSON.parse(params.options.body);
+      const ciphertextWithInputVerification: string =
+        body.ciphertextWithInputVerification;
+      const options = {
+        params: { ciphertextWithInputVerification },
+      };
+      return {
+        options: options,
+        response: {
+          handles: [
+            '0x0034ab0034ab00340034abe034cb00340034ab0034ab00340034ab0934ab0034',
+          ],
+          signatures: ['dead3232'],
+        },
+      };
+    });
+    await expect(input.encrypt()).rejects.toThrow(
+      new InvalidPropertyError({
+        objName: 'fetchPostInputProof()',
+        property: 'signatures',
+        index: 0,
+        expectedType: 'Bytes65Hex',
+        type: 'string',
+      }),
+    );
+  });
+
+  describe('when api keys are enabled', () => {
+    it('returns Unauthorized if api key is invalid', async () => {
+      const input = createRelayerEncryptedInput(
+        aclContractAddress,
+        verifyingContractAddressInputVerification,
+        chainId,
+        gatewayChainId,
+        relayerProvider,
+        publicKey,
+        publicParams,
+        [],
+        0,
+      )(
+        '0x8ba1f109551bd432803012645ac136ddd64dba72',
+        '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+      );
+      autoMock(input, {
+        auth: { __type: 'ApiKeyHeader', value: 'my-api-key' },
+      });
+      expect(
+        input.encrypt({
+          auth: { __type: 'ApiKeyHeader', value: 'my-wrong-api-key' },
+        }),
+      ).rejects.toThrow(/Unauthorized/);
+    });
+
+    it('returns Unauthorized if the api key is missing', async () => {
+      const input = createRelayerEncryptedInput(
+        aclContractAddress,
+        verifyingContractAddressInputVerification,
+        chainId,
+        gatewayChainId,
+        relayerProvider,
+        publicKey,
+        publicParams,
+        [],
+        0,
+      )(
+        '0x8ba1f109551bd432803012645ac136ddd64dba72',
+        '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+      );
+      autoMock(input, {
+        auth: { __type: 'ApiKeyHeader', value: 'my-api-key' },
+      });
+      expect(input.encrypt()).rejects.toThrow(/Unauthorized/);
+    });
+
+    it('returns ok if the api key is valid', async () => {
+      const input = createRelayerEncryptedInput(
+        aclContractAddress,
+        verifyingContractAddressInputVerification,
+        chainId,
+        gatewayChainId,
+        relayerProvider,
+        publicKey,
+        publicParams,
+        [],
+        0,
+      )(
+        '0x8ba1f109551bd432803012645ac136ddd64dba72',
+        '0xa5e1defb98EFe38EBb2D958CEe052410247F4c80',
+      );
+      autoMock(input, {
+        auth: { __type: 'ApiKeyHeader', value: 'my-api-key' },
+      });
+      const { inputProof } = await input.encrypt({
+        auth: { __type: 'ApiKeyHeader', value: 'my-api-key' },
+      });
+      expect(inputProof).toBeDefined();
+    });
+  });
+});

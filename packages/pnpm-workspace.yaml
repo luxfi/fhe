@@ -1,0 +1,13 @@
+packages:
+  - 'wasm'
+  - 'kms'
+  - 'luxfhejs'
+  - 'hardhat-plugin'
+  - 'hardhat-docker'
+  - 'hardhat-network'
+  - '../js/v2-sdk'
+  - '../js/permit'
+  - 'contracts'
+  - '../mocks/foundry'
+  - '../relayer-sdk'
+  - '../examples/*'
