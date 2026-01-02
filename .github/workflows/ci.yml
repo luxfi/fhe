@@ -159,14 +159,22 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Install dependencies
+      - name: Install npm dependencies
+        working-directory: mocks/foundry
+        run: npm install
+
+      - name: Install forge dependencies
         working-directory: mocks/foundry
         run: |
           forge install foundry-rs/forge-std --no-commit || true
-          forge install luxfi/contracts --no-commit || true
 
       - name: Build contracts
         working-directory: mocks/foundry
