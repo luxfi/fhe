@@ -1,0 +1,244 @@
+name: Python package
+
+on: [pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+  SLAB_PROFILE: single-t4-gpu
+
+jobs:
+  setup-ec2:
+    name: Setup EC2 instance
+    runs-on: ubuntu-latest
+    outputs:
+      runner-name: ${{ steps.start-instance.outputs.label }}
+    steps:
+      - name: Start instance
+        id: start-instance
+        uses: luxfhe-ai/slab-github-runner@801df0b8db5ea2b06128b7476c652f5ed5f193a8
+        with:
+          mode: start
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          backend: aws
+          profile: ${{ env.SLAB_PROFILE }}
+
+  build:
+    needs: [setup-ec2]
+    runs-on: ${{ needs.setup-ec2.outputs.runner-name }}
+
+    strategy:
+      fail-fast: false
+      # explicit include-based build matrix, of known valid options
+      matrix:
+        python-version: ["3.8"] # We limit to 3.8 for now to limit time spent      
+        include:
+          - os: ubuntu-22.04
+            cuda: "12.2"
+            gcc: 11
+    env:
+      CUDA_PATH: /usr/local/cuda-${{ matrix.cuda }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Export CUDA variables
+        if: ${{ !cancelled() }}
+        run: |
+          echo "CUDA_PATH=$CUDA_PATH" >> "${GITHUB_ENV}"
+          echo "$CUDA_PATH/bin" >> "${GITHUB_PATH}"
+          echo "LD_LIBRARY_PATH=$CUDA_PATH/lib:$LD_LIBRARY_PATH" >> "${GITHUB_ENV}"
+          echo "CUDACXX=/usr/local/cuda-${{ matrix.cuda }}/bin/nvcc" >> "${GITHUB_ENV}"
+
+      - name: Install latest stable
+        uses: dtolnay/rust-toolchain@315e265cd78dad1e1dcf3a5074f6d6c47029d5aa
+        with:
+          toolchain: stable
+
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # You can test your matrix by printing the current Python version
+      - name: Install dependencies
+        run: 
+          python -m pip install "poetry==1.8.3"
+
+          python -m poetry install --all-extras --no-root
+
+
+      - name: Build package CUDA
+        run: 
+          python -m poetry run maturin develop --release --features cuda
+
+      - name: CUDA check
+        run:
+          nvidia-smi
+
+          scripts/print_cuda_infos.sh
+
+      - name: Run CUDA tests
+        run:
+          make pytest
+
+      - name: Build package CPU
+        run:
+          python -m poetry run maturin develop --no-default-features --features "python_bindings" --release
+
+      - name: Run CPU tests
+        run: 
+          make pytest
+
+      - name: Install docker dependencies
+        run: 
+          docker pull sameli/manylinux_2_34_x86_64_cuda_12.8
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          args: --release --out dist -i python3.8
+          sccache: 'false'
+          manylinux: auto
+          docker-options: --gpus all
+          container: sameli/manylinux_2_34_x86_64_cuda_12.8
+          before-script-linux: |
+            yum install -y clang 
+
+  teardown-ec2:
+    name: Teardown EC2 instance (fast-tests)
+    if: ${{ always() }}
+    needs: [ setup-ec2, build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop instance
+        id: stop-instance
+        uses: luxfhe-ai/slab-github-runner@801df0b8db5ea2b06128b7476c652f5ed5f193a8
+        with:
+          mode: stop
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          label: ${{ needs.setup-ec2.outputs.runner-name }}
+
+  build-macos:
+    name: Build for Python on macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Install latest stable
+        uses: dtolnay/rust-toolchain@315e265cd78dad1e1dcf3a5074f6d6c47029d5aa
+        with:
+          toolchain: stable
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+
+      # You can test your matrix by printing the current Python version
+      - name: Install dependencies
+        run: 
+          python -m pip install "poetry==1.8.3"
+
+          python -m poetry install --all-extras --no-root
+
+      - name: Build package CPU
+        run: 
+          python -m poetry run maturin develop --no-default-features --features "python_bindings" --release
+
+      - name: Run MAC CPU tests
+        run:
+          make pytest
+
+  build-ios:
+    name: Build For iOS on macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Install latest stable
+        uses: dtolnay/rust-toolchain@315e265cd78dad1e1dcf3a5074f6d6c47029d5aa
+        with:
+          toolchain: stable
+
+      - name: Install Swift Rust targets
+        run: |
+          rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+
+      - name: Build package CPU
+        run: |
+          cd rust
+          cargo build --no-default-features --features "swift_bindings" --lib --release --target aarch64-apple-ios
+          cargo build --no-default-features --features "swift_bindings" --lib --release --target aarch64-apple-ios-sim          
+          cargo run \
+            --bin uniffi-bindgen \
+            --no-default-features \
+            --features "uniffi/cli swift_bindings" generate \
+            --library target/aarch64-apple-ios/release/libconcrete_ml_extensions.dylib \
+            --language swift \
+            --out-dir GENERATED/
+          
+          mkdir -p GENERATED/include
+          mv GENERATED/concrete_ml_extensionsFFI.modulemap GENERATED/include/module.modulemap
+          mv GENERATED/concrete_ml_extensionsFFI.h GENERATED/include/concrete_ml_extensionsFFI.h
+  
+          xcodebuild -create-xcframework \
+            -library target/aarch64-apple-ios/release/libconcrete_ml_extensions.a \
+            -headers GENERATED/include/ \
+            -library target/aarch64-apple-ios-sim/release/libconcrete_ml_extensions.a \
+            -headers GENERATED/include/ \
+            -output GENERATED/ConcreteMLExtensions.xcframework
+
+      - name: Test iOS project compiles
+        if: false
+        run: |
+          cd ..
+          cd TestConcretMLX
+          xcodebuild -project TestConcretMLX.xcodeproj \
+                -scheme TestConcretMLX \
+                -sdk iphonesimulator \
+                -configuration Debug \
+                ARCHS="arm64" \
+                VALID_ARCHS="arm64" \
+                EXCLUDED_ARCHS="x86_64" \
+                build
+
+  test-wasm:
+    name: Test WASM Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Install latest stable
+        uses: dtolnay/rust-toolchain@315e265cd78dad1e1dcf3a5074f6d6c47029d5aa
+        with:
+          toolchain: stable
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install wasm-pack
+        run: |
+          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Run WASM tests
+        run: |
+          make wasm_test_e2e

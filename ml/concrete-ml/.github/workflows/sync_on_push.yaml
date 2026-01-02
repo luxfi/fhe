@@ -1,0 +1,32 @@
+# Sync repos
+name: Sync repos
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync-repo:
+    if: ${{ github.repository == 'luxfhe-ai/concrete-ml' }}
+    runs-on: ubuntu-24.04
+    steps:
+      # Initial action can be found here: https://github.com/wei/git-sync
+      # The issue is that it does not handle new LFS files when pushing, only the ones that are
+      # already existing ones. We therefore had to fork it and add the feature manually. In
+      # particular, trying to rewrite the action directly here as a step does not work because of
+      # some authorization issues and thus requires to further investigate on the right
+      # configuration to use. This is not needed with external actions like this one as they
+      # are specifically allowed in the repository's settings
+      - name: git-sync
+        uses: RomanBredehoft/git-sync@4cb5df92a32e6b0881903ebb4e7b2e7d5643891b
+        with:
+          source_repo: "luxfhe-ai/concrete-ml"
+          source_branch: "main"
+          destination_repo: "https://${{ secrets.BOT_USERNAME }}:${{ secrets.CONCRETE_ACTIONS_TOKEN }}@github.com/${{ secrets.SYNC_DEST_REPO }}.git"
+          destination_branch: "main"
+          push_lfs: true
