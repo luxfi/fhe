@@ -1,0 +1,101 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Check for docs
+        id: check-docs
+        run: |
+          if [ -f "docs/package.json" ]; then
+            echo "has_docs=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_docs=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        if: steps.check-docs.outputs.has_docs == 'true'
+        working-directory: docs
+        run: npm install
+
+      - name: Build docs
+        if: steps.check-docs.outputs.has_docs == 'true'
+        working-directory: docs
+        run: npm run build
+
+      - name: Upload artifact
+        if: steps.check-docs.outputs.has_docs == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Generate API docs from TypeDoc
+  api-docs:
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install TypeDoc
+        run: npm install -g typedoc
+
+      - name: Generate SDK docs
+        working-directory: js/v2-sdk
+        run: |
+          npm install
+          npx typedoc --out ../../docs/api/sdk src/index.ts || true
+
+      - name: Generate Permit docs
+        working-directory: js/permit
+        run: |
+          npm install
+          npx typedoc --out ../../docs/api/permit src/index.ts || true
