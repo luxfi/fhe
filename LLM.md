@@ -1,624 +1,462 @@
-# Lux FHE - Pure Go FHE Implementation
+# LuxFHE - Fully Homomorphic Encryption Stack
 
 ## Overview
 
-Novel FHE implementation built on our own lattice cryptography stack (`luxfi/lattice`), designed for blockchain/EVM integration with multi-GPU acceleration.
+LuxFHE (`github.com/luxfhe`) provides a complete FHE stack for Lux blockchain - JavaScript SDKs, Solidity contracts, Go/WASM backends, ML pipelines, and research implementations.
 
-**Key differentiators:**
-- Pure Go implementation from first principles using `luxfi/lattice/v6` primitives
-- Native blockchain integration (FheUint160 for addresses, FheUint256 for EVM words)
-- Multi-GPU parallelism via luxfi/gpu backend (Metal/CUDA/CPU)
-- 10,000+ concurrent user support with 100GB+ GPU memory
-- Independent implementation - no external FHE library dependencies for core operations
+## Packages
+
+| Package | Mode | Description |
+|---------|------|-------------|
+| `@luxfhe/v1-sdk` | Standard | Single-key TFHE - simpler, faster for trusted setups |
+| `@luxfhe/v2-sdk` | Threshold | Network-based TFHE - decentralized decryption |
+| `@luxfhe/wasm` | Bindings | TFHE WASM bindings (web + node via conditional exports) |
+| `@luxfhe/kms` | Bindings | KMS bindings (web + node via conditional exports) |
+
+**Canonical Contracts:** FHE contracts are published as part of `@luxfi/contracts` at `~/work/lux/standard`.
+
+```
+@luxfi/contracts/contracts/fhe/     # Canonical FHE contracts location
+├── FHE.sol                         # Core FHE library
+├── IFHE.sol                        # FHE interface and types
+├── FheOS.sol                       # FHE OS precompiles
+├── access/                         # Permissioned access control
+├── config/                         # Network configuration
+├── finance/                        # Vesting, DeFi primitives
+├── gateway/                        # Gateway for decryption
+├── governance/                     # Confidential voting
+├── token/ERC20/                    # Confidential ERC20 tokens
+└── utils/                          # Errors, debugging
+```
+
+**Sync workflow:** Development happens in `luxfhe/contracts/`, then sync to `lux/standard`:
+```bash
+cd luxfhe/contracts && pnpm sync  # Syncs to ~/work/lux/standard/contracts/fhe/
+```
+
+**Progression:** v1 → v2 shows evolution from centralized to decentralized FHE.
+
+## Directory Structure
+
+```
+luxfhe/
+├── js/                     # JavaScript SDKs
+│   ├── v1-sdk/             # @luxfhe/v1-sdk - Standard TFHE
+│   ├── v2-sdk/             # @luxfhe/v2-sdk - Threshold TFHE  
+│   └── permit/             # Permit handling utilities
+│
+├── contracts/              # @luxfhe/contracts - Solidity FHE
+│   └── contracts/
+│       ├── access/         # Access control
+│       ├── experimental/   # Experimental features
+│       ├── finance/        # DeFi primitives
+│       ├── governance/     # Voting/governance
+│       ├── token/          # ERC20/721/1155 FHE variants
+│       ├── utils/          # Utility contracts
+│       ├── FHE.sol         # Core FHE operations
+│       ├── FheOS.sol       # FHE OS interface
+│       └── IFHE.sol        # FHE types and interface
+│
+├── core/                   # Core FHE implementations
+│   ├── concrete/           # TFHE compiler (Python to FHE)
+│   ├── fhevm/              # Full-stack FHEVM framework
+│   ├── fhevm-solidity/     # FHEVM Solidity library
+│   ├── kms/                # Key Management System (Rust)
+│   └── threshold/          # Threshold FHE library (Rust)
+│
+├── sdk/                    # Additional SDKs
+│   ├── relayer/            # Relayer SDK for FHEVM protocol
+│   └── fhe/              # CoFHE SDK monorepo
+│
+├── ml/                     # Machine Learning with FHE
+│   ├── concrete-ml/        # ML with FHE (Python)
+│   ├── biometrics/         # FHE biometrics demo
+│   └── extensions/         # Concrete ML extensions
+│
+├── go/                     # Go implementations
+│   └── tfhe/               # Go TFHE bindings + server
+│       └── cmd/            # CLI tools
+│
+├── wasm/                   # WebAssembly
+│   └── tfhe/               # TFHE WASM bindings
+│
+├── examples/               # 25+ reference implementations
+│   ├── blind-auction/      # [v1] Blind auction demo
+│   ├── blind-auction-v2/   # [v2] Blind auction (threshold)
+│   ├── binary-guessing/    # Binary number guessing game
+│   ├── confidential-contracts/ # Confidential contract patterns
+│   ├── confidential-voting/ # [v1] Private voting
+│   ├── dapps/              # Multi-dapp monorepo
+│   ├── demo-v2/            # v2 SDK demo (Nuxt)
+│   ├── encrypto/           # Foundry-based FHE examples
+│   ├── erc20-tutorial/     # [v1] FHE ERC20 tutorial
+│   ├── fhe-voting/         # FHE voting implementation
+│   ├── ios-demo/           # iOS FHE demo app
+│   ├── kuhn-poker/         # FHE Kuhn poker variant
+│   ├── playground/         # [v1] Interactive demo
+│   ├── poker/              # [v1] FHE Kuhn poker
+│   ├── redact/             # Data redaction example
+│   ├── rng-game/           # [v1] Random number guessing
+│   ├── rps-game/           # [v2] Rock-paper-scissors
+│   ├── secret-santa/       # [v2] Secret Santa
+│   ├── smart-wallet/       # [v1] Smart wallet POC
+│   ├── ticket-manager/     # Ticket management (Nuxt)
+│   ├── ticketing/          # Ticket contracts
+│   ├── tickets/            # Ticket UI (Nuxt)
+│   └── voting/             # FHE voting demo
+│
+├── templates/              # Project starters
+│   ├── fhevm-hardhat/      # Hardhat + FHEVM
+│   ├── foundry/            # Foundry template
+│   ├── hardhat/            # Basic hardhat
+│   ├── hardhat-starter/    # Hardhat quickstart
+│   ├── miniapp/            # Mini-app template
+│   ├── next/               # Next.js template
+│   ├── nuxt/               # Nuxt.js template
+│   ├── react/              # React template
+│   ├── scaffold-eth/       # Scaffold-ETH2 + FHE
+│   ├── ui/                 # UI component templates
+│   └── vue/                # Vue.js template
+│
+├── plugins/                # Development plugins
+│   ├── hardhat/            # Hardhat plugin
+│   └── remix/              # Remix IDE plugin
+│
+├── mocks/                  # Mock contracts for testing
+│   ├── fhe/              # CoFHE mock contracts
+│   ├── fhevm/              # FHEVM mocks
+│   └── foundry/            # Foundry mocks
+│
+├── research/               # Research implementations
+│   ├── acm-threshold/      # ACM threshold paper code
+│   ├── ocp-fhe/            # Open compute protocol FHE
+│   ├── threshold-paper/    # Threshold FHE benchmarks
+│   └── verifiable-fhe/     # Verifiable FHE proofs
+│
+├── proto/                  # Protocol buffers
+│   └── decryption-oracle/  # Decryption oracle protos
+│
+├── docs/                   # Documentation
+│   ├── fhe/              # Threshold FHE docs (Docusaurus)
+│   ├── luxfhe/             # Legacy docs
+│   ├── resources/          # Awesome FHE resources
+│   └── workshop/           # Workshop materials
+│
+├── tests/                  # Test suites
+│   └── fhevm-suite/        # FHEVM test suite
+│
+├── scaffold-eth/           # Scaffold-ETH2 integration
+└── hardhat-plugin/         # Hardhat plugin monorepo
+```
 
 ## Architecture
 
 ```
-luxfi/fhe (Pure Go FHE)
-    │
-    ├── Core Types
-    │   ├── fhe.go            - Parameters, KeyGenerator, SecretKey, PublicKey
-    │   ├── encryptor.go      - Bit/Boolean encryption
-    │   ├── decryptor.go      - Bit/Boolean decryption
-    │   └── evaluator.go      - Boolean gates (AND, OR, XOR, NOT, NAND, NOR, MUX)
-    │
-    ├── Integer Operations
-    │   ├── integers.go       - FheUintType, Encryptor, Decryptor
-    │   ├── bitwise_integers.go - BitCiphertext, BitwiseEncryptor, BitwiseEvaluator
-    │   ├── integer_ops.go    - Add, Sub, Mul, Div, comparisons
-    │   └── shortint.go       - Small integer optimizations
-    │
-    ├── Advanced Features
-    │   ├── random.go         - FheRNG, FheRNGPublic (deterministic RNG)
-    │   └── serialization.go  - Binary serialization for keys/ciphertexts
-    │
-    ├── CGO Backend (GPU-accelerated via luxcpp/fhe)
-    │   └── cgo/
-    │       ├── fhe.go        - OpenFHE bindings with Metal/CUDA GPU support
-    │       ├── fhe_test.go   - Comprehensive tests
-    │       └── tfhe_bridge.h - C header for C++ bridge
-    │
-    └── github.com/luxfi/lattice/v6  - Cryptographic primitives
-        ├── core/rlwe         - Ring-LWE encryption
-        ├── core/rgsw         - RGSW & blind rotation
-        └── ring              - Polynomial ring operations
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         JavaScript Applications                         │
+├────────────────────────────┬────────────────────────────────────────────┤
+│   @luxfhe/v1-sdk           │         @luxfhe/v2-sdk                     │
+│   (Standard TFHE)          │         (Threshold TFHE)                   │
+│   - Single encryption key  │         - Distributed key shares (t-of-n) │
+│   - Key holder decrypts    │         - Network consensus decryption    │
+│   - Lower latency          │         - No single point of trust        │
+│   - Trusted environments   │         - Public DeFi, trustless apps     │
+├────────────────────────────┴────────────────────────────────────────────┤
+│                          @luxfhe/contracts                              │
+│                    Solidity FHE Smart Contracts                         │
+│    FHE.sol · FheOS.sol · token/* · finance/* · governance/*            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                         Core Components                                  │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐            │
+│  │   concrete/    │  │    fhevm/      │  │     kms/       │            │
+│  │ TFHE Compiler  │  │ Full Stack VM  │  │ Key Management │            │
+│  │   (Python)     │  │   (Solidity)   │  │    (Rust)      │            │
+│  └────────────────┘  └────────────────┘  └────────────────┘            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                    Backend Services                                      │
+│  ┌───────────────────────────────┐  ┌───────────────────────────────┐  │
+│  │   Go FHE Server               │  │   WASM Bindings               │  │
+│  │   ~/work/lux/tfhe/cmd/        │  │   luxfhe/wasm/tfhe            │  │
+│  │   /encrypt /decrypt /evaluate │  │   Browser-native FHE          │  │
+│  └───────────────────────────────┘  └───────────────────────────────┘  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                    Cryptographic Foundations                             │
+│     github.com/luxfi/tfhe (Pure Go)  ·  github.com/luxfi/lattice       │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Features
+## SDK Comparison
 
-### Boolean Gates
-- 2-input: AND, OR, XOR, NOT (free), NAND, NOR, XNOR, MUX
-- 3-input: AND3, OR3, NAND3, NOR3, MAJORITY (single bootstrap)
-- Full blind rotation with RGSW ciphertexts
-- Programmable bootstrapping
+### v1-sdk (Standard TFHE)
+- Single encryption key
+- Key holder performs decryption  
+- Simpler architecture
+- Lower latency
+- Best for: Trusted environments, private apps
 
-### Integer Types
-| Type | Bits | Use Case |
-|------|------|----------|
-| FheUint4 | 4 | Small values |
-| FheUint8 | 8 | Bytes |
-| FheUint16 | 16 | Short integers |
-| FheUint32 | 32 | Standard integers |
-| FheUint64 | 64 | Long integers |
-| FheUint128 | 128 | Large values |
-| FheUint160 | 160 | Ethereum addresses |
-| FheUint256 | 256 | EVM words |
+### v2-sdk (Threshold TFHE)
+- Distributed key shares (t-of-n)
+- Network consensus for decryption
+- No single point of trust
+- Requires FHE server network
+- Best for: Public DeFi, trustless apps
 
-### Integer Operations
-- Arithmetic: Add, Sub, Neg, ScalarAdd
-- Comparisons: Eq, Lt, Le, Gt, Ge, Min, Max
-- Bitwise: And, Or, Xor, Not
-- Shifts: Shl, Shr
-- Casting: CastTo
+## Examples by SDK
 
-### Public Key Encryption
-- Generate public key from secret key
-- Encrypt with public key (no secret key needed)
-- Decrypt with secret key
+**v1-sdk examples** (single-key):
+- blind-auction, confidential-voting, erc20-tutorial
+- playground, poker, rng-game, smart-wallet
 
-### Deterministic RNG
-- FheRNG - secret key encryption
-- FheRNGPublic - public key encryption
-- SHA256-based deterministic PRNG
-- Blockchain consensus compatible
+**v2-sdk examples** (threshold):
+- blind-auction-v2, rps-game, secret-santa, demo-v2
 
-## API Reference
+**Framework-agnostic** (works with both):
+- binary-guessing, confidential-contracts, dapps
+- encrypto, fhe-voting, ios-demo, kuhn-poker
+- redact, ticket-manager, ticketing, tickets, voting
 
-### Quick Start
+## Core Components
 
-```go
-import "github.com/luxfi/fhe"
+### concrete/ - TFHE Compiler
+Python-to-FHE compiler. Converts Python code with numpy operations into FHE circuits.
+- `frontends/` - Python frontend
+- `compilers/` - FHE circuit compilers
+- `backends/` - Execution backends (CPU, GPU)
 
-// Create parameters and key generator
-params, _ := fhe.NewParametersFromLiteral(fhe.PN10QP27)
-kgen := fhe.NewKeyGenerator(params)
+### fhevm/ - Full-Stack FHEVM
+Complete blockchain FHE framework:
+- `coprocessor/` - FHE coprocessor
+- `gateway-contracts/` - Gateway smart contracts
+- `protocol-contracts/` - Protocol layer
+- `sdk/` - TypeScript SDK
+- `test-suite/` - Comprehensive tests
 
-// Generate keys
-sk := kgen.GenSecretKey()
-pk := kgen.GenPublicKey(sk)
-bsk := kgen.GenBootstrapKey(sk)
+### kms/ - Key Management System
+Rust-based threshold key management:
+- `core/` - KMS core logic
+- `core-client/` - Client library
+- Docker compose files for centralized/threshold modes
 
-// Boolean operations
-enc := fhe.NewEncryptor(params, sk)
-dec := fhe.NewDecryptor(params, sk)
-eval := fhe.NewEvaluator(params, bsk, sk)
+### threshold/ - Threshold FHE Library
+Rust implementation of threshold TFHE:
+- `src/` - Core threshold logic
+- `examples/` - Usage examples
+- `benches/` - Performance benchmarks
 
-ct1 := enc.Encrypt(true)
-ct2 := enc.Encrypt(false)
-result, _ := eval.AND(ct1, ct2)
-value := dec.Decrypt(result) // false
-```
+## ML with FHE
 
-### Integer Operations
+### concrete-ml/
+Machine learning on encrypted data:
+- `src/` - Core library
+- `use_case_examples/` - Real-world ML examples
+- `benchmarks/` - Performance benchmarks
+- `docs/` - Comprehensive documentation
 
-```go
-// Bitwise integer encryption
-bitwiseEnc := fhe.NewBitwiseEncryptor(params, sk)
-bitwiseDec := fhe.NewBitwiseDecryptor(params, sk)
-bitwiseEval := fhe.NewBitwiseEvaluator(params, bsk, sk)
+### biometrics/
+FHE biometric verification demo:
+- `client/` - Client-side processing
+- `server/` - Server-side FHE operations
+- `notebooks/` - Jupyter demos
 
-// Encrypt integers
-ct1 := bitwiseEnc.EncryptUint64(42, fhe.FheUint8)
-ct2 := bitwiseEnc.EncryptUint64(10, fhe.FheUint8)
+### extensions/
+Concrete-ML extensions:
+- `rust/` - Rust accelerations
+- Additional ML operations
 
-// Operations
-sum, _ := bitwiseEval.Add(ct1, ct2)
-diff, _ := bitwiseEval.Sub(ct1, ct2)
-eq, _ := bitwiseEval.Eq(ct1, ct2)
+## Go & WASM
 
-// Decrypt
-result := bitwiseDec.DecryptUint64(sum) // 52
-```
+### go/tfhe/
+Go bindings for TFHE with FHE server:
+- `cmd/` - CLI tools and server
+- `internal/` - Internal implementations
+- `libtfhe-wrapper/` - C FFI bindings
+- `wasm-cmd/` - WASM generation tools
 
-### Public Key Encryption
+### wasm/tfhe/
+Browser-native FHE via WebAssembly:
+- `wasm-code/` - Core WASM code
+- `wasmer/` - Wasmer runtime
+- `scripts/` - Build scripts
 
-```go
-// Generate public key
-pk := kgen.GenPublicKey(sk)
+## Research
 
-// Encrypt with public key
-pubEnc := fhe.NewBitwisePublicEncryptor(params, pk)
-ct := pubEnc.EncryptUint64(42, fhe.FheUint8)
+### ocp-fhe/
+Open Compute Protocol for FHE - decentralized compute network:
+- `chain/` - Blockchain integration
+- `demo-frontend/` - Demo UI
+- `ocf/` - OCF implementation
 
-// Decrypt with secret key
-result := bitwiseDec.DecryptUint64(ct) // 42
-```
+### threshold-paper/
+Academic threshold TFHE paper implementation:
+- `benchmarks/` - Performance data
+- `src/` - Reference implementation
 
-### Random Number Generation
+### verifiable-fhe/
+Verifiable FHE proofs - proving correct FHE computation:
+- `src/` - Proof generation/verification
 
-```go
-// Secret key RNG
-seed := []byte("block_hash+tx_hash")
-rng := fhe.NewFheRNG(params, sk, seed)
-randomBit := rng.RandomBit()
-randomUint := rng.RandomUint(fhe.FheUint8)
-
-// Public key RNG
-rngPub := fhe.NewFheRNGPublic(params, pk, seed)
-randomPub := rngPub.RandomUint(fhe.FheUint8)
-
-// Reseed
-rng.Reseed(newSeed)
-```
-
-### Serialization
-
-```go
-// Serialize ciphertext
-data, _ := ct.MarshalBinary()
-
-// Deserialize
-ct2 := new(fhe.BitCiphertext)
-ct2.UnmarshalBinary(data)
-
-// Public key serialization
-pkData, _ := pk.MarshalBinary()
-pkRestored := new(fhe.PublicKey)
-pkRestored.UnmarshalBinary(pkData)
-```
-
-## Parameter Sets
-
-| Name | Security | LWE N | Ring N | Use Case |
-|------|----------|-------|--------|----------|
-| PN10QP27 | 128-bit | 1024 | 512 | Default, balanced |
-| PN11QP54 | 128-bit | 2048 | 1024 | Higher precision |
-
-## Test Results
-
-```
-=== RUN   TestBitwiseEncryptDecrypt      --- PASS
-=== RUN   TestBitwiseAdd                 --- PASS (6.50s)
-=== RUN   TestBitwiseScalarAdd           --- PASS (2.74s)
-=== RUN   TestBitwiseEq                  --- PASS (3.21s)
-=== RUN   TestBitwiseLt                  --- PASS (6.53s)
-=== RUN   TestBitwiseSub                 --- PASS (8.94s)
-=== RUN   TestBitwiseBitOps              --- PASS (1.15s)
-=== RUN   TestBitwiseShift               --- PASS (0.13s)
-=== RUN   TestBitwiseCastTo              --- PASS (0.13s)
-=== RUN   TestPublicKeyEncryption        --- PASS
-=== RUN   TestPublicKeyWithOperations    --- PASS (1.71s)
-=== RUN   TestPublicKeySerialization     --- PASS
-=== RUN   TestFheRNG                     --- PASS (6 subtests)
-=== RUN   TestFheRNGPublic               --- PASS (2 subtests)
-PASS - ok  github.com/luxfi/fhe  35.876s
-```
-
-## Implementation Status
-
-### Completed ✓
-- [x] Boolean gates with blind rotation
-- [x] Multi-input gates: AND3, OR3, NAND3, NOR3, MAJORITY
-- [x] Integer types (FheUint4-256)
-- [x] Arithmetic: Add, Sub, Neg, ScalarAdd
-- [x] Comparisons: Eq, Lt, Le, Gt, Ge, Min, Max
-- [x] Bitwise: And, Or, Xor, Not
-- [x] Shifts: Shl, Shr
-- [x] Type casting
-- [x] Public key encryption
-- [x] Deterministic RNG
-- [x] Binary serialization
-- [x] OpenFHE CGO backend (C++ bridge + Go bindings)
-- [x] GitHub Actions CI workflow
-
-### CGO Backend (Primary GPU Path)
-The CGO backend provides GPU-accelerated FHE via C++ (`luxcpp/fhe`):
-- `cgo/fhe.go` - ~1000 lines of thin CGO wrappers
-- `cgo/tfhe_bridge.h` - C header for the C++ bridge
-- Links to `libFHEbin`, `libFHEpke`, `libFHEcore` with Metal/CUDA support
-- All gate operations run on GPU automatically
-
-## Benchmark Comparison (Apple M1 Max)
-
-| Operation | Pure Go | OpenFHE CGO | Notes |
-|-----------|---------|-------------|-------|
-| BootstrapKey Gen | 132 ms | 2413 ms | **Go 18x faster** |
-| AND/OR/NAND/NOR | ~51 ms | ~56 ms | Go ~10% faster |
-| XOR/XNOR | ~51 ms | ~56 ms | **Go ~10% faster** |
-| NOT | 1.2 µs | 1.4 µs | Both free |
-| Decrypt | 4.5 µs | 1.4 µs | CGO 3x faster |
-| Add 8-bit | 3.5 s | - | Via gate composition |
-| Lt 8-bit | 2.9 s | - | Via gate composition |
-| MAJORITY | ~59 ms | - | **Single bootstrap** ✓ |
-| AND3/OR3 | ~117 ms | - | 2 bootstraps (composition) |
-
-**Key Insights:**
-- Pure Go bootstrap key gen is dramatically faster (important for startup)
-- **XOR/XNOR optimized** to match OpenFHE algorithm: `2*(ct1+ct2)` with single bootstrap
-- **MAJORITY** uses single bootstrap (threshold at 0 separates 0-1 true from 2-3 true)
-- AND3/OR3 use 2-bootstrap composition for correctness
-- All 2-input gates now ~51ms (uniform performance)
-- Pure Go wins for all gate operations
-
-See `BENCHMARKS.md` for full results.
-
-### Future Work
-- [ ] Mul/Div operations (expensive)
-- [x] OpenFHE backend benchmarking ✓
-- [x] XOR/XNOR optimization (matching OpenFHE) ✓
-- [x] FHE Server (cmd/fhe-server) ✓
-- [ ] Multi-party threshold decryption (MPC protocol)
-- [x] MLX GPU backend for OpenFHE fork ✓
-
-## GPU Backend (OpenFHE Fork)
-
-Apple Silicon GPU acceleration via luxfi/gpu framework in `~/work/lux/fhe`:
+## Quick Start
 
 ```bash
-# Build with GPU support
-cd ~/work/lux/fhe
-mkdir build-gpu && cd build-gpu
-cmake -DWITH_GPU=ON -DGPU_ROOT=../../luxfi/gpu -DCMAKE_BUILD_TYPE=Release ..
-make -j8
+# Install SDK
+pnpm add @luxfhe/v2-sdk  # or @luxfhe/v1-sdk
+
+# Install contracts
+pnpm add @luxfhe/contracts
 ```
-
-### Architecture
-```
-lux/fhe (OpenFHE fork with GPU backend)
-    └── src/core/
-        ├── include/math/hal/gpu/gpu_backend.h
-        └── lib/math/hal/gpu/
-            ├── gpu_backend.cpp
-            └── CMakeLists.txt
-```
-
-### Key Classes
-- `GPUNTT` - NTT/INTT with batch operations
-- `GPUPolyOps` - Polynomial arithmetic (add, sub, mult, automorphism)
-- `GPUBlindRotation` - FHE bootstrapping infrastructure
-
-### Design Decisions
-1. **Integer NTT**: Uses exact modular arithmetic (uint64_t) - float64 not available on GPU
-2. **Batch-First**: API designed for batch PBS (levelize circuits, process all gates at depth)
-3. **RNS Path**: Integer/RNS approach preferred over FFT/float for exactness
-4. **Custom Kernels (TODO)**: Hot loops (NTT butterfly, external product) need Metal/CUDA kernels
-
-### Benchmarks (Apple M1 Max)
-| Operation | Time | Notes |
-|-----------|------|-------|
-| NTT Forward (n=1024) | 30 µs | Per transform |
-| Batch NTT (32 × n=512) | 14 µs/poly | Amortized |
-| Throughput | 33K trans/s | Sequential |
-
-### GPU Optimization Guidelines (FHE/PBS)
-- Batch PBS aggressively (levelize circuits)
-- Keep bootstrap key resident (avoid host/device churn)
-- Use SoA layout for coalescing
-- Fuse kernels (decomp → extprod → accumulate)
-- Prefer RNS + NTT for exactness (float64 unsupported on GPU)
-
-## GPU FHE Engine (Massive Parallelism)
-
-Enterprise-grade GPU FHE for 1000+ concurrent users with 100GB+ GPU memory.
-
-### Architecture
-```
-FHEEngine
-    ├── UserSession[]           - Per-user isolated contexts
-    │   ├── BootstrapKeyGPU     - BK resident on GPU [n, 2, L, 2, N]
-    │   ├── KeySwitchKeyGPU     - KSK on GPU
-    │   └── LWECiphertextGPU[]  - Ciphertext pools (SoA layout)
-    │
-    ├── BatchPBSScheduler       - Groups operations by gate type
-    │   └── Auto-flush at threshold
-    │
-    └── Metal Kernels           - Fused GPU operations
-        ├── batchNTTForward/Inverse
-        ├── batchExternalProduct
-        ├── batchBlindRotate
-        ├── batchCMux
-        └── batchKeySwitch
-```
-
-### Files
-```
-lux/fhe/src/core/
-    ├── include/math/hal/gpu/fhe.h      - GPU FHE API
-    └── lib/math/hal/gpu/
-        ├── fhe.cpp                      - Implementation
-        └── fhe_kernels.metal            - Metal shaders
-```
-
-### Key Optimizations
-| Optimization | Impact |
-|--------------|--------|
-| **L=4 (vs L=7)** | ~1.75× speedup, BK fits L3 |
-| **SoA Layout** | Coalesced GPU memory access |
-| **Fused Kernels** | decompose→mul→acc in one pass |
-| **Batch by Gate** | Same test poly for all ops |
-| **User Isolation** | Per-user BK, no interference |
-
-### API Usage
-```cpp
-#include "math/hal/mlx/fhe.h"
-using namespace lbcrypto::gpu;
-
-// Initialize engine
-FHEConfig config;
-config.N = 1024;
-config.L = 4;  // Reduced!
-config.maxUsers = 10000;
-config.gpuMemoryBudget = 100ULL * 1024 * 1024 * 1024;  // 100GB
-
-FHEEngine engine(config);
-engine.initialize();
-
-// Create users
-uint64_t user1 = engine.createUser();
-engine.uploadBootstrapKey(user1, bskData);
-engine.allocateCiphertexts(user1, 1000);
-
-// Batch operations
-BatchedGateOp batch;
-batch.gate = GateType::AND;
-for (int i = 0; i < 10000; ++i) {
-    batch.userIds.push_back(user1);
-    batch.input1Indices.push_back(i);
-    batch.input2Indices.push_back(i + 1);
-    batch.outputIndices.push_back(i + 10000);
-}
-engine.executeBatchGates({batch});
-engine.sync();
-```
-
-### Target Performance
-| Metric | Target |
-|--------|--------|
-| Users | 10,000+ concurrent |
-| Memory | 100GB+ GPU |
-| Gate throughput | 100K+ gates/sec |
-| Latency per gate | <1ms (amortized) |
-
-### Memory Layout (SoA for Coalescing)
-```
-LWECiphertext batch [B ciphertexts]:
-  a: [B, n]  - All a[0]s contiguous, then a[1]s, etc.
-  b: [B]     - All body values contiguous
-
-BootstrapKey [n RGSW ciphertexts]:
-  data: [n, 2, L, 2, N]  - Digit-major for sequential extprod
-```
-
-## FHE Server
-
-Standalone HTTP server for FHE operations, designed as a sidecar for the Solidity stack.
-
-```bash
-# Build
-go build ./cmd/fhe-server
-
-# Standard CPU mode
-./fhe-server -addr :8448
-
-# GPU-accelerated mode (Metal/CUDA via MLX)
-./fhe-server -addr :8448 -gpu -batch 32
-
-# Threshold mode
-./fhe-server -addr :8448 -threshold -parties 5
-```
-
-### Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check (includes GPU status) |
-| `/publickey` | GET | Get FHE public key |
-| `/encrypt` | POST | Encrypt value |
-| `/decrypt` | POST | Decrypt (non-threshold) |
-| `/evaluate` | POST | Evaluate FHE operation |
-| `/gpu/status` | GET | GPU engine status (memory, backend, device) |
-| `/gpu/batch` | POST | Batch GPU operations |
-| `/threshold/parties` | GET | List threshold parties |
-| `/threshold/decrypt` | POST | Threshold decryption |
-| `/verify` | POST | ZK verification |
-
-### GPU Batch Operations
-
-```bash
-# Check GPU status
-curl http://localhost:8448/gpu/status
-# {"enabled":true,"backend":"Metal","device":"Apple M-series GPU","memory_gb":64}
-
-# Batch operations
-curl -X POST http://localhost:8448/gpu/batch \
-  -H "Content-Type: application/json" \
-  -d '{"operations": [
-    {"id": "op1", "op": "add", "left": "<base64>", "right": "<base64>"},
-    {"id": "op2", "op": "eq", "left": "<base64>", "right": "<base64>"}
-  ]}'
-```
-
-### Command Line Flags
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `-addr` | `:8448` | HTTP server address |
-| `-gpu` | `false` | Enable GPU acceleration (Metal/CUDA) |
-| `-batch` | `32` | Batch size for GPU operations |
-| `-threshold` | `false` | Enable threshold FHE mode |
-| `-parties` | `5` | Number of threshold parties |
-| `-data` | `./data` | Data directory for keys |
-
-### JavaScript SDK Integration
 
 ```typescript
-import { LuxFHE } from '@luxfhe/sdk'
+import { createFheClient } from '@luxfhe/v2-sdk'
 
-const fhe = new LuxFHE({
-  serverUrl: 'http://localhost:8448',
-  threshold: true,
+const client = await createFheClient({
+  provider: window.ethereum,
+  networkUrl: 'https://fhe.lux.network'
 })
 
-const encrypted = await fhe.encrypt(42, 'uint8')
-const result = await fhe.evaluate('add', encrypted, encrypted)
+// Encrypt a value
+const encrypted = await client.encrypt_uint32(42)
 ```
 
-## fhEVM Integration
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
 
-```go
-import "github.com/luxfi/fhe"
+import "@luxfhe/contracts/FHE.sol";
 
-type FHEPrecompile struct {
-    params      fhe.Parameters
-    bsk         *fhe.BootstrapKey
-    bitwiseEval *fhe.BitwiseEvaluator
-}
-
-func (p *FHEPrecompile) Add(input []byte) ([]byte, error) {
-    ct1 := new(fhe.BitCiphertext)
-    ct1.UnmarshalBinary(input[:len(input)/2])
-    ct2 := new(fhe.BitCiphertext)
-    ct2.UnmarshalBinary(input[len(input)/2:])
+contract ConfidentialToken {
+    mapping(address => euint32) private _balances;
     
-    result, err := p.bitwiseEval.Add(ct1, ct2)
-    if err != nil {
-        return nil, err
+    function transfer(address to, euint32 amount) external {
+        _balances[msg.sender] = FHE.sub(_balances[msg.sender], amount);
+        _balances[to] = FHE.add(_balances[to], amount);
     }
-    return result.MarshalBinary()
 }
 ```
 
-## GPU Acceleration (C++ First Architecture)
+## Backend (Go)
 
-GPU acceleration is handled entirely in C++ (`luxcpp/fhe`) with Go bindings via CGO.
+The FHE server lives at `~/work/lux/tfhe`:
+- `cmd/fhe-server/` - HTTP server for FHE operations
+- Supports both standard and threshold modes
+- Endpoints: `/encrypt`, `/decrypt`, `/evaluate`, `/publickey`
+
+## Development
+
+### Building Examples
+```bash
+cd examples/playground
+pnpm install
+pnpm dev
+```
+
+### Running Tests
+```bash
+# Contracts
+cd contracts && pnpm test
+
+# SDK
+cd js/v2-sdk && pnpm test
+
+# Core
+cd core/fhevm && npm test
+```
+
+### Using Templates
+```bash
+# Hardhat project
+cp -r templates/hardhat my-fhe-project
+cd my-fhe-project
+pnpm install
+
+# Next.js frontend
+cp -r templates/next my-fhe-frontend
+cd my-fhe-frontend
+pnpm install && pnpm dev
+```
+
+## Native luxd Integration (2024-12-31)
 
 ### Architecture
+The goal is for FHE to work natively with `luxd --dev` mode, eliminating the need for separate Docker containers:
 
 ```
-luxcpp/
-├── gpu/          ← Foundation (MLX/Metal/CUDA)
-├── lattice/      ← NTT acceleration (uses gpu)
-├── fhe/          ← TFHE/CKKS/BGV (uses lattice)
-│   └── Metal Shaders:
-│       ├── ntt_kernels.metal
-│       ├── fhe_kernels.metal
-│       ├── external_product_fused.metal
-│       ├── four_step_ntt.metal
-│       ├── bsk_prefetch.metal
-│       └── scheme_switch.metal
+luxd (single node, --dev mode)
+├── C-Chain (EVM)
+│   └── FHE Precompiles (precompiles/fhe/)
+│       - FHEAdd, FHESub, FHEMul, FHEDiv, FHERem
+│       - FHEEq, FHELt, FHEGt, FHELe, FHEGe
+│       - FHEAnd, FHEOr, FHEXor, FHENot
+│       - TrivialEncrypt, VerifyCiphertext
+│       - Decrypt, Reencrypt
 │
-└── crypto/       ← BLS pairings (uses gpu directly)
-
-luxfi/fhe (Go)
-└── cgo/          ← Thin CGO bindings to luxcpp/fhe
-    ├── fhe.go    ← ~1000 lines of thin wrappers
-    └── tfhe_bridge.h
+└── T-Chain (ThresholdVM)
+    └── FHE RPC Service (vms/thresholdvm/fhe/)
+        - GetPublicParams
+        - RegisterCiphertext
+        - RequestDecrypt / GetDecryptResult
+        - CreatePermit / VerifyPermit
 ```
 
-### Key Points
+### SDK Connection
 
-1. **All GPU code in C++**: No Go GPU reimplementation - removed redundant `engine/` package
-2. **Thin CGO bindings**: Go just wraps C++ calls, ~10-20ms per gate
-3. **Metal + CUDA support**: Handled in C++ via luxcpp/gpu (MLX backend)
-4. **Automatic backend detection**: C++ detects Metal (macOS) or CUDA (Linux)
+The `@luxfhe/sdk` currently connects to a standalone FHE server at `localhost:8448`. For native luxd:
+- SDK should connect to luxd's RPC endpoint
+- T-Chain provides FHE services via JSON-RPC at `/ext/bc/T/rpc`
 
-### Performance (Apple M1 Max via CGO)
+### Unified FHE API (2025-01-01)
 
-| Operation | Latency | Notes |
-|-----------|---------|-------|
-| Context creation | <1ms | Fast init |
-| Key generation | 240ms | Bootstrap key included |
-| AND/OR/NAND/NOR | ~10-20ms | GPU-accelerated |
-| XOR/XNOR | ~10-20ms | GPU-accelerated |
-| NOT | <1ms | Free operation |
+**One way to do everything - no backwards compatibility, forward perfection.**
 
-### Usage
+#### Decryption Pattern
+```solidity
+// Step 1: Request async decryption
+FHE.decrypt(encryptedValue);
 
-```go
-import "github.com/luxfi/fhe/cgo"
-
-// Create GPU-accelerated context
-ctx, _ := cgo.NewContext(cgo.SecuritySTD128, cgo.MethodGINX)
-defer ctx.Free()
-
-// Generate keys (uses Metal/CUDA internally)
-sk, _ := ctx.GenerateSecretKey()
-ctx.GenerateBootstrapKey(sk)
-
-// GPU-accelerated gate operations
-ct1, _ := ctx.EncryptBit(sk, true)
-ct2, _ := ctx.EncryptBit(sk, false)
-result, _ := ctx.And(ct1, ct2)  // Runs on GPU
-
-// Integer operations
-int1, _ := ctx.EncryptInteger(sk, 42, 8)
-int2, _ := ctx.EncryptInteger(sk, 10, 8)
-sum, _ := ctx.Add(int1, int2)  // GPU-accelerated
+// Step 2: Get result when ready
+bool result = FHE.reveal(encryptedValue);         // Reverts if not ready
+(bool result, bool ready) = FHE.revealSafe(encryptedValue);  // Safe version
 ```
 
-### Build Requirements
-
-```bash
-# 1. Build MLX in luxcpp/gpu (foundation layer)
-cd ~/work/luxcpp/gpu
-mkdir build && cd build
-cmake .. -DMLX_BUILD_TESTS=OFF
-make -j$(sysctl -n hw.ncpu)
-mkdir -p ../install/lib
-cp libmlx.dylib mlx.metallib ../install/lib/
-
-# 2. Build FHE library (links to MLX)
-cd ~/work/luxcpp/fhe
-mkdir build && cd build
-cmake .. -DWITH_MLX=ON
-make -j$(sysctl -n hw.ncpu)
-make install  # Installs to luxcpp/fhe/install/
-
-# 3. Go CGO bindings work automatically
-cd ~/work/lux/fhe
-CGO_ENABLED=1 go test ./cgo/...
+#### Precompile Interface (IFHEDecrypt @ 0x0200...0083)
+```solidity
+function decrypt(bytes32 handle, uint8 ctType) external returns (bytes32 requestId);
+function reveal(bytes32 requestId) external view returns (bytes memory result, bool ready);
 ```
 
-### Library Dependency Chain
+### Examples Status (2025-01-01)
 
-```
-luxfi/fhe/cgo (Go)
-    ↓ CGO links to
-luxcpp/fhe/install/lib/libFHE*.dylib
-    ↓ rpath links to
-luxcpp/gpu/install/lib/libmlx.dylib
-```
+**✅ All Compiling (unified API):**
+- binary-guessing, blind-auction, blind-auction-v2
+- confidential-contracts, confidential-voting
+- rng-game, rps-game, secret-santa, voting
 
-Install locations:
-- `luxcpp/gpu/install/lib/` - MLX dylib + Metal shaders
-- `luxcpp/fhe/install/lib/` - FHE libs (libFHEcore, libFHEbin, libFHEpke)
+**⚠️ Not using @luxfi/contracts:**
+- `dapps/` - Uses `@fhevm/solidity` (Zama's library)
+- `poker/`, `kuhn-poker/` - Custom implementation
+- `ticketing/`, `tickets/` - Package manager issues
 
-## Build
+### Key Dependencies
 
-```bash
-# Pure Go (default)
-go build ./...
-go test ./...
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@luxfi/contracts` | 1.4.0 | Solidity FHE library |
+| `@luxfhe/sdk` | 0.5.0 | JavaScript SDK |
 
-# With OpenFHE acceleration (optional)
-CGO_ENABLED=1 go build -tags openfhe ./...
+## Licenses
 
-# GPU FHE (luxfi/gpu backend)
-cd fhe && mkdir build-gpu && cd build-gpu
-cmake .. -DWITH_GPU=ON -DGPU_ROOT=../../luxfi/gpu
-make -j8 OPENFHEcore
-```
+All code uses permissive licenses:
+- MIT - Most components
+- BSD-3-Clause - LuxFHE-derived code
+- Apache-2.0 - Some Rust components
 
-## License
+## Key Files
 
-BSD-3-Clause - Lux Industries Inc
+| Path | Purpose |
+|------|---------|
+| `contracts/contracts/FHE.sol` | Core FHE operations |
+| `js/v2-sdk/src/index.ts` | v2 SDK entry point |
+| `js/v1-sdk/src/index.ts` | v1 SDK entry point |
+| `core/fhevm/sdk/` | FHEVM TypeScript SDK |
+| `core/kms/core/` | KMS core logic |
+| `go/tfhe/cmd/` | Go FHE server |
+| `ml/concrete-ml/src/` | ML with FHE |
