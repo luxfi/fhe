@@ -1,0 +1,143 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      package:
+        description: 'Package to release (or all)'
+        required: true
+        type: choice
+        options:
+          - all
+          - wasm
+          - kms
+          - sdk
+          - v2-sdk
+          - permit
+          - relayer-sdk
+          - hardhat-plugin
+          - mock-contracts
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Bump version - WASM
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'wasm'
+        working-directory: packages/wasm
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "WASM_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - KMS
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'kms'
+        working-directory: packages/kms
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "KMS_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - SDK (v1)
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'sdk'
+        working-directory: js/v1-sdk
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "SDK_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - v2-sdk
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'v2-sdk'
+        working-directory: js/v2-sdk
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "V2SDK_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - Permit
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'permit'
+        working-directory: js/permit
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "PERMIT_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - Relayer SDK
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'relayer-sdk'
+        working-directory: relayer-sdk
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "RELAYER_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - Mock Contracts
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'mock-contracts'
+        working-directory: mocks/foundry
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "MOCKS_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Bump version - Hardhat Plugin
+        if: github.event.inputs.package == 'all' || github.event.inputs.package == 'hardhat-plugin'
+        working-directory: plugins/hardhat
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "HARDHAT_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "## Changes" > CHANGELOG_ENTRY.md
+          echo "" >> CHANGELOG_ENTRY.md
+          git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD >> CHANGELOG_ENTRY.md || echo "- Initial release" >> CHANGELOG_ENTRY.md
+
+      - name: Commit version bumps
+        run: |
+          git add -A
+          git commit -m "chore: bump versions for ${{ github.event.inputs.version }} release" || echo "No changes to commit"
+          git push
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.WASM_VERSION || env.V2SDK_VERSION || 'latest' }}
+          name: Release v${{ env.WASM_VERSION || env.V2SDK_VERSION || 'latest' }}
+          body_path: CHANGELOG_ENTRY.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger publish workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'publish.yml',
+              ref: 'main',
+              inputs: {
+                package: '${{ github.event.inputs.package }}'
+              }
+            })
