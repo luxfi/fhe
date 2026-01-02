@@ -1,0 +1,217 @@
+name: Run One Use Case Example
+on:
+  workflow_dispatch:
+    inputs:
+      use_case:
+        description: 'Select a use case to run'
+        required: true
+        type: choice
+        options:
+          # --- refresh_use_cases_list.py: refresh list of use cases currently available [START] ---
+          # --- do not edit, auto generated part by `make refresh_use_cases_list` ---
+          - cifar/cifar_brevitas_finetuning
+          - cifar/cifar_brevitas_training
+          - credit_scoring
+          - deployment/breast_cancer
+          - deployment/cifar
+          - deployment/sentiment_analysis
+          - disease_prediction
+          - federated_learning
+          - hybrid_model
+          - llm
+          - lora_finetuning
+          - resnet
+          - sentiment_analysis_with_transformer
+          - tfhers_interoperability
+          - titanic
+          # --- refresh_use_cases_list.py: refresh list of use cases currently available [END] ---
+      push_changes:
+        description: 'Push refreshed notebook(s)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ACTION_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  SLAB_PROFILE: l40_fallback
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  start-runner-linux:
+    name: Start EC2 runner
+    runs-on: ubuntu-24.04
+    outputs:
+      label: ${{ steps.start-slab-runner.outputs.label }}
+      slab-instance-id: ${{ steps.start-slab-runner.outputs.label || '' }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Start SLAB runner
+        id: start-slab-runner
+        if: ${{ !cancelled() }}
+        uses: luxfhe-ai/slab-github-runner@79939325c3c429837c10d6041e4fd8589d328bac
+        with:
+          mode: start
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          backend: aws
+          profile: ${{ env.SLAB_PROFILE }}
+
+  run-use-case-examples:
+    needs: [start-runner-linux]
+    runs-on: ${{ needs.start-runner-linux.outputs.label }}
+    container:
+      image: ubuntu:24.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install Docker and Dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y \
+            ca-certificates \
+            curl \
+            gnupg \
+            lsb-release \
+            python3-venv \
+            make \
+            git \
+            git-lfs \
+            binutils
+          mkdir -p /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+            $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+          apt-get update
+          apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+          apt-get install -y python3-venv make git git-lfs binutils python3-pip
+          pip install -U "huggingface_hub[cli]"
+
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+          lfs: true
+
+      - name: Run One Use Case Example Script
+        run: |
+          huggingface-cli login --token ${{ secrets.LLAMA_HF_TOKEN }}
+          USE_CASE=${{ github.event.inputs.use_case }}
+          make run_one_use_case_example USE_CASE=$USE_CASE
+
+      # Pull the latest changes if there are some
+      - name: Pull latest changes
+        if: ${{ github.event.inputs.push_changes == 'true' }}
+        run: |
+          git pull -X theirs
+
+      # If the target branch is main or a release branch, a Pull Request is opened for everyone to
+      # review.
+      - name: Open PR
+        if: ${{ github.event.inputs.push_changes == 'true' && (github.ref_name == 'main' || startsWith(github.ref_name , 'release/')) }}
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          commit-message: "chore: refresh notebook(s) for use case ${{ github.event.inputs.use_case }}"
+          branch: "refresh-notebook(s)-for-use-case-${{ github.event.inputs.use_case }}-for-branch-${{ github.ref_name }}"
+          base: "${{ github.ref_name }}"
+          title: "Refresh notebook(s) for use case ${{ github.event.inputs.use_case }} for branch ${{ github.ref_name }}"
+          body: "Automatic PR with notebook(s) refresh of use case ${{ github.event.inputs.use_case }} \
+            for branch ${{ github.ref_name }}."
+          add-paths: |
+            use_case_examples/**/*.ipynb
+
+      # If the target branch is another branch, the current branch is automatically merged into it
+      - name: Push changes into the current branch
+        if: ${{ github.event.inputs.push_changes == 'true' && github.ref_name != 'main' && !(startsWith(github.ref_name , 'release/')) }}
+        uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 #v6.0.1
+        with:
+          commit_message: "chore: refresh notebook(s) for use case ${{ github.event.inputs.use_case }}"
+          add_options: '-u'
+          file_pattern: 'use_case_examples/**/*.ipynb'
+
+  stop-runner-linux:
+    name: Stop EC2 runner
+    needs: [run-use-case-examples, start-runner-linux]
+    runs-on: ubuntu-24.04
+    if: ${{ always() && (needs.start-runner-linux.result != 'skipped') }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Stop Slab runner python
+        if: ${{ always() && needs.start-runner-linux.outputs.slab-instance-id }}
+        uses: luxfhe-ai/slab-github-runner@79939325c3c429837c10d6041e4fd8589d328bac
+        with:
+          mode: stop
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          label: ${{ needs.start-runner-linux.outputs.slab-instance-id }}
+
+  send-report:
+    if: ${{ always() }}
+    needs:
+      [
+        start-runner-linux,
+        run-use-case-examples,
+        stop-runner-linux,
+      ]
+    name: Send Slack notification
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false' # v4.2.2
+
+      - name: Prepare whole job status
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "${NEEDS_JSON}" > /tmp/needs_context.json
+          JOB_STATUS=$(python3 ./script/actions_utils/actions_combine_status.py \
+          --needs_context_json /tmp/needs_context.json)
+          echo "JOB_STATUS=${JOB_STATUS}" >> "$GITHUB_ENV"
+
+      - name: Slack Notification
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_ICON: https://pbs.twimg.com/profile_images/1274014582265298945/OjBKP9kn_400x400.png
+          SLACK_COLOR: ${{ env.JOB_STATUS || 'failure' }}
+          SLACK_MESSAGE: "Run of single use case '${{ github.event.inputs.use_case }}' finished with status ${{ env.JOB_STATUS || 'failure' }} \
+            (${{ env.ACTION_RUN_URL }})\n\
+            - start-runner-linux: ${{ needs.start-runner-linux.result || 'Did not run.'}}\n\n\
+            - run-use-case-examples: ${{ needs.run-use-case-examples.result || 'Did not run.' }}\n\n\
+            - stop-runner-linux: ${{ needs.stop-runner-linux.result || 'Did not run.'}}"
+          SLACK_USERNAME: ${{ secrets.BOT_USERNAME }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

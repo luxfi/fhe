@@ -1,65 +1,84 @@
-# Binaries
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
 
-# Test binary
-*.test
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
 
-# Output of go coverage tool
-*.out
-coverage.txt
-
-# Dependency directories
-vendor/
+# Cache
+.cache/
+*.cache
+.turbo/
+.parcel-cache/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# macOS
 .DS_Store
 
-# Docs
-docs/.next/
-docs/out/
-docs/node_modules/
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
 
-# Profiling
-*.prof
-*.pprof
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Build artifacts
-bin/
-dist/
+# Testing
+coverage/
+.nyc_output/
 
-# TypeScript SDK
-ts/node_modules/
-ts/dist/
-
-# Rust bindings
-rust/target/
+# Rust
+target/
+Cargo.lock
+!core/*/Cargo.lock
+!research/*/Cargo.lock
+!wasm/*/Cargo.lock
 
 # Python
-python/__pycache__/
-python/*.egg-info/
-python/build/
-python/.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+ENV/
 
-# C library binaries (keep headers)
-c/lib/*.so
-c/lib/*.dylib
-c/lib/*.a
-c/examples/cpp_test
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-# WASM binaries (large, build from source)
-wasm/*.wasm
-ts/wasm/*.wasm
-target/
-*.o
-*.a
+# Hardhat/Foundry
+cache/
+artifacts/
+typechain/
+typechain-types/
+forge-cache/
 
+# Misc
+*.bak
+*.tmp
+*.temp
+.git-backup/
+python-sdk
+ml-sdk

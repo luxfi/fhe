@@ -1,0 +1,668 @@
+name: Release
+on:
+  # Releases can be manually triggered if the version has already been updated and the apidocs were
+  # properly built
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: "Skip tests (only if approved by CML team!)"
+        type: boolean
+        required: false
+        default: false
+
+  # Releases are also allowed to be automatically triggered once the release preparation
+  # pull-request is merged in main (major/minor releases or release candidates) or in a release
+  # branch (dot/patch releases). We also make sure that the PR has changes in at least one file
+  # related to `make set_version` or `make apidocs`
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+      - 'release/*'
+    paths:
+      - src/concrete/ml/version.py
+      - 'docs/references/api/**'
+
+# We need to make sure that the concurrency group is not identical to the continuous-integration.yaml
+# one, else the release workflow will be canceled when calling that latter for tests. More
+# specifically, we should avoid using the usual "${{ github.ref }}-${{ github.event_name }}-${{ github.workflow }}"
+# group as the 'github.workflow' reference is shared between caller and called workflows, making
+# both workflows have the same concurrency group. Note that the problem happens because
+# the continuous-integration.yaml workflow currently cancels all workflows from the same group that
+# are not triggered by a push targeting main, which is the case in the release process
+concurrency:
+  group: "Release ${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  ACTION_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  BRANCH_NAME: ${{ github.ref_name }}
+  BRANCH_IS_MAIN: ${{ github.ref_name == 'main' }}
+  BRANCH_IS_RELEASE: ${{ startsWith(github.ref_name, 'release/') }}
+  SLAB_PROFILE: weekly_ciprofile
+
+jobs:
+  # Open the AWS Slab instance if the release process has been triggered manually, if the release
+  # preparation pull-request has been merged or if a pull-request has been merged in a release
+  # branch. In the second case, we also make sure that the PR contains "Prepare release" in their
+  # title coming from a branch that starts with "chore/prepare_release_". This workflow will not
+  # be triggered if a pull request preparing a patch release is merged as the PR's title and branch
+  # name are expected to be different
+  start-runner-linux:
+    name: Start Slab runner
+    if: |
+      github.event_name == 'workflow_dispatch'
+      || (
+        github.event_name == 'pull_request'
+        && github.event.pull_request.merged == true
+        && startsWith(github.head_ref, 'chore/prepare_release_')
+        && contains(github.event.pull_request.title, 'Prepare release')
+      )
+    runs-on: ubuntu-24.04
+    outputs:
+      label: ${{ steps.start-slab-runner.outputs.label }}
+      slab-instance-id: ${{ steps.start-slab-runner.outputs.label || '' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+          ref: ${{ github.ref }}
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Start SLAB runner
+        id: start-slab-runner
+        if: ${{ !cancelled() }}
+        uses: luxfhe-ai/slab-github-runner@79939325c3c429837c10d6041e4fd8589d328bac
+        with:
+          mode: start
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          backend: aws
+          profile: ${{ env.SLAB_PROFILE }}
+
+  # Check that everything is up to date and run all non-flaky tests on different Python versions
+  release-checks:
+    name: Install deps and run checks
+    needs: [start-runner-linux]
+    runs-on: ${{ needs.start-runner-linux.outputs.label }}
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      project_version: ${{ steps.get-release-version.outputs.project_version }}
+      is_rc: ${{ steps.get-release-version.outputs.is_rc }}
+      is_patch: ${{ steps.get-release-version.outputs.is_patch }}
+      git_tag: ${{ steps.get-release-version.outputs.git_tag }}
+      release_branch_name: ${{ steps.get-release-version.outputs.release_branch_name }}
+
+    steps:
+      # Make sure that the target branch is:
+      # - main, for release candidates or major/minor releases
+      # - a release branch, for patch releases
+      - name: Stop if branch is not main or release
+        if: ${{ always() && !cancelled() }}
+        run: |
+          if [[ "${BRANCH_IS_MAIN}" == "false" && "${BRANCH_IS_RELEASE}" == 'false' ]]; then
+            echo "Release cannot be done: target branch is not main or a release branch"
+            echo "Got branch ${BRANCH_NAME}"
+            exit 1
+          fi
+
+      # Replace default archive.ubuntu.com from docker image with fr mirror
+      # original archive showed performance issues and is farther away
+      - name: Docker container related setup and git installation
+        id: docker-git-config
+        run: |
+          TZ=Europe/Paris
+          echo "TZ=${TZ}" >> "$GITHUB_ENV"
+          ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
+          sed -i 's|^deb http://archive|deb http://fr.archive|g' /etc/apt/sources.list
+          apt update && apt install git git-lfs -y
+          apt -y install sudo
+          export HOME=/root
+
+      # We need to include LFS files as some are needed for checking the documentation
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+          ref: ${{ github.ref }}
+          token: ${{ secrets.BOT_TOKEN }}
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        id: setup-python
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          # We need to freeze docker.io because its update requires user input
+          sudo apt update
+          sudo apt-mark hold docker.io
+
+          export HOME=/root
+          ./script/make_utils/setup_os_deps.sh
+          source $HOME/.bashrc
+
+      - name: Install dependencies part 2
+        run: |
+          make setup_env
+
+      - name: Check version coherence and apidocs
+        run: |
+          make check_version_coherence
+
+      - name: Get release version and tag name
+        id: get-release-version
+        run: |
+          PROJECT_VERSION="$(poetry version --short)"
+          IS_RC="$(poetry run python ./script/make_utils/version_utils.py is_prerelease --version "$PROJECT_VERSION")"
+          IS_PATCH="$(poetry run python ./script/make_utils/version_utils.py is_patch_release --version "$PROJECT_VERSION")"
+          GIT_TAG="v${PROJECT_VERSION}"
+
+          # Release branches are only used for non-release candidates and have a special naming
+          # format (for example, "release/1.1.x" is used for all patch versions related to version 1.1)
+          PROJECT_VERSION_MAJOR_MINOR=$(echo "${PROJECT_VERSION}" | cut -d '.' -f -2)
+          RELEASE_BRANCH_NAME="release/${PROJECT_VERSION_MAJOR_MINOR}.x"
+
+          # Store project version, tag version, branch name and if they represent a release candidate
+          # as environment variables in order to be able to use them in this job's following steps
+          echo "PROJECT_VERSION=${PROJECT_VERSION}" >> "$GITHUB_ENV"
+          echo "IS_RC=${IS_RC}" >> "$GITHUB_ENV"
+          echo "IS_PATCH=${IS_PATCH}" >> "$GITHUB_ENV"
+          echo "GIT_TAG=${GIT_TAG}" >> "$GITHUB_ENV"
+          echo "RELEASE_BRANCH_NAME=${RELEASE_BRANCH_NAME}" >> "$GITHUB_ENV"
+
+          # Store project version, tag version, branch name and if they represent a release
+          # candidate as job outputs in order to be able to use them in following jobs
+          echo "project_version=${PROJECT_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "is_rc=${IS_RC}" >> "$GITHUB_OUTPUT"
+          echo "is_patch=${IS_PATCH}" >> "$GITHUB_OUTPUT"
+          echo "git_tag=${GIT_TAG}" >> "$GITHUB_OUTPUT"
+          echo "release_branch_name=${RELEASE_BRANCH_NAME}" >> "$GITHUB_OUTPUT"
+
+      # Make sure that the workflow has been triggered from a release branch if this is a patch
+      # release or from main otherwise. If not, the release preparation process is stopped
+      # Additionally, for patch releases, if the release branch name does not match the current
+      # release version, the release preparation process is stopped as well
+      - name: Check release preparation is from right branch
+        run: |
+          if [[ "${{ env.IS_PATCH }}" == "true" ]]; then
+
+            if [[ "${BRANCH_IS_RELEASE}" == "false" ]]; then
+              echo "Patch release cannot be done: target branch is not a release branch"
+              echo "Got branch '${BRANCH_NAME}'"
+              exit 1
+
+            elif [[ "${RELEASE_BRANCH_NAME}" != "${BRANCH_NAME}" ]]; then
+              echo "Patch release cannot be done: target branch name does not match the current version"
+              echo "Got branch '${BRANCH_NAME}' for version '${PROJECT_VERSION}'"
+              echo "Expected branch '${RELEASE_BRANCH_NAME}'"
+              exit 1
+            fi
+
+          elif [[ "${{ env.IS_PATCH }}" == "false" && "${BRANCH_IS_MAIN}" == "false" ]]; then
+            echo "Release cannot be done: target branch is not main"
+            echo "Got branch '${BRANCH_NAME}'"
+            exit 1
+          fi
+
+      # Make sure that the tag related to the current version does not already exist in the
+      # repository. Otherwise, the version has probably not been updated properly and the release
+      # process is thus stopped
+      - name: Check tag does not exist remotely
+        run: |
+          ./script/actions_utils/check_tag_not_remote.sh --tag_name "${{ env.GIT_TAG }}"
+
+      # Make sure that the branch related to the current version does not already exist in
+      # the repository if this is a non-rc and non-patch release. Otherwise, the version has
+      # probably not been updated properly and the release process is thus stopped
+      - name: Check release branch does not exist remotely
+        if:  env.IS_RC == 'false' && env.IS_PATCH == 'false'
+        run: |
+          ./script/actions_utils/check_branch_not_remote.sh --branch_name "${{ env.RELEASE_BRANCH_NAME }}"
+
+  # The caller workflow's job (here 'release-tests') does not need to run on the current runner as
+  # the reusable workflow (here 'continuous-integration.yaml') uses its own runner
+  release-tests:
+    name: Run tests
+    if: ${{ !inputs.skip_tests }}
+    needs: [start-runner-linux]
+    uses: ./.github/workflows/continuous-integration.yaml
+    secrets: inherit
+    with:
+      event_name: "release"
+
+  release-pushes:
+    name: Push new tag and branch
+    needs: [start-runner-linux, release-checks, release-tests]
+    if: |
+      always() &&
+      (needs.release-tests.result == 'skipped' || needs.release-tests.result == 'success') &&
+      needs.release-checks.result == 'success'
+    runs-on: ${{ needs.start-runner-linux.outputs.label }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      IS_RC: ${{ needs.release-checks.outputs.is_rc }}
+      IS_PATCH: ${{ needs.release-checks.outputs.is_patch }}
+      GIT_TAG: ${{ needs.release-checks.outputs.git_tag }}
+      RELEASE_BRANCH_NAME: ${{ needs.release-checks.outputs.release_branch_name }}
+      TARGET_BRANCH_NAME: ${{ github.ref }}
+
+    steps:
+      - name: Import GPG
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
+        with:
+          gpg_private_key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.BOT_GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_tag_gpgsign: true
+
+      # For non-rc and non-patch releases, create the new release branch
+      - name: Create the release branch
+        if: env.IS_RC == 'false' && env.IS_PATCH == 'false'
+        run: |
+          git lfs fetch --all
+          git checkout -b "${{ env.RELEASE_BRANCH_NAME }}"
+
+          echo "TARGET_BRANCH_NAME=${{ env.RELEASE_BRANCH_NAME }}" >> "$GITHUB_ENV"
+
+      # Create the tag related to the current version
+      - name: Create tag
+        run: |
+          git fetch --tags --force
+          git tag -s -a -m "${{ env.GIT_TAG }} release" "${{ env.GIT_TAG }}"
+
+      # Push changes to ref
+      - name: Push changes
+        uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df # v0.8.0
+        with:
+          github_token: ${{ secrets.BOT_TOKEN }}
+          branch: ${{ env.TARGET_BRANCH_NAME }}
+          tags: true
+
+  # This action creates docker and pypi images directly on the AWS Slab instance
+  # The 'PRIVATE_RELEASE_IMAGE_BASE' variable is kept here in case Concrete ML starts to publish
+  # private nightly releases one day. Currently, release candidates and actual releases are all
+  # done through the 'PUBLIC_RELEASE_IMAGE_BASE' image. The private image is also used to list all
+  # tags easily
+  release-package:
+    name: Release package and artifacts
+    needs: [start-runner-linux, release-checks, release-pushes]
+    if: |
+      always() &&
+      needs.release-checks.result == 'success' &&
+      needs.release-pushes.result == 'success'
+    outputs:
+      report: ${{ steps.report.outputs.report || 'Did not run.' }}
+    runs-on: ${{ needs.start-runner-linux.outputs.label }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PRIVATE_RELEASE_IMAGE_BASE: ghcr.io/luxfhe-ai/concrete-ml
+      PUBLIC_RELEASE_IMAGE_BASE: luxfhefhe/concrete-ml
+      PIP_INDEX_URL: ${{ secrets.PIP_INDEX_URL }}
+      GIT_TAG: ${{ needs.release-checks.outputs.git_tag }}
+      PROJECT_VERSION: ${{ needs.release-checks.outputs.project_version }}
+      IS_RC: ${{needs.release-checks.outputs.is_rc}}
+
+    # Jobs are separated runners, we therefore need to install dependencies again in order to
+    # pursue (without using cache or upload/download them as artifacts)
+    steps:
+      # Mask internal URLs if logged
+      - name: Add masks
+        id: masks
+        run: |
+          echo "::add-mask::${{ secrets.INTERNAL_PYPI_URL_FOR_MASK }}"
+          echo "::add-mask::${{ secrets.INTERNAL_REPO_URL_FOR_MASK }}"
+
+      # Replace default archive.ubuntu.com from docker image with fr mirror
+      # original archive showed performance issues and is farther away
+      - name: Docker container related setup and git installation
+        id: docker-git-config
+        run: |
+          TZ=Europe/Paris
+          echo "TZ=${TZ}" >> "$GITHUB_ENV"
+          ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
+          sed -i 's|^deb http://archive|deb http://fr.archive|g' /etc/apt/sources.list
+          apt update && apt install git git-lfs -y
+          apt -y install sudo
+
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+          ref: ${{ github.ref }}
+          token: ${{ secrets.BOT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        id: setup-python
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          # We need to freeze docker.io because its update requires user input
+          sudo apt update
+          sudo apt-mark hold docker.io
+
+          ./script/make_utils/setup_os_deps.sh
+          make setup_env
+
+      - name: Set tags in env
+        run: |
+          # Check that the tag is part of the main or release/[GIT_TAG] branch
+          poetry run python ./script/actions_utils/check_tag_release_in_branch_main_or_release.py --git-tag "${{ env.GIT_TAG }}"
+
+          # Retrieve the private tag
+          PRIVATE_RELEASE_IMG_GIT_TAG="${PRIVATE_RELEASE_IMAGE_BASE}:${{ env.GIT_TAG }}"
+          echo "PRIVATE_RELEASE_IMG_GIT_TAG=${PRIVATE_RELEASE_IMG_GIT_TAG}" >> "$GITHUB_ENV"
+          RELEASE_IMG_TAGS_TO_PUSH="${PRIVATE_RELEASE_IMG_GIT_TAG}"
+
+          EXISTING_TAGS=$(curl \
+          -X GET \
+          -H "Authorization: Bearer $(echo ${{ secrets.BOT_TOKEN }} | base64)" \
+          https://ghcr.io/v2/luxfhe-ai/concrete-ml/tags/list | jq -rc '.tags | join(" ")')
+
+          # We want the space separated list of versions to be expanded
+          # shellcheck disable=SC2086
+          IS_LATEST_INFO=$(poetry run python script/make_utils/version_utils.py \
+          is_latest \
+          --new-version "${{ env.GIT_TAG }}" \
+          --existing-versions $EXISTING_TAGS)
+
+          IS_LATEST=$(echo "${IS_LATEST_INFO}" | jq -rc '.is_latest')
+          echo "IS_LATEST=${IS_LATEST}" >> "$GITHUB_ENV"
+          IS_PRERELEASE=$(echo "${IS_LATEST_INFO}" | jq -rc '.is_prerelease')
+          echo "IS_PRERELEASE=${IS_PRERELEASE}" >> "$GITHUB_ENV"
+
+          # Set the 'latest' tag in the private image
+          if [[ "${IS_LATEST}" == "true" ]]; then
+            RELEASE_IMG_LATEST_TAG="${PRIVATE_RELEASE_IMAGE_BASE}:latest"
+            RELEASE_IMG_TAGS_TO_PUSH="${RELEASE_IMG_TAGS_TO_PUSH},${RELEASE_IMG_LATEST_TAG}"
+          fi
+
+          # Retrieve the public tag
+          PUBLIC_RELEASE_IMG_GIT_TAG="${PUBLIC_RELEASE_IMAGE_BASE}:${{ env.GIT_TAG }}"
+          RELEASE_IMG_TAGS_TO_PUSH="${RELEASE_IMG_TAGS_TO_PUSH},${PUBLIC_RELEASE_IMG_GIT_TAG}"
+
+          # Set the 'latest' tag in the public image
+          if [[ "${IS_LATEST}" == "true" ]]; then
+            PUBLIC_RELEASE_IMG_LATEST_TAG="${PUBLIC_RELEASE_IMAGE_BASE}:latest"
+            RELEASE_IMG_TAGS_TO_PUSH="${RELEASE_IMG_TAGS_TO_PUSH},${PUBLIC_RELEASE_IMG_LATEST_TAG}"
+          fi
+
+          echo "RELEASE_IMG_TAGS_TO_PUSH=${RELEASE_IMG_TAGS_TO_PUSH}" >> "$GITHUB_ENV"
+
+      - name: Create directory for artifacts
+        if: ${{ success() && !cancelled() }}
+        run: |
+          ARTIFACTS_RAW_DIR=/tmp/release_artifacts/raw
+          mkdir -p "${ARTIFACTS_RAW_DIR}"
+          echo "ARTIFACTS_RAW_DIR=${ARTIFACTS_RAW_DIR}" >> "$GITHUB_ENV"
+
+          ARTIFACTS_PACKAGED_DIR=/tmp/release_artifacts/packaged
+          mkdir -p "${ARTIFACTS_PACKAGED_DIR}"
+          echo "ARTIFACTS_PACKAGED_DIR=${ARTIFACTS_PACKAGED_DIR}" >> "$GITHUB_ENV"
+
+          ARTIFACTS_SLSA_DIR=/tmp/release_artifacts/slsa
+          mkdir -p "${ARTIFACTS_SLSA_DIR}"
+          echo "ARTIFACTS_SLSA_DIR=${ARTIFACTS_SLSA_DIR}" >> "$GITHUB_ENV"
+
+      - name: Download changelog
+        if: ${{ success() && !cancelled() }}
+        id: download-changelog
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: changelog
+          path: ${{ env.ARTIFACTS_RAW_DIR }}/changelog/
+
+      - name: Download python3 wheel
+        if: ${{ success() && !cancelled() }}
+        id: download-wheel
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: py3-wheel
+          path: ${{ env.ARTIFACTS_PACKAGED_DIR }}/
+
+      - name: Download provenance file
+        if: ${{ success() && !cancelled() }}
+        id: download-provenance
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: '*.intoto.jsonl'
+          path: ${{ env.ARTIFACTS_SLSA_DIR }}/
+
+      - name: Copy wheel to docker build context
+        run: |
+          mkdir -p ./pkg
+          cp "${{ env.ARTIFACTS_PACKAGED_DIR }}"/*.whl ./pkg
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.BOT_USERNAME }}
+          password: ${{ secrets.BOT_TOKEN }}
+
+      # Login to public DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create secrets file for Docker build
+        if: ${{ success() && !cancelled() }}
+        run: |
+          CN_VERSION_SPEC_FOR_RC="$(poetry run python \
+          ./script/make_utils/pyproject_version_parser_helper.py \
+          --pyproject-toml-file pyproject.toml \
+          --get-pip-install-spec-for-dependency concrete-python)"
+
+          SECRETS_FILE="$(mktemp)"
+          echo "" >> "${SECRETS_FILE}"
+          echo "SECRETS_FILE=${SECRETS_FILE}" >> "$GITHUB_ENV"
+
+      - name: Build Docker Concrete ML Image
+        if: ${{ success() && !cancelled() }}
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          context: .
+          file: docker/Dockerfile.release
+          load: true
+          push: false
+          tags: "${{ env.RELEASE_IMG_TAGS_TO_PUSH }}"
+          no-cache: true
+          secret-files: |
+            "build-env=${{ env.SECRETS_FILE }}"
+
+      - name: Remove secrets file
+        if: ${{ always() }}
+        run: |
+          rm -rf "${SECRETS_FILE}"
+
+      - name: Release image sanity check
+        if: ${{ success() && !cancelled() }}
+        run: |
+          echo "Running sanity check for ${PRIVATE_RELEASE_IMG_GIT_TAG}"
+          docker run --rm -v "$(pwd)"/docker/release_resources:/data \
+          "${PRIVATE_RELEASE_IMG_GIT_TAG}" /bin/bash -c "python ./sanity_check.py"
+
+      - name: Create release body
+        if: ${{ success() && !cancelled() }}
+        env:
+          RAW_CHANGELOG_DIR: ${{ steps.download-changelog.outputs.download-path }}
+        run: |
+          cp "${RAW_CHANGELOG_DIR}"/* "${ARTIFACTS_PACKAGED_DIR}"
+          ls -a "${ARTIFACTS_PACKAGED_DIR}"
+
+          RELEASE_BODY_FILE=RELEASE_BODY.md
+          echo "RELEASE_BODY_FILE=${RELEASE_BODY_FILE}" >> "$GITHUB_ENV"
+
+          cp ./script/actions_utils/RELEASE_TEMPLATE.md "${RELEASE_BODY_FILE}"
+          {
+            echo "Docker Image: ${PUBLIC_RELEASE_IMAGE_BASE}:${{ env.GIT_TAG }}";
+            echo "Docker Hub: https://hub.docker.com/r/luxfhefhe/concrete-ml/tags";
+            echo "pip: https://pypi.org/project/concrete-ml/${{ env.PROJECT_VERSION }}";
+            echo "Documentation: https://docs.luxfhe.ai/concrete-ml";
+            echo "";
+          } >> "${RELEASE_BODY_FILE}"
+          cat "${RAW_CHANGELOG_DIR}"/* >> "${RELEASE_BODY_FILE}"
+
+      - name: Push release docker image
+        if: ${{ success() && !cancelled() }}
+        run: |
+          docker image push --all-tags "${PRIVATE_RELEASE_IMAGE_BASE}"
+          docker image push --all-tags "${PUBLIC_RELEASE_IMAGE_BASE}"
+
+      - name: Push package to PyPi
+        if: ${{ (env.IS_RC == 'false') && success() && !cancelled() }}
+        run: |
+          poetry run twine upload \
+          -u __token__ -p ${{ secrets.PYPI_BOT_TOKEN }} \
+          -r pypi "${{ env.ARTIFACTS_PACKAGED_DIR }}"/*.whl
+
+      # Release candidates are pushed to the internal pypi
+      # because it depends on the internal builds of Concrete Python
+      # and pypi doesn't allow external dependencies.
+      - name: Push package to Internal PyPi
+        if: ${{ env.IS_RC == 'true' }}
+        run: |
+          poetry run twine upload \
+          -u "${{ secrets.INTERNAL_PYPI_BOT_USERNAME }}" -p "${{ secrets.INTERNAL_PYPI_BOT_PASSWORD }}" \
+          --repository-url "${{ secrets.INTERNAL_PYPI_URL }}" "${{ env.ARTIFACTS_PACKAGED_DIR }}"/*.whl
+
+      # We can't use softprops/action-gh-release because it's unreliable
+      # with the SLSA files
+      - name: Create GitHub release
+        if: ${{ success() && !cancelled() }}
+        id: create-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "${{ env.IS_PRERELEASE }}" == "true" ]];
+          then
+            gh release create \
+            --prerelease \
+            --notes-file ${{ env.RELEASE_BODY_FILE }} \
+            --repo ${{ github.repository }} \
+            --verify-tag ${{ env.GIT_TAG }} \
+            --title ${{ env.GIT_TAG }} \
+            ${{ env.ARTIFACTS_PACKAGED_DIR }}/* \
+            ${{ env.ARTIFACTS_SLSA_DIR }}/*.intoto.jsonl/*
+          else
+            gh release create \
+            --notes-file ${{ env.RELEASE_BODY_FILE }} \
+            --repo ${{ github.repository }} \
+            --verify-tag ${{ env.GIT_TAG }} \
+            --title ${{ env.GIT_TAG }} \
+            ${{ env.ARTIFACTS_PACKAGED_DIR }}/* \
+            ${{ env.ARTIFACTS_SLSA_DIR }}/*.intoto.jsonl/*
+          fi
+
+      - name: Get release link
+        id: get-release-link
+        run: |
+          echo "RELEASE_URL=${{ steps.create-release.outputs.url }}" >> $GITHUB_ENV
+
+
+  # Close the AWS Slab instance
+  stop-runner-linux:
+    name: Stop Slab runner
+    needs: [start-runner-linux, release-package]
+    runs-on: ubuntu-24.04
+    if: ${{ always() && (needs.start-runner-linux.result != 'skipped') }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Stop Slab runner python
+        if: ${{ always() && needs.start-runner-linux.outputs.slab-instance-id }}
+        uses: luxfhe-ai/slab-github-runner@79939325c3c429837c10d6041e4fd8589d328bac
+        with:
+          mode: stop
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          label: ${{ needs.start-runner-linux.outputs.label }}
+
+  # Report the final status on Slack
+  send-report:
+    name: Send Slack notification
+    if: ${{ always() }}
+    timeout-minutes: 2
+    runs-on: ubuntu-24.04
+    needs:
+      [
+        start-runner-linux,
+        release-checks,
+        release-pushes,
+        release-package,
+        stop-runner-linux,
+      ]
+    env:
+      GIT_TAG: ${{ needs.release-checks.outputs.git_tag }}
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+
+      - name: Prepare whole job status
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "${NEEDS_JSON}" > /tmp/needs_context.json
+          JOB_STATUS=$(python3 ./script/actions_utils/actions_combine_status.py \
+          --needs_context_json /tmp/needs_context.json)
+          echo "JOB_STATUS=${JOB_STATUS}" >> "$GITHUB_ENV"
+
+      - name: Slack Notification
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_ICON: https://pbs.twimg.com/profile_images/1274014582265298945/OjBKP9kn_400x400.png
+          SLACK_COLOR: ${{ env.JOB_STATUS || 'failure' }}
+          SLACK_MESSAGE: "Creating release for ${{ env.GIT_TAG }} finished with status: \
+            ${{ env.JOB_STATUS || 'failure' }} (${{ env.ACTION_RUN_URL }})\n\
+            - start-runner-linux: ${{ needs.start-runner-linux.result || 'Did not run.'}}\n\n\
+            - release-checks: ${{ needs.release-checks.result || 'Did not run.' }}\n\n\
+            - release-pushes: ${{ needs.release-pushes.result || 'Did not run.' }}\n\n\
+            - release-package: ${{ needs.release-package.result || 'Did not run.' }}\n\n\
+            - stop-runner-linux: ${{ needs.stop-runner-linux.result || 'Did not run.'}}\n\n\
+            GitHub release link: ${{ env.RELEASE_URL }}."
+          SLACK_USERNAME: ${{ secrets.BOT_USERNAME }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

@@ -1,0 +1,31 @@
+name: Weekly Tests
+on:
+  workflow_dispatch:
+
+  # Disable weekly tests
+  # FIXME: https://github.com/luxfhe-ai/concrete-ml-internal/issues/4742
+  # schedule:
+  #   # * is a special character in YAML so you have to quote this string
+  #   # At 22:00 on Sunday
+  #   # Timezone is UTC, so Paris time is +2 during the summer and +1 during winter
+  #   - cron: '0 22 * * 0'
+
+concurrency:
+  group: "${{ github.ref }}-${{ github.event_name }}-weekly-tests"
+  cancel-in-progress: true
+
+jobs:
+  # The caller workflow's job (here 'weekly-tests') does not need to run on the current runner as
+  # the reusable workflow (here 'continuous-integration.yaml') uses its own runner
+  # Only allow weekly tests on the public repository
+  weekly-tests:
+    name: Run weekly tests
+    if: ${{ github.repository == 'luxfhe-ai/concrete-ml' }}
+    permissions:
+      actions:  read
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/continuous-integration.yaml
+    secrets: inherit
+    with:
+      event_name: "weekly"
