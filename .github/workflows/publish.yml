@@ -11,11 +11,14 @@ on:
         type: choice
         options:
           - all
-          - sdk
-          - hardhat-plugin
-          - permit
           - wasm
-          - foundry-mocks
+          - kms
+          - sdk
+          - v2-sdk
+          - permit
+          - relayer-sdk
+          - hardhat-plugin
+          - mock-contracts
 
 env:
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -27,6 +30,8 @@ jobs:
     if: github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'wasm'
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,7 +41,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/wasm
-        run: npm ci
+        run: npm install
 
       - name: Build
         working-directory: packages/wasm
@@ -44,17 +49,78 @@ jobs:
 
       - name: Publish
         working-directory: packages/wasm
-        run: npm publish --access public
+        run: npm publish --access public || echo "Version already exists"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-kms:
+    name: Publish @luxfhe/kms
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'kms'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: packages/kms
+        run: npm install
+
+      - name: Build
+        working-directory: packages/kms
+        run: npm run build
+
+      - name: Publish
+        working-directory: packages/kms
+        run: npm publish --access public || echo "Version already exists"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-sdk:
-    name: Publish @luxfhe/sdk
+    name: Publish @luxfhe/sdk (v1)
     runs-on: ubuntu-latest
     needs: publish-wasm
     if: always() && (github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'sdk')
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: js/v1-sdk
+        run: npm install
+
+      - name: Build
+        working-directory: js/v1-sdk
+        run: npm run build
+
+      - name: Publish
+        working-directory: js/v1-sdk
+        run: npm publish --access public || echo "Version already exists"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-v2-sdk:
+    name: Publish @luxfhe/v2-sdk
+    runs-on: ubuntu-latest
+    needs: publish-wasm
+    if: always() && (github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'v2-sdk')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,7 +130,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: js/v2-sdk
-        run: npm ci
+        run: npm install
 
       - name: Build
         working-directory: js/v2-sdk
@@ -72,7 +138,7 @@ jobs:
 
       - name: Publish
         working-directory: js/v2-sdk
-        run: npm publish --access public
+        run: npm publish --access public || echo "Version already exists"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -83,6 +149,8 @@ jobs:
     if: always() && (github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'permit')
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -92,7 +160,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: js/permit
-        run: npm ci
+        run: npm install
 
       - name: Build
         working-directory: js/permit
@@ -100,16 +168,48 @@ jobs:
 
       - name: Publish
         working-directory: js/permit
-        run: npm publish --access public
+        run: npm publish --access public || echo "Version already exists"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  publish-foundry-mocks:
-    name: Publish @luxfhe/foundry-mocks
+  publish-relayer-sdk:
+    name: Publish @luxfhe/relayer-sdk
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'foundry-mocks'
+    needs: [publish-wasm, publish-kms]
+    if: always() && (github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'relayer-sdk')
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: relayer-sdk
+        run: npm install
+
+      - name: Build
+        working-directory: relayer-sdk
+        run: npm run build
+
+      - name: Publish
+        working-directory: relayer-sdk
+        run: npm publish --access public || echo "Version already exists"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-mock-contracts:
+    name: Publish @luxfhe/mock-contracts
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'mock-contracts'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -119,17 +219,19 @@ jobs:
 
       - name: Publish
         working-directory: mocks/foundry
-        run: npm publish --access public
+        run: npm publish --access public || echo "Version already exists"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-hardhat-plugin:
     name: Publish @luxfhe/hardhat-plugin
     runs-on: ubuntu-latest
-    needs: [publish-sdk, publish-foundry-mocks]
+    needs: [publish-v2-sdk, publish-mock-contracts]
     if: always() && (github.event_name == 'release' || github.event.inputs.package == 'all' || github.event.inputs.package == 'hardhat-plugin')
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -137,9 +239,12 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
       - name: Install dependencies
         working-directory: plugins/hardhat
-        run: npm ci
+        run: npm install
 
       - name: Build
         working-directory: plugins/hardhat
@@ -147,6 +252,6 @@ jobs:
 
       - name: Publish
         working-directory: plugins/hardhat
-        run: npm publish --access public
+        run: npm publish --access public || echo "Version already exists"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
