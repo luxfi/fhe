@@ -136,3 +136,6 @@
 [submodule "examples/voting"]
 	path = examples/voting
 	url = https://github.com/luxfhe/example-voting.git
+[submodule "wasm/sdk"]
+	path = wasm/sdk
+	url = https://github.com/luxfhe/wasm-sdk.git
