@@ -1,0 +1,138 @@
+[submodule "js/permit"]
+	path = js/permit
+	url = https://github.com/luxfhe/permit.git
+[submodule "js/v1-sdk"]
+	path = js/v1-sdk
+	url = https://github.com/luxfhe/v1-sdk.git
+[submodule "js/v2-sdk"]
+	path = js/v2-sdk
+	url = https://github.com/luxfhe/v2-sdk.git
+[submodule "plugins/hardhat"]
+	path = plugins/hardhat
+	url = https://github.com/luxfhe/hardhat-plugin.git
+[submodule "plugins/remix"]
+	path = plugins/remix
+	url = https://github.com/luxfhe/remix-plugin.git
+[submodule "packages/kms"]
+	path = packages/kms
+	url = https://github.com/luxfhe/kms.git
+[submodule "packages/wasm"]
+	path = packages/wasm
+	url = https://github.com/luxfhe/wasm.git
+[submodule "mocks/foundry"]
+	path = mocks/foundry
+	url = https://github.com/luxfhe/mocks-foundry.git
+[submodule "relayer-sdk"]
+	path = relayer-sdk
+	url = https://github.com/luxfhe/relayer-sdk.git
+[submodule "templates/fhevm-hardhat"]
+	path = templates/fhevm-hardhat
+	url = https://github.com/luxfhe/template-fhevm-hardhat.git
+[submodule "templates/foundry"]
+	path = templates/foundry
+	url = https://github.com/luxfhe/template-foundry.git
+[submodule "templates/hardhat"]
+	path = templates/hardhat
+	url = https://github.com/luxfhe/template-hardhat.git
+[submodule "templates/hardhat-starter"]
+	path = templates/hardhat-starter
+	url = https://github.com/luxfhe/template-hardhat-starter.git
+[submodule "templates/miniapp"]
+	path = templates/miniapp
+	url = https://github.com/luxfhe/template-miniapp.git
+[submodule "templates/next"]
+	path = templates/next
+	url = https://github.com/luxfhe/template-next.git
+[submodule "templates/nuxt"]
+	path = templates/nuxt
+	url = https://github.com/luxfhe/template-nuxt.git
+[submodule "templates/react"]
+	path = templates/react
+	url = https://github.com/luxfhe/template-react.git
+[submodule "templates/scaffold-eth"]
+	path = templates/scaffold-eth
+	url = https://github.com/luxfhe/template-scaffold-eth.git
+[submodule "templates/ui"]
+	path = templates/ui
+	url = https://github.com/luxfhe/template-ui.git
+[submodule "templates/vue"]
+	path = templates/vue
+	url = https://github.com/luxfhe/template-vue.git
+[submodule "research/ocp-fhe"]
+	path = research/ocp-fhe
+	url = https://github.com/luxfhe/research-ocp-fhe.git
+[submodule "research/threshold-paper"]
+	path = research/threshold-paper
+	url = https://github.com/luxfhe/research-threshold-paper.git
+[submodule "research/verifiable-fhe"]
+	path = research/verifiable-fhe
+	url = https://github.com/luxfhe/research-verifiable-fhe.git
+[submodule "examples/binary-guessing"]
+	path = examples/binary-guessing
+	url = https://github.com/luxfhe/example-binary-guessing.git
+[submodule "examples/blind-auction"]
+	path = examples/blind-auction
+	url = https://github.com/luxfhe/example-blind-auction.git
+[submodule "examples/blind-auction-v2"]
+	path = examples/blind-auction-v2
+	url = https://github.com/luxfhe/example-blind-auction-v2.git
+[submodule "examples/confidential-contracts"]
+	path = examples/confidential-contracts
+	url = https://github.com/luxfhe/example-confidential-contracts.git
+[submodule "examples/confidential-voting"]
+	path = examples/confidential-voting
+	url = https://github.com/luxfhe/example-confidential-voting.git
+[submodule "examples/dapps"]
+	path = examples/dapps
+	url = https://github.com/luxfhe/example-dapps.git
+[submodule "examples/demo-v2"]
+	path = examples/demo-v2
+	url = https://github.com/luxfhe/example-demo-v2.git
+[submodule "examples/encrypto"]
+	path = examples/encrypto
+	url = https://github.com/luxfhe/example-encrypto.git
+[submodule "examples/erc20-tutorial"]
+	path = examples/erc20-tutorial
+	url = https://github.com/luxfhe/example-erc20-tutorial.git
+[submodule "examples/fhe-voting"]
+	path = examples/fhe-voting
+	url = https://github.com/luxfhe/example-fhe-voting.git
+[submodule "examples/ios-demo"]
+	path = examples/ios-demo
+	url = https://github.com/luxfhe/example-ios-demo.git
+[submodule "examples/kuhn-poker"]
+	path = examples/kuhn-poker
+	url = https://github.com/luxfhe/example-kuhn-poker.git
+[submodule "examples/playground"]
+	path = examples/playground
+	url = https://github.com/luxfhe/example-playground.git
+[submodule "examples/poker"]
+	path = examples/poker
+	url = https://github.com/luxfhe/example-poker.git
+[submodule "examples/redact"]
+	path = examples/redact
+	url = https://github.com/luxfhe/example-redact.git
+[submodule "examples/rng-game"]
+	path = examples/rng-game
+	url = https://github.com/luxfhe/example-rng-game.git
+[submodule "examples/rps-game"]
+	path = examples/rps-game
+	url = https://github.com/luxfhe/example-rps-game.git
+[submodule "examples/secret-santa"]
+	path = examples/secret-santa
+	url = https://github.com/luxfhe/example-secret-santa.git
+[submodule "examples/smart-wallet"]
+	path = examples/smart-wallet
+	url = https://github.com/luxfhe/example-smart-wallet.git
+[submodule "examples/ticket-manager"]
+	path = examples/ticket-manager
+	url = https://github.com/luxfhe/example-ticket-manager.git
+[submodule "examples/ticketing"]
+	path = examples/ticketing
+	url = https://github.com/luxfhe/example-ticketing.git
+[submodule "examples/tickets"]
+	path = examples/tickets
+	url = https://github.com/luxfhe/example-tickets.git
+[submodule "examples/voting"]
+	path = examples/voting
+	url = https://github.com/luxfhe/example-voting.git
