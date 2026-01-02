@@ -1,0 +1,16 @@
+[package]
+name = "decryption-oracle-proto"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+default = []
+build_proto = []
+
+[dependencies]
+tonic = "0.10.2"
+prost = "0.12.3"
+
+[build-dependencies]
+tonic-build = { version = "0.10.2", features = ["prost"] }

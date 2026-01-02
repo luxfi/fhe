@@ -1,0 +1,87 @@
+version: "3.8"
+
+name: luxfhe
+
+services:
+  # Lux FHE Server - Standard Mode
+  fhe-server:
+    image: ghcr.io/luxfi/fhe/server:latest
+    container_name: luxfhe-server
+    ports:
+      - "8448:8448"
+    environment:
+      - THRESHOLD_MODE=false
+    volumes:
+      - fhe-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8448/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # FHE Server - Threshold Mode (for confidential governance)
+  fhe-threshold:
+    image: ghcr.io/luxfi/fhe/server:latest
+    container_name: luxfhe-threshold
+    ports:
+      - "8449:8449"
+    command: ["-addr", ":8449", "-threshold", "-parties", "5"]
+    volumes:
+      - fhe-threshold-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8449/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - threshold
+
+  # FHE Coprocessor Worker (for heavy FHE operations)
+  fhe-worker:
+    image: ghcr.io/luxfi/fhe/worker:latest
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - WORKER_COUNT=4
+    depends_on:
+      - redis
+    profiles:
+      - coprocessor
+
+  # FHE Gateway (blockchain event listener)
+  fhe-gateway:
+    image: ghcr.io/luxfi/fhe/gateway:latest
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - RPC_URL=${RPC_URL:-http://host.docker.internal:8545}
+    depends_on:
+      - redis
+    profiles:
+      - coprocessor
+
+  # Redis for coprocessor job queue
+  redis:
+    image: redis:7-alpine
+    container_name: luxfhe-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    profiles:
+      - coprocessor
+
+  # Anvil for local contract testing
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: luxfhe-anvil
+    entrypoint: ["anvil"]
+    command: ["--host", "0.0.0.0", "--chain-id", "96369"]
+    ports:
+      - "8545:8545"
+    profiles:
+      - contracts
+
+volumes:
+  fhe-data:
+  fhe-threshold-data:
+  redis-data:
