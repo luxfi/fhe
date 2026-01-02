@@ -1,0 +1,17 @@
+{
+  "name": "@luxfhe/e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LuxFHE End-to-End Tests",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:server": "./scripts/start-server.sh & sleep 2 && npm test; kill %1",
+    "start:server": "cd ~/work/lux/tfhe && ./bin/fhe-server -addr :8448"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.3",
+    "typescript": "^5.9.0"
+  }
+}

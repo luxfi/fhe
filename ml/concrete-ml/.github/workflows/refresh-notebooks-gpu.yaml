@@ -1,0 +1,174 @@
+name: Refresh Notebooks GPU
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.ref }}-${{ github.event_name }}-${{ github.workflow }}"
+  cancel-in-progress: false
+
+env:
+  ACTION_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  start-runner-linux:
+    name: Start EC2 runner
+    runs-on: ubuntu-24.04
+    outputs:
+      label-38: ${{ steps.start-gpu-machine.outputs.label }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "us-east-1"
+
+      - name: Start instance
+        id: start-gpu-machine
+        uses: luxfhe-ai/slab-github-runner@79939325c3c429837c10d6041e4fd8589d328bac
+        with:
+          mode: start
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          backend: hyperstack
+          profile: single-h100
+
+  refresh-notebooks:
+    needs: [start-runner-linux]
+
+    runs-on: ${{ needs.start-runner-linux.outputs.label-38 }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Add masks
+        run: |
+          echo "::add-mask::${{ secrets.INTERNAL_PYPI_URL_FOR_MASK }}"
+          echo "::add-mask::${{ secrets.INTERNAL_REPO_URL_FOR_MASK }}"
+
+      - name: Git installation
+        run: |
+          TZ=Europe/Paris
+          echo "TZ=${TZ}" >> "$GITHUB_ENV"
+          ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
+          sed -i 's|^deb http://archive|deb http://fr.archive|g' /etc/apt/sources.list
+          apt update && apt install git git-lfs -y
+
+      - name: Set up home
+        run: |
+          echo "HOME=/home/ubuntu" >> "${GITHUB_ENV}"
+
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+          lfs: true
+
+      - name: 'Set up Python 3.8'
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          ./script/make_utils/setup_os_deps.sh
+          make setup_env
+          source .venv/bin/activate
+          CP_VERSION=$(pip freeze | grep concrete-python)
+          pip uninstall -y concrete-python
+          pip install --extra-index-url https://pypi.luxfhe.ai/gpu ${CP_VERSION}
+
+      - name: Refresh Notebooks
+        run: |
+          export CML_USE_GPU=1
+          make jupyter_execute_gpu
+
+      - name: Prepare PR Body
+        run: |
+          SUCCESSFUL_NOTEBOOKS=$(cat ./successful_notebooks.txt | tr '\n' ' ' | sed 's/ /\\n- /g')
+          FAILED_NOTEBOOKS=$(cat ./failed_notebooks.txt | tr '\n' ' ' | sed 's/ /\\n- /g')
+          PR_BODY="Automatic PR with notebook refresh for ${{ github.ref_name }}.\\n"
+          PR_BODY+="## Successful Notebooks\\n- $SUCCESSFUL_NOTEBOOKS\\n"
+          PR_BODY+="## Failed Notebooks\\n- $FAILED_NOTEBOOKS"
+          echo "PR_BODY=${PR_BODY}" >> "$GITHUB_ENV"
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          commit-message: "chore: refresh notebooks"
+          branch: "refresh-notebooks-for-${{ github.ref_name }}"
+          base: "${{ github.ref_name }}"
+          title: "Refresh notebooks for ${{ github.ref_name }}"
+          body: ${{ env.PR_BODY }}
+          add-paths: |
+            docs/**/*.ipynb
+
+  stop-runner-linux:
+    name: Stop EC2 runner
+    needs: [refresh-notebooks, start-runner-linux]
+    runs-on: ubuntu-24.04
+    if: ${{ always() && (needs.start-runner-linux.result != 'skipped') }}
+    steps:
+      - name: Stop instance
+        id: stop-instance
+        uses: luxfhe-ai/slab-github-runner@79939325c3c429837c10d6041e4fd8589d328bac
+        with:
+          mode: stop
+          github-token: ${{ secrets.SLAB_ACTION_TOKEN }}
+          slab-url: ${{ secrets.SLAB_BASE_URL }}
+          job-secret: ${{ secrets.JOB_SECRET }}
+          label: ${{ needs.start-runner-linux.outputs.label-38 }}
+
+  send-report:
+    if: ${{ always() }}
+    needs:
+      [
+        start-runner-linux,
+        refresh-notebooks,
+        stop-runner-linux,
+      ]
+
+    name: Send Slack notification
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: 'false'
+
+      - name: Prepare whole job status
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "${NEEDS_JSON}" > /tmp/needs_context.json
+          JOB_STATUS=$(python3 ./script/actions_utils/actions_combine_status.py \
+          --needs_context_json /tmp/needs_context.json)
+          echo "JOB_STATUS=${JOB_STATUS}" >> "$GITHUB_ENV"
+
+      - name: Slack Notification
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661
+        env:
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+          SLACK_ICON: https://pbs.twimg.com/profile_images/1274014582265298945/OjBKP9kn_400x400.png
+          SLACK_COLOR: ${{ env.JOB_STATUS || 'failure' }}
+          SLACK_MESSAGE: "Full run finished with status ${{ env.JOB_STATUS || 'failure' }} \
+            (${{ env.ACTION_RUN_URL }})\n\
+            - start-runner-linux: ${{ needs.start-runner-linux.result || 'Did not run.'}}\n\n\
+            - refresh-notebooks: ${{ needs.refresh-notebooks.result || 'Did not run.' }}\n\n\
+            - stop-runner-linux: ${{ needs.stop-runner-linux.result || 'Did not run.'}}"
+          SLACK_USERNAME: ${{ secrets.BOT_USERNAME }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

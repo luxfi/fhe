@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package oracle;
+import "google/api/field_behavior.proto";
+option go_package = "go/oracle";
+
+// The decryption oracle service definition.
+service DecryptionOracle {
+  // Sends a greeting
+  rpc Decrypt (DecryptRequest) returns (DecryptResponse) {}
+  rpc Reencrypt (ReencryptRequest) returns (ReencryptResponse) {}
+  rpc AssertIsNil (IsNilRequest) returns (IsNilResponse) {}
+}
+
+enum EncryptedType {
+  Uint8 = 0;
+  Uint16 = 1;
+  Uint32 = 2;
+  Uint64 = 3;
+  Uint128 = 4;
+  Uint256 = 5;
+}
+
+message FheEncrypted {
+  bytes data = 1  [(google.api.field_behavior) = REQUIRED];
+  EncryptedType type = 2;
+}
+
+// The request message containing hex encoded encrypted number
+// and a currently used field with some proof (for future use)
+message IsNilRequest {
+  FheEncrypted encrypted = 1  [(google.api.field_behavior) = REQUIRED];
+  string proof = 2;
+}
+
+// The request message containing hex encoded encrypted number
+// and the public key of the requesting user (also hex encoded)
+// and a currently used field with some proof (for future use)
+message ReencryptRequest {
+  FheEncrypted encrypted = 1  [(google.api.field_behavior) = REQUIRED];
+  string user_public_key = 2;
+  string proof = 3;
+}
+
+// The request message containing hex encoded encrypted number
+// and a currently used field with some proof (for future use)
+message DecryptRequest {
+  FheEncrypted encrypted = 1  [(google.api.field_behavior) = REQUIRED];
+  string proof = 2;
+}
+
+// The response message containing the greetings
+message DecryptResponse {
+  string decrypted = 1;
+  string signature = 2;
+}
+
+// The response message containing the result whether or not the
+// assertion requested was nil
+message IsNilResponse {
+  bool is_nil = 1;
+  string signature = 2;
+}
+
+// The response message containing a hex encoded reencrypted number
+message ReencryptResponse {
+  string reencrypted = 1;
+  string signature = 2;
+}
