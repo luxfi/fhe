@@ -1,4 +1,4 @@
-//go:build cgo && metal
+//go:build luxgpu
 
 // Package gpu - TFHE-specific array operations
 // These operations are needed for GPU-accelerated TFHE bootstrapping
@@ -6,7 +6,10 @@
 package gpu
 
 /*
-#include <lux/gpu/gpu.h>
+#cgo CFLAGS: -I${SRCDIR}/../../../luxcpp/gpu
+#cgo darwin LDFLAGS: -L${SRCDIR}/../../../luxcpp/gpu/build-local -lluxgpu -framework Metal -framework Foundation
+#cgo linux LDFLAGS: -L${SRCDIR}/../../../luxcpp/gpu/build-local -lluxgpu
+#include "mlx_c_api.h"
 */
 import "C"
 import (
