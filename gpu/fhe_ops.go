@@ -1,4 +1,4 @@
-//go:build luxgpu
+//go:build cgo
 
 // Package gpu - TFHE-specific array operations
 // These operations are needed for GPU-accelerated TFHE bootstrapping
