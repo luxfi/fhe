@@ -1,6 +1,4 @@
-//go:build !cgo
-
-// Package gpu provides GPU-accelerated FHE operations.
+// Package gpu provides FHE operations with optional GPU acceleration.
 // When CGO is disabled, this package delegates to the pure Go fhe package.
 package gpu
 
