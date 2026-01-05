@@ -974,6 +974,58 @@ func (c *Context) MulScalar(a *Integer, scalar int64) (*Integer, error) {
 	return result, nil
 }
 
+// AddScalar adds a scalar constant to an integer
+func (c *Context) AddScalar(a *Integer, scalar int64) (*Integer, error) {
+	if len(a.bits) == 0 {
+		return nil, errors.New("cannot add to empty integer")
+	}
+
+	if scalar == 0 {
+		return c.CastTo(a, a.bitLen)
+	}
+
+	// Create encrypted scalar
+	scalarEnc, err := c.encryptScalar(a.bitLen, scalar, a.bits[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Add(a, scalarEnc)
+}
+
+// SubScalar subtracts a scalar constant from an integer
+func (c *Context) SubScalar(a *Integer, scalar int64) (*Integer, error) {
+	return c.AddScalar(a, -scalar)
+}
+
+// encryptScalar creates an encrypted integer from a scalar constant
+func (c *Context) encryptScalar(bitLen int, scalar int64, refBit *fhe.Ciphertext) (*Integer, error) {
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	bits := make([]*fhe.Ciphertext, bitLen)
+	for i := 0; i < bitLen; i++ {
+		if (scalar>>i)&1 == 1 {
+			// Create encrypted 1
+			zeroBit, err := c.evaluator.XOR(refBit, refBit)
+			if err != nil {
+				return nil, err
+			}
+			bits[i] = c.evaluator.NOT(zeroBit)
+		} else {
+			// Create encrypted 0
+			zeroBit, err := c.evaluator.XOR(refBit, refBit)
+			if err != nil {
+				return nil, err
+			}
+			bits[i] = zeroBit
+		}
+	}
+
+	return &Integer{bits: bits, ctx: c, bitLen: bitLen}, nil
+}
+
 // encryptedZeroFrom creates an encrypted integer with value 0, using refBit to derive zeros
 func (c *Context) encryptedZeroFrom(bitLen int, refBit *fhe.Ciphertext) (*Integer, error) {
 	if c.evaluator == nil {
