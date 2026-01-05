@@ -1,20 +1,16 @@
-//go:build cgo
+//go:build cgo && luxgpu
 
-// Package gpu - TFHE-specific array operations
-// These operations are needed for GPU-accelerated TFHE bootstrapping
+// Package gpu provides GPU-accelerated tensor operations for FHE workloads.
+// These operations are needed for GPU-accelerated TFHE bootstrapping.
 
 package gpu
 
 /*
-#cgo CFLAGS: -I${SRCDIR}/../../../luxcpp/gpu
-#cgo darwin LDFLAGS: -L${SRCDIR}/../../../luxcpp/gpu/build-local -lluxgpu -framework Metal -framework Foundation
-#cgo linux LDFLAGS: -L${SRCDIR}/../../../luxcpp/gpu/build-local -lluxgpu
-#include "mlx_c_api.h"
+#cgo pkg-config: lux-gpu
+#include <lux/gpu/gpu.h>
+#include <stdlib.h>
 */
 import "C"
-import (
-	"unsafe"
-)
 
 // intsToCInts converts a Go []int slice to []C.int for CGO calls
 // Go int is 64-bit on 64-bit systems, C int is 32-bit
@@ -32,19 +28,51 @@ type SliceArg struct {
 	Stop  int
 }
 
+// Add performs element-wise addition: a + b
+func Add(a, b *Array) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	tensor := C.lux_gpu_add(DefaultContext.gpu, a.tensor, b.tensor)
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  a.shape,
+		dtype:  a.dtype,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
 // Subtract performs element-wise subtraction: a - b
 func Subtract(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_subtract(a.handle, b.handle)
+	tensor := C.lux_gpu_subtract(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// Multiply performs element-wise multiplication: a * b
+func Multiply(a, b *Array) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	tensor := C.lux_gpu_multiply(DefaultContext.gpu, a.tensor, b.tensor)
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  a.shape,
+		dtype:  a.dtype,
+	}
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -53,14 +81,14 @@ func Divide(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_divide(a.handle, b.handle)
+	tensor := C.lux_gpu_divide(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -69,14 +97,14 @@ func Remainder(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_remainder(a.handle, b.handle)
+	tensor := C.lux_gpu_remainder(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -85,14 +113,14 @@ func Floor(a *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_floor(a.handle)
+	tensor := C.lux_gpu_floor(DefaultContext.gpu, a.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -101,30 +129,30 @@ func Round(a *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_round(a.handle)
+	tensor := C.lux_gpu_round(DefaultContext.gpu, a.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
-// RightShift performs element-wise right shift: a >> b
-func RightShift(a, b *Array) *Array {
+// RightShift performs element-wise right shift: a >> bits
+func RightShift(a *Array, bits int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_right_shift(a.handle, b.handle)
+	tensor := C.lux_gpu_right_shift(DefaultContext.gpu, a.tensor, C.int(bits))
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -133,14 +161,14 @@ func AsType(a *Array, dtype Dtype) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_astype(a.handle, C.int(dtype))
+	tensor := C.lux_gpu_astype(DefaultContext.gpu, a.tensor, dtypeToC(dtype))
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -149,31 +177,37 @@ func Full(shape []int, value interface{}, dtype Dtype) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	var fval float64
+	var fval float32
 	switch v := value.(type) {
 	case float64:
-		fval = v
+		fval = float32(v)
 	case float32:
-		fval = float64(v)
+		fval = v
 	case int:
-		fval = float64(v)
+		fval = float32(v)
 	case int32:
-		fval = float64(v)
+		fval = float32(v)
 	case int64:
-		fval = float64(v)
+		fval = float32(v)
 	case uint64:
-		fval = float64(v)
+		fval = float32(v)
 	}
 
 	cShape := intsToCInts(shape)
-	handle := C.mlx_full(&cShape[0], C.int(len(shape)), C.double(fval), C.int(dtype))
+	tensor := C.lux_gpu_tensor_full(
+		DefaultContext.gpu,
+		&cShape[0],
+		C.int(len(shape)),
+		C.float(fval),
+		dtypeToC(dtype),
+	)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  shape,
 		dtype:  dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -183,14 +217,14 @@ func Reshape(a *Array, shape []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cShape := intsToCInts(shape)
-	handle := C.mlx_reshape(a.handle, &cShape[0], C.int(len(shape)))
+	tensor := C.lux_gpu_reshape(DefaultContext.gpu, a.tensor, &cShape[0], C.int(len(shape)))
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -199,7 +233,7 @@ func Squeeze(a *Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_squeeze(a.handle, C.int(axis))
+	tensor := C.lux_gpu_squeeze(DefaultContext.gpu, a.tensor, C.int(axis))
 
 	// Calculate new shape
 	newShape := make([]int, 0, len(a.shape)-1)
@@ -213,11 +247,11 @@ func Squeeze(a *Array, axis int) *Array {
 	}
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  newShape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -227,14 +261,14 @@ func Broadcast(a *Array, shape []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cShape := intsToCInts(shape)
-	handle := C.mlx_broadcast(a.handle, &cShape[0], C.int(len(shape)))
+	tensor := C.lux_gpu_broadcast(DefaultContext.gpu, a.tensor, &cShape[0], C.int(len(shape)))
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -246,15 +280,18 @@ func Slice(a *Array, args []SliceArg) *Array {
 	ndim := len(args)
 	starts := make([]int, ndim)
 	stops := make([]int, ndim)
+	steps := make([]int, ndim)
 
 	for i, arg := range args {
 		starts[i] = arg.Start
 		stops[i] = arg.Stop
+		steps[i] = 1 // Default step
 	}
 
 	cStarts := intsToCInts(starts)
 	cStops := intsToCInts(stops)
-	handle := C.mlx_slice_nd(a.handle, &cStarts[0], &cStops[0], C.int(ndim))
+	cSteps := intsToCInts(steps)
+	tensor := C.lux_gpu_slice(DefaultContext.gpu, a.tensor, &cStarts[0], &cStops[0], &cSteps[0], C.int(ndim))
 
 	// Calculate new shape
 	newShape := make([]int, ndim)
@@ -263,11 +300,11 @@ func Slice(a *Array, args []SliceArg) *Array {
 	}
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  newShape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -276,15 +313,15 @@ func Take(a *Array, indices *Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_take(a.handle, indices.handle, C.int(axis))
+	tensor := C.lux_gpu_take(DefaultContext.gpu, a.tensor, indices.tensor, C.int(axis))
 
 	// Shape depends on indices shape replacing the axis dimension
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  indices.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -293,14 +330,14 @@ func TakeAlongAxis(a, indices *Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_take_along_axis(a.handle, indices.handle, C.int(axis))
+	tensor := C.lux_gpu_take_along_axis(DefaultContext.gpu, a.tensor, indices.tensor, C.int(axis))
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  indices.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -309,12 +346,12 @@ func Concatenate(arrays []Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handles := make([]unsafe.Pointer, len(arrays))
+	tensors := make([]*C.LuxTensor, len(arrays))
 	for i := range arrays {
-		handles[i] = arrays[i].handle
+		tensors[i] = arrays[i].tensor
 	}
 
-	handle := C.mlx_concatenate(&handles[0], C.int(len(arrays)), C.int(axis))
+	tensor := C.lux_gpu_concatenate(DefaultContext.gpu, &tensors[0], C.int(len(arrays)), C.int(axis))
 
 	// Calculate output shape
 	newShape := make([]int, len(arrays[0].shape))
@@ -324,27 +361,11 @@ func Concatenate(arrays []Array, axis int) *Array {
 	}
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  newShape,
 		dtype:  arrays[0].dtype,
 	}
-	DefaultContext.arrays[handle] = arr
-	return arr
-}
-
-// GreaterEqual compares element-wise: a >= b
-func GreaterEqual(a, b *Array) *Array {
-	DefaultContext.mu.Lock()
-	defer DefaultContext.mu.Unlock()
-
-	handle := C.mlx_greater_equal(a.handle, b.handle)
-
-	arr := &Array{
-		handle: handle,
-		shape:  a.shape,
-		dtype:  Bool,
-	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -353,14 +374,62 @@ func Less(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_less(a.handle, b.handle)
+	tensor := C.lux_gpu_less(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  Bool,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// Greater compares element-wise: a > b
+func Greater(a, b *Array) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	tensor := C.lux_gpu_greater(DefaultContext.gpu, a.tensor, b.tensor)
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  a.shape,
+		dtype:  Bool,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// LessEqual compares element-wise: a <= b
+func LessEqual(a, b *Array) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	tensor := C.lux_gpu_less_equal(DefaultContext.gpu, a.tensor, b.tensor)
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  a.shape,
+		dtype:  Bool,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// GreaterEqual compares element-wise: a >= b
+func GreaterEqual(a, b *Array) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	tensor := C.lux_gpu_greater_equal(DefaultContext.gpu, a.tensor, b.tensor)
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  a.shape,
+		dtype:  Bool,
+	}
+	DefaultContext.Track(arr)
 	return arr
 }
 
@@ -369,57 +438,196 @@ func Where(cond, a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	handle := C.mlx_where(cond.handle, a.handle, b.handle)
+	tensor := C.lux_gpu_where(DefaultContext.gpu, cond.tensor, a.tensor, b.tensor)
 
 	arr := &Array{
-		handle: handle,
+		tensor: tensor,
 		shape:  a.shape,
 		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
 	return arr
 }
 
-// ToSlice downloads array data to a Go slice
-func ToSlice[T int64 | float64 | float32 | int32](a *Array) []T {
+// Matmul performs matrix multiplication
+func Matmul(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	// Calculate total size
-	total := 1
-	for _, s := range a.shape {
-		total *= s
+	tensor := C.lux_gpu_matmul(DefaultContext.gpu, a.tensor, b.tensor)
+
+	// Calculate output shape for matmul
+	newShape := make([]int, len(a.shape))
+	copy(newShape, a.shape)
+	if len(b.shape) > 1 {
+		newShape[len(newShape)-1] = b.shape[len(b.shape)-1]
 	}
-
-	// For int64
-	result := make([]T, total)
-
-	switch any(result).(type) {
-	case []int64:
-		cOut := (*C.longlong)(unsafe.Pointer(&result[0]))
-		C.mlx_to_slice_int64(a.handle, cOut, C.int(total))
-	}
-
-	return result
-}
-
-// ArangeInt creates an array with sequential integer values [start, stop) with step
-func ArangeInt(start, stop, step int, dtype Dtype) *Array {
-	DefaultContext.mu.Lock()
-	defer DefaultContext.mu.Unlock()
-
-	size := (stop - start + step - 1) / step
-	if size <= 0 {
-		size = 0
-	}
-
-	handle := C.mlx_arange(C.double(start), C.double(stop), C.double(step))
 
 	arr := &Array{
-		handle: handle,
-		shape:  []int{size},
-		dtype:  dtype,
+		tensor: tensor,
+		shape:  newShape,
+		dtype:  a.dtype,
 	}
-	DefaultContext.arrays[handle] = arr
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// Sum reduces array by summing along specified axes
+func Sum(a *Array, axes []int) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	cAxes := intsToCInts(axes)
+	var tensor *C.LuxTensor
+	if len(axes) > 0 {
+		tensor = C.lux_gpu_sum(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+	} else {
+		tensor = C.lux_gpu_sum(DefaultContext.gpu, a.tensor, nil, 0)
+	}
+
+	// Calculate reduced shape
+	newShape := make([]int, 0)
+	for i, s := range a.shape {
+		keep := true
+		for _, ax := range axes {
+			if i == ax {
+				keep = false
+				break
+			}
+		}
+		if keep {
+			newShape = append(newShape, s)
+		}
+	}
+	if len(newShape) == 0 {
+		newShape = []int{1}
+	}
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  newShape,
+		dtype:  a.dtype,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// Mean reduces array by computing mean along specified axes
+func Mean(a *Array, axes []int) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	cAxes := intsToCInts(axes)
+	var tensor *C.LuxTensor
+	if len(axes) > 0 {
+		tensor = C.lux_gpu_mean(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+	} else {
+		tensor = C.lux_gpu_mean(DefaultContext.gpu, a.tensor, nil, 0)
+	}
+
+	// Calculate reduced shape
+	newShape := make([]int, 0)
+	for i, s := range a.shape {
+		keep := true
+		for _, ax := range axes {
+			if i == ax {
+				keep = false
+				break
+			}
+		}
+		if keep {
+			newShape = append(newShape, s)
+		}
+	}
+	if len(newShape) == 0 {
+		newShape = []int{1}
+	}
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  newShape,
+		dtype:  a.dtype,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// Max reduces array by computing max along specified axes
+func Max(a *Array, axes []int) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	cAxes := intsToCInts(axes)
+	var tensor *C.LuxTensor
+	if len(axes) > 0 {
+		tensor = C.lux_gpu_max(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+	} else {
+		tensor = C.lux_gpu_max(DefaultContext.gpu, a.tensor, nil, 0)
+	}
+
+	// Calculate reduced shape
+	newShape := make([]int, 0)
+	for i, s := range a.shape {
+		keep := true
+		for _, ax := range axes {
+			if i == ax {
+				keep = false
+				break
+			}
+		}
+		if keep {
+			newShape = append(newShape, s)
+		}
+	}
+	if len(newShape) == 0 {
+		newShape = []int{1}
+	}
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  newShape,
+		dtype:  a.dtype,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// Min reduces array by computing min along specified axes
+func Min(a *Array, axes []int) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	cAxes := intsToCInts(axes)
+	var tensor *C.LuxTensor
+	if len(axes) > 0 {
+		tensor = C.lux_gpu_min(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+	} else {
+		tensor = C.lux_gpu_min(DefaultContext.gpu, a.tensor, nil, 0)
+	}
+
+	// Calculate reduced shape
+	newShape := make([]int, 0)
+	for i, s := range a.shape {
+		keep := true
+		for _, ax := range axes {
+			if i == ax {
+				keep = false
+				break
+			}
+		}
+		if keep {
+			newShape = append(newShape, s)
+		}
+	}
+	if len(newShape) == 0 {
+		newShape = []int{1}
+	}
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  newShape,
+		dtype:  a.dtype,
+	}
+	DefaultContext.Track(arr)
 	return arr
 }
