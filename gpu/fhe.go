@@ -4,6 +4,7 @@ package gpu
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/luxfi/fhe"
@@ -53,11 +54,45 @@ type Ciphertext struct {
 	ctx *Context
 }
 
+// Free releases ciphertext resources (no-op in pure Go)
+func (ct *Ciphertext) Free() {
+	ct.ct = nil
+}
+
+// Clone creates a copy of the ciphertext
+func (ct *Ciphertext) Clone() (*Ciphertext, error) {
+	return &Ciphertext{
+		ct:  ct.ct,
+		ctx: ct.ctx,
+	}, nil
+}
+
 // Integer wraps encrypted integer bits
 type Integer struct {
 	bits   []*fhe.Ciphertext
 	ctx    *Context
 	bitLen int
+}
+
+// Free releases integer resources
+func (i *Integer) Free() {
+	i.bits = nil
+}
+
+// BitLen returns the number of bits in the integer
+func (i *Integer) BitLen() int {
+	return i.bitLen
+}
+
+// Clone creates a copy of the integer
+func (i *Integer) Clone() (*Integer, error) {
+	newBits := make([]*fhe.Ciphertext, len(i.bits))
+	copy(newBits, i.bits)
+	return &Integer{
+		bits:   newBits,
+		ctx:    i.ctx,
+		bitLen: i.bitLen,
+	}, nil
 }
 
 // getParamsLiteral maps security level to parameter literal
@@ -268,15 +303,644 @@ func (c *Context) NAND(a, b *Ciphertext) (*Ciphertext, error) {
 	return &Ciphertext{ct: result, ctx: c}, nil
 }
 
-// GPUAvailable returns false when CGO is disabled
-func GPUAvailable() bool {
-	return false
-}
-
-// GetBackend returns "CPU (pure Go)" when CGO is disabled
-func GetBackend() string {
-	return "CPU (pure Go)"
-}
-
 // ErrNoBootstrapKey is returned when operations are attempted without a bootstrap key
 var ErrNoBootstrapKey = errors.New("bootstrap key not generated - call GenerateBootstrapKey first")
+
+// Lowercase aliases for gate operations (for API compatibility)
+
+// And is an alias for AND
+func (c *Context) And(a, b *Ciphertext) (*Ciphertext, error) { return c.AND(a, b) }
+
+// Or is an alias for OR
+func (c *Context) Or(a, b *Ciphertext) (*Ciphertext, error) { return c.OR(a, b) }
+
+// Xor is an alias for XOR
+func (c *Context) Xor(a, b *Ciphertext) (*Ciphertext, error) { return c.XOR(a, b) }
+
+// Not is an alias for NOT
+func (c *Context) Not(a *Ciphertext) (*Ciphertext, error) { return c.NOT(a) }
+
+// Nand is an alias for NAND
+func (c *Context) Nand(a, b *Ciphertext) (*Ciphertext, error) { return c.NAND(a, b) }
+
+// Nor performs homomorphic NOR on two ciphertexts
+func (c *Context) Nor(a, b *Ciphertext) (*Ciphertext, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result, err := c.evaluator.NOR(a.ct, b.ct)
+	if err != nil {
+		return nil, err
+	}
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Mux performs homomorphic multiplexer: sel ? a : b
+func (c *Context) Mux(sel, a, b *Ciphertext) (*Ciphertext, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result, err := c.evaluator.MUX(sel.ct, a.ct, b.ct)
+	if err != nil {
+		return nil, err
+	}
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Integer encryption and operations
+
+// EncryptInteger encrypts an integer value
+func (c *Context) EncryptInteger(sk *SecretKey, value int64, bitLen int) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if sk.key == nil {
+		return nil, errors.New("secret key is nil")
+	}
+
+	enc := fhe.NewEncryptor(c.params, sk.key)
+	bits := make([]*fhe.Ciphertext, bitLen)
+	for i := 0; i < bitLen; i++ {
+		bit := int((value >> i) & 1)
+		bits[i] = enc.EncryptBit(bit)
+	}
+
+	return &Integer{
+		bits:   bits,
+		ctx:    c,
+		bitLen: bitLen,
+	}, nil
+}
+
+// DecryptInteger decrypts an encrypted integer
+func (c *Context) DecryptInteger(sk *SecretKey, ct *Integer) (int64, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if sk.key == nil {
+		return 0, errors.New("secret key is nil")
+	}
+
+	dec := fhe.NewDecryptor(c.params, sk.key)
+	var value int64
+	for i := 0; i < ct.bitLen; i++ {
+		bit := dec.DecryptBit(ct.bits[i])
+		if bit == 1 {
+			value |= 1 << i
+		}
+	}
+
+	return value, nil
+}
+
+// Add performs homomorphic addition of two integers
+func (c *Context) Add(a, b *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	// Ripple-carry adder
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	var carry *fhe.Ciphertext
+
+	for i := 0; i < a.bitLen; i++ {
+		// Sum = a XOR b XOR carry
+		sum, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+
+		if carry != nil {
+			sum, err = c.evaluator.XOR(sum, carry)
+			if err != nil {
+				return nil, err
+			}
+		}
+		result[i] = sum
+
+		// Carry = (a AND b) OR (carry AND (a XOR b))
+		ab, err := c.evaluator.AND(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+
+		if carry != nil {
+			axorb, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+			if err != nil {
+				return nil, err
+			}
+			carryAndXor, err := c.evaluator.AND(carry, axorb)
+			if err != nil {
+				return nil, err
+			}
+			carry, err = c.evaluator.OR(ab, carryAndXor)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			carry = ab
+		}
+	}
+
+	return &Integer{
+		bits:   result,
+		ctx:    c,
+		bitLen: a.bitLen,
+	}, nil
+}
+
+// Sub performs homomorphic subtraction of two integers
+func (c *Context) Sub(a, b *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	// Two's complement subtraction: a - b = a + NOT(b) + 1
+	// Implemented as ripple-borrow subtractor
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	var borrow *fhe.Ciphertext
+
+	for i := 0; i < a.bitLen; i++ {
+		// diff = a XOR b XOR borrow
+		diff, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+
+		if borrow != nil {
+			diff, err = c.evaluator.XOR(diff, borrow)
+			if err != nil {
+				return nil, err
+			}
+		}
+		result[i] = diff
+
+		// borrow = (NOT a AND b) OR (borrow AND NOT(a XOR b))
+		notA := c.evaluator.NOT(a.bits[i])
+		notAandB, err := c.evaluator.AND(notA, b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+
+		if borrow != nil {
+			axorb, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+			if err != nil {
+				return nil, err
+			}
+			notAxorb := c.evaluator.NOT(axorb)
+			borrowAndNotXor, err := c.evaluator.AND(borrow, notAxorb)
+			if err != nil {
+				return nil, err
+			}
+			borrow, err = c.evaluator.OR(notAandB, borrowAndNotXor)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			borrow = notAandB
+		}
+	}
+
+	return &Integer{
+		bits:   result,
+		ctx:    c,
+		bitLen: a.bitLen,
+	}, nil
+}
+
+// Comparison operations
+
+// Eq checks if a equals b (encrypted equality comparison)
+func (c *Context) Eq(a, b *Integer) (*Ciphertext, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	// a == b iff all bits are equal: AND of (NOT (a_i XOR b_i))
+	result, err := c.evaluator.XOR(a.bits[0], b.bits[0])
+	if err != nil {
+		return nil, err
+	}
+	result = c.evaluator.NOT(result)
+
+	for i := 1; i < a.bitLen; i++ {
+		xorBit, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+		notXor := c.evaluator.NOT(xorBit)
+		result, err = c.evaluator.AND(result, notXor)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Ne checks if a is not equal to b
+func (c *Context) Ne(a, b *Integer) (*Ciphertext, error) {
+	eq, err := c.Eq(a, b)
+	if err != nil {
+		return nil, err
+	}
+	result := c.evaluator.NOT(eq.ct)
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Lt checks if a < b (less than)
+func (c *Context) Lt(a, b *Integer) (*Ciphertext, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	// Compare from MSB to LSB
+	var result *fhe.Ciphertext
+	var decided *fhe.Ciphertext
+
+	for i := a.bitLen - 1; i >= 0; i-- {
+		// a < b at this bit: NOT a AND b
+		notA := c.evaluator.NOT(a.bits[i])
+		ltBit, err := c.evaluator.AND(notA, b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+
+		if result == nil {
+			result = ltBit
+			// decided = a XOR b (bits differ)
+			decided, err = c.evaluator.XOR(a.bits[i], b.bits[i])
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// Update only if not yet decided
+			notDecided := c.evaluator.NOT(decided)
+			ltMasked, err := c.evaluator.AND(ltBit, notDecided)
+			if err != nil {
+				return nil, err
+			}
+			result, err = c.evaluator.OR(result, ltMasked)
+			if err != nil {
+				return nil, err
+			}
+
+			// Update decided
+			bitsDiffer, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+			if err != nil {
+				return nil, err
+			}
+			decidedMasked, err := c.evaluator.AND(bitsDiffer, notDecided)
+			if err != nil {
+				return nil, err
+			}
+			decided, err = c.evaluator.OR(decided, decidedMasked)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Le checks if a <= b (less than or equal)
+func (c *Context) Le(a, b *Integer) (*Ciphertext, error) {
+	gt, err := c.Gt(a, b)
+	if err != nil {
+		return nil, err
+	}
+	result := c.evaluator.NOT(gt.ct)
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Gt checks if a > b (greater than)
+func (c *Context) Gt(a, b *Integer) (*Ciphertext, error) {
+	return c.Lt(b, a)
+}
+
+// Ge checks if a >= b (greater than or equal)
+func (c *Context) Ge(a, b *Integer) (*Ciphertext, error) {
+	lt, err := c.Lt(a, b)
+	if err != nil {
+		return nil, err
+	}
+	result := c.evaluator.NOT(lt.ct)
+	return &Ciphertext{ct: result, ctx: c}, nil
+}
+
+// Bitwise operations on integers
+
+// BitwiseAnd performs bitwise AND on two integers
+func (c *Context) BitwiseAnd(a, b *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	for i := 0; i < a.bitLen; i++ {
+		res, err := c.evaluator.AND(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+		result[i] = res
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// BitwiseOr performs bitwise OR on two integers
+func (c *Context) BitwiseOr(a, b *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	for i := 0; i < a.bitLen; i++ {
+		res, err := c.evaluator.OR(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+		result[i] = res
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// BitwiseXor performs bitwise XOR on two integers
+func (c *Context) BitwiseXor(a, b *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	for i := 0; i < a.bitLen; i++ {
+		res, err := c.evaluator.XOR(a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+		result[i] = res
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// Shift operations
+
+// Shl performs left shift by n bits (requires bootstrap key for zero padding)
+func (c *Context) Shl(a *Integer, n int) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+
+	// Fill lower n bits with trivial encryptions of zero
+	// We use NOT(a AND NOT(a)) = 0 to create encrypted zeros
+	for i := 0; i < n && i < a.bitLen; i++ {
+		// Create a zero by XORing any bit with itself
+		zeroBit, err := c.evaluator.XOR(a.bits[0], a.bits[0])
+		if err != nil {
+			return nil, err
+		}
+		// XOR(x, x) = 0, so zeroBit is encrypted zero
+		result[i] = zeroBit
+	}
+
+	// Shift remaining bits
+	for i := n; i < a.bitLen; i++ {
+		result[i] = a.bits[i-n]
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// Shr performs right shift by n bits (requires bootstrap key for zero padding)
+func (c *Context) Shr(a *Integer, n int) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+
+	// Shift bits right
+	for i := 0; i < a.bitLen-n; i++ {
+		result[i] = a.bits[i+n]
+	}
+
+	// Fill upper n bits with encrypted zeros
+	for i := a.bitLen - n; i < a.bitLen; i++ {
+		// Create a zero by XORing any bit with itself
+		zeroBit, err := c.evaluator.XOR(a.bits[0], a.bits[0])
+		if err != nil {
+			return nil, err
+		}
+		result[i] = zeroBit
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// Min/Max operations
+
+// Min returns the minimum of two integers
+func (c *Context) Min(a, b *Integer) (*Integer, error) {
+	lt, err := c.Lt(a, b)
+	if err != nil {
+		return nil, err
+	}
+	return c.Select(lt, a, b)
+}
+
+// Max returns the maximum of two integers
+func (c *Context) Max(a, b *Integer) (*Integer, error) {
+	gt, err := c.Gt(a, b)
+	if err != nil {
+		return nil, err
+	}
+	return c.Select(gt, a, b)
+}
+
+// Select returns a if cond is true, else b
+func (c *Context) Select(cond *Ciphertext, a, b *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	for i := 0; i < a.bitLen; i++ {
+		res, err := c.evaluator.MUX(cond.ct, a.bits[i], b.bits[i])
+		if err != nil {
+			return nil, err
+		}
+		result[i] = res
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// CastTo changes the bit width of an integer
+func (c *Context) CastTo(a *Integer, newBitLen int) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	result := make([]*fhe.Ciphertext, newBitLen)
+
+	// Copy existing bits
+	for i := 0; i < newBitLen && i < a.bitLen; i++ {
+		result[i] = a.bits[i]
+	}
+
+	// Zero-extend if needed using XOR trick: XOR(x,x) = 0
+	if newBitLen > a.bitLen && a.bitLen > 0 {
+		for i := a.bitLen; i < newBitLen; i++ {
+			// Create encrypted zero by XORing any bit with itself
+			zeroBit, err := c.evaluator.XOR(a.bits[0], a.bits[0])
+			if err != nil {
+				return nil, fmt.Errorf("failed to create zero bit: %w", err)
+			}
+			result[i] = zeroBit
+		}
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: newBitLen}, nil
+}
+
+// Public key encryption
+
+// ErrPublicKeyEncryptionNotSupported is returned when public key encryption is attempted
+var ErrPublicKeyEncryptionNotSupported = errors.New("public key encryption not supported - use secret key encryption instead")
+
+// EncryptBitPublic encrypts a bit using the public key
+// Note: TFHE doesn't support traditional public key encryption. Use EncryptBit with secret key.
+func (c *Context) EncryptBitPublic(pk *PublicKey, value bool) (*Ciphertext, error) {
+	// TFHE uses secret key encryption. "Public key" in TFHE context refers to
+	// the bootstrap key which is used for homomorphic operations, not encryption.
+	// For now, we return an error as this isn't properly supported.
+	return nil, ErrPublicKeyEncryptionNotSupported
+}
+
+// EncryptIntegerPublic encrypts an integer using the public key
+// Note: TFHE doesn't support traditional public key encryption. Use EncryptInteger with secret key.
+func (c *Context) EncryptIntegerPublic(pk *PublicKey, value int64, bitLen int) (*Integer, error) {
+	// TFHE uses secret key encryption. "Public key" in TFHE context refers to
+	// the bootstrap key which is used for homomorphic operations, not encryption.
+	return nil, ErrPublicKeyEncryptionNotSupported
+}
+
+// Serialization
+
+// SerializeCiphertext serializes a ciphertext to bytes
+func (c *Context) SerializeCiphertext(ct *Ciphertext) ([]byte, error) {
+	if ct.ct == nil {
+		return nil, errors.New("ciphertext is nil")
+	}
+	return ct.ct.MarshalBinary()
+}
+
+// DeserializeCiphertext deserializes bytes to a ciphertext
+func (c *Context) DeserializeCiphertext(data []byte) (*Ciphertext, error) {
+	ct := &fhe.Ciphertext{}
+	if err := ct.UnmarshalBinary(data); err != nil {
+		return nil, err
+	}
+	return &Ciphertext{ct: ct, ctx: c}, nil
+}
+
+// SerializeInteger serializes an integer to bytes
+func (c *Context) SerializeInteger(ct *Integer) ([]byte, error) {
+	var result []byte
+	for _, bit := range ct.bits {
+		data, err := bit.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+		// Prepend length
+		lenBytes := make([]byte, 4)
+		lenBytes[0] = byte(len(data))
+		lenBytes[1] = byte(len(data) >> 8)
+		lenBytes[2] = byte(len(data) >> 16)
+		lenBytes[3] = byte(len(data) >> 24)
+		result = append(result, lenBytes...)
+		result = append(result, data...)
+	}
+	return result, nil
+}
+
+// DeserializeInteger deserializes bytes to an integer
+func (c *Context) DeserializeInteger(data []byte, bitLen int) (*Integer, error) {
+	bits := make([]*fhe.Ciphertext, bitLen)
+	offset := 0
+	for i := 0; i < bitLen; i++ {
+		if offset+4 > len(data) {
+			return nil, errors.New("invalid data length")
+		}
+		length := int(data[offset]) | int(data[offset+1])<<8 | int(data[offset+2])<<16 | int(data[offset+3])<<24
+		offset += 4
+		if offset+length > len(data) {
+			return nil, errors.New("invalid data length")
+		}
+		ct := &fhe.Ciphertext{}
+		if err := ct.UnmarshalBinary(data[offset : offset+length]); err != nil {
+			return nil, err
+		}
+		bits[i] = ct
+		offset += length
+	}
+	return &Integer{bits: bits, ctx: c, bitLen: bitLen}, nil
+}
+
+// SerializeSecretKey serializes a secret key
+func (c *Context) SerializeSecretKey(sk *SecretKey) ([]byte, error) {
+	if sk.key == nil {
+		return nil, errors.New("secret key is nil")
+	}
+	return sk.key.MarshalBinary()
+}
+
+// DeserializeSecretKey deserializes bytes to a secret key
+func (c *Context) DeserializeSecretKey(data []byte) (*SecretKey, error) {
+	sk := &fhe.SecretKey{}
+	if err := sk.UnmarshalBinary(data); err != nil {
+		return nil, err
+	}
+	return &SecretKey{key: sk, ctx: c}, nil
+}
