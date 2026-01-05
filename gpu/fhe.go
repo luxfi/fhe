@@ -844,6 +844,154 @@ func (c *Context) CastTo(a *Integer, newBitLen int) (*Integer, error) {
 	return &Integer{bits: result, ctx: c, bitLen: newBitLen}, nil
 }
 
+// BitwiseNot performs bitwise NOT on an integer
+func (c *Context) BitwiseNot(a *Integer) (*Integer, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	result := make([]*fhe.Ciphertext, a.bitLen)
+	for i := 0; i < a.bitLen; i++ {
+		res := c.evaluator.NOT(a.bits[i])
+		result[i] = res
+	}
+
+	return &Integer{bits: result, ctx: c, bitLen: a.bitLen}, nil
+}
+
+// Neg performs arithmetic negation on an integer (two's complement: -x = ~x + 1)
+func (c *Context) Neg(a *Integer) (*Integer, error) {
+	if len(a.bits) == 0 {
+		return nil, errors.New("cannot negate empty integer")
+	}
+
+	// First compute bitwise NOT
+	notA, err := c.BitwiseNot(a)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create encrypted one (1 in two's complement)
+	// Use a.bits[0] as reference to derive zeros via XOR(x,x)
+	one, err := c.encryptedOneFrom(a.bitLen, a.bits[0])
+	if err != nil {
+		return nil, err
+	}
+
+	// Add 1 to get two's complement negation
+	return c.Add(notA, one)
+}
+
+// encryptedOneFrom creates an encrypted integer with value 1, using refBit to derive zeros
+func (c *Context) encryptedOneFrom(bitLen int, refBit *fhe.Ciphertext) (*Integer, error) {
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	bits := make([]*fhe.Ciphertext, bitLen)
+	for i := 0; i < bitLen; i++ {
+		if i == 0 {
+			// First bit is 1 - we need NOT(0)
+			// XOR(x,x) = 0, then NOT(0) = 1
+			zeroBit, err := c.evaluator.XOR(refBit, refBit)
+			if err != nil {
+				return nil, fmt.Errorf("cannot create zero bit: %w", err)
+			}
+			oneBit := c.evaluator.NOT(zeroBit)
+			bits[i] = oneBit
+		} else {
+			// Other bits are 0
+			zeroBit, err := c.evaluator.XOR(refBit, refBit)
+			if err != nil {
+				return nil, err
+			}
+			bits[i] = zeroBit
+		}
+	}
+
+	return &Integer{bits: bits, ctx: c, bitLen: bitLen}, nil
+}
+
+// MulScalar multiplies an integer by a scalar constant
+func (c *Context) MulScalar(a *Integer, scalar int64) (*Integer, error) {
+	if len(a.bits) == 0 {
+		return nil, errors.New("cannot multiply empty integer")
+	}
+
+	if scalar == 0 {
+		// Return encrypted zero
+		return c.encryptedZeroFrom(a.bitLen, a.bits[0])
+	}
+	if scalar == 1 {
+		// Return a copy of a
+		return c.CastTo(a, a.bitLen)
+	}
+	if scalar == -1 {
+		return c.Neg(a)
+	}
+
+	// For other scalars, use addition-based multiplication
+	// This is expensive but correct for TFHE
+	isNeg := scalar < 0
+	if isNeg {
+		scalar = -scalar
+	}
+
+	var result *Integer
+	var err error
+	current := a
+
+	for scalar > 0 {
+		if scalar&1 == 1 {
+			if result == nil {
+				result, err = c.CastTo(current, current.bitLen)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				result, err = c.Add(result, current)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+		scalar >>= 1
+		if scalar > 0 {
+			current, err = c.Add(current, current) // current *= 2
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if isNeg && result != nil {
+		return c.Neg(result)
+	}
+
+	return result, nil
+}
+
+// encryptedZeroFrom creates an encrypted integer with value 0, using refBit to derive zeros
+func (c *Context) encryptedZeroFrom(bitLen int, refBit *fhe.Ciphertext) (*Integer, error) {
+	if c.evaluator == nil {
+		return nil, ErrNoBootstrapKey
+	}
+
+	bits := make([]*fhe.Ciphertext, bitLen)
+	for i := 0; i < bitLen; i++ {
+		zeroBit, err := c.evaluator.XOR(refBit, refBit)
+		if err != nil {
+			return nil, err
+		}
+		bits[i] = zeroBit
+	}
+
+	return &Integer{bits: bits, ctx: c, bitLen: bitLen}, nil
+}
+
 // Public key encryption
 
 // ErrPublicKeyEncryptionNotSupported is returned when public key encryption is attempted
@@ -943,4 +1091,22 @@ func (c *Context) DeserializeSecretKey(data []byte) (*SecretKey, error) {
 		return nil, err
 	}
 	return &SecretKey{key: sk, ctx: c}, nil
+}
+
+// SerializePublicKey serializes a public key (bootstrap key)
+// Note: In TFHE, this serializes the bootstrap key which is used for homomorphic operations
+func (c *Context) SerializePublicKey(pk *PublicKey) ([]byte, error) {
+	if pk.bsk == nil {
+		return nil, errors.New("public key is nil")
+	}
+	return pk.bsk.MarshalBinary()
+}
+
+// DeserializePublicKey deserializes bytes to a public key (bootstrap key)
+func (c *Context) DeserializePublicKey(data []byte) (*PublicKey, error) {
+	bsk := &fhe.BootstrapKey{}
+	if err := bsk.UnmarshalBinary(data); err != nil {
+		return nil, err
+	}
+	return &PublicKey{bsk: bsk, ctx: c}, nil
 }
