@@ -2,7 +2,9 @@
 
 // Package gpu provides GPU-accelerated tensor operations for FHE workloads.
 // These operations are needed for GPU-accelerated TFHE bootstrapping.
-
+//
+// Copyright (c) 2024-2025 Lux Industries Inc.
+// SPDX-License-Identifier: Apache-2.0
 package gpu
 
 /*
@@ -10,6 +12,52 @@ package gpu
 #include <lux/gpu/gpu.h>
 #include <stdlib.h>
 #include <string.h>
+
+// Short aliases for Go code readability (hides lux_gpu_ prefix)
+
+// Types
+#define GPU             LuxGPU
+#define Tensor          LuxTensor
+#define DType           LuxDType
+
+// Tensor creation
+#define tensor_create        lux_gpu_tensor_create
+#define tensor_full          lux_gpu_tensor_full
+#define tensor_data          lux_gpu_tensor_data
+
+// Tensor operations (arithmetic)
+#define gpu_add              lux_gpu_add
+#define gpu_subtract         lux_gpu_subtract
+#define gpu_multiply         lux_gpu_multiply
+#define gpu_divide           lux_gpu_divide
+#define gpu_remainder        lux_gpu_remainder
+#define gpu_floor            lux_gpu_floor
+#define gpu_round            lux_gpu_round
+#define gpu_right_shift      lux_gpu_right_shift
+#define gpu_astype           lux_gpu_astype
+
+// Tensor operations (shape manipulation)
+#define gpu_reshape          lux_gpu_reshape
+#define gpu_squeeze          lux_gpu_squeeze
+#define gpu_broadcast        lux_gpu_broadcast
+#define gpu_slice            lux_gpu_slice
+#define gpu_take             lux_gpu_take
+#define gpu_take_along_axis  lux_gpu_take_along_axis
+#define gpu_concatenate      lux_gpu_concatenate
+
+// Tensor operations (comparison)
+#define gpu_less             lux_gpu_less
+#define gpu_greater          lux_gpu_greater
+#define gpu_less_equal       lux_gpu_less_equal
+#define gpu_greater_equal    lux_gpu_greater_equal
+#define gpu_where            lux_gpu_where
+
+// Tensor operations (linear algebra & reduction)
+#define gpu_matmul           lux_gpu_matmul
+#define gpu_sum              lux_gpu_sum
+#define gpu_mean             lux_gpu_mean
+#define gpu_max              lux_gpu_max
+#define gpu_min              lux_gpu_min
 */
 import "C"
 import "unsafe"
@@ -35,7 +83,7 @@ func Add(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_add(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_add(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -51,7 +99,7 @@ func Subtract(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_subtract(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_subtract(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -67,7 +115,7 @@ func Multiply(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_multiply(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_multiply(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -83,7 +131,7 @@ func Divide(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_divide(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_divide(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -99,7 +147,7 @@ func Remainder(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_remainder(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_remainder(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -115,7 +163,7 @@ func Floor(a *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_floor(DefaultContext.gpu, a.tensor)
+	tensor := C.gpu_floor(DefaultContext.gpu, a.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -131,7 +179,7 @@ func Round(a *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_round(DefaultContext.gpu, a.tensor)
+	tensor := C.gpu_round(DefaultContext.gpu, a.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -147,7 +195,7 @@ func RightShift(a *Array, bits int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_right_shift(DefaultContext.gpu, a.tensor, C.int(bits))
+	tensor := C.gpu_right_shift(DefaultContext.gpu, a.tensor, C.int(bits))
 
 	arr := &Array{
 		tensor: tensor,
@@ -163,7 +211,7 @@ func AsType(a *Array, dtype Dtype) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_astype(DefaultContext.gpu, a.tensor, dtypeToC(dtype))
+	tensor := C.gpu_astype(DefaultContext.gpu, a.tensor, dtypeToC(dtype))
 
 	arr := &Array{
 		tensor: tensor,
@@ -196,7 +244,7 @@ func Full(shape []int, value interface{}, dtype Dtype) *Array {
 	}
 
 	cShape := intsToCInts(shape)
-	tensor := C.lux_gpu_tensor_full(
+	tensor := C.tensor_full(
 		DefaultContext.gpu,
 		&cShape[0],
 		C.int(len(shape)),
@@ -219,7 +267,7 @@ func Reshape(a *Array, shape []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cShape := intsToCInts(shape)
-	tensor := C.lux_gpu_reshape(DefaultContext.gpu, a.tensor, &cShape[0], C.int(len(shape)))
+	tensor := C.gpu_reshape(DefaultContext.gpu, a.tensor, &cShape[0], C.int(len(shape)))
 
 	arr := &Array{
 		tensor: tensor,
@@ -235,7 +283,7 @@ func Squeeze(a *Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_squeeze(DefaultContext.gpu, a.tensor, C.int(axis))
+	tensor := C.gpu_squeeze(DefaultContext.gpu, a.tensor, C.int(axis))
 
 	// Calculate new shape
 	newShape := make([]int, 0, len(a.shape)-1)
@@ -263,7 +311,7 @@ func Broadcast(a *Array, shape []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cShape := intsToCInts(shape)
-	tensor := C.lux_gpu_broadcast(DefaultContext.gpu, a.tensor, &cShape[0], C.int(len(shape)))
+	tensor := C.gpu_broadcast(DefaultContext.gpu, a.tensor, &cShape[0], C.int(len(shape)))
 
 	arr := &Array{
 		tensor: tensor,
@@ -293,7 +341,7 @@ func Slice(a *Array, args []SliceArg) *Array {
 	cStarts := intsToCInts(starts)
 	cStops := intsToCInts(stops)
 	cSteps := intsToCInts(steps)
-	tensor := C.lux_gpu_slice(DefaultContext.gpu, a.tensor, &cStarts[0], &cStops[0], &cSteps[0], C.int(ndim))
+	tensor := C.gpu_slice(DefaultContext.gpu, a.tensor, &cStarts[0], &cStops[0], &cSteps[0], C.int(ndim))
 
 	// Calculate new shape
 	newShape := make([]int, ndim)
@@ -315,7 +363,7 @@ func Take(a *Array, indices *Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_take(DefaultContext.gpu, a.tensor, indices.tensor, C.int(axis))
+	tensor := C.gpu_take(DefaultContext.gpu, a.tensor, indices.tensor, C.int(axis))
 
 	// Shape depends on indices shape replacing the axis dimension
 	arr := &Array{
@@ -332,7 +380,7 @@ func TakeAlongAxis(a, indices *Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_take_along_axis(DefaultContext.gpu, a.tensor, indices.tensor, C.int(axis))
+	tensor := C.gpu_take_along_axis(DefaultContext.gpu, a.tensor, indices.tensor, C.int(axis))
 
 	arr := &Array{
 		tensor: tensor,
@@ -348,12 +396,12 @@ func Concatenate(arrays []Array, axis int) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensors := make([]*C.LuxTensor, len(arrays))
+	tensors := make([]*C.Tensor, len(arrays))
 	for i := range arrays {
 		tensors[i] = arrays[i].tensor
 	}
 
-	tensor := C.lux_gpu_concatenate(DefaultContext.gpu, &tensors[0], C.int(len(arrays)), C.int(axis))
+	tensor := C.gpu_concatenate(DefaultContext.gpu, &tensors[0], C.int(len(arrays)), C.int(axis))
 
 	// Calculate output shape
 	newShape := make([]int, len(arrays[0].shape))
@@ -376,7 +424,7 @@ func Less(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_less(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_less(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -392,7 +440,7 @@ func Greater(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_greater(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_greater(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -408,7 +456,7 @@ func LessEqual(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_less_equal(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_less_equal(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -424,7 +472,7 @@ func GreaterEqual(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_greater_equal(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_greater_equal(DefaultContext.gpu, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -440,7 +488,7 @@ func Where(cond, a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_where(DefaultContext.gpu, cond.tensor, a.tensor, b.tensor)
+	tensor := C.gpu_where(DefaultContext.gpu, cond.tensor, a.tensor, b.tensor)
 
 	arr := &Array{
 		tensor: tensor,
@@ -456,7 +504,7 @@ func Matmul(a, b *Array) *Array {
 	DefaultContext.mu.Lock()
 	defer DefaultContext.mu.Unlock()
 
-	tensor := C.lux_gpu_matmul(DefaultContext.gpu, a.tensor, b.tensor)
+	tensor := C.gpu_matmul(DefaultContext.gpu, a.tensor, b.tensor)
 
 	// Calculate output shape for matmul
 	newShape := make([]int, len(a.shape))
@@ -480,11 +528,11 @@ func Sum(a *Array, axes []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cAxes := intsToCInts(axes)
-	var tensor *C.LuxTensor
+	var tensor *C.Tensor
 	if len(axes) > 0 {
-		tensor = C.lux_gpu_sum(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+		tensor = C.gpu_sum(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
 	} else {
-		tensor = C.lux_gpu_sum(DefaultContext.gpu, a.tensor, nil, 0)
+		tensor = C.gpu_sum(DefaultContext.gpu, a.tensor, nil, 0)
 	}
 
 	// Calculate reduced shape
@@ -520,11 +568,11 @@ func Mean(a *Array, axes []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cAxes := intsToCInts(axes)
-	var tensor *C.LuxTensor
+	var tensor *C.Tensor
 	if len(axes) > 0 {
-		tensor = C.lux_gpu_mean(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+		tensor = C.gpu_mean(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
 	} else {
-		tensor = C.lux_gpu_mean(DefaultContext.gpu, a.tensor, nil, 0)
+		tensor = C.gpu_mean(DefaultContext.gpu, a.tensor, nil, 0)
 	}
 
 	// Calculate reduced shape
@@ -560,11 +608,11 @@ func Max(a *Array, axes []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cAxes := intsToCInts(axes)
-	var tensor *C.LuxTensor
+	var tensor *C.Tensor
 	if len(axes) > 0 {
-		tensor = C.lux_gpu_max(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+		tensor = C.gpu_max(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
 	} else {
-		tensor = C.lux_gpu_max(DefaultContext.gpu, a.tensor, nil, 0)
+		tensor = C.gpu_max(DefaultContext.gpu, a.tensor, nil, 0)
 	}
 
 	// Calculate reduced shape
@@ -600,11 +648,11 @@ func Min(a *Array, axes []int) *Array {
 	defer DefaultContext.mu.Unlock()
 
 	cAxes := intsToCInts(axes)
-	var tensor *C.LuxTensor
+	var tensor *C.Tensor
 	if len(axes) > 0 {
-		tensor = C.lux_gpu_min(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
+		tensor = C.gpu_min(DefaultContext.gpu, a.tensor, &cAxes[0], C.int(len(axes)))
 	} else {
-		tensor = C.lux_gpu_min(DefaultContext.gpu, a.tensor, nil, 0)
+		tensor = C.gpu_min(DefaultContext.gpu, a.tensor, nil, 0)
 	}
 
 	// Calculate reduced shape
@@ -653,7 +701,7 @@ func ArangeInt(start, stop, step int, dtype Dtype) *Array {
 	}
 
 	cShape := intsToCInts([]int{size})
-	tensor := C.lux_gpu_tensor_create(
+	tensor := C.tensor_create(
 		DefaultContext.gpu,
 		unsafe.Pointer(&data[0]),
 		&cShape[0],
@@ -696,7 +744,7 @@ func ToSlice[T int64 | float64 | float32 | int32](a *Array) []T {
 	}
 
 	// Copy tensor data to output slice
-	rc := C.lux_gpu_tensor_data(a.tensor, unsafe.Pointer(&result[0]), C.size_t(byteSize))
+	rc := C.tensor_data(a.tensor, unsafe.Pointer(&result[0]), C.size_t(byteSize))
 	if rc != 0 {
 		return nil // Error copying data
 	}
