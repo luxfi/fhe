@@ -1,4 +1,4 @@
-//go:build cgo && luxgpu
+//go:build cgo
 
 // Package gpu provides GPU-accelerated tensor operations for FHE workloads.
 // These operations are needed for GPU-accelerated TFHE bootstrapping.
@@ -9,8 +9,10 @@ package gpu
 #cgo pkg-config: lux-gpu
 #include <lux/gpu/gpu.h>
 #include <stdlib.h>
+#include <string.h>
 */
 import "C"
+import "unsafe"
 
 // intsToCInts converts a Go []int slice to []C.int for CGO calls
 // Go int is 64-bit on 64-bit systems, C int is 32-bit
@@ -630,4 +632,74 @@ func Min(a *Array, axes []int) *Array {
 	}
 	DefaultContext.Track(arr)
 	return arr
+}
+
+// ArangeInt creates an array with sequential integer values [start, stop) with step
+func ArangeInt(start, stop, step int, dtype Dtype) *Array {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	size := (stop - start + step - 1) / step
+	if size <= 0 {
+		size = 0
+	}
+
+	// Create data manually
+	data := make([]float32, size)
+	val := float32(start)
+	for i := range data {
+		data[i] = val
+		val += float32(step)
+	}
+
+	cShape := intsToCInts([]int{size})
+	tensor := C.lux_gpu_tensor_create(
+		DefaultContext.gpu,
+		unsafe.Pointer(&data[0]),
+		&cShape[0],
+		C.int(1),
+		dtypeToC(dtype),
+	)
+
+	arr := &Array{
+		tensor: tensor,
+		shape:  []int{size},
+		dtype:  dtype,
+	}
+	DefaultContext.Track(arr)
+	return arr
+}
+
+// ToSlice downloads array data to a Go slice
+func ToSlice[T int64 | float64 | float32 | int32](a *Array) []T {
+	DefaultContext.mu.Lock()
+	defer DefaultContext.mu.Unlock()
+
+	// Calculate total size
+	total := 1
+	for _, s := range a.shape {
+		total *= s
+	}
+
+	result := make([]T, total)
+	if total == 0 {
+		return result
+	}
+
+	// Determine byte size based on type
+	var byteSize int
+	switch any(result).(type) {
+	case []int64, []float64:
+		byteSize = total * 8
+	case []float32, []int32:
+		byteSize = total * 4
+	}
+
+	// Copy tensor data to output slice
+	rc := C.lux_gpu_tensor_data(a.tensor, unsafe.Pointer(&result[0]), C.size_t(byteSize))
+	if rc != 0 {
+		return nil // Error copying data
+	}
+
+	return result
 }
