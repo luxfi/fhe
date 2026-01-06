@@ -1,4 +1,4 @@
-//go:build !cgo || !luxgpu
+//go:build !cgo
 
 // Package gpu provides FHE operations with optional GPU acceleration.
 // This file provides stub implementations when CGO is disabled or luxgpu tag is not set.
