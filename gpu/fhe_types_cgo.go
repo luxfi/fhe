@@ -14,6 +14,7 @@ package gpu
 
 /*
 #cgo pkg-config: lux-gpu
+#cgo CFLAGS: -I${SRCDIR}/../../cpp/gpu
 #include <lux/gpu/gpu.h>
 #include <stdlib.h>
 
