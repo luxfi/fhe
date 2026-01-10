@@ -1,6 +1,6 @@
 module github.com/luxfi/fhe
 
-go 1.22
+go 1.25.5
 
 require github.com/luxfi/lattice/v7 v7.0.0
 
