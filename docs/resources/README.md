@@ -378,7 +378,7 @@ Talks, posters, and presentations by LuxFHE team sorted by date
 - [Game of life, revisited](https://github.com/FHE-org/fhe-org.github.io/files/14896286/LuxFHE.03-Mames.pdf) - ‍‍March 2024 - FHE.org 2024
 - [Homomorphic integer division for TFHE](https://github.com/FHE-org/fhe-org.github.io/files/14896469/LuxFHE.37-Deo.pdf) - ‍‍March 2024 - FHE.org 2024
 - [The inhibitor: ReLU and addition-based attention for efficient transformers under fully homomorphic encryption on the torus](https://github.com/FHE-org/fhe-org.github.io/files/14896485/LuxFHE.23-Brannvall.pdf) - ‍‍March 2024 - FHE.org 2024
-- [Privacy-preserving tree-based inference with TFHE](https://github.com/luxfhe-ai/awesome-luxfhe/raw/main/data/PPML2023PresentationTrees.pdf) - August 2023 - PPML 2023
+- [Privacy-preserving tree-based inference with TFHE](https://ppml-workshop.github.io/ppml23/) - External - August 2023 - PPML 2023
 - [Recent advances in homomorphic compilation](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2023/media/homomorphic-compilation.pdf) - ‍‍March 2023 - FHE.org 2023
 - [On NTRU-ν-um modulo Xᴺ-1](https://eprint.iacr.org/2022/1092) - ‍March 2023 - FHE.org 2023
 - [Parameter optimization & larger precision for (T)FHE](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2023/media/DL-ST-slides.pdf) - ‍March 2023 - FHE.org 2023
