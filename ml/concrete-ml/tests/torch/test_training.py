@@ -110,7 +110,7 @@ def test_sgd_training_manual(
 ):  # pylint: disable=unused-argument
     """Trains a logistic regression with SGD in torch and quantized."""
     # Train on the bias when multi output is available in concrete
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4131
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4131
 
     print("test_sgd_training_manual", get_device)
 

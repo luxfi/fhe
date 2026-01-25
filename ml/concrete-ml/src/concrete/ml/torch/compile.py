@@ -141,7 +141,7 @@ def build_quantized_module(
         *inputset_as_numpy_tuple, keep_onnx=keep_onnx
     )
 
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4127
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4127
     if reduce_sum_copy:
         quantized_module.set_reduce_sum_copy()
 

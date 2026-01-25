@@ -7,7 +7,7 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 
 SIGNATURE_KEY_VAR = "WORKSHOP_PRIVATE_KEY"
 DEVNET_VAR = "ETHCC23_DEVNET"
-DEFAULT_DEVNET = "https://devnet.zama.ai"
+DEFAULT_DEVNET = "https://devnet.lux.network"
 
 
 def setup_w3():

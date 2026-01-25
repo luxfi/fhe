@@ -238,6 +238,17 @@ func (eval *Evaluator) XNOR(ct1, ct2 *Ciphertext) (*Ciphertext, error) {
 	return eval.bootstrap(doubled, eval.bsk.TestPolyXNOR)
 }
 
+// CMPCOMBINE computes: isLess OR (isEqual AND bitLt) in one bootstrap
+// This is an optimized gate for comparison propagation.
+// Uses weighted encoding: 2*isLess + isEqual + bitLt, threshold at 0
+func (eval *Evaluator) CMPCOMBINE(isLess, isEqual, bitLt *Ciphertext) (*Ciphertext, error) {
+	// Compute weighted sum: 2*isLess + isEqual + bitLt
+	doubledIsLess := eval.doubleCiphertext(isLess)
+	sum := eval.addCiphertexts(doubledIsLess, isEqual)
+	sum = eval.addCiphertexts(sum, bitLt)
+	return eval.bootstrap(sum, eval.bsk.TestPolyCMPCOMBINE)
+}
+
 // ANDNY computes AND with negated first input: AND(NOT(a), b)
 func (eval *Evaluator) ANDNY(ct1, ct2 *Ciphertext) (*Ciphertext, error) {
 	return eval.AND(eval.NOT(ct1), ct2)

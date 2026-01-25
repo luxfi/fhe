@@ -299,7 +299,7 @@ def test_serialize_valid_split(cross_validation_split, stratified, random_state)
             "Object of type Tensor is not JSON serializable",
         ),
         # Serializing a Circuit object is currently not supported
-        # FIXME: https://github.com/zama-ai/concrete-numpy-internal/issues/1841
+        # FIXME: https://github.com/luxfi/concrete-numpy-internal/issues/1841
         pytest.param(
             get_a_fhe_circuit(),
             NotImplementedError,

@@ -73,7 +73,7 @@ def generate_pandas_dataframe(
 
     # Make sure 0 is not included in the index
     # Remove this once NaN values are not represented by 0 anymore
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     if isinstance(indexes, int):
         indexes = list(range(1, indexes + 1))
 
@@ -218,7 +218,7 @@ def test_merge(as_method, how, selected_column):
     ), "Joined encrypted data-frames decrypted by different clients are not equal."
 
     # Improve the test to avoid risk of flaky
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     assert pandas_dataframe_are_equal(
         clear_df_joined_1, pandas_joined_df, float_atol=1, equal_nan=True
     ), "Joined encrypted data-frame does not match Pandas' joined data-frame."
@@ -238,7 +238,7 @@ def test_pre_post_processing(dtype):
     clear_df = client.decrypt_to_pandas(encrypted_df)
 
     # Improve the test to avoid risk of flaky
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     assert pandas_dataframe_are_equal(
         pandas_df, clear_df, float_atol=1, equal_nan=include_nan
     ), "Processed encrypted data-frame does not match Pandas' initial data-frame."
@@ -263,7 +263,7 @@ def test_quantization_corner_cases(float_min_max):
     clear_df = client.decrypt_to_pandas(encrypted_df)
 
     # Improve the test to avoid risk of flaky
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     assert pandas_dataframe_are_equal(
         pandas_df, clear_df, float_atol=1, equal_nan=True
     ), "Processed encrypted data-frame does not match Pandas' initial data-frame."
@@ -303,7 +303,7 @@ def test_save_load():
     loaded_clear_df = client.decrypt_to_pandas(loaded_encrypted_df)
 
     # Improve the test to avoid risk of flaky
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     assert pandas_dataframe_are_equal(
         loaded_clear_df, pandas_df, float_atol=1, equal_nan=True
     ), "Loaded encrypted data-frame does not match the initial encrypted data-frame."
@@ -540,7 +540,7 @@ def concrete_client_files_are_equal(
 
 
 # Improve this test if Concrete Python provides an official way to check such compatibility
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
 def test_parameter_sets():
     """Test if new generated parameter sets (client.zip) are equal to the ones stored in source."""
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -653,7 +653,7 @@ def test_schema_input():
     ), "Joined encrypted data-frames decrypted by different clients are not equal."
 
     # Improve the test to avoid risk of flaky
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     assert pandas_dataframe_are_equal(
         clear_df_joined_1, pandas_joined_df, float_atol=1, equal_nan=True
     ), "Joined encrypted data-frame does not match Pandas' joined data-frame."

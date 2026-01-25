@@ -27,7 +27,7 @@ from concrete.ml.torch.numpy_module import NumpyModule
 INPUT_OUTPUT_FEATURE = [1, 2, 3]
 
 
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4172
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4172
 @pytest.mark.flaky
 @pytest.mark.parametrize(
     "model",
