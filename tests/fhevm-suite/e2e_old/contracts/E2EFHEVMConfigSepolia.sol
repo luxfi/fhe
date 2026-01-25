@@ -7,11 +7,11 @@ import { Gateway } from "fhevm/gateway/GatewayCaller.sol";
 address constant gatewayAddress = 0x33347831500F1e73f0ccCBb95c9f86B94d7b1123;
 
 /**
- * @title   ZamaFHEVMConfig.
+ * @title   LuxFHEVMConfig.
  * @notice  This library returns the TFHE config for different networks
  *          with the contract addresses for
  *          (1) ACL, (2) TFHEExecutor, (3) FHEPayment, (4) KMSVerifier,
- *          which are deployed & maintained by Zama.
+ *          which are deployed & maintained by Lux.
  */
 library DefaultFHEVMConfig {
     function getConfig() internal pure returns (FHEVMConfig.FHEVMConfigStruct memory) {
@@ -26,9 +26,9 @@ library DefaultFHEVMConfig {
 }
 
 /**
- * @title   MockZamaFHEVMConfig.
+ * @title   MockLuxFHEVMConfig.
  * @dev     This contract can be inherited by a contract wishing to use these contracts on the mock
- *          environment provided by Zama.
+ *          environment provided by Lux.
  *          Other providers may offer similar contracts deployed at different addresses.
  *          If you wish to use them, you should rely on the instructions from these providers.
  */
