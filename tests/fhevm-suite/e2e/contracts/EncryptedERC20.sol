@@ -7,7 +7,7 @@ import { E2EFHEVMConfig } from "./E2EFHEVMConfigLocal.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 
-/// @notice This contract implements an encrypted ERC20-like token with confidential balances using Zama's FHE (Fully Homomorphic Encryption) library.
+/// @notice This contract implements an encrypted ERC20-like token with confidential balances using Lux's FHE (Fully Homomorphic Encryption) library.
 /// @dev It supports typical ERC20 functionality such as transferring tokens, minting, and setting allowances, but uses encrypted data types.
 contract EncryptedERC20 is Ownable2Step, E2EFHEVMConfig {
     /// @notice Emitted when tokens are transferred
