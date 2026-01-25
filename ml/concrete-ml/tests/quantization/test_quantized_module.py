@@ -56,7 +56,7 @@ N_BITS_LIST = [
         pytest.param(nn.GELU, id="GELU"),
         pytest.param(nn.LogSigmoid, id="LogSigmoid"),
         # Some issues are still encountered with some activations
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/335
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/335
         #
         # Other problems, certainly related to tests:
         # Required positional arguments: 'embed_dim' and 'num_heads' and fails with a partial
@@ -352,11 +352,11 @@ def test_quantized_module_rounding_fhe(model_class, input_shape, default_configu
     # Execute the model with rounding in FHE execution mode
     quantized_model.forward(numpy_test, fhe="execute")
 
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3800
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3800
 
 
 # Extend this test with multi-input encryption status
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4011
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4011
 @pytest.mark.parametrize("model_class, input_shape", [pytest.param(FC, (100, 32 * 32 * 3))])
 def test_inputs_encryption_status(model_class, input_shape, default_configuration):
     """Check that giving inputs_encryption_status work properly."""

@@ -15,7 +15,7 @@ headers = {
     "username": "benoit",
 }
 r = requests.get(
-    "https://community.zama.ai/directory_items.json?period=all&order=likes_received&group=ML-team",
+    "https://community.lux.network/directory_items.json?period=all&order=likes_received&group=ML-team",
     headers=headers,
 )
 dic = r.json()

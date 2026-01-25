@@ -52,7 +52,7 @@ def compile_and_test_keras(
 
 
 # We should also have some correctness tests
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2749
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2749
 
 
 @pytest.mark.parametrize(

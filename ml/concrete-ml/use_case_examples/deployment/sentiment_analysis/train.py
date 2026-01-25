@@ -54,7 +54,7 @@ def train(dev_folder="./dev"):
 
     # Add MPS (for macOS with Apple Silicon or AMD GPUs) support when error is fixed. For now, we
     # observe a decrease in torch's top1 accuracy when using MPS devices
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3953
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3953
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # # Load the tokenizer (converts text to tokens)
@@ -167,7 +167,7 @@ def train(dev_folder="./dev"):
     print(f"Compilation time: {end - start:.4f} seconds")
 
     # Write a custom example and predict in FHE
-    tested_tweet = ["AirFrance is awesome, almost as much as Zama!"]
+    tested_tweet = ["AirFrance is awesome, almost as much as Lux!"]
     X_tested_tweet = text_to_tensor(tested_tweet, transformer_model, tokenizer, device)
     clear_proba = best_model.predict_proba(X_tested_tweet)
 

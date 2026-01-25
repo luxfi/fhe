@@ -197,7 +197,7 @@ def get_sklearn_linear_models_and_datasets(
     if is_model_class_in_a_list(SGDClassifier, linear_classes):
         linear_classes += [
             partial(SGDClassifier, fit_encrypted=False),
-            # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4460
+            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4460
             # partial(SGDClassifier, fit_encrypted=True, parameters_range=(-1, 1)),
         ]
 

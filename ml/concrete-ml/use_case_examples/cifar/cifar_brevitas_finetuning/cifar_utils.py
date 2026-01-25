@@ -67,7 +67,7 @@ DATASETS_ARGS = {
         ),
     },
     # Separate FMNIST from CIFAR directory
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3552
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3552
     "FashionMNIST": {
         "dataset": datasets.FashionMNIST,
         "mean": (0.2859),

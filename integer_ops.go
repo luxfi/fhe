@@ -576,21 +576,135 @@ func (eval *IntegerEvaluator) blockEq(a, b *ShortInt) (*Ciphertext, error) {
 	return &Ciphertext{resultCt}, nil
 }
 
-// selectBlock selects between two blocks based on condition
+// selectBlock selects between two blocks based on condition using bivariate LUT
+// Implements: result = cond ? a : b
+// Uses tensor product encoding: combines cond, a, and b into a trivariate LUT
+// The condition is boolean (-1/+1 encoding), a and b are ShortInts.
 func (eval *IntegerEvaluator) selectBlock(cond *Ciphertext, a, b *ShortInt) (*ShortInt, error) {
-	// Use MUX: cond ? a : b
-	// For shortints, we need a custom LUT approach
-	// Simplified: use boolean MUX bit by bit (slow but correct)
+	msgSpace := a.msgSpace
 
-	// For now, delegate to the boolean MUX
-	// This is a placeholder - proper implementation needs tensor product
-	resultCt, err := eval.boolEval.MUX(cond, &Ciphertext{a.ct}, &Ciphertext{b.ct})
+	// Strategy: Use two bivariate LUTs and combine
+	// 1. Compute cond * a using bivariate LUT (result is a if cond=1, 0 if cond=0)
+	// 2. Compute (1-cond) * b using bivariate LUT (result is b if cond=0, 0 if cond=1)
+	// 3. Add results: cond*a + (1-cond)*b = MUX(cond, a, b)
+
+	// For efficiency, we use a trivariate approach by encoding cond and one operand
+	// together, then evaluating with the other operand.
+
+	// Approach: Create bivariate LUT where we combine cond with a
+	// cond is boolean: -Q/8 (false) or +Q/8 (true)
+	// a is shortint: [0, msgSpace) encoded as [0, Q/(2*msgSpace) * msgSpace)
+
+	// First, compute condVal * a using bivariate LUT
+	// Scale: cond uses Q/8 encoding, a uses Q/(2*msgSpace) encoding
+	// Combined encoding: we add them and use a bivariate LUT
+	scale := rlwe.NewScale(float64(eval.params.fheParams.QBR()) / float64(2*msgSpace))
+
+	// Combine cond and a: we scale cond to match a's space
+	// cond is in [-1, 1] -> scale to [-msgSpace/2, msgSpace/2) to interleave with a
+	// Combined input x encodes: (cond_scaled * msgSpace + a) in a range for bivariate evaluation
+
+	// Create select-a LUT: outputs a if cond > 0, else 0
+	selectALUT := blindrot.InitTestPolynomial(func(x float64) float64 {
+		// Decode the combined input
+		// x is in [-1, 1], representing the sum of cond and a encodings
+		// After adding cond_scaled ([-0.5, 0.5]) and a_normalized ([0, 1]),
+		// the combined range is [-0.5, 1.5]
+
+		// For cond=true (+0.5): x = 0.5 + a_norm, range [0.5, 1.5]
+		// For cond=false (-0.5): x = -0.5 + a_norm, range [-0.5, 0.5]
+
+		// Extract cond and a from the combined value
+		// If x >= 0.5, cond was true (output a)
+		// If x < 0.5, cond was false (output 0)
+
+		if x >= 0.0 {
+			// cond is true, extract a value from upper portion
+			// a_norm was in [0, 1], so x - 0.5 is a_norm when cond=true
+			aNorm := x
+			if aNorm > 1.0 {
+				aNorm = 1.0
+			}
+			if aNorm < 0.0 {
+				aNorm = 0.0
+			}
+			aVal := int(aNorm * float64(msgSpace))
+			if aVal >= msgSpace {
+				aVal = msgSpace - 1
+			}
+			return float64(aVal)*2/float64(msgSpace) - 1
+		}
+		// cond is false, output 0
+		return float64(0)*2/float64(msgSpace) - 1
+	}, scale, eval.shortEval.ringQBR, -1, 1)
+
+	// Combine cond and a ciphertexts
+	// Scale cond to be compatible with a's encoding
+	// cond is in ±Q/8, a is in [0, Q/(2*msgSpace)*value]
+	// We want cond to contribute ±Q/(4*msgSpace) to separate true/false cases
+	condScaled := eval.shortEval.scaleCiphertext(cond.Ciphertext, 0.5/float64(msgSpace))
+	sumCondA := eval.shortEval.addCiphertexts(condScaled, a.ct)
+
+	// Evaluate LUT for cond*a
+	condTimesA, err := eval.shortEval.bootstrap(sumCondA, &selectALUT)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("selectA LUT: %w", err)
+	}
+
+	// Create select-b LUT: outputs b if cond <= 0, else 0
+	selectBLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
+		// Similar logic but inverted: output b when cond is false
+		if x < 0.0 {
+			// cond is false, extract b value from lower portion
+			bNorm := x + 1.0 // shift to [0, 1] range
+			if bNorm > 1.0 {
+				bNorm = 1.0
+			}
+			if bNorm < 0.0 {
+				bNorm = 0.0
+			}
+			bVal := int(bNorm * float64(msgSpace))
+			if bVal >= msgSpace {
+				bVal = msgSpace - 1
+			}
+			return float64(bVal)*2/float64(msgSpace) - 1
+		}
+		// cond is true, output 0
+		return float64(0)*2/float64(msgSpace) - 1
+	}, scale, eval.shortEval.ringQBR, -1, 1)
+
+	// Combine cond and b ciphertexts
+	sumCondB := eval.shortEval.addCiphertexts(condScaled, b.ct)
+
+	// Evaluate LUT for (1-cond)*b
+	notCondTimesB, err := eval.shortEval.bootstrap(sumCondB, &selectBLUT)
+	if err != nil {
+		return nil, fmt.Errorf("selectB LUT: %w", err)
+	}
+
+	// Final result: add the two partial results
+	// result = cond*a + (1-cond)*b
+	resultCt := eval.shortEval.addCiphertexts(condTimesA, notCondTimesB)
+
+	// Bootstrap to clean up noise and normalize
+	identityLUT := blindrot.InitTestPolynomial(func(x float64) float64 {
+		val := int((x + 1) * float64(msgSpace) / 2)
+		if val >= msgSpace {
+			val = msgSpace - 1
+		}
+		if val < 0 {
+			val = 0
+		}
+		return float64(val)*2/float64(msgSpace) - 1
+	}, scale, eval.shortEval.ringQBR, -1, 1)
+
+	finalCt, err := eval.shortEval.bootstrap(resultCt, &identityLUT)
+	if err != nil {
+		return nil, fmt.Errorf("final bootstrap: %w", err)
 	}
 
 	return &ShortInt{
-		ct:       resultCt.Ciphertext,
+		ct:       finalCt,
 		msgBits:  a.msgBits,
 		msgSpace: a.msgSpace,
 	}, nil

@@ -81,7 +81,7 @@ def get_onnx_model(model, x: numpy.ndarray, framework: str) -> onnx.ModelProto:
 def workaround_squeeze_node_xgboost(onnx_model: onnx.ModelProto):
     """Workaround to fix torch issue that does not export the proper axis in the ONNX squeeze node.
 
-    FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2778
+    FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2778
     The squeeze ops does not have the proper dimensions.
     remove the following workaround when the issue is fixed
     Add the axis attribute to the Squeeze node
@@ -267,7 +267,7 @@ def tree_onnx_graph_preprocessing(
         clean_graph_at_node_op_type(onnx_model, "ReduceSum")
 
     if framework == "xgboost":
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2778
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2778
         # The squeeze ops does not have the proper dimensions.
         # remove the following workaround when the issue is fixed
         # Add the axis attribute to the Squeeze node
@@ -369,7 +369,7 @@ def tree_to_numpy(
         f"framework={framework} is not supported. It must be either 'xgboost' or 'sklearn'",
     )
 
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4545
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4545
     # Execute with 2 example for efficiency in large data scenarios to prevent slowdown
     # but also to work around the HB export issue
     onnx_model = get_onnx_model(model, x[:2] if x.shape[0] > 1 else x, framework)
@@ -403,7 +403,7 @@ def tree_to_numpy(
 
 
 # Remove this function once the truncate feature is released
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4143
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4143
 def _compute_lsb_to_remove_for_trees(
     onnx_model: onnx.ModelProto, q_x: numpy.ndarray
 ) -> Tuple[int, int]:
