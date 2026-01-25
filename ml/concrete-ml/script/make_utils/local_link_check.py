@@ -161,7 +161,7 @@ def main():
                         if bad:
                             for err_link in bad:
                                 # Skip links to CML internal issues
-                                if "zama-ai/concrete-ml-internal" in err_link[1]:
+                                if "luxfi/concrete-ml-internal" in err_link[1]:
                                     continue
 
                                 errors.append(

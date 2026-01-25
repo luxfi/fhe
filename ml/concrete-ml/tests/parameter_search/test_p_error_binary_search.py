@@ -301,9 +301,9 @@ def test_binary_search_for_built_in_models(model_class, parameters, threshold, p
     # NeuralNetRegressor models support a `predict_proba` method since it directly inherits from
     # Skorch but since Scikit-Learn does not, we don't as well. This issue could be fixed by making
     # neural networks not inherit from Skorch.
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3373
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
     # Skipping predict_proba for KNN, doesn't work for now.
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
 
     if predict == "predict_proba" and get_model_name(model_class) in [
         "NeuralNetRegressor",

@@ -167,7 +167,7 @@ def train_brevitas_network_tinymnist(is_cnn, qat_bits, signed, narrow, pot_scali
 
 
 # This test is a known flaky
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3933
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3933
 @pytest.mark.flaky
 @pytest.mark.parametrize("qat_bits", [3])
 @pytest.mark.parametrize("signed, narrow", [(True, False), (True, True), (False, False)])
@@ -234,7 +234,7 @@ def test_brevitas_tinymnist_cnn(
     # Accept, at most, 1% examples that are classified differently (currently 5)
     # For now, the correctness test has been disabled as it was too flaky, it should however be put
     # back at one point
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2550
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2550
     # assert abs(fhe_simulation_correct - torch_correct) <= numpy.ceil(0.01 * len(y_test))
 
     assert fhe_s_correct >= 0
@@ -245,7 +245,7 @@ def test_brevitas_tinymnist_cnn(
 
 # Note that this test is currently disabled until the pytorch dtype issue is found
 # and all mismatches between Concrete ML and Brevitas are fixed
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2373
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2373
 @pytest.mark.parametrize(
     "n_layers",
     [3],
@@ -496,7 +496,7 @@ def test_brevitas_constant_folding(default_configuration):
 
 
 # This test is a known flaky
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4356
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4356
 @pytest.mark.flaky
 @pytest.mark.parametrize("manual_rounding", [None, 3])
 @pytest.mark.parametrize("power_of_two", [True, False])

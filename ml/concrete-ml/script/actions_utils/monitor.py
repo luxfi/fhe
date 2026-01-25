@@ -126,7 +126,7 @@ def get_data(token: str, path_to_json: Path):
         "page": index,
         "event": "push",
     }
-    user = "zama-ai"
+    user = "luxfi"
     repo = "concrete-ml"
     final_result = {}
 

@@ -164,7 +164,7 @@ def get_n_bits_non_correctness(model_class):
     """Get the number of bits to use for non correctness related tests."""
 
     # KNN can only be compiled with small quantization bit numbers for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3979
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3979
     if get_model_name(model_class) == "KNeighborsClassifier":
         n_bits = 2
     else:
@@ -206,7 +206,7 @@ def check_correctness_with_sklearn(
 
     # If the model is a classifier
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
     if (
         is_classifier_or_partial_classifier(model)
         and get_model_name(model_class) != "KNeighborsClassifier"
@@ -263,7 +263,7 @@ def check_double_fit(model_class, n_bits, x_1, x_2, y_1, y_2):
     """Check double fit."""
 
     if get_model_name(model_class) == "KNeighborsClassifier":
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4014
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4014
         pytest.skip(
             "Given that KNN is not accurate and the test data-set is small"
             "the y_pred1 and y_pred2 can be equal."
@@ -420,7 +420,7 @@ def check_serialization_dump_load(model, x, use_dump_method):
         assert numpy.array_equal(y_pred_sklearn_model, y_pred_loaded_sklearn_model)
 
         # Add a test to check that graphs before and after the serialization are identical
-        # FIME: https://github.com/zama-ai/concrete-ml-internal/issues/4175
+        # FIME: https://github.com/luxfi/concrete-ml-internal/issues/4175
 
 
 def check_serialization_dumps_loads(model, x, use_dump_method):
@@ -476,7 +476,7 @@ def check_serialization_dumps_loads(model, x, use_dump_method):
     assert numpy.array_equal(y_pred_sklearn_model, y_pred_loaded_sklearn_model)
 
     # Add a test to check that graphs before and after the serialization are identical
-    # FIME: https://github.com/zama-ai/concrete-ml-internal/issues/4175
+    # FIME: https://github.com/luxfi/concrete-ml-internal/issues/4175
 
 
 def check_offset(model_class, n_bits, x, y):
@@ -502,7 +502,7 @@ def check_inference_methods(model, model_class, x, check_float_array_equal):
     # method accessible by anyone, without having any FHE implementation. As this could create some
     # confusion, a NotImplementedError is raised. This issue could be fixed by making these classes
     # not inherit from skorch.
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3373
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
     if get_model_name(model) == "NeuralNetRegressor":
         with pytest.raises(
             NotImplementedError,
@@ -514,7 +514,7 @@ def check_inference_methods(model, model_class, x, check_float_array_equal):
             model.predict_proba(x)
 
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
     elif get_model_name(model) == "KNeighborsClassifier":
         with pytest.raises(
             NotImplementedError,
@@ -526,7 +526,7 @@ def check_inference_methods(model, model_class, x, check_float_array_equal):
             model.predict_proba(x)
 
         # KNeighborsClassifier does not provide a kneighbors method
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4080
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4080
         with pytest.raises(
             NotImplementedError,
             match=(
@@ -628,7 +628,7 @@ def check_separated_inference(model, fhe_circuit, x, check_float_array_equal):
     y_pred = model.post_processing(y_pred)
 
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
     if (
         is_classifier_or_partial_classifier(model)
         and get_model_name(model) != "KNeighborsClassifier"
@@ -705,7 +705,7 @@ def check_input_support(model_class, n_bits, default_configuration, x, y, input_
 
     # Similarly, we test `predict_proba` for classifiers
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
     if (
         is_classifier_or_partial_classifier(model)
         and get_model_name(model_class) != "KNeighborsClassifier"
@@ -719,7 +719,7 @@ def check_input_support(model_class, n_bits, default_configuration, x, y, input_
 
     # Similarly, we test `predict_proba` for classifiers
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
     if (
         is_classifier_or_partial_classifier(model)
         and get_model_name(model_class) != "KNeighborsClassifier"
@@ -797,7 +797,7 @@ def check_grid_search(model_class, x, y, scoring):
         warnings.simplefilter("ignore", category=UndefinedMetricWarning)
 
         # KNeighborsClassifier does not provide a predict_proba method for now
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
         if get_model_name(model_class) == "KNeighborsClassifier" and scoring in [
             "roc_auc",
             "average_precision",
@@ -932,7 +932,7 @@ def check_fitted_compiled_error_raises(model_class, n_bits, x, y):
             model.predict(x)
 
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
     if (
         is_classifier_or_partial_classifier(model_class)
         and get_model_name(model) != "KNeighborsClassifier"
@@ -1384,7 +1384,7 @@ def check_rounding_consistency(
 
         # Check that the maximum bit-width of the circuit with rounding is at most:
         # maximum bit-width (of the circuit without rounding) + 2
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4178
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4178
 
 
 def check_sum_for_tree_based_models(
@@ -1706,7 +1706,7 @@ def test_inference_methods(
 
 # Pipeline test sometimes fails with RandomForest models. This bug may come from Hummingbird
 # and needs further investigations
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2779
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2779
 @pytest.mark.parametrize(
     "model_class, parameters",
     get_sklearn_all_models_and_datasets(ignore="RandomForest"),
@@ -1773,7 +1773,7 @@ def test_predict_correctness(
     """Test prediction correctness between clear quantized and FHE simulation or execution."""
 
     # KNN can only be compiled with small quantization bit numbers for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3979
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3979
     if n_bits > 5 and get_model_name(model_class) == "KNeighborsClassifier":
         pytest.skip("KNeighborsClassifier models can only run with 5 bits at most.")
 
@@ -1817,7 +1817,7 @@ def test_separated_inference(
     n_bits = min(N_BITS_REGULAR_BUILDS)
 
     # KNN can only be compiled with small quantization bit numbers for now
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3979
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3979
     if n_bits > 5 and get_model_name(model_class) == "KNeighborsClassifier":
         pytest.skip("KNeighborsClassifier models can only run with 5 bits at most.")
 
@@ -1862,7 +1862,7 @@ def test_fitted_compiled_error_raises(
     check_fitted_compiled_error_raises(model_class, n_bits, x, y)
 
 
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4169
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4169
 @pytest.mark.flaky
 @pytest.mark.parametrize("model_class, parameters", MODELS_AND_DATASETS)
 @pytest.mark.parametrize(
@@ -1898,7 +1898,7 @@ def test_p_error_simulation(
         """Detect divergence between simulated/FHE execution and clear run."""
 
         # KNeighborsClassifier does not provide a predict_proba method for now
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
         predict_function = (
             model.predict_proba
             if is_classifier_or_partial_classifier(model)
@@ -1921,7 +1921,7 @@ def test_p_error_simulation(
 
     # Skip the following if model is linear
     # Simulation and FHE differs with very high p_error on leveled circuit
-    # FIXME https://github.com/zama-ai/concrete-ml-internal/issues/4343
+    # FIXME https://github.com/luxfi/concrete-ml-internal/issues/4343
     if is_linear_model:
         pytest.skip("Skipping test for linear models")
 
@@ -2063,7 +2063,7 @@ def test_linear_models_have_no_tlu(
 
 # This test does not check rounding at level 2
 # Additional tests for this purpose should be added in future updates
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4179
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4179
 @pytest.mark.parametrize("model_class, parameters", get_sklearn_tree_models_and_datasets())
 @pytest.mark.parametrize("n_bits", [2, 5, 8])
 def test_rounding_consistency_for_regular_models(
@@ -2139,7 +2139,7 @@ def test_sum_for_tree_based_models(
 
 
 # This test should be extended to all built-in models.
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4234
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4234
 @pytest.mark.parametrize(
     "n_bits, error_message",
     [
@@ -2168,7 +2168,7 @@ def test_invalid_n_bits_setting(model_class, n_bits, error_message):
 
 
 # This test should be extended to all built-in models.
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4234
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4234
 @pytest.mark.parametrize("n_bits", [5, {"op_inputs": 5}, {"op_inputs": 2, "op_leaves": 1}])
 @pytest.mark.parametrize("model_class, parameters", get_sklearn_tree_models_and_datasets())
 def test_valid_n_bits_setting(
@@ -2230,7 +2230,7 @@ def test_error_raise_unsupported_pandas_values(model_class, bad_value, expected_
 
 
 # Add QNNs in this test
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4436
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4436
 @pytest.mark.parametrize(
     "model_class, parameters",
     get_sklearn_linear_models_and_datasets()

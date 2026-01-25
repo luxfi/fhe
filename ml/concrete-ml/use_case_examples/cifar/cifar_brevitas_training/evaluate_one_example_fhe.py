@@ -21,7 +21,7 @@ KEYGEN_CACHE_DIR = CURRENT_DIR.joinpath(".keycache")
 
 # Add MPS (for macOS with Apple Silicon or AMD GPUs) support when error is fixed. For now, we
 # observe a decrease in torch's top1 accuracy when using MPS devices
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3953
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3953
 
 # For PyTorch operations, we use CPU (simpler and avoids device mismatch issues)
 DEVICE = "cpu"

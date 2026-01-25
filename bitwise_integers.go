@@ -473,6 +473,7 @@ func (eval *BitwiseEvaluator) Eq(a, b *BitCiphertext) (*Ciphertext, error) {
 }
 
 // Lt returns encrypted 1 if a < b, 0 otherwise (unsigned)
+// Optimized using CMPCOMBINE gate to reduce bootstraps from ~37 to ~23 for 8-bit
 func (eval *BitwiseEvaluator) Lt(a, b *BitCiphertext) (*Ciphertext, error) {
 	if a.numBits != b.numBits {
 		return nil, fmt.Errorf("bit count mismatch")
@@ -487,9 +488,8 @@ func (eval *BitwiseEvaluator) Lt(a, b *BitCiphertext) (*Ciphertext, error) {
 
 	// Start from MSB
 	for i := numBits - 1; i >= 0; i-- {
-		// a[i] < b[i]: NOT(a[i]) AND b[i]
-		notA := eval.eval.NOT(a.bits[i])
-		bitLt, err := eval.eval.AND(notA, b.bits[i])
+		// a[i] < b[i]: NOT(a[i]) AND b[i] = ANDNY(a[i], b[i])
+		bitLt, err := eval.eval.ANDNY(a.bits[i], b.bits[i])
 		if err != nil {
 			return nil, err
 		}
@@ -504,12 +504,9 @@ func (eval *BitwiseEvaluator) Lt(a, b *BitCiphertext) (*Ciphertext, error) {
 			isLess = bitLt
 			isEqual = bitEq
 		} else {
-			// isLess = isLess OR (isEqual AND bitLt)
-			eqAndLt, err := eval.eval.AND(isEqual, bitLt)
-			if err != nil {
-				return nil, err
-			}
-			isLess, err = eval.eval.OR(isLess, eqAndLt)
+			// Use CMPCOMBINE to compute: isLess OR (isEqual AND bitLt)
+			// This replaces 2 bootstraps (AND + OR) with 1 bootstrap
+			isLess, err = eval.eval.CMPCOMBINE(isLess, isEqual, bitLt)
 			if err != nil {
 				return nil, err
 			}

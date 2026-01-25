@@ -38,7 +38,7 @@ from concrete.ml.torch.compile import compile_torch_model
 
 
 # Add encrypted training with SGDClassifier manually
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4460
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4460
 MODELS_AND_DATASETS = MODELS_AND_DATASETS + [
     pytest.param(
         partial(SGDClassifier, fit_encrypted=True, parameters_range=(-1, 1)),
@@ -67,9 +67,9 @@ class OnDiskNetwork:
 
 
 # This is a known flaky test
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4014
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4014
 # This test is disabled on CPU because it is getting stuck
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4737
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4737
 # @pytest.mark.use_gpu
 @pytest.mark.flaky
 @pytest.mark.parametrize("model_class, parameters", MODELS_AND_DATASETS)
@@ -89,7 +89,7 @@ def test_client_server_sklearn_inference(
 
     if get_model_name(model_class) == "KNeighborsClassifier":
         # Skipping KNN for this test
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4014
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4014
         pytest.skip("Skipping KNN, because FHE predictions and clear ones are differents.")
 
     # Generate random data
@@ -167,7 +167,7 @@ def test_client_server_sklearn_inference(
 
 
 # This is a known flaky test
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4014
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4014
 @pytest.mark.flaky
 @pytest.mark.parametrize("model_class, parameters", MODELS_AND_DATASETS)
 @pytest.mark.parametrize("n_bits", [8])
@@ -912,7 +912,7 @@ def test_client_server_sklearn_training(
     # Fit the model with the created dataset to compile it for production
     # This step ensures the model knows the number of features, targets and features distribution
     # Remove this once this step is improved
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4466
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4466
     model.fit(x_compile_set, y_compile_set, fhe="disable")
 
     # Check that client and server files are properly generated

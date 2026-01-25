@@ -57,7 +57,7 @@ def underscore_str_to_tuple(tup: str) -> Tuple:
     return ast.literal_eval(tup.replace("po_", "(").replace("_pc", ")").replace("_", ", "))
 
 
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3858
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3858
 def convert_conv1d_to_linear(layer_or_module):
     """Convert all Conv1D layers in a module or a Conv1D layer itself to nn.Linear.
 
@@ -293,7 +293,7 @@ class RemoteModule(nn.Module):
 
         elif self.fhe_local_mode == HybridFHEMode.REMOTE:  # pragma:no cover
             # Remote call
-            # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4672
+            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4672
             assert self.executor is None, "Remote optimized linear layers are not yet implemented"
             y = self.remote_call(x)
 
@@ -423,7 +423,7 @@ class HybridFHEModel:
         """Replace the private modules in the model with remote layers."""
         self._has_only_large_linear_layers = True
         for module_name in self.module_names:
-            # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3858
+            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3858
             # Conv1d introduce reshaping operations which adds more TLU
             self.private_modules[module_name] = convert_conv1d_to_linear(
                 self.private_modules[module_name]
@@ -755,7 +755,7 @@ class HybridFHEModel:
         # Save the model with a specific filename
         model_path = path / "model.pth"
         # Save the model state dict due to a Brevitas issue
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4572
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4572
         torch.save(self.model.state_dict(), model_path.resolve())
 
         # Save the FHE circuit in the same directory
