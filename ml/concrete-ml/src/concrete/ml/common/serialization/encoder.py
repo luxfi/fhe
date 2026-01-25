@@ -190,7 +190,7 @@ class ConcreteEncoder(JSONEncoder):
         """
 
         # Serializing a Circuit object is currently not supported
-        # FIXME: https://github.com/zama-ai/concrete-numpy-internal/issues/1841
+        # FIXME: https://github.com/luxfi/concrete-numpy-internal/issues/1841
         if isinstance(o, fhe.Circuit):
             raise NotImplementedError("Concrete Circuit object serialization is not implemented.")
 

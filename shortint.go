@@ -481,6 +481,19 @@ func (eval *ShortIntEvaluator) addCiphertexts(ct1, ct2 *rlwe.Ciphertext) *rlwe.C
 	return result
 }
 
+// scaleCiphertext scales a ciphertext by a scalar value
+func (eval *ShortIntEvaluator) scaleCiphertext(ct *rlwe.Ciphertext, scalar float64) *rlwe.Ciphertext {
+	result := ct.CopyNew()
+	// Scale by multiplying each coefficient
+	for i := range result.Value {
+		coeffs := result.Value[i].Coeffs
+		for j := range coeffs[0] {
+			coeffs[0][j] = uint64(float64(coeffs[0][j]) * scalar)
+		}
+	}
+	return result
+}
+
 // Add adds two shortints (with modular wrap)
 func (eval *ShortIntEvaluator) Add(a, b *ShortInt) (*ShortInt, error) {
 	if a.msgSpace != b.msgSpace {

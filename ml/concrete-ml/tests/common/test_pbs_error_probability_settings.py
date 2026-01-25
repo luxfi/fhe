@@ -43,7 +43,7 @@ def test_config_sklearn(model_class, parameters, kwargs, load_data):
         model.compile(x, verbose=True, **kwargs)
 
     # We still need to check that we have the expected probabilities
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2206
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2206
 
 
 @pytest.mark.parametrize(
@@ -102,4 +102,4 @@ def test_config_torch(model, kwargs):
         )
 
     # We still need to check that we have the expected probabilities
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2206
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2206

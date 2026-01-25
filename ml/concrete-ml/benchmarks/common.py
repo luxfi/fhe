@@ -767,7 +767,7 @@ def benchmark_name_generator(
 # Add tests:
 # - Bijection between both functions
 # - The functions support all models
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/1866
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/1866
 
 
 # pylint: disable-next=too-many-branches, redefined-outer-name

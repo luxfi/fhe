@@ -431,7 +431,7 @@ function reveal(bytes32 requestId) external view returns (bytes memory result, b
 - rng-game, rps-game, secret-santa, voting
 
 **⚠️ Not using @luxfi/contracts:**
-- `dapps/` - Uses `@fhevm/solidity` (Zama's library)
+- `dapps/` - Uses `@fhevm/solidity` (lux's library)
 - `poker/`, `kuhn-poker/` - Custom implementation
 - `ticketing/`, `tickets/` - Package manager issues
 

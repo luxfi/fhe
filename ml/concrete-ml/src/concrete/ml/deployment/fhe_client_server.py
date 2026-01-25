@@ -150,10 +150,10 @@ class FHEModelServer:
 
     # We should make 'serialized_encrypted_quantized_data' handle unpacked inputs, as Concrete does,
     # instead of tuples
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4477
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4477
     # We should also rename the input arguments to remove the `serialized` part, as we now accept
     # both serialized and deserialized input values
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4476
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4476
     def run(
         self,
         serialized_encrypted_quantized_data: Union[
@@ -416,7 +416,7 @@ class FHEModelClient:
         if "is_fitted" in serialized_processing:
             # This private access should be temporary as the Client-Server interface could benefit
             # from built-in serialization load/dump methods
-            # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3243
+            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3243
             # pylint: disable-next=protected-access
             self.model._is_fitted = serialized_processing["is_fitted"]
 
@@ -431,7 +431,7 @@ class FHEModelClient:
 
         # Load model parameters
         # Add some checks on post-processing-params
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3131
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3131
         self.model.post_processing_params = serialized_processing["model_post_processing_params"]
 
     def generate_private_and_evaluation_keys(self, force=False):
@@ -530,7 +530,7 @@ class FHEModelClient:
         return serialize_encrypted_values(*x_quant_encrypted)
 
     # We should find a better name for `serialized_encrypted_quantized_result`
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4476
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4476
     def deserialize_decrypt(
         self, *serialized_encrypted_quantized_result: Optional[bytes]
     ) -> Union[Any, Tuple[Any, ...]]:
@@ -574,7 +574,7 @@ class FHEModelClient:
         return result_quant
 
     # We should find a better name for `serialized_encrypted_quantized_result`
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4476
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4476
     def deserialize_decrypt_dequantize(
         self, *serialized_encrypted_quantized_result: Optional[bytes]
     ) -> Union[numpy.ndarray, Tuple[numpy.ndarray, ...]]:
@@ -598,7 +598,7 @@ class FHEModelClient:
         # handles a single input. Calling the following is however not an issue for now as we expect
         # 'result' to be a tuple of length 1 in this case anyway. Still, we need to make sure this
         # does not break in the future if any built-in models starts to handle multiple outputs :
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4474
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4474
         assert len(result) == 1 or isinstance(
             self.model, QuantizedModule
         ), "Only 'QuantizedModule' instances can handle multi-outputs."

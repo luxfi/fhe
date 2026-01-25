@@ -4,7 +4,7 @@
 # Code source: Gaël Varoquaux
 #              Andreas Müller
 # Modified for documentation by Jaques Grobler
-# Modified to integrate Concrete ML functions by Zama
+# Modified to integrate Concrete ML functions by Lux
 # License: BSD 3 clause
 
 import warnings

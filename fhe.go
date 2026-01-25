@@ -180,6 +180,10 @@ type BootstrapKey struct {
 	TestPolyID *ring.Poly
 	// TestPolyMAJORITY is the test polynomial for majority vote (2 of 3)
 	TestPolyMAJORITY *ring.Poly
+	// TestPolyCMPCOMBINE is the test polynomial for comparison combine:
+	// output = isLess OR (isEqual AND bitLt)
+	// Uses weighted sum: 2*isLess + isEqual + bitLt >= 0
+	TestPolyCMPCOMBINE *ring.Poly
 	// Parameters
 	params Parameters
 }
@@ -354,22 +358,42 @@ func (kg *KeyGenerator) GenBootstrapKey(sk *SecretKey) *BootstrapKey {
 		return -1.0
 	}, scale, kg.ringQBR, -1, 1)
 
+	// CMPCOMBINE: computes isLess OR (isEqual AND bitLt) in one bootstrap
+	// Uses weighted encoding: 2*isLess + isEqual + bitLt
+	// With Q/8 encoding, weighted sum ranges:
+	// - (F,F,F): 2*(-1/8) + (-1/8) + (-1/8) = -4/8 = -0.5 → FALSE
+	// - (F,F,T): 2*(-1/8) + (-1/8) + (+1/8) = -2/8 = -0.25 → FALSE
+	// - (F,T,F): 2*(-1/8) + (+1/8) + (-1/8) = -2/8 = -0.25 → FALSE
+	// - (F,T,T): 2*(-1/8) + (+1/8) + (+1/8) = 0 → TRUE
+	// - (T,F,F): 2*(+1/8) + (-1/8) + (-1/8) = 0 → TRUE
+	// - (T,F,T): 2*(+1/8) + (-1/8) + (+1/8) = +2/8 = +0.25 → TRUE
+	// - (T,T,F): 2*(+1/8) + (+1/8) + (-1/8) = +2/8 = +0.25 → TRUE
+	// - (T,T,T): 2*(+1/8) + (+1/8) + (+1/8) = +4/8 = +0.5 → TRUE
+	// Threshold at -0.125 (midpoint between -0.25 and 0) for maximum noise margin
+	testPolyCMPCOMBINE := blindrot.InitTestPolynomial(func(x float64) float64 {
+		if x > -0.125 {
+			return 1.0
+		}
+		return -1.0
+	}, scale, kg.ringQBR, -1, 1)
+
 	// Note: AND3 and OR3 use composition (2 bootstraps) rather than
 	// single-bootstrap with gate constants. Single-bootstrap versions
 	// would require OpenFHE-style gate constant offsets.
 
 	return &BootstrapKey{
-		BRK:              brk,
-		KSK:              ksk,
-		TestPolyAND:      &testPolyAND,
-		TestPolyOR:       &testPolyOR,
-		TestPolyXOR:      &testPolyXOR,
-		TestPolyNAND:     &testPolyNAND,
-		TestPolyNOR:      &testPolyNOR,
-		TestPolyXNOR:     &testPolyXNOR,
-		TestPolyID:       &testPolyID,
-		TestPolyMAJORITY: &testPolyMAJORITY,
-		params:           kg.params,
+		BRK:                brk,
+		KSK:                ksk,
+		TestPolyAND:        &testPolyAND,
+		TestPolyOR:         &testPolyOR,
+		TestPolyXOR:        &testPolyXOR,
+		TestPolyNAND:       &testPolyNAND,
+		TestPolyNOR:        &testPolyNOR,
+		TestPolyXNOR:       &testPolyXNOR,
+		TestPolyID:         &testPolyID,
+		TestPolyMAJORITY:   &testPolyMAJORITY,
+		TestPolyCMPCOMBINE: &testPolyCMPCOMBINE,
+		params:             kg.params,
 	}
 }
 

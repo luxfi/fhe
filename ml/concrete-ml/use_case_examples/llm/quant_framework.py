@@ -425,7 +425,7 @@ class DualArray:
 
     # Concrete-Python does not support numpy.array_split and numpy.take so we need to build a custom
     # split method instead
-    # FIXME: https://github.com/zama-ai/concrete-internal/issues/329
+    # FIXME: https://github.com/luxfi/concrete-internal/issues/329
     def enc_split(self, n: int, axis: int, key: str) -> Tuple[DualArray]:
         """Split the arrays in n parts along a given axis."""
         self_int_array = self._ensure_quantized(key=f"{key}_self")

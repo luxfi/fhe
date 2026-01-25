@@ -416,7 +416,7 @@ def check_onnx_file_dump(
 
     if model_name == "KNeighborsClassifier":
         # KNN can only be compiled with small quantization bit numbers for now
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3979
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3979
         model.n_bits = 2
 
     model.fit(x, y)
@@ -446,7 +446,7 @@ def check_onnx_file_dump(
     print(f"\nExpected {model_name=}:\n{str_expected}")
 
     # Test equality when it does not depend on seeds
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3266
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3266
     if not is_model_class_in_a_list(model_class, _get_sklearn_tree_models(select="RandomForest")):
         # The expected graph is usually a string and we therefore directly test if it is equal to
         # the retrieved graph's string. However, in some cases such as for TweedieRegressor models,

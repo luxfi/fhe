@@ -48,16 +48,16 @@ For more details on the topic please refer to [the ACL documentation](https://do
 
 ## Step 2: decrypt the ciphertext
 
-Using those ciphertext handles, user decryption is performed client-side using the `@zama-fhe/relayer-sdk` library.
+Using those ciphertext handles, user decryption is performed client-side using the `@luxfhe/relayer-sdk` library.
 The `userDecrypt` function takes a **list of handles**, allowing you to decrypt multiple ciphertexts in a single request. In this example, provide just one handle.
 The user needs to have created an instance object prior to that (for more context see [the relayer-sdk setup page](./initialization.md)).
 
 {% hint style="info" %}
-The total bit length of all ciphertexts being decrypted in a single request must not exceed 2048 bits. Each encrypted type has a specific bit length, for instance `euint8` uses 8 bits and `euint16` uses 16 bits. For the full list of encrypted types and their corresponding bit lengths, refer to the [encrypted types documentation](https://docs.zama.org/protocol/solidity-guides/smart-contract/types#list-of-encrypted-types).
+The total bit length of all ciphertexts being decrypted in a single request must not exceed 2048 bits. Each encrypted type has a specific bit length, for instance `euint8` uses 8 bits and `euint16` uses 16 bits. For the full list of encrypted types and their corresponding bit lengths, refer to the [encrypted types documentation](https://docs.lux.network/protocol/solidity-guides/smart-contract/types#list-of-encrypted-types).
 {% endhint %}
 
 ```ts
-// instance: [`FhevmInstance`] from `zama-fhe/relayer-sdk`
+// instance: [`FhevmInstance`] from `luxfhe/relayer-sdk`
 // signer: [`Signer`] from ethers (could a [`Wallet`])
 // ciphertextHandle: [`string`]
 // contractAddress: [`string`]
