@@ -8,7 +8,7 @@ It takes as input a folder with:
 It builds a Docker image and spawns a Docker container that runs the server.
 
 This module is untested as it would require to first build the release Docker image.
-FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3347
+FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3347
 """
 
 import argparse

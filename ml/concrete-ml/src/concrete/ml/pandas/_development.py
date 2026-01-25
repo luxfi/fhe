@@ -134,7 +134,7 @@ def get_encrypt_config() -> Dict:
 
 
 # Allow 0 values once NaN values are not represented by it anymore
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
 def get_min_max_allowed() -> Tuple[int, int]:
     """Get the minimum and maximum value allowed in the data-frames.
 

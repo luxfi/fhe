@@ -60,12 +60,12 @@ class ClientEngine:
 
         # Inputs need to be encrypted element-wise in order to be able to use a composable circuit
         # Once multi-operator is supported, better handle encryption configuration parameters
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
         encrypted_values = encrypt_elementwise(pandas_array, self.client, **get_encrypt_config())
 
         # Encrypt a 0 in order to represent NaN values
         # Remove this once NaN values are not represented by 0 anymore
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
         encrypted_nan = encrypt_value(0, self.client, **get_encrypt_config())
 
         return EncryptedDataFrame(

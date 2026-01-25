@@ -526,7 +526,7 @@ class UniformQuantizationParameters:
 
 
 # Change UniformQuantizer inheritance from UniformQuantizationParameters to composition.
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/1434
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/1434
 class UniformQuantizer(UniformQuantizationParameters, QuantizationOptions, MinMaxQuantizationStats):
     """Uniform quantizer.
 

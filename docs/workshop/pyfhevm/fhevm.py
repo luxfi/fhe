@@ -23,13 +23,13 @@ class FHEVM:
             print("Fetching global public key")
             self.network_encryption_key = self.w3.eth.call({"to": PUBLIC_KEY_CONTRACT})
 
-        with open("/tmp/zama_network_public_key", mode="wb") as f:
+        with open("/tmp/lux_network_public_key", mode="wb") as f:
             f.write(self.network_encryption_key)
         res = os.system(
-            f"fhevm-tfhe-cli public-encrypt-integer32 -v {plaintext} -c /tmp/zama_ciphertext -p /tmp/zama_network_public_key"
+            f"fhevm-tfhe-cli public-encrypt-integer32 -v {plaintext} -c /tmp/lux_ciphertext -p /tmp/lux_network_public_key"
         )
         assert res == 0, "fail to execute fhe-tool"
-        with open("/tmp/zama_ciphertext", mode="rb") as file:
+        with open("/tmp/lux_ciphertext", mode="rb") as file:
             ciphertext = file.read()
         assert len(ciphertext) == 8404
 

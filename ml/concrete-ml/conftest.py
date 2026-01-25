@@ -313,7 +313,7 @@ def enforce_gpu_determinism():
 
 
 # Method is not ideal as some MLIR can contain TLUs but not the associated graph
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2381
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2381
 def check_graph_input_has_no_tlu_impl(graph: CPGraph):
     """Check that the graph's input node does not contain a TLU."""
     succ = list(graph.graph.successors(graph.input_nodes[0]))
@@ -322,7 +322,7 @@ def check_graph_input_has_no_tlu_impl(graph: CPGraph):
 
 
 # Method is not ideal as some MLIR can contain TLUs but not the associated graph
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2381
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2381
 def check_graph_output_has_no_tlu_impl(graph: CPGraph):
     """Check that the graph's output node does not contain a TLU."""
     if graph.output_nodes[0].converted_to_table_lookup:
@@ -330,7 +330,7 @@ def check_graph_output_has_no_tlu_impl(graph: CPGraph):
 
 
 # Method is not ideal as some MLIR can contain TLUs but not the associated graph
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/2381
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2381
 def check_graph_has_no_input_output_tlu_impl(graph: CPGraph):
     """Check that the graph's input and output nodes do not contain a TLU."""
     check_graph_input_has_no_tlu_impl(graph)
@@ -338,7 +338,7 @@ def check_graph_has_no_input_output_tlu_impl(graph: CPGraph):
 
 
 # To update when the feature becomes available Concrete
-# FIXME: https://github.com/zama-ai/concrete-numpy-internal/issues/1714
+# FIXME: https://github.com/luxfi/concrete-numpy-internal/issues/1714
 def check_circuit_has_no_tlu_impl(circuit: Circuit):
     """Check a circuit has no TLU."""
     if "apply_" in circuit.mlir and "_lookup_table" in circuit.mlir:
@@ -596,7 +596,7 @@ def check_is_good_execution_for_cml_vs_circuit():
                     # tests), especially since these results are tested in other tests such as the
                     # `check_subfunctions_in_fhe`
                     # For KNN `predict_proba` is not supported for now
-                    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3962
+                    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
                     if is_classifier_or_partial_classifier(model) and not isinstance(
                         model, SklearnKNeighborsMixin
                     ):

@@ -245,7 +245,7 @@ class EncryptedDataFrame:
         )
 
         # Once multi-operator is supported, make sure to provide relevant keys and objects
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
         joined_df = EncryptedDataFrame(
             joined_array,
             self._encrypted_nan,
@@ -271,7 +271,7 @@ class EncryptedDataFrame:
         evaluation_keys = serialize_evaluation_keys(self._evaluation_keys)
 
         # Avoid sending column names and string mappings to server, instead use hashes
-        # FIXME : https://github.com/zama-ai/concrete-ml-internal/issues/4342
+        # FIXME : https://github.com/luxfi/concrete-ml-internal/issues/4342
         # Additionally, Numpy arrays are not serializable using JSON so we need to convert them
         # to lists
         output_dict = {
