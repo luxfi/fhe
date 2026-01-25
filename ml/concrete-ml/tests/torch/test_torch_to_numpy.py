@@ -62,7 +62,7 @@ from concrete.ml.torch import NumpyModule
         pytest.param(nn.LogSigmoid, id="LogSigmoid"),
         pytest.param(nn.GELU, id="GELU"),
         # Some issues are still encountered with some activations
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/335
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/335
         #
         # Other problems, certainly related to tests:
         # Required positional arguments: 'embed_dim' and 'num_heads' and fails with a partial

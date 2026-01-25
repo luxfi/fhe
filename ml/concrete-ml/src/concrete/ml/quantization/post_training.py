@@ -89,7 +89,7 @@ def _inspect_tree_n_bits(n_bits: Union[int, Dict[str, int]]) -> None:
 
 
 # Find a better naming to describe leaf quantization in tree-based models
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4258
+# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4258
 def _get_n_bits_dict_trees(n_bits: Union[int, Dict[str, int]]) -> Dict[str, int]:
     """Convert the n_bits parameter into a proper dictionary for tree based-models.
 
@@ -975,7 +975,7 @@ class PostTrainingAffineQuantization(ONNXConverter):
         if not numpy.issubdtype(values.dtype, numpy.bool_):
             is_signed = is_symmetric = self._check_distribution_is_symmetric_around_zero(values)
         # Boolean parameters are quantized to 1 bit
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4593
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4593
         # We should not quantize boolean parameters in the future
         else:
             is_signed = is_symmetric = False

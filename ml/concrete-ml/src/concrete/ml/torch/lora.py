@@ -439,7 +439,7 @@ class LoraTrainer:
             use_dynamic_quantization=use_dynamic_quantization,
         )
 
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4707
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4707
         # Need a forward call to set the executors in remote modules
         self.hybrid_model.set_fhe_mode("disable")
         self.hybrid_model(inputset)

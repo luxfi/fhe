@@ -180,7 +180,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
         # into account when training, so we can just modify them manually.
         # The number of bits used for training should be adjusted according to n-bits
         # but for now we use this hardcoded values.
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4205
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4205
         self.n_bits_training = 6
         self.rounding_training = 7
         self.learning_rate_value = 1.0
@@ -258,7 +258,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
 
     def get_sklearn_params(self, deep: bool = True) -> dict:
         # Here, the `get_params` method is the `BaseEstimator.get_params` method from scikit-learn
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
         params = super().get_params(deep=deep)  # type: ignore[misc]
 
         # Remove the parameters added by Concrete ML
@@ -314,7 +314,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
 
         # Generate the target values to consider for compilation
         # Update this once we support multi-class
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4182
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4182
         y_compile_set = numpy.empty((compile_size, self.batch_size, n_targets))
 
         # Generate the weight values to consider for compilation
@@ -501,7 +501,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
         # that this is the partial fit's first call)
         if (not is_partial_fit) or (self.training_quantized_module is None):
             # Update this once we support multi-class
-            # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4182
+            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4182
             # We need to define this here and not in the init otherwise this breaks
             # because scikit-learn assumes that as soon as the attribute exists
             # the model is fitted
@@ -741,7 +741,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
 
         # Initialize the underlying scikit-learn model if it has not already been done
         # This model should be directly initialized in the model's __init__ method instead
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
         if self.sklearn_model is None:
 
             # Retrieve the init parameters
@@ -913,7 +913,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
 
         else:
             # Expose and implement partial_fit for clear training
-            # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4184
+            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4184
             raise NotImplementedError("Partial fit is not currently supported for clear training.")
 
     def post_processing(self, y_preds: numpy.ndarray) -> numpy.ndarray:

@@ -11,7 +11,7 @@ Install LuxFHE Devnet in MetaMask:
 - Network name: LuxFHE Devnet
 - RPC URL: https://devnet.luxfhe.ai
 - Chain ID: 8009
-- Currency symbol: ZAMA
+- Currency symbol: LUX
 - Block explorer: https://main.explorer.luxfhe.ai/
 
 ## Encrypted ERC20

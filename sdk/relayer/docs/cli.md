@@ -4,10 +4,10 @@ The `fhevm` Command-Line Interface (CLI) tool provides a simple and efficient wa
 
 ## Installation
 
-Ensure you have [Node.js](https://nodejs.org/) installed on your system before proceeding. Then, globally install the `@zama-fhe/relayer-sdk` package to enable the CLI tool:
+Ensure you have [Node.js](https://nodejs.org/) installed on your system before proceeding. Then, globally install the `@luxfhe/relayer-sdk` package to enable the CLI tool:
 
 ```bash
-npm install -g @zama-fhe/relayer-sdk
+npm install -g @luxfhe/relayer-sdk
 ```
 
 Once installed, you can access the CLI using the `relayer` command. Verify the installation and explore available commands using:

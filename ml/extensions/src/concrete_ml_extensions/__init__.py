@@ -1,5 +1,5 @@
 __name__ = "concrete-ml-extensions"
-__author__ = "Zama"
+__author__ = "Lux Network"
 __all__ = ["concrete-ml-extensions"]
 __version__ = "0.2.0"
 

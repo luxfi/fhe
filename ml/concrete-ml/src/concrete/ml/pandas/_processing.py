@@ -63,7 +63,7 @@ def compute_scale_zero_point(
         # Zero-point must be rounded once NaN values are not represented by 0 anymore
         # The issue is that we currently need to avoid quantized values to reach 0, but having a
         # round here + in the 'quant' method can make this happen.
-        # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
         # Disable mypy until it is fixed
         zero_point = f_min * scale - q_min  # type: ignore[assignment]
 
@@ -173,7 +173,7 @@ def pre_process_dtypes(
     q_min, q_max = get_min_max_allowed()
 
     # Avoid sending column names to server, instead use hashes
-    # FIXME : https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME : https://github.com/luxfi/concrete-ml-internal/issues/4342
     # pylint: disable=too-many-nested-blocks
     for column_name in pandas_dataframe.columns:
         column = pandas_dataframe[column_name]
@@ -245,7 +245,7 @@ def pre_process_dtypes(
                     string_mapping_keys = set(str_to_int.keys())
 
                     # Allow custom mapping for NaN values once they are not represented by 0 anymore
-                    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+                    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
                     if numpy.NaN in string_mapping_keys:
                         raise ValueError(
                             f"String mapping for column '{column_name}' contains numpy.NaN as a "
@@ -305,7 +305,7 @@ def pre_process_dtypes(
 
                 # Store the mapping in order to recover the initial values in post-processing
                 # Avoid sending string mappings to server, instead use and check hashes
-                # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+                # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
                 dtype_mappings[column_name]["str_to_int"] = str_to_int
 
             else:
@@ -342,7 +342,7 @@ def pre_process_from_pandas(
 
     """
     # Support Index of Pandas data-frames
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     if not isinstance(pandas_dataframe.index, pandas.RangeIndex):
         raise ValueError(
             "The data-frame's index has not been reset. Please make sure to not put relevant data "
@@ -355,7 +355,7 @@ def pre_process_from_pandas(
 
     # Replace NaN values with 0
     # Remove this once NaN values are not represented by 0 anymore
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     q_pandas_dataframe.fillna(0, inplace=True)
 
     q_array = q_pandas_dataframe.to_numpy(dtype=numpy.int64)
@@ -441,7 +441,7 @@ def post_process_to_pandas(
     """
     # Replace 0 values by NaN
     # Remove this once NaN values are not represented by 0 anymore
-    # FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4342
+    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4342
     clear_array_0_to_nan = numpy.where(clear_array == 0, numpy.nan, clear_array)
 
     # Build the joined Pandas data-frame using the de-serialized encrypted data-frame
