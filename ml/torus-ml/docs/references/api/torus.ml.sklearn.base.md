@@ -124,7 +124,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -520,7 +520,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -890,7 +890,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -2231,7 +2231,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -2597,7 +2597,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -2989,7 +2989,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -3363,7 +3363,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -3753,7 +3753,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -4125,7 +4125,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -4489,7 +4489,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.TORUS: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
