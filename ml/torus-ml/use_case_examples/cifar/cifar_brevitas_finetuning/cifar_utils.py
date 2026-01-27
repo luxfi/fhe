@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from brevitas import config
-from concrete.fhe.compilation import Configuration
+from torus.fhe.compilation import Configuration
 from models import Fp32VGG11
 from torch.utils.data.dataloader import DataLoader
 from torchvision import datasets, transforms
@@ -67,7 +67,7 @@ DATASETS_ARGS = {
         ),
     },
     # Separate FMNIST from CIFAR directory
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3552
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3552
     "FashionMNIST": {
         "dataset": datasets.FashionMNIST,
         "mean": (0.2859),

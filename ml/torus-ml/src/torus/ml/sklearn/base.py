@@ -27,12 +27,12 @@ import sklearn
 import skorch.net
 import torch
 from brevitas.export.onnx.qonnx.manager import QONNXManager as BrevitasONNXManager
-from concrete.fhe import tfhers
-from concrete.fhe.compilation.artifacts import DebugArtifacts
-from concrete.fhe.compilation.circuit import Circuit
-from concrete.fhe.compilation.compiler import Compiler
-from concrete.fhe.compilation.configuration import Configuration
-from concrete.fhe.dtypes.integer import Integer
+from torus.fhe import tfhers
+from torus.fhe.compilation.artifacts import DebugArtifacts
+from torus.fhe.compilation.circuit import Circuit
+from torus.fhe.compilation.compiler import Compiler
+from torus.fhe.compilation.configuration import Configuration
+from torus.fhe.dtypes.integer import Integer
 from sklearn.base import clone
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.utils.validation import check_is_fitted
@@ -203,7 +203,7 @@ class BaseEstimator:
         # scikit-learn model (once fitted), retrieve its value
         # Enable non-training attributes as well once Torus ML models initialize their
         # underlying scikit-learn models during initialization
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         if (
             attr.endswith("_")
             and not attr.endswith("__")
@@ -221,7 +221,7 @@ class BaseEstimator:
     # We need to specifically call the default __setattr__ method as QNN models still inherit from
     # skorch, which provides its own __setattr__ implementation and creates a cyclic loop
     # with __getattr__. Removing this inheritance once and for all should fix the issue
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
     def __setattr__(self, name: str, value: Any):
         """Set the value as a model attribute.
 
@@ -285,7 +285,7 @@ class BaseEstimator:
 
         The FHE circuit combines computational graph, mlir, client and server into a single object.
         More information available in Concrete documentation
-        (https://docs.lux.network/concrete/get-started/terminology)
+        (https://docs.lux.network/torus/get-started/terminology)
         Is None if the model is not fitted.
 
         Returns:
@@ -365,7 +365,7 @@ class BaseEstimator:
         # Here, the `get_params` method is the `BaseEstimator.get_params` method from scikit-learn,
         # which will become available once a subclass inherits from it. We therefore disable both
         # pylint and mypy as this behavior is expected
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         # pylint: disable-next=no-member
         params = super().get_params(deep=deep)  # type: ignore[misc]
 
@@ -394,7 +394,7 @@ class BaseEstimator:
         # Initialize the underlying scikit-learn model if it has not already been done or if
         # `warm_start` is set to False (for neural networks)
         # This model should be directly initialized in the model's __init__ method instead
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         if self.sklearn_model is None or not getattr(self, "warm_start", False):
             # Retrieve the init parameters
             params = self.get_sklearn_params()
@@ -530,8 +530,8 @@ class BaseEstimator:
         native_function_to_compile = c._func_def.function  # pylint: disable=protected-access
 
         def tfhers_tree_inference(inputs):
-            concrete_x = tfhers.to_native(inputs)
-            res = native_function_to_compile(concrete_x)
+            torus_x = tfhers.to_native(inputs)
+            res = native_function_to_compile(torus_x)
             tfhers_res = tfhers.from_native(res[0], out_dtype_spec)
             return tfhers_res
 
@@ -558,9 +558,9 @@ class BaseEstimator:
             configuration (Optional[Configuration]): Options to use for compilation. Default
                 to None.
             ciphertext_format (CiphertextFormat): The format of input/output ciphertexts. Can
-                be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's
+                be one of "torus" or "tfhe-rs". When using tfhe-rs the model's
                 latency will be lower because of the necessary conversion between
-                tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+                tfhe-rs and torus. Using tfhe-rs allows you to use fhEVM ciphertexts.
             artifacts (Optional[DebugArtifacts]): Artifacts information about the compilation
                 process to store for debugging. Default to None.
             show_mlir (bool): Indicate if the MLIR graph should be printed during compilation.
@@ -828,7 +828,7 @@ class BaseEstimator:
                 # If the virtual library method should be used
                 # For now, use the virtual library when simulating
                 # circuits that use CRT  encoding because the official simulation is too slow
-                # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4391
+                # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4391
                 if USE_OLD_VL or is_crt_encoding:
                     predict_method = partial(
                         self.fhe_circuit.graph, p_error=self.fhe_circuit.p_error
@@ -904,7 +904,7 @@ class BaseClassifier(BaseEstimator):
     """
 
     # Remove in our next release major release
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3994
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3994
     @property
     def target_classes_(self) -> Optional[numpy.ndarray]:  # pragma: no cover
         """Get the model's classes.
@@ -924,7 +924,7 @@ class BaseClassifier(BaseEstimator):
         return self.classes_
 
     # Remove in our next release major release
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3994
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3994
     @property
     def n_classes_(self) -> int:  # pragma: no cover
         """Get the model's number of classes.
@@ -958,7 +958,7 @@ class BaseClassifier(BaseEstimator):
         assert_true(len(classes) > 1, "You must provide at least 2 classes in y.")
 
         # Change to composition in order to avoid diamond inheritance and indirect super() calls
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3249
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3249
         return super().fit(X, y, **fit_parameters)  # type: ignore[safe-super]
 
     def predict_proba(self, X: Data, fhe: Union[FheMode, str] = FheMode.DISABLE) -> numpy.ndarray:
@@ -1015,7 +1015,7 @@ class BaseClassifier(BaseEstimator):
 # Pylint complains that this method does not override the `dump_dict` and `load_dict` methods. This
 # is expected as the QuantizedTorchEstimatorMixin class is not supposed to be used as such. This
 # disable could probably be removed when refactoring the serialization of models
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3250
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3250
 # pylint: disable-next=abstract-method,too-many-instance-attributes
 class QuantizedTorchEstimatorMixin(BaseEstimator):
     """Mixin that provides quantization for a torch module and follows the Estimator API."""
@@ -1099,7 +1099,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
         # Here, the `get_params` method is the `NeuralNet.get_params` method from skorch, which
         # will become available once a subclass inherits from it. We therefore disable both pylint
         # and mypy as this behavior is expected
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         # pylint: disable-next=no-member
         params = super().get_params(deep)  # type: ignore[misc]
 
@@ -1118,7 +1118,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
         # Here, the `get_params` method is the `NeuralNet.get_params` method from skorch, which
         # will become available once a subclass inherits from it. We therefore disable both pylint
         # and mypy as this behavior is expected
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         # pylint: disable-next=no-member
         params = super().get_params(deep=deep)  # type: ignore[misc]
 
@@ -1478,7 +1478,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
         # The .module_ was initialized manually, prevent .fit (for both skorch and Torus ML)
         # from creating a new one
         # Setting both attributes could be avoided by initializing `sklearn_model` in __init__
-        # # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         pruned_model.warm_start = True
         pruned_model.sklearn_model.warm_start = True
 
@@ -1572,7 +1572,7 @@ class BaseTreeEstimatorMixin(BaseEstimator, sklearn.base.BaseEstimator, ABC):
 
         # Get the onnx model, all operations needed to load it properly will be done on it.
         n_features = model.n_features_in_
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4545
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4545
         # Execute with 2 example for efficiency in large data scenarios to prevent slowdown
         # but also to work around the HB export issue.
         dummy_input = numpy.zeros((2, n_features))
@@ -1891,7 +1891,7 @@ class SklearnLinearModelMixin(BaseEstimator, sklearn.base.BaseEstimator, ABC):
         # scikit-learn models
         # This should be fixed once Torus ML models initialize their underlying scikit-learn
         # models during initialization
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         model = cls(n_bits=n_bits, **init_params)
 
         # Update the underlying scikit-learn model with the given fitted one
@@ -2154,7 +2154,7 @@ class SklearnSGDRegressorMixin(SklearnLinearRegressorMixin):
     """
 
     # Remove once Hummingbird supports SGDRegressor
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4100
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4100
     def _set_onnx_model(self, test_input: numpy.ndarray) -> None:
         """Retrieve the model's ONNX graph using Hummingbird conversion.
 
@@ -2186,7 +2186,7 @@ class SklearnSGDClassifierMixin(SklearnLinearClassifierMixin):
     """
 
     # Remove once Hummingbird supports SGDClassifier
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4100
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4100
     def _set_onnx_model(self, test_input: numpy.ndarray) -> None:
         """Retrieve the model's ONNX graph using Hummingbird conversion.
 

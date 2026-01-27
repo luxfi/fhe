@@ -1059,7 +1059,7 @@ class QuantizedMixingOp(QuantizedOp, is_utility=True):
 
         if lsbs_value > 0:
             # Rounding to low bit-width with approximate can cause issues with overflow protection
-            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4345
+            # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4345
             x = fhe.round_bit_pattern(
                 x, lsbs_to_remove=lsbs_value, exactness=exactness, overflow_protection=False
             )

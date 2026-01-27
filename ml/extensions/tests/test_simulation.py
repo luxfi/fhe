@@ -2,12 +2,12 @@
 
 import pytest
 import numpy as np
-import concrete_ml_extensions as fhext
+import torus_ml_extensions as fhext
 import json
 import time
 from tqdm import tqdm
 
-from concrete_ml_extensions.utils_simulation import analyze_bit_errors, calculate_bit_width
+from torus_ml_extensions.utils_simulation import analyze_bit_errors, calculate_bit_width
 
 
 @pytest.mark.parametrize("num_test_runs", [10])

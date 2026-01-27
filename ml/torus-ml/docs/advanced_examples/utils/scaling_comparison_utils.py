@@ -7,18 +7,18 @@ from sklearn.metrics import accuracy_score
 def plot_data(axs, X_train, y_train, X_test, y_test, model, name, h=0.04, font_size_text=20):
     # Train the model and retrieve both the Torus ML model and its equivalent one from
     # scikit-learn
-    concrete_model, sklearn_model = model.fit_benchmark(X_train, y_train)
+    torus_model, sklearn_model = model.fit_benchmark(X_train, y_train)
 
     # Compute the predictions in clear using the scikit-learn model
     sklearn_y_pred = sklearn_model.predict(X_test)
 
     # Compile the Torus ML model
-    circuit = concrete_model.compile(X_test)
-    concrete_y_pred = concrete_model.predict(X_test, fhe="simulate")
+    circuit = torus_model.compile(X_test)
+    torus_y_pred = torus_model.predict(X_test, fhe="simulate")
 
     # Measure the accuracy scores
     sklearn_score = accuracy_score(sklearn_y_pred, y_test)
-    concrete_score = accuracy_score(concrete_y_pred, y_test)
+    torus_score = accuracy_score(torus_y_pred, y_test)
     
     bitwidth = circuit.graph.maximum_integer_bit_width()
 
@@ -37,17 +37,17 @@ def plot_data(axs, X_train, y_train, X_test, y_test, model, name, h=0.04, font_s
     # cartesian product of [x_min, x_max] with [y_min, y_max].
     if hasattr(sklearn_model, "decision_function"):
         sklearn_Z = sklearn_model.decision_function(raveled_input)
-        concrete_Z = concrete_model.decision_function(raveled_input, fhe="simulate")
+        torus_Z = torus_model.decision_function(raveled_input, fhe="simulate")
     else:
         sklearn_Z = sklearn_model.predict_proba(raveled_input.astype(np.float32))[:, 1]
-        concrete_Z = concrete_model.predict_proba(raveled_input, fhe="simulate")[:, 1]
+        torus_Z = torus_model.predict_proba(raveled_input, fhe="simulate")[:, 1]
 
     for _, (ax, framework, score, Z) in enumerate(
         zip(
             axs,
             ["scikit-learn", "Torus ML"],
-            [sklearn_score, concrete_score],
-            [sklearn_Z, concrete_Z],
+            [sklearn_score, torus_score],
+            [sklearn_Z, torus_Z],
         )
     ):
 

@@ -2,9 +2,9 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import torch
-from concrete.fhe import GraphProcessor
-from concrete.fhe.compilation import Circuit, Configuration
-from concrete.fhe.tracing import Tracer
+from torus.fhe import GraphProcessor
+from torus.fhe.compilation import Circuit, Configuration
+from torus.fhe.tracing import Tracer
 from load_huggingface import get_gpt2_model
 from preprocessor import InsertRounding
 from quant_framework import DualArray, Quantizer

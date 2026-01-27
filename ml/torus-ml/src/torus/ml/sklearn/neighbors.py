@@ -121,7 +121,7 @@ class KNeighborsClassifier(SklearnKNeighborsClassifierMixin):
         return obj
 
     # KNeighborsClassifier does not provide a predict_proba method for now
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3962
     def predict_proba(self, X: Data, fhe: Union[FheMode, str] = FheMode.DISABLE) -> numpy.ndarray:
         """Predict class probabilities.
 
@@ -144,7 +144,7 @@ class KNeighborsClassifier(SklearnKNeighborsClassifierMixin):
         )
 
     # KNeighborsClassifier does not provide a kneighbors method
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4080
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4080
     def kneighbors(self, X: Data) -> numpy.ndarray:
         """Return the knearest distances and their respective indices for each query point.
 

@@ -167,7 +167,7 @@ def train_brevitas_network_tinymnist(is_cnn, qat_bits, signed, narrow, pot_scali
 
 
 # This test is a known flaky
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3933
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3933
 @pytest.mark.flaky
 @pytest.mark.parametrize("qat_bits", [3])
 @pytest.mark.parametrize("signed, narrow", [(True, False), (True, True), (False, False)])
@@ -186,7 +186,7 @@ def test_brevitas_tinymnist_cnn(
         True, qat_bits, signed, narrow, False
     )
 
-    def test_with_concrete(quantized_module, test_loader, use_fhe_simulation):
+    def test_with_torus(quantized_module, test_loader, use_fhe_simulation):
         """Test a neural network that is quantized and compiled with Torus ML."""
 
         all_targets = numpy.zeros((len(test_loader)), dtype=numpy.int64)
@@ -225,7 +225,7 @@ def test_brevitas_tinymnist_cnn(
         configuration=default_configuration,
     )
 
-    fhe_s_correct = test_with_concrete(
+    fhe_s_correct = test_with_torus(
         q_module_simulated,
         test_dataloader,
         use_fhe_simulation=True,
@@ -234,7 +234,7 @@ def test_brevitas_tinymnist_cnn(
     # Accept, at most, 1% examples that are classified differently (currently 5)
     # For now, the correctness test has been disabled as it was too flaky, it should however be put
     # back at one point
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2550
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/2550
     # assert abs(fhe_simulation_correct - torch_correct) <= numpy.ceil(0.01 * len(y_test))
 
     assert fhe_s_correct >= 0
@@ -245,7 +245,7 @@ def test_brevitas_tinymnist_cnn(
 
 # Note that this test is currently disabled until the pytorch dtype issue is found
 # and all mismatches between Torus ML and Brevitas are fixed
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2373
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/2373
 @pytest.mark.parametrize(
     "n_layers",
     [3],
@@ -341,14 +341,14 @@ def test_brevitas_intermediary_values(
         "verbose": 0,
     }
 
-    concrete_model = model_class(**params)
+    torus_model = model_class(**params)
 
     # Compute mean/stdev on training set and normalize both train and test sets with them
     normalizer = StandardScaler()
     x_train = normalizer.fit_transform(x_train)
     x_test = normalizer.transform(x_test)
 
-    concrete_model.fit(x_train, y_train)
+    torus_model.fit(x_train, y_train)
 
     # Wrap the original torch module with a debug module that captures intermediary values
     class DebugQNNModel(SparseQuantNeuralNetwork):
@@ -388,13 +388,13 @@ def test_brevitas_intermediary_values(
 
     # Wrap the original model, and copy its weights
     dbg_model = DebugQNNModel(**params_module, input_dim=input_dim, n_outputs=n_outputs)
-    dbg_model.load_state_dict(concrete_model.base_module.state_dict())
+    dbg_model.load_state_dict(torus_model.base_module.state_dict())
 
     # Execute on the test set and capture debug values
     dbg_model(torch.tensor(x_test.astype(numpy.float64)))
 
     # Execute the Torus ML model on the test set and capture debug values
-    _, cml_debug_values = concrete_model.quantized_module_.forward(
+    _, cml_debug_values = torus_model.quantized_module_.forward(
         x_test, debug=True, fhe="disable"
     )
 
@@ -496,7 +496,7 @@ def test_brevitas_constant_folding(default_configuration):
 
 
 # This test is a known flaky
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4356
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/4356
 @pytest.mark.flaky
 @pytest.mark.parametrize("manual_rounding", [None, 3])
 @pytest.mark.parametrize("power_of_two", [True, False])

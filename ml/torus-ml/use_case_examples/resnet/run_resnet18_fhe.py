@@ -7,7 +7,7 @@ import torus.compiler
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from concrete.fhe import Configuration
+from torus.fhe import Configuration
 from resnet import ResNet18_Weights, resnet18_custom
 from utils_resnet import ImageNetProcessor
 
@@ -297,10 +297,10 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.use_gpu and not concrete.compiler.check_gpu_available():
+    if args.use_gpu and not torus.compiler.check_gpu_available():
         print("Follow the GPU setup guide to install the GPU-enabled Torus ML compiler.")
-        print("GPU Enabled:", concrete.compiler.check_gpu_enabled())
-        print("GPU Available:", concrete.compiler.check_gpu_available())
+        print("GPU Enabled:", torus.compiler.check_gpu_enabled())
+        print("GPU Available:", torus.compiler.check_gpu_available())
 
     resnet18 = load_model()
     processor = ImageNetProcessor(
@@ -321,7 +321,7 @@ def main():
             rounding_threshold_bits=7,
             fhe_mode="simulate",
             compilation_device=(
-                "cuda" if args.use_gpu and concrete.compiler.check_gpu_available() else "cpu"
+                "cuda" if args.use_gpu and torus.compiler.check_gpu_available() else "cpu"
             ),
         )
 

@@ -322,7 +322,7 @@ def save_metrics(
         "fhe_layers_targeted": target_modules,
         "debug_mode": args.debug_mode,
         "device_used": system_info.get("device", "cpu"),
-        "framework": "concrete-ml",
+        "framework": "torus-ml",
         "model": "resnet18",
         "task": "image_classification",
         "dataset": "imagenet",

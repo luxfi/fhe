@@ -44,7 +44,7 @@ params = {
     "max_epochs": 10,
 }
 
-concrete_classifier = NeuralNetClassifier(**params)
+torus_classifier = NeuralNetClassifier(**params)
 ```
 
 The [Classifier Comparison notebook](../tutorials/ml_examples.md) shows the behavior of built-in neural networks on several synthetic data-sets.

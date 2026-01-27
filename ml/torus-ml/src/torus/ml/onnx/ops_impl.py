@@ -8,9 +8,9 @@ import numpy
 import onnx
 import onnx.helper
 from brevitas.function import max_int, min_int
-from concrete.fhe import conv as fhe_conv
-from concrete.fhe import maxpool as fhe_maxpool
-from concrete.fhe import univariate
+from torus.fhe import conv as fhe_conv
+from torus.fhe import maxpool as fhe_maxpool
+from torus.fhe import univariate
 from scipy import special
 from typing_extensions import SupportsIndex
 
@@ -148,7 +148,7 @@ def numpy_where_body(
     """
     # Use numpy.where (it is currently supported by Concrete) once we investigate why it outputs a
     # a different dtype then the following workaround
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2738
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/2738
     return c * t + (1.0 - c) * f
 
 
@@ -720,7 +720,7 @@ def numpy_div(
     """
 
     # Remove the where op once the following issue is explained
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/857
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/857
     bp = numpy_where_body(b != 0, b, 1)
 
     # Check if processing non-encrypted constants.
@@ -890,7 +890,7 @@ def numpy_equal(
 
 
 # Remove `# pragma: no cover` once the following issue will be resolved
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4179
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/4179
 def rounded_numpy_equal_for_trees(
     x: numpy.ndarray,
     y: numpy.ndarray,
@@ -1309,7 +1309,7 @@ def numpy_conv(
     is_conv1d = len(kernel_shape) == 1
 
     # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4117
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
     if is_conv1d:
         x_pad = numpy.expand_dims(x_pad, axis=-2)
         w = numpy.expand_dims(w, axis=-2)
@@ -1330,7 +1330,7 @@ def numpy_conv(
     )
 
     # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4117
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
     if is_conv1d:
         res = numpy.squeeze(res, axis=-2)
 
@@ -1773,7 +1773,7 @@ def numpy_reduce_sum(
     # Python handles them equivalently, we need to manually convert it as mypy doesn't accept this
     # type difference
     # Find a way to make axis of type Union[SupportsIndex, Sequence[SupportsIndex]
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2050
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/2050
     return (numpy.sum(a, axis=axis, keepdims=bool(keepdims)),)  # type: ignore
 
 
@@ -1808,7 +1808,7 @@ def numpy_brevitas_quant(
     assert_true(signed in (1, 0), "Signed flag in Brevitas quantizer must be 0/1")
     assert_true(narrow in (1, 0), "Narrow range flag in Brevitas quantizer must be 0/1")
 
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4544
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4544
     # Remove this workaround when brevitas export is fixed
     if signed == 0 and narrow == 1:
         signed = 1
@@ -2109,7 +2109,7 @@ def numpy_gather(
     # Support both negative and positive axis
     axis = axis % x.ndim
 
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3605
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3605
     # Convert indices to a list
     indices_list = indices.tolist()
 

@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.sklearn.base`
 
@@ -14,7 +14,7 @@ Base classes for all estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L124"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L124"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `BaseEstimator`
 
@@ -26,7 +26,7 @@ This class does not inherit from sklearn.base.BaseEstimator as it creates some c
 
 - <b>`_is_a_public_cml_model`</b> (bool):  Private attribute indicating if the class is a public model  (as opposed to base or mixin classes).
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L141"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L141"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -44,7 +44,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -84,7 +84,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -100,7 +100,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -116,7 +116,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -124,7 +124,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -140,7 +140,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -154,7 +154,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L496"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L496"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -176,7 +176,7 @@ This step ensures that the fit method has been called.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -192,7 +192,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -208,7 +208,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -224,7 +224,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L409"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L409"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -247,7 +247,7 @@ The fitted estimator.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -274,7 +274,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -296,7 +296,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -316,7 +316,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -340,7 +340,7 @@ For some simple models such a linear regression, there is no post-processing ste
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -368,7 +368,7 @@ Predict values for X, in FHE or in the clear.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L483"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L483"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -390,7 +390,7 @@ This step ensures that the fit method has been called.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L898"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L898"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `BaseClassifier`
 
@@ -398,7 +398,7 @@ Base class for linear and tree-based classifiers in Torus ML.
 
 This class inherits from BaseEstimator and modifies some of its methods in order to align them with classifier behaviors. This notably include applying a sigmoid/softmax post-processing to the predicted values as well as handling a mapping of classes in case they are not ordered.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L141"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L141"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -416,7 +416,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -480,7 +480,7 @@ Using this attribute is deprecated.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -496,7 +496,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -512,7 +512,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -520,7 +520,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -536,7 +536,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -550,7 +550,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L496"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L496"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -572,7 +572,7 @@ This step ensures that the fit method has been called.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -588,7 +588,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -604,7 +604,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -620,7 +620,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -630,7 +630,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -657,7 +657,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -679,7 +679,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -699,7 +699,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -709,7 +709,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L981"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L981"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -722,7 +722,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L964"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L964"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict_proba`
 
@@ -746,7 +746,7 @@ Predict class probabilities.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L483"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L483"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -768,13 +768,13 @@ This step ensures that the fit method has been called.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1020"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1020"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `QuantizedTorchEstimatorMixin`
 
 Mixin that provides quantization for a torch module and follows the Estimator API.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -850,7 +850,7 @@ Get the output quantizers.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -866,7 +866,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -882,7 +882,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1340"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1340"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -890,7 +890,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -902,7 +902,7 @@ compile(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1331"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1331"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -912,7 +912,7 @@ dequantize_output(*q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -928,7 +928,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -944,7 +944,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -960,7 +960,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1136"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1136"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -985,7 +985,7 @@ The fitted estimator.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1282"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1282"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -1016,7 +1016,7 @@ The Torus ML and equivalent skorch fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1085"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1085"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_params`
 
@@ -1038,7 +1038,7 @@ This method is overloaded in order to make sure that auto-computed parameters ar
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1116"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1116"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -1048,7 +1048,7 @@ get_sklearn_params(deep: 'bool' = True) → Dict
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -1068,7 +1068,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1412"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1412"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -1078,7 +1078,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -1106,7 +1106,7 @@ Predict values for X, in FHE or in the clear.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1416"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1416"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `prune`
 
@@ -1134,7 +1134,7 @@ A new pruned copy of the Neural Network model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1323"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1323"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -1144,7 +1144,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1491"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1491"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `BaseTreeEstimatorMixin`
 
@@ -1152,7 +1152,7 @@ Mixin class for tree-based estimators.
 
 This class inherits from sklearn.base.BaseEstimator in order to have access to scikit-learn's `get_params` and `set_params` methods.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1509"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1509"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -1174,7 +1174,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -1214,7 +1214,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -1230,7 +1230,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -1246,7 +1246,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1716"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1716"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -1256,7 +1256,7 @@ compile(*args, **kwargs) → Circuit
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1686"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1686"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -1266,7 +1266,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -1282,7 +1282,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -1298,7 +1298,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -1314,7 +1314,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1617"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1617"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -1324,7 +1324,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -1351,7 +1351,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1537"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1537"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -1378,7 +1378,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1762"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1762"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -1400,7 +1400,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -1420,7 +1420,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1746"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1746"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -1430,7 +1430,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1741"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1741"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -1443,7 +1443,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1674"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1674"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -1453,7 +1453,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1786"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1786"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `BaseTreeRegressorMixin`
 
@@ -1461,7 +1461,7 @@ Mixin class for tree-based regressors.
 
 This class is used to create a tree-based regressor class that inherits from sklearn.base.RegressorMixin, which essentially gives access to scikit-learn's `score` method for regressors.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1509"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1509"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -1483,7 +1483,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -1523,7 +1523,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -1539,7 +1539,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -1555,7 +1555,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1716"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1716"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -1565,7 +1565,7 @@ compile(*args, **kwargs) → Circuit
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1686"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1686"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -1575,7 +1575,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -1591,7 +1591,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -1607,7 +1607,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -1623,7 +1623,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1617"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1617"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -1633,7 +1633,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -1660,7 +1660,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1537"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1537"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -1687,7 +1687,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1762"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1762"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -1709,7 +1709,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -1729,7 +1729,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1746"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1746"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -1739,7 +1739,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1741"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1741"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -1752,7 +1752,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1674"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1674"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -1762,7 +1762,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1795"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1795"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `BaseTreeClassifierMixin`
 
@@ -1772,7 +1772,7 @@ This class is used to create a tree-based classifier class that inherits from sk
 
 Additionally, this class adjusts some of the tree-based base class's methods in order to make them compliant with classification workflows.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1509"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1509"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -1794,7 +1794,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -1858,7 +1858,7 @@ Using this attribute is deprecated.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -1874,7 +1874,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -1890,7 +1890,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1716"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1716"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -1900,7 +1900,7 @@ compile(*args, **kwargs) → Circuit
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1686"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1686"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -1910,7 +1910,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -1926,7 +1926,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -1942,7 +1942,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -1958,7 +1958,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -1968,7 +1968,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -1995,7 +1995,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1537"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1537"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -2022,7 +2022,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1762"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1762"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -2044,7 +2044,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -2064,7 +2064,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -2074,7 +2074,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L981"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L981"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -2087,7 +2087,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L964"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L964"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict_proba`
 
@@ -2111,7 +2111,7 @@ Predict class probabilities.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1674"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1674"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -2121,7 +2121,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1810"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1810"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnLinearModelMixin`
 
@@ -2129,7 +2129,7 @@ A Mixin class for sklearn linear models with FHE.
 
 This class inherits from sklearn.base.BaseEstimator in order to have access to scikit-learn's `get_params` and `set_params` methods.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -2151,7 +2151,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -2191,7 +2191,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -2207,7 +2207,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -2223,7 +2223,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -2231,7 +2231,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -2247,7 +2247,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -2261,7 +2261,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -2271,7 +2271,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -2287,7 +2287,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -2303,7 +2303,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -2319,7 +2319,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1928"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1928"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -2329,7 +2329,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -2356,7 +2356,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -2383,7 +2383,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -2405,7 +2405,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -2425,7 +2425,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -2449,7 +2449,7 @@ For some simple models such a linear regression, there is no post-processing ste
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -2477,7 +2477,7 @@ Predict values for X, in FHE or in the clear.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -2487,7 +2487,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2076"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2076"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnLinearRegressorMixin`
 
@@ -2495,7 +2495,7 @@ A Mixin class for sklearn linear regressors with FHE.
 
 This class is used to create a linear regressor class that inherits from sklearn.base.RegressorMixin, which essentially gives access to scikit-learn's `score` method for regressors.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -2517,7 +2517,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -2557,7 +2557,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -2573,7 +2573,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -2589,7 +2589,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -2597,7 +2597,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -2613,7 +2613,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -2627,7 +2627,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -2637,7 +2637,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -2653,7 +2653,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -2669,7 +2669,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -2685,7 +2685,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1928"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1928"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -2695,7 +2695,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -2722,7 +2722,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -2749,7 +2749,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -2771,7 +2771,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -2791,7 +2791,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -2815,7 +2815,7 @@ For some simple models such a linear regression, there is no post-processing ste
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -2843,7 +2843,7 @@ Predict values for X, in FHE or in the clear.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -2853,7 +2853,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2085"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2085"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnLinearClassifierMixin`
 
@@ -2863,7 +2863,7 @@ This class is used to create a linear classifier class that inherits from sklear
 
 Additionally, this class adjusts some of the tree-based base class's methods in order to make them compliant with classification workflows.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -2885,7 +2885,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -2949,7 +2949,7 @@ Using this attribute is deprecated.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -2965,7 +2965,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -2981,7 +2981,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -2989,7 +2989,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -3005,7 +3005,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -3019,7 +3019,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2106"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2106"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `decision_function`
 
@@ -3043,7 +3043,7 @@ Predict confidence scores.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -3053,7 +3053,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -3069,7 +3069,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -3085,7 +3085,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -3101,7 +3101,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -3111,7 +3111,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -3138,7 +3138,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -3165,7 +3165,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -3187,7 +3187,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -3207,7 +3207,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -3217,7 +3217,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -3230,7 +3230,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2129"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2129"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict_proba`
 
@@ -3243,7 +3243,7 @@ predict_proba(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -3253,7 +3253,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2149"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2149"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnSGDRegressorMixin`
 
@@ -3261,7 +3261,7 @@ A Mixin class for sklearn SGD regressors with FHE.
 
 This class is used to create a SGD regressor class what can be exported to ONNX using Hummingbird.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -3283,7 +3283,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -3323,7 +3323,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -3339,7 +3339,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -3355,7 +3355,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -3363,7 +3363,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -3379,7 +3379,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -3393,7 +3393,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -3403,7 +3403,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -3419,7 +3419,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -3435,7 +3435,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -3451,7 +3451,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1928"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1928"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -3461,7 +3461,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -3488,7 +3488,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -3515,7 +3515,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -3537,7 +3537,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -3557,7 +3557,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L872"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -3581,7 +3581,7 @@ For some simple models such a linear regression, there is no post-processing ste
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L768"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -3609,7 +3609,7 @@ Predict values for X, in FHE or in the clear.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -3619,7 +3619,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2181"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2181"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnSGDClassifierMixin`
 
@@ -3627,7 +3627,7 @@ A Mixin class for sklearn SGD classifiers with FHE.
 
 This class is used to create a SGD classifier class what can be exported to ONNX using Hummingbird.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1825"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -3649,7 +3649,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -3713,7 +3713,7 @@ Using this attribute is deprecated.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -3729,7 +3729,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -3745,7 +3745,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -3753,7 +3753,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -3769,7 +3769,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -3783,7 +3783,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2106"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2106"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `decision_function`
 
@@ -3807,7 +3807,7 @@ Predict confidence scores.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2031"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -3817,7 +3817,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -3833,7 +3833,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -3849,7 +3849,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -3865,7 +3865,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L951"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -3875,7 +3875,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -3902,7 +3902,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L1850"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `from_sklearn_model`
 
@@ -3929,7 +3929,7 @@ The FHE-compliant fitted model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -3951,7 +3951,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -3971,7 +3971,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L990"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -3981,7 +3981,7 @@ post_processing(y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -3994,7 +3994,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2129"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2129"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict_proba`
 
@@ -4007,7 +4007,7 @@ predict_proba(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2024"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -4017,7 +4017,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2220"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2220"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnKNeighborsMixin`
 
@@ -4025,7 +4025,7 @@ A Mixin class for sklearn KNeighbors models with FHE.
 
 This class inherits from sklearn.base.BaseEstimator in order to have access to scikit-learn's `get_params` and `set_params` methods.
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2235"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2235"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -4045,7 +4045,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -4085,7 +4085,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -4101,7 +4101,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -4117,7 +4117,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -4125,7 +4125,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -4141,7 +4141,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -4155,7 +4155,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -4165,7 +4165,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -4181,7 +4181,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -4197,7 +4197,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -4213,7 +4213,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -4223,7 +4223,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -4250,7 +4250,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -4272,7 +4272,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2568"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2568"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_topk_labels`
 
@@ -4296,7 +4296,7 @@ Return the K-nearest labels of each point.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -4316,7 +4316,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2389"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2389"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `majority_vote`
 
@@ -4336,7 +4336,7 @@ Determine the most common class among nearest neighborsfor each query.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2554"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2554"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -4358,7 +4358,7 @@ For KNN, the de-quantization step is not required. Because \_inference returns t
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2593"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2593"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -4371,7 +4371,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2349"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2349"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 
@@ -4381,7 +4381,7 @@ quantize_input(X: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2604"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2604"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `SklearnKNeighborsClassifierMixin`
 
@@ -4389,7 +4389,7 @@ A Mixin class for sklearn KNeighbors classifiers with FHE.
 
 This class is used to create a KNeighbors classifier class that inherits from SklearnKNeighborsMixin and sklearn.base.ClassifierMixin. By inheriting from sklearn.base.ClassifierMixin, it allows this class to be recognized as a classifier."
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2235"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2235"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -4409,7 +4409,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -4449,7 +4449,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L342"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_compiled`
 
@@ -4465,7 +4465,7 @@ Check if the model is compiled.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L318"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `check_model_is_fitted`
 
@@ -4481,7 +4481,7 @@ Check if the model is fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L540"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -4489,7 +4489,7 @@ ______________________________________________________________________
 compile(
     X: 'Data',
     configuration: 'Optional[Configuration]' = None,
-    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'concrete'>,
+    ciphertext_format: 'Union[str, CiphertextFormat]' = <CiphertextFormat.CONCRETE: 'torus'>,
     artifacts: 'Optional[DebugArtifacts]' = None,
     show_mlir: 'bool' = False,
     p_error: 'Optional[float]' = None,
@@ -4505,7 +4505,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "torus" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and torus. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -4519,7 +4519,7 @@ Compile the model.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dequantize_output`
 
@@ -4529,7 +4529,7 @@ dequantize_output(q_y_preds: 'ndarray') → ndarray
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L262"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -4545,7 +4545,7 @@ Dump itself to a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L234"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -4561,7 +4561,7 @@ Dump the object as a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L254"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dumps`
 
@@ -4577,7 +4577,7 @@ Dump itself to a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -4587,7 +4587,7 @@ fit(X: 'Data', y: 'Target', **fit_parameters)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L430"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit_benchmark`
 
@@ -4614,7 +4614,7 @@ The Torus ML and float equivalent fitted estimators.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L351"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_sklearn_params`
 
@@ -4636,7 +4636,7 @@ This method is used to instantiate a scikit-learn model using the Torus ML model
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2568"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2568"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_topk_labels`
 
@@ -4660,7 +4660,7 @@ Return the K-nearest labels of each point.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -4680,7 +4680,7 @@ Load itself from a dict.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2389"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2389"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `majority_vote`
 
@@ -4700,7 +4700,7 @@ Determine the most common class among nearest neighborsfor each query.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2554"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2554"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 
@@ -4722,7 +4722,7 @@ For KNN, the de-quantization step is not required. Because \_inference returns t
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2593"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2593"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `predict`
 
@@ -4735,7 +4735,7 @@ predict(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/base.py#L2349"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/base.py#L2349"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `quantize_input`
 

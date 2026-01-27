@@ -6,9 +6,9 @@ from typing import Callable, Dict, Optional, Union
 
 import networkx as nx
 import numpy as np
-from concrete.fhe import Exactness, round_bit_pattern
-from concrete.fhe.dtypes import Integer
-from concrete.fhe.representation import Graph, GraphProcessor, Node, Operation
+from torus.fhe import Exactness, round_bit_pattern
+from torus.fhe.dtypes import Integer
+from torus.fhe.representation import Graph, GraphProcessor, Node, Operation
 
 
 def is_node_tlu(node: Node) -> bool:

@@ -15,7 +15,7 @@ from common import (
     run_and_report_classification_metrics,
     seed_everything,
 )
-from concrete.fhe.compilation.circuit import Circuit
+from torus.fhe.compilation.circuit import Circuit
 from sklearn.datasets import load_digits
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
@@ -459,7 +459,7 @@ def report_compiler_feedback(fhe_circuit: Circuit):
         )
 
 
-def concrete_inference(quantized_module: QuantizedModule, x: np.ndarray, in_fhe: bool):
+def torus_inference(quantized_module: QuantizedModule, x: np.ndarray, in_fhe: bool):
     """Execute the model's inference using Torus ML (quantized clear or FHE).
 
     Args:
@@ -525,7 +525,7 @@ def evaluate_module(
     """Evaluate several metrics using a Torch or Torus ML module.
 
     Args:
-        framework (str): The framework to evaluate, either 'concrete' or 'torch'.
+        framework (str): The framework to evaluate, either 'torus' or 'torch'.
         module (Union[nn.Module, QuantizedModule]): The Torch or Torus ML module representing
             the model to evaluate.
         test_loader (DataLoader): The test data loader.
@@ -542,18 +542,18 @@ def evaluate_module(
 
     Returns:
         y_preds_proba (np.ndarray): The model's predicted probabilities (quantized form for the
-            'concrete' framework).
+            'torus' framework).
     """
 
     assert framework in [
-        "concrete",
+        "torus",
         "torch",
-    ], f"Wrong framework. Expected one of 'torch' or 'concrete', got {framework}."
+    ], f"Wrong framework. Expected one of 'torch' or 'torus', got {framework}."
 
     if framework == "torch":
         assert (
             not in_fhe
-        ), "Torch models can't be executed in FHE. Either use 'concrete' or set 'in_fhe' to False."
+        ), "Torch models can't be executed in FHE. Either use 'torus' or set 'in_fhe' to False."
     else:
         assert not train, "Training can only be done using Torch models."
 
@@ -584,8 +584,8 @@ def evaluate_module(
         for batch_i, (data, target) in enumerate(test_loader):
 
             # Execute Torus ML's inference
-            if framework == "concrete":
-                y_pred, y_pred_proba = concrete_inference(module, data.numpy(), in_fhe)
+            if framework == "torus":
+                y_pred, y_pred_proba = torus_inference(module, data.numpy(), in_fhe)
 
             # Else, execute torch's inference
             else:
@@ -614,7 +614,7 @@ def evaluate_module(
         ), "Please prove metric prefixes when executing the inference."
 
         # If we evaluate a Torus ML module in FHE, the inference execution time is also tracked
-        if framework == "concrete" and in_fhe:
+        if framework == "torus" and in_fhe:
             progress.measure(
                 id=metric_id_prefix + "-execution-time-per-sample",
                 label="Execution Time per sample for " + metric_label_prefix,
@@ -719,7 +719,7 @@ def evaluate_pre_trained_cnn_model(dataset: str, cnn_class: type, config: dict, 
 
     # Evaluate the quantized clear inference using the full data-set
     evaluate_module(
-        framework="concrete",
+        framework="torus",
         module=fhe_module,
         test_loader=test_loader,
         n_classes=n_classes,
@@ -735,7 +735,7 @@ def evaluate_pre_trained_cnn_model(dataset: str, cnn_class: type, config: dict, 
 
     # Evaluate the quantized clear inference using a specific number of FHE samples
     q_y_preds_proba_clear = evaluate_module(
-        framework="concrete",
+        framework="torus",
         module=fhe_module,
         test_loader=fhe_test_loader,
         n_classes=n_classes,
@@ -749,7 +749,7 @@ def evaluate_pre_trained_cnn_model(dataset: str, cnn_class: type, config: dict, 
 
         # Evaluate the FHE inference using a specific number of FHE samples
         q_y_preds_proba_fhe = evaluate_module(
-            framework="concrete",
+            framework="torus",
             module=fhe_module,
             test_loader=fhe_test_loader,
             n_classes=n_classes,

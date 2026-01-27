@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.quantization.quantized_module_passes`
 
@@ -8,13 +8,13 @@ Optimization passes for QuantizedModules.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L30"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L30"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `PowerOfTwoScalingRoundPBSAdapter`
 
 Detect neural network patterns that can be optimized with round PBS.
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -36,7 +36,7 @@ Patterns could be ignored since a number of rounding bits was set manually throu
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L90"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L90"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compute_op_predecessors`
 
@@ -54,7 +54,7 @@ Stores, for each quantized op, a list of quantized ops that produce its inputs. 
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L159"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L159"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `detect_patterns`
 
@@ -76,7 +76,7 @@ Detect the patterns that can be optimized with roundPBS in the QuantizedModule.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L119"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L119"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `match_path_pattern`
 
@@ -102,7 +102,7 @@ Determine if a pattern has the structure that makes it viable for roundPBS.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L56"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L56"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `process`
 
@@ -122,7 +122,7 @@ Nothing will be done if rounding is already specified.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/quantized_module_passes.py#L223"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/quantized_module_passes.py#L223"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `process_patterns`
 

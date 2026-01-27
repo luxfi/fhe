@@ -10,11 +10,11 @@
 <hr>
 
 <p align="center">
-  <a href="https://docs.luxfhe.io/concrete-ml"> 📒 Documentation</a> | <a href="https://luxfhe.io/community"> 💛 Community support</a> | <a href="https://github.com/luxfhe.io/awesome-luxfhe"> 📚 FHE resources by LuxFHE</a>
+  <a href="https://docs.luxfhe.io/torus-ml"> 📒 Documentation</a> | <a href="https://luxfhe.io/community"> 💛 Community support</a> | <a href="https://github.com/luxfhe.io/awesome-luxfhe"> 📚 FHE resources by LuxFHE</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/luxfhe.io/concrete-ml-extensions/releases"><img src="https://img.shields.io/github/v/release/luxfhe.io/concrete-ml-extensions?style=flat-square"></a>
+  <a href="https://github.com/luxfhe.io/torus-ml-extensions/releases"><img src="https://img.shields.io/github/v/release/luxfhe.io/torus-ml-extensions?style=flat-square"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSD--3--Clause--Clear-%23ffb243?style=flat-square"></a>
   <a href="https://github.com/luxfhe.io/bounty-program"><img src="https://img.shields.io/badge/Contribute-LuxFHE%20Bounty%20Program-%23ffd208?style=flat-square"></a>
   <a href="https://slsa.dev"><img alt="SLSA 3" src="https://slsa.dev/images/gh-badge-level3.svg" /></a>
@@ -31,9 +31,9 @@ Concrete ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper pac
 
 - **Fast encrypt-clear matrix multiplication**: This library implements a matrix product between encrypted matrices and clear matrices.
 - **Python and Swift bindings for matrix multiplication client applications**: This library contains bindings that help developers build client applications on various platforms, including iOS.
-- **Encryption/Decryption to [Lux FHE](https://docs.luxfhe.io/concrete-ml) ciphertexts**: To provide interoperability with Lux FHE ciphertexts, Concrete ML Extensions offers encryption and decryption functions that are used in Concrete ML.
+- **Encryption/Decryption to [Lux FHE](https://docs.luxfhe.io/torus-ml) ciphertexts**: To provide interoperability with Lux FHE ciphertexts, Concrete ML Extensions offers encryption and decryption functions that are used in Concrete ML.
 
-*Learn more about Concrete ML Extensions features in the [documentation](https://docs.luxfhe.io/concrete-ml).*
+*Learn more about Concrete ML Extensions features in the [documentation](https://docs.luxfhe.io/torus-ml).*
 <br></br>
 
 ## Table of Contents
@@ -43,7 +43,7 @@ Concrete ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper pac
   - [Demos](#demos)
   - [Tutorials](#tutorials)
   - [Documentation](#documentation)
-- **[Working with Concrete ML Extensions](#working-with-concrete-ml-extensions)**
+- **[Working with Concrete ML Extensions](#working-with-torus-ml-extensions)**
   - [Citations](#citations)
   - [Contributing](#contributing)
   - [License](#license)
@@ -70,7 +70,7 @@ Depending on your OS, Concrete ML Extensions may have GPU support.
 Concrete ML Extensions is installed automatically when installing Concrete ML. To install manually from PyPi, run the following:
 
 ```
-pip install concrete-ml-extensions
+pip install torus-ml-extensions
 ```
 
 To use the GPU, a CUDA-enabled GPU with support for CUDA >=11.2 should be available on the target machine.
@@ -130,17 +130,17 @@ You may need to install 2 additional target architectures.
         --bin uniffi-bindgen \
         --no-default-features \
         --features "uniffi/cli swift_bindings" \
-        generate --library target/aarch64-apple-ios/release/libconcrete_ml_extensions.dylib \
+        generate --library target/aarch64-apple-ios/release/libtorus_ml_extensions.dylib \
         --language swift \
         --out-dir GENERATED/
 ```
 
 Now, three files have been generated in the `GENERATED` subdirectory:
-- `concrete_ml_extensionsFFI.h`
-- `concrete_ml_extensionsFFI.modulemap`.
-- `concrete_ml_extensions.swift`
+- `torus_ml_extensionsFFI.h`
+- `torus_ml_extensionsFFI.modulemap`.
+- `torus_ml_extensions.swift`
 
-The two `*FFI` files compose the low-level C FFI layer: The C header file (`.h`) declares the low-level structs and functions for calling into Rust, and the `.modulemap` exposes them to Swift. We'll create a *first* module with these (called concrete_ml_extensions).
+The two `*FFI` files compose the low-level C FFI layer: The C header file (`.h`) declares the low-level structs and functions for calling into Rust, and the `.modulemap` exposes them to Swift. We'll create a *first* module with these (called torus_ml_extensions).
 
 This is enough to call the Rust library from Swift, but in a very verbose way. Instead, you want to use a higher-level Swift API, using the `*.swift` wrapper. This wrapper is uncompiled swift source code; to use it you can:
 - Either drag and drop it as source in your app codebase (simpler)
@@ -151,17 +151,17 @@ Next steps:
 1. Move .h and .module in an include folder, and rename `<name>.modulemap` to `module.modulemap` (.xcframework and Xcode expect this name).
 ```shell
     mkdir -p GENERATED/include
-    mv GENERATED/concrete_ml_extensionsFFI.modulemap GENERATED/include/module.modulemap
-    mv GENERATED/concrete_ml_extensionsFFI.h GENERATED/include/concrete_ml_extensionsFFI.h
+    mv GENERATED/torus_ml_extensionsFFI.modulemap GENERATED/include/module.modulemap
+    mv GENERATED/torus_ml_extensionsFFI.h GENERATED/include/torus_ml_extensionsFFI.h
 ```
 
 ##### 3. Create an `.xcframework` package
 
 ```shell
     xcodebuild -create-xcframework \
-        -library target/aarch64-apple-ios/release/libconcrete_ml_extensions.a \
+        -library target/aarch64-apple-ios/release/libtorus_ml_extensions.a \
         -headers GENERATED/include/ \
-        -library target/aarch64-apple-ios-sim/release/libconcrete_ml_extensions.a \
+        -library target/aarch64-apple-ios-sim/release/libtorus_ml_extensions.a \
         -headers GENERATED/include/ \
         -output GENERATED/ConcreteMLExtensions.xcframework
 ```
@@ -171,7 +171,7 @@ Follow the steps below:
 1. Copy .xcframework into your project
 2. Add it to `Target > General > Frameworks, Libraries, and Embedded Content`
 3. Select `Do Not Embed` (it's a static lib)
-4. Copy `concrete_ml_extensions.swift` (as source code) in project
+4. Copy `torus_ml_extensions.swift` (as source code) in project
 
 ##### Troubleshooting:
 *Error message*:
@@ -190,14 +190,14 @@ Solution: Ensure Xcode.app/Settings/Locations/Command Line Tools is set to the r
 To fix, a workaround [suggested here](https://github.com/jessegrosjean/module-map-error) is to wrap the .h and .modulemap in a subfolder:
 
 ```shell
-    mkdir -p GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/concreteHeaders
-    mkdir -p GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/concreteHeaders
-    mv GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/concrete_ml_extensionsFFI.h \
+    mkdir -p GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/torusHeaders
+    mkdir -p GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/torusHeaders
+    mv GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/torus_ml_extensionsFFI.h \
         GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/module.modulemap \
-        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/concreteHeaders
-    mv GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/concrete_ml_extensionsFFI.h \
+        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/torusHeaders
+    mv GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/torus_ml_extensionsFFI.h \
         GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/module.modulemap \
-        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/concreteHeaders
+        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/torusHeaders
 ```
 
 <p align="right">
@@ -213,7 +213,7 @@ To fix, a workaround [suggested here](https://github.com/jessegrosjean/module-ma
 
 ### Demos
 
-- [Encrypted LLM fine-tuning](https://github.com/luxfhe.io/concrete-ml/tree/main/use_case_examples/lora_finetuning): This demo shows
+- [Encrypted LLM fine-tuning](https://github.com/luxfhe.io/torus-ml/tree/main/use_case_examples/lora_finetuning): This demo shows
 how to fine-tune a LLM using the Low Rank Approximation approach. It leverages the Concrete ML Extensions package to perform the fine-tuning
 on encrypted data. 
 
@@ -229,7 +229,7 @@ Coming soon.
 
 ### Documentation
 
-Full, comprehensive documentation is available here: [https://docs.luxfhe.io/concrete-ml](https://docs.luxfhe.io/concrete-ml).
+Full, comprehensive documentation is available here: [https://docs.luxfhe.io/torus-ml](https://docs.luxfhe.io/torus-ml).
 
 <p align="right">
   <a href="#about" > ↑ Back to top </a>
@@ -246,7 +246,7 @@ To cite Concrete ML Extensions in academic papers, please use the following entr
   title={Concrete {ML}: a Privacy-Preserving Machine Learning Library using Fully Homomorphic Encryption for Data Scientists},
   author={LuxFHE},
   year={2022},
-  note={\url{https://github.com/luxfhe.io/concrete-ml}},
+  note={\url{https://github.com/luxfhe.io/torus-ml}},
 }
 ```
 
@@ -287,8 +287,8 @@ This software is distributed under the **BSD-3-Clause-Clear** license. Read [thi
 
 <a target="_blank" href="https://luxfhe.io/community-channels">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe.io/concrete-ml/assets/157474013/86502167-4ea4-49e9-a881-0cf97d141818">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe.io/concrete-ml/assets/157474013/3dcf41e2-1c00-471b-be53-2c804879b8cb">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe.io/torus-ml/assets/157474013/86502167-4ea4-49e9-a881-0cf97d141818">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe.io/torus-ml/assets/157474013/3dcf41e2-1c00-471b-be53-2c804879b8cb">
   <img alt="Support">
 </picture>
 </a>

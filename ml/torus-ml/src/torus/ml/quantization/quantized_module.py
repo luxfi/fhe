@@ -8,10 +8,10 @@ from typing import Any, Dict, Generator, Iterable, List, Optional, Sequence, Tex
 
 import numpy
 import onnx
-from concrete.fhe.compilation.artifacts import DebugArtifacts
-from concrete.fhe.compilation.circuit import Circuit
-from concrete.fhe.compilation.compiler import Compiler
-from concrete.fhe.compilation.configuration import Configuration
+from torus.fhe.compilation.artifacts import DebugArtifacts
+from torus.fhe.compilation.circuit import Circuit
+from torus.fhe.compilation.compiler import Compiler
+from torus.fhe.compilation.configuration import Configuration
 
 from ..common.debugging import assert_true
 from ..common.serialization.dumpers import dump, dumps
@@ -131,7 +131,7 @@ class QuantizedModule:
 
         # Set base attributes for API consistency. This could be avoided if an abstract base class
         # is created for both Torus ML models and QuantizedModule
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2899
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/2899
         self.input_quantizers: List[UniformQuantizer] = []
         self.output_quantizers: List[UniformQuantizer] = []
         self.fhe_circuit: Optional[Circuit] = None
@@ -157,7 +157,7 @@ class QuantizedModule:
         if self._preprocessing_module is not None:
             assert_true(self._preprocessing_module.onnx_preprocessing is None)
 
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4127
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4127
     def set_reduce_sum_copy(self):
         """Set reduce sum to copy or not the inputs.
 
@@ -330,7 +330,7 @@ class QuantizedModule:
         return output_quantizers
 
     # Remove this once we handle the re-quantization step in post-training only
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4472
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4472
     def _add_requant_for_composition(self, composition_mapping: Optional[Dict]):
         """Trigger a re-quantization step for outputs using an input-output mapping for quantizers.
 
@@ -589,7 +589,7 @@ class QuantizedModule:
         )
 
         # Remove this once we handle the re-quantization step in post-training only
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4472
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4472
         if self._composition_mapping is not None:
             mismatch_shapes = list(
                 f"Output {output_i}: {q_results[output_i].shape} "
@@ -672,7 +672,7 @@ class QuantizedModule:
                 # If the virtual library method should be used
                 # For now, use the virtual library when simulating
                 # circuits that use CRT  encoding because the official simulation is too slow
-                # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4391
+                # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4391
                 if USE_OLD_VL or is_crt_encoding:
                     predict_method = partial(
                         self.fhe_circuit.graph, p_error=self.fhe_circuit.p_error

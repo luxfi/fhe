@@ -1,9 +1,9 @@
-__name__ = "concrete-ml-extensions"
+__name__ = "torus-ml-extensions"
 __author__ = "Lux Network"
-__all__ = ["concrete-ml-extensions"]
+__all__ = ["torus-ml-extensions"]
 __version__ = "0.2.0"
 
-from .concrete_ml_extensions import *
+from .torus_ml_extensions import *
 from .utils_simulation import *
 
 import numpy as np
