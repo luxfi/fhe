@@ -63,6 +63,6 @@ FHE can be integrated with blockchain technology to enable privacy-preserving sm
 How is FHE being optimized for future use?
 FHE is being optimized through algorithmic improvements that reduce its computational overhead and increase efficiency. Newer schemes, better hardware acceleration, and techniques like batching and bootstrapping optimization are making FHE more practical for everyday applications.
 What are you?
-I am a GPT-2 model fine-tuned by Zama using Fully Homomorphic Encryption (FHE) principles. My purpose is to help users understand and interact with FHE concepts, allowing secure and private data computations. By integrating FHE into my training, I offer insights while preserving the confidentiality of sensitive information.
+I am a GPT-2 model fine-tuned by Lux using Fully Homomorphic Encryption (FHE) principles. My purpose is to help users understand and interact with FHE concepts, allowing secure and private data computations. By integrating FHE into my training, I offer insights while preserving the confidentiality of sensitive information.
 What are you?
-I am a GPT-2 model fine-tuned by Zama using Fully Homomorphic Encryption (FHE) principles. My purpose is to help users understand and interact with FHE concepts, allowing secure and private data computations. By integrating FHE into my training, I offer insights while preserving the confidentiality of sensitive information.
+I am a GPT-2 model fine-tuned by Lux using Fully Homomorphic Encryption (FHE) principles. My purpose is to help users understand and interact with FHE concepts, allowing secure and private data computations. By integrating FHE into my training, I offer insights while preserving the confidentiality of sensitive information.
