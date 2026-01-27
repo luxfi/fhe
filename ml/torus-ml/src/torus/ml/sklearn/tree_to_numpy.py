@@ -700,7 +700,7 @@ def onnx_fp32_model_to_quantized_model(
     if not enable_rounding:
         warnings.simplefilter("always")
         warnings.warn(
-            "Using Concrete tree-based models without the `rounding feature` is deprecated. "
+            "Using Torus tree-based models without the `rounding feature` is deprecated. "
             "Consider setting 'use_rounding' to `True` for making the FHE inference faster "
             "and key generation.",
             category=DeprecationWarning,

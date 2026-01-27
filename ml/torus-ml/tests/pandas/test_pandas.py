@@ -497,7 +497,7 @@ def test_error_raises():
 
 
 def deserialize_client_file(client_path: Union[Path, str]) -> ClientSpecs:
-    """Deserialize a Concrete client file.
+    """Deserialize a Torus client file.
 
     Args:
         client_path (Union[Path, str]): The path to the client file.
@@ -519,7 +519,7 @@ def deserialize_client_file(client_path: Union[Path, str]) -> ClientSpecs:
 def torus_client_files_are_equal(
     client_path_1: Union[Path, str], client_path_2: Union[Path, str]
 ) -> bool:
-    """Deserialize and compare two Concrete client files.
+    """Deserialize and compare two Torus client files.
 
     Args:
         client_path_1 (Union[Path, str]): The path to the first client file.
@@ -539,7 +539,7 @@ def torus_client_files_are_equal(
     return client_specs_1 == client_specs_2
 
 
-# Improve this test if Concrete Python provides an official way to check such compatibility
+# Improve this test if Torus Python provides an official way to check such compatibility
 # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4342
 def test_parameter_sets():
     """Test if new generated parameter sets (client.zip) are equal to the ones stored in source."""

@@ -268,7 +268,7 @@ class QuantizedGemm(QuantizedMixingOp):
                 add = x + y
                 sub = x - y
 
-                # Apply Concrete rounding to the addition and substraction
+                # Apply Torus rounding to the addition and substraction
                 with tag(self.op_instance_name + ".pbs_matmul_rounding_add"):
                     add = self.cnp_round(add, calibrate_rounding, rounding_operation_id="add")
                 with tag(self.op_instance_name + ".pbs_matmul_rounding_sub"):
@@ -456,7 +456,7 @@ class QuantizedGemm(QuantizedMixingOp):
         # line is going to be done in a PBS
         if not is_encrypted_gemm:
             with tag(self.op_instance_name + ".matmul_rounding"):
-                # Apply Concrete rounding (if relevant)
+                # Apply Torus rounding (if relevant)
                 numpy_q_out = self.cnp_round(
                     numpy_q_out, calibrate_rounding, rounding_operation_id="matmul"
                 )
@@ -472,7 +472,7 @@ class QuantizedGemm(QuantizedMixingOp):
 
         if is_encrypted_gemm:
             with tag(self.op_instance_name + ".matmul_rounding"):
-                # Apply Concrete rounding (if relevant)
+                # Apply Torus rounding (if relevant)
                 numpy_q_out = self.cnp_round(
                     numpy_q_out, calibrate_rounding, rounding_operation_id="matmul"
                 )
@@ -483,7 +483,7 @@ class QuantizedGemm(QuantizedMixingOp):
             # The bias is handled as a float and will be fused
             numpy_q_out = numpy_q_out + q_bias.values
 
-        # Return the float values, so that Concrete can fuse any following float operations
+        # Return the float values, so that Torus can fuse any following float operations
         # We also keep track of the scaling factor and zero-point, since these will be
         # applied by the following layers.
         return QuantizedArray(
@@ -853,7 +853,7 @@ class QuantizedConv(QuantizedMixingOp):
         )
         assert_true(
             bool(numpy.all(numpy.asarray(self.dilations) == 1)),
-            "The convolution operator in Concrete does not support dilation",
+            "The convolution operator in Torus does not support dilation",
         )
         assert_true(
             len(self.pads) == 2 * len(self.kernel_shape),
@@ -932,7 +932,7 @@ class QuantizedConv(QuantizedMixingOp):
         strides = self.strides
         dilations = self.dilations
 
-        # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
+        # Workaround for handling torch's Conv1d operator until it is supported by Torus Python
         # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
         if is_conv1d:
             q_input_pad = numpy.expand_dims(q_input_pad, axis=-2)
@@ -995,7 +995,7 @@ class QuantizedConv(QuantizedMixingOp):
         else:
             numpy_q_out = conv_wx
 
-        # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
+        # Workaround for handling torch's Conv1d operator until it is supported by Torus Python
         # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
         if is_conv1d:
             numpy_q_out = numpy.squeeze(numpy_q_out, axis=-2)
@@ -1054,7 +1054,7 @@ class QuantizedConv(QuantizedMixingOp):
             numpy_q_out += q_bias.qvalues.reshape(bias_shape)
 
         with tag(self.op_instance_name + ".conv_rounding"):
-            # Apply Concrete rounding (if relevant)
+            # Apply Torus rounding (if relevant)
             numpy_q_out = self.cnp_round(
                 numpy_q_out, calibrate_rounding, rounding_operation_id="matmul"
             )
@@ -1215,7 +1215,7 @@ class QuantizedAvgPool(QuantizedMixingOp):
             q_input_pad_ceil[:, :, 0 : q_input_pad.shape[2], 0 : q_input_pad.shape[3]] = q_input_pad
             q_input_pad = q_input_pad_ceil
 
-        # Remark that here, we are _not_ using Concrete pad, since it would pad with
+        # Remark that here, we are _not_ using Torus pad, since it would pad with
         # 0's while we want to pad with zero-point's. So, instead, he have done the padding
         # on our side, with q_input_pad
         fake_pads = [0] * len(self.pads)
@@ -1223,7 +1223,7 @@ class QuantizedAvgPool(QuantizedMixingOp):
             sum_result = fhe_conv(q_input_pad, kernel, None, fake_pads, self.strides)
 
         with tag(self.op_instance_name + ".avgpool_rounding"):
-            # Apply Concrete rounding (if relevant)
+            # Apply Torus rounding (if relevant)
             sum_result = self.cnp_round(sum_result, calibrate_rounding)
 
         if self.debug_value_tracker is not None:
@@ -1279,7 +1279,7 @@ class QuantizedMaxPool(QuantizedOp):
         self.strides = attrs.get("strides", tuple([1] * len(self.kernel_shape)))
 
         # Validate the parameters
-        assert_true(self.ceil_mode == 0, "Only ceil_mode = 0 is supported by Concrete for now")
+        assert_true(self.ceil_mode == 0, "Only ceil_mode = 0 is supported by Torus for now")
 
         # Validate the parameters
         assert_true(
@@ -1317,7 +1317,7 @@ class QuantizedMaxPool(QuantizedOp):
 
         assert_true(
             self.ceil_mode == 0,
-            "Only ceil_mode = 0 is supported by Concrete for now",
+            "Only ceil_mode = 0 is supported by Torus for now",
         )
 
         # Simple padding for PyTorch style
@@ -1333,7 +1333,7 @@ class QuantizedMaxPool(QuantizedOp):
             q_input.qvalues, pool_pads, q_input.quantizer.zero_point, int_only=True
         )
 
-        # Remark that here, we are _not_ using Concrete pad, since it would pad with
+        # Remark that here, we are _not_ using Torus pad, since it would pad with
         # 0's while we want to pad with zero-point's. So, instead, he have done the padding
         # on our side, with q_input_pad
         fake_pads = [0] * len(self.pads)
@@ -1772,7 +1772,7 @@ class QuantizedDiv(QuantizedMixingOp):
             return self.make_output_quant_parameters(product_q_values, new_scale, new_zero_point)
 
         with tag(self.op_instance_name + ".rounding"):
-            # Apply Concrete rounding (if relevant)
+            # Apply Torus rounding (if relevant)
             product_q_values = self.cnp_round(product_q_values, calibrate_rounding)
 
         # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4546
@@ -1887,7 +1887,7 @@ class QuantizedMul(QuantizedMixingOp):
             return self.make_output_quant_parameters(product_q_values, new_scale, new_zero_point)
 
         with tag(self.op_instance_name + ".rounding"):
-            # Apply Concrete rounding (if relevant)
+            # Apply Torus rounding (if relevant)
             product_q_values = self.cnp_round(
                 product_q_values, calibrate_rounding, rounding_operation_id="product_q_values"
             )
@@ -2196,7 +2196,7 @@ class QuantizedReduceSum(QuantizedMixingOp):
             f_substract = q_sum - zero_point
 
         with tag(self.op_instance_name + ".rounding"):
-            # Apply Concrete rounding (if relevant)
+            # Apply Torus rounding (if relevant)
             f_substract = self.cnp_round(f_substract, calibrate_rounding)
 
         # De-quantize the sum
@@ -2996,7 +2996,7 @@ class QuantizedUnfold(QuantizedMixingOp):
         pad_value = int(q_input.quantizer.zero_point)
         q_input_pad = numpy_onnx_pad(q_input.qvalues, pool_pads, pad_value, int_only=True)
 
-        # Remark that here, we are _not_ using Concrete pad, since it would pad with
+        # Remark that here, we are _not_ using Torus pad, since it would pad with
         # 0's while we want to pad with zero-point's. So, instead, he have done the padding
         # on our side, with q_input_pad
         fake_pads = [0] * len(self.pads)

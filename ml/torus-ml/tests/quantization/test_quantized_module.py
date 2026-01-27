@@ -399,7 +399,7 @@ def test_inputs_encryption_status(model_class, input_shape, default_configuratio
             inputs_encryption_status=("random",),
         )
 
-    # Additional argument (error from Concrete Python)
+    # Additional argument (error from Torus Python)
     with pytest.raises(ValueError, match="Too many arguments in '.*', expected 1 arguments."):
         compile_torch_model(
             torch_fc_model,

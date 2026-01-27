@@ -127,7 +127,7 @@ def test_serialize_sklearn_model(torus_model_class, load_data):
     # Create the data
     x, y = load_data(torus_model_class)
 
-    # Instantiate and fit a Concrete model to recover its underlying Scikit Learn model
+    # Instantiate and fit a Torus model to recover its underlying Scikit Learn model
     torus_model = torus_model_class()
 
     _, sklearn_model = torus_model.fit_benchmark(x, y)
@@ -303,7 +303,7 @@ def test_serialize_valid_split(cross_validation_split, stratified, random_state)
         pytest.param(
             get_a_fhe_circuit(),
             NotImplementedError,
-            "Concrete Circuit object serialization is not implemented.",
+            "Torus Circuit object serialization is not implemented.",
         ),
     ],
 )

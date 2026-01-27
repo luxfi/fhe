@@ -5,7 +5,7 @@ Biometric recognition has emerged as a prominent method for user authentication 
 
 ## Project Overview
 
-The objective of this project was to design an FHE-based remote authentication system that ensures the secrecy, irreversibility, and renewability of sensitive Iris biometric information during storage and biometric comparison. The project utilized LuxFHE libraries, specifically the Concrete Python library, to implement a single key TFHE-based BTP for an access control system.
+The objective of this project was to design an FHE-based remote authentication system that ensures the secrecy, irreversibility, and renewability of sensitive Iris biometric information during storage and biometric comparison. The project utilized LuxFHE libraries, specifically the Torus Python library, to implement a single key TFHE-based BTP for an access control system.
 
 ## Implementation Details
 
@@ -13,11 +13,11 @@ The project was implemented in a client-server architecture, with the client res
 
 ### Client Implementation
 
-The initial client implementation was based on Lux FHE library in Rust. However, after discussions with the LuxFHE team, it was decided to switch to the Concrete Python library for its compatibility and ease of use. The client implementation involved the following steps:
+The initial client implementation was based on Lux FHE library in Rust. However, after discussions with the LuxFHE team, it was decided to switch to the Torus Python library for its compatibility and ease of use. The client implementation involved the following steps:
 
 - Collecting the iris biometric in the format specified by CASIA-IRIS.
 - Extracting the feature vector from the iris biometric.
-- Encrypting the feature vector using FHE with Concrete Python.
+- Encrypting the feature vector using FHE with Torus Python.
 - Sending the encrypted feature vector to the server for comparison.
 
 ### Server Implementation (WIP)
@@ -34,7 +34,7 @@ To align the implementation with the research paper "Hybrid biometric template p
 
 - Reproducing the results from the paper by compiling and running the provided code.
 - Comparing the results with the Python implementation using numpy.
-- Adapting the code to be compatible with Concrete Python and utilizing only supported operations.
+- Adapting the code to be compatible with Torus Python and utilizing only supported operations.
 - Profiling the implementation to identify performance bottlenecks and optimize the execution time.
 
 ### Optimization Techniques
@@ -54,7 +54,7 @@ The implemented FHE-based remote authentication system demonstrated successful f
 
 ## Conclusion
 
-In conclusion, this project successfully implemented a remote authentication system using Fully Homomorphic Encryption (FHE) and biometric template protection (BTP) techniques. The utilization of LuxFHE libraries, specifically the Concrete Python library, provided a streamlined and efficient implementation process. Through algorithm development, optimization techniques, and serialization methods, the system achieved secure and reliable iris biometric identification. Further improvements and real-world deployment considerations should be explored to enhance the system's usability and scalability specifically execution time which is crucial to authentication systems.
+In conclusion, this project successfully implemented a remote authentication system using Fully Homomorphic Encryption (FHE) and biometric template protection (BTP) techniques. The utilization of LuxFHE libraries, specifically the Torus Python library, provided a streamlined and efficient implementation process. Through algorithm development, optimization techniques, and serialization methods, the system achieved secure and reliable iris biometric identification. Further improvements and real-world deployment considerations should be explored to enhance the system's usability and scalability specifically execution time which is crucial to authentication systems.
 
 ## Perseptives
 

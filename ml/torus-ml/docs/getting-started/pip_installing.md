@@ -28,7 +28,7 @@ Depending on your OS/HW, Torus ML may be installed with Docker or with pip:
 - **Linux requirement**: The Torus ML Python package requires `glibc >= 2.28`. On Linux, you can check your `glibc` version by running `ldd --version`.
 - **Kaggle installation**: Torus ML can be installed on Kaggle ([see question on community for more details](https://community.luxfhe.io/t/how-do-we-use-torus-ml-on-kaggle/332)) and on Google Colab.
 
-Most of these limits are shared with the rest of the Concrete stack (namely Concrete Python). Support for more platforms will be added in the future.
+Most of these limits are shared with the rest of the Torus stack (namely Torus Python). Support for more platforms will be added in the future.
 
 ## Installation using PyPi
 
@@ -47,7 +47,7 @@ pip install -U pip wheel setuptools
 pip install torus-ml
 ```
 
-This will automatically install all dependencies, notably Concrete.
+This will automatically install all dependencies, notably Torus.
 
 If you encounter any issue during installation on Apple Silicon mac, please visit this [troubleshooting guide on community](https://community.luxfhe.io/t/troubleshooting-torus-installation-on-apple-silicon/577).
 

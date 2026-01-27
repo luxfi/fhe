@@ -131,7 +131,7 @@ This function shall be overloaded by inheriting classes to test self.\_int_input
 
 **Returns:**
 
-- <b>`bool`</b>:  whether this QuantizedOp instance produces Concrete code that can be fused to TLUs
+- <b>`bool`</b>:  whether this QuantizedOp instance produces Torus code that can be fused to TLUs
 
 ______________________________________________________________________
 

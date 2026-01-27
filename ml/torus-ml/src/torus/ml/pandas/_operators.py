@@ -108,7 +108,7 @@ def encrypted_left_right_join(
     Note that for now, only a left and right join is implemented. Additionally, only some Pandas
     parameters are supported, and joining on multiple columns is not available.
 
-    The algorithm benefits from Concrete Python's composability feature. The idea is that for loops
+    The algorithm benefits from Torus Python's composability feature. The idea is that for loops
     are done in the clear, meaning positional indexes are not encrypte and only the data is. In the
     case of a left merge, we need to select the encrypted value from the right data-frame for a
     given (left) row and (right) column position. In order to do that, a for loop goes through
@@ -122,7 +122,7 @@ def encrypted_left_right_join(
     Args:
         left_encrypted (EncryptedDataFrame): The left encrypted data-frame.
         right_encrypted (EncryptedDataFrame): The right encrypted data-frame.
-        server (Server): The Concrete server to use for running the computations in FHE.
+        server (Server): The Torus server to use for running the computations in FHE.
         how (str): Type of merge to be performed, one of {'left', 'right'}.
             * left: use only keys from left frame, similar to a SQL left outer join;
             preserve key order.
@@ -268,7 +268,7 @@ def encrypted_merge(
     Args:
         left_encrypted (EncryptedDataFrame): The left encrypted data-frame.
         right_encrypted (EncryptedDataFrame): The right encrypted data-frame.
-        server (Server): The Concrete server to use for running the computations in FHE.
+        server (Server): The Torus server to use for running the computations in FHE.
         how (str): Type of merge to be performed, one of {'left', 'right'}.
             * left: use only keys from left frame, similar to a SQL left outer join;
             preserve key order.
