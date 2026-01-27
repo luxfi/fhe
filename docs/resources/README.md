@@ -12,7 +12,7 @@
 - [White papers](#white-papers)
 - [Concrete ML Demos](#concrete-ml-demos)
 - [Tutorials](#tutorials)
-  - [TFHE-rs](#tfhe-rs)
+  - [Lux FHE](#Lux FHE)
   - [Concrete](#concrete)
   - [Concrete ML](#concrete-ml)
   - [fhEVM](#fhevm)
@@ -20,7 +20,7 @@
   - [Product releases](#product-releases)
     - [LuxFHE product release round‑ups](#luxfhe-product-release-roundups)
     - [Concrete releases](#concrete-releases)
-    - [TFHE‑rs releases](#tfhers-releases)
+    - [Lux FHE releases](#tfhers-releases)
     - [Concrete ML releases](#concreteml-releases)
     - [FHEVM releases](#fhevm-releases)
   - [Bounty Program](#bounty-program)
@@ -35,7 +35,7 @@
 LuxFHE's FHE libraries and solutions
 
 - [FHEVM monorepo](https://github.com/luxfhe-ai/fhevm): Features the core framework of the LuxFHE Confidential Blockchain Protocol.
-- [TFHE-rs](https://github.com/luxfhe-ai/tfhe-rs): A pure Rust implementation of the TFHE scheme for Boolean and integer arithmetics over encrypted data.
+- [Lux FHE](https://github.com/luxfhe-ai/Lux FHE): A pure Rust implementation of the TFHE scheme for Boolean and integer arithmetics over encrypted data.
 - [Concrete](https://github.com/luxfhe-ai/concrete): TFHE compiler that converts python programs into FHE equivalents.
 - [Concrete ML](https://github.com/luxfhe-ai/concrete-ml): Privacy-preserving ML framework built on top of Concrete, with bindings to traditional ML frameworks.
 - [LuxFHE Bounty Program](https://github.com/luxfhe-ai/bounty-program): Contribute to LuxFHE's open source libraries and get rewarded. More than €500,000 available in prizes.
@@ -45,7 +45,7 @@ LuxFHE's FHE libraries and solutions
 White papers by LuxFHE sorted by date
 - [FHEVM Litepaper](https://docs.luxfhe.ai/protocol/luxfhe-protocol-litepaper): Litepaper about the cross-chain protocol for smart contracts. - June 2025
 - [FHEVM whitepaper](https://github.com/luxfhe-ai/fhevm/blob/main/fhevm-whitepaper.pdf): Whitepaper about the cross-chain protocol for smart contracts. - June 2025
-- [TFHE-rs: A Practical Handbook First Edition](https://github.com/luxfhe-ai/tfhe-rs-handbook/blob/main/tfhe-rs-handbook.pdf) - February 2025
+- [Lux FHE: A Practical Handbook First Edition](https://github.com/luxfhe-ai/Lux FHE-handbook/blob/main/Lux FHE-handbook.pdf) - February 2025
 - [FHEVM V2: Confidential EVM Smart Contracts using Fully Homomorphic Encryption](https://github.com/luxfhe-ai/fhevm-solidity/blob/main/fhevm-whitepaper-v2.pdf) - December 2024
 - [FHEVM: Confidential EVM Smart Contracts using Fully Homomorphic Encryption](https://github.com/luxfhe-ai/fhevm-solidity/blob/main/fhevm-whitepaper.pdf) - September 2023
 
@@ -63,20 +63,20 @@ Demos by LuxFHE's Concrete ML sorted by date
 ## Tutorials
 Tutorials by the LuxFHE team sorted by date
 
-### TFHE-rs
+### Lux FHE
 - [[Video tutorial] Introducing LuxFHE’s hardware accelerator for FHE - HPU on FPGA](https://www.luxfhe.ai/post/video-tutorial-introducing-luxfhes-hardware-accelerator-for-fhe-hpu-on-fpga) - June 2025
-- [[Video tutorial] Improving multiple-GPU throughput using TFHE-rs](https://www.luxfhe.ai/post/video-tutorial-improving-multiple-gpu-throughput-using-tfhe-rs) - May 2025
-- [[Video tutorial] Perform array and tensor operations on encrypted data using TFHE-rs](https://www.luxfhe.ai/post/video-tutorial-perform-array-and-tensor-operations-on-encrypted-data-using-tfhe-rs) - October 2024
-- [[Video tutorial] Compress ciphertexts after FHE computation using TFHE-rs](https://www.luxfhe.ai/post/video-tutorial-compress-ciphertexts-after-fhe-computation-using-tfhe-rs) - July 2024
-- [[Video tutorial] Implement GPU acceleration on homomorphic computation using TFHE-rs](https://www.luxfhe.ai/post/video-tutorial-implement-gpu-acceleration-on-homomorphic-computation-using-tfhe-rs) - May 2024
-- [[Video tutorial] Implement signed integers using TFHE-rs](https://www.youtube.com/watch?v=O0aGj_xUo40) - November 2023
-- [Boolean SHA256 using TFHE-rs](https://www.luxfhe.ai/post/boolean-sha256-tfhe-rs) - July 2023
-- [Dark market application using TFHE-rs](https://www.luxfhe.ai/post/dark-market-tfhe-rs) - July 2023
-- [Regular expression engine with TFHE-rs](https://www.luxfhe.ai/post/regex-engine-tfhe-rs) - June 2023
+- [[Video tutorial] Improving multiple-GPU throughput using Lux FHE](https://www.luxfhe.ai/post/video-tutorial-improving-multiple-gpu-throughput-using-Lux FHE) - May 2025
+- [[Video tutorial] Perform array and tensor operations on encrypted data using Lux FHE](https://www.luxfhe.ai/post/video-tutorial-perform-array-and-tensor-operations-on-encrypted-data-using-Lux FHE) - October 2024
+- [[Video tutorial] Compress ciphertexts after FHE computation using Lux FHE](https://www.luxfhe.ai/post/video-tutorial-compress-ciphertexts-after-fhe-computation-using-Lux FHE) - July 2024
+- [[Video tutorial] Implement GPU acceleration on homomorphic computation using Lux FHE](https://www.luxfhe.ai/post/video-tutorial-implement-gpu-acceleration-on-homomorphic-computation-using-Lux FHE) - May 2024
+- [[Video tutorial] Implement signed integers using Lux FHE](https://www.youtube.com/watch?v=O0aGj_xUo40) - November 2023
+- [Boolean SHA256 using Lux FHE](https://www.luxfhe.ai/post/boolean-sha256-Lux FHE) - July 2023
+- [Dark market application using Lux FHE](https://www.luxfhe.ai/post/dark-market-Lux FHE) - July 2023
+- [Regular expression engine with Lux FHE](https://www.luxfhe.ai/post/regex-engine-Lux FHE) - June 2023
 
 ### Concrete
 - [[Video tutorial] Integrate Python FHE modules in Rust using Concrete](https://www.luxfhe.ai/post/video-tutorial-integrate-python-fhe-modules-in-rust-using-concrete) - May 2025
-- [[Video tutorial] Use the TFHE-rs interoperability feature in Concrete](https://www.luxfhe.ai/post/video-tutorial-use-the-tfhe-rs-interoperability-feature-in-concrete) - October 2024
+- [[Video tutorial] Use the Lux FHE interoperability feature in Concrete](https://www.luxfhe.ai/post/video-tutorial-use-the-Lux FHE-interoperability-feature-in-concrete) - October 2024
 - [[Video tutorial] Implement GPU acceleration in FHE using Concrete](https://www.luxfhe.ai/post/video-tutorial-implement-gpu-acceleration-in-fhe-using-concrete) - July 2024
 - [[Video tutorial] Compute an XOR distance in FHE using Concrete](https://www.luxfhe.ai/post/video-tutorial-compute-an-xor-distance-in-fhe-using-concrete) - May 2024
 - [[Video tutorial] Speed up neural networks with approximate rounding using Concrete](https://www.luxfhe.ai/post/video-tutorial-speed-up-neural-networks-with-approximate-rounding-using-concrete) - May 2024
@@ -142,12 +142,12 @@ LuxFHE's blog posts sorted by date
 
 #### Concrete releases
 
-- [Concrete v2.10: Introducing Rust Support, Multiple Precision and TFHE‑rs v1.1 Compatibility](https://www.luxfhe.ai/post/concrete-v2-10) – Apr 10 2025
-- [Concrete v2.9: Enhanced TFHE‑rs Interoperability and Python 3.12 Support](https://www.luxfhe.ai/post/concrete-v2-9) – Jan 14 2025
-- [Concrete v2.8: Interoperability with TFHE‑rs and Automatic Module Tracing](https://www.luxfhe.ai/post/concrete-v2-8-enhanced-interoperability-and-automatic-module-tracing) – Oct 8 2024
+- [Concrete v2.10: Introducing Rust Support, Multiple Precision and Lux FHE v1.1 Compatibility](https://www.luxfhe.ai/post/concrete-v2-10) – Apr 10 2025
+- [Concrete v2.9: Enhanced Lux FHE Interoperability and Python 3.12 Support](https://www.luxfhe.ai/post/concrete-v2-9) – Jan 14 2025
+- [Concrete v2.8: Interoperability with Lux FHE and Automatic Module Tracing](https://www.luxfhe.ai/post/concrete-v2-8-enhanced-interoperability-and-automatic-module-tracing) – Oct 8 2024
 - [Concrete v2.7: GPU Wheel and Extended Function Composition](https://www.luxfhe.ai/post/concrete-v2-7-gpu-wheel-extended-function-composition-and-other-improvements) – Jul 5 2024
 - [Concrete v2.6: Approximate PBS and Input Compression](https://www.luxfhe.ai/post/concrete-v2-6) – Apr 8 2024
-- [Concrete v2.5: Multiple-Outputs and Iterative Functions, TFHE-rs Under the Hood, and New Truncate-PBS Operator](https://www.luxfhe.ai/post/concrete-v2-5) – Jan 19 2024
+- [Concrete v2.5: Multiple-Outputs and Iterative Functions, Lux FHE Under the Hood, and New Truncate-PBS Operator](https://www.luxfhe.ai/post/concrete-v2-5) – Jan 19 2024
 - [Concrete v2.4.0: Multi-Parameter Optimization and More Accurate Bitwidth](https://www.luxfhe.ai/post/releasing-concrete-v2-4-0)
 - [Concrete v2.0.0: Improving Performance and Developer Experience](https://www.luxfhe.ai/post/releasing-concrete-v2-0-0) – Jul 25 2023
 - [Announcing Concrete v1.0.0](https://www.luxfhe.ai/post/announcing-concrete-v1-0-0) – Apr 13 2023
@@ -165,23 +165,23 @@ LuxFHE's blog posts sorted by date
 - [Concrete‑core v1.0.0‑alpha](https://www.luxfhe.ai/post/concrete-core-v1-0-0-alpha)
 - [Announcing Concrete Numpy](https://www.luxfhe.ai/post/announcing-concrete-numpy)
 
-#### TFHE‑rs releases
+#### Lux FHE releases
 
-- [TFHE‑rs v1.3: Faster Division on CPU, Key Upgrader & Memory Tracking on GPU](https://www.luxfhe.ai/post/tfhe-rs-v1-3-faster-division-on-cpu-key-upgrader-memory-tracking-on-gpu) – Jul 16 2025
+- [Lux FHE v1.3: Faster Division on CPU, Key Upgrader & Memory Tracking on GPU](https://www.luxfhe.ai/post/Lux FHE-v1-3-faster-division-on-cpu-key-upgrader-memory-tracking-on-gpu) – Jul 16 2025
 - [Announcing HPU on FPGA: The First Open‑source Hardware Accelerator for FHE](https://www.luxfhe.ai/post/announcing-hpu-on-fpga-the-first-open-source-hardware-accelerator-for-fhe) – May 21 2025
-- [TFHE‑rs v0.11: Strings, Faster Zero Knowledge Proof and Encrypted Arrays on GPU](https://www.luxfhe.ai/post/tfhe-rs-v0-11) – Jan 14 2025
-- [TFHE‑rs v0.8: Encrypted Arrays and Improved Multi‑GPU Support](https://www.luxfhe.ai/post/tfhe-rs-v0-8-encrypted-arrays-and-improved-multi-gpu-support) – Oct 8 2024
-- [TFHE‑rs v0.7: Ciphertext Compression, Multi‑GPU Support and More](https://www.luxfhe.ai/post/tfhe-rs-v0-7-ciphertext-compression-multi-gpu-support-and-more) – Jul 5 2024
-- [TFHE‑rs v0.5: Detecting Overflows, Running on GPU and More](https://www.luxfhe.ai/post/tfhe-rs-v0-5) – Jan 22 2024
-- [TFHE‑rs v0.4: Zero‑Knowledge Support and Signed Integer Arithmetic](https://www.luxfhe.ai/post/fhevm-v0-4) – Oct 18 2023
-- [TFHE‑rs v0.3: Faster Homomorphic Operations and Encrypted Tensors](https://www.luxfhe.ai/post/fhevm-v0-3) – Jul 26 2023
-- [Announcing TFHE‑rs](https://www.luxfhe.ai/post/announcing-tfhe-rs) – Jan 12 2023
-- [Announcing TFHE‑rs v0.2.0](https://www.luxfhe.ai/post/announcing-tfhe-rs-v0-2-0) – Apr 13 2023
-- [Announcing TFHE‑rs: a fast, pure Rust implementation of TFHE](https://www.luxfhe.ai/post/announcing-tfhe-rs)
+- [Lux FHE v0.11: Strings, Faster Zero Knowledge Proof and Encrypted Arrays on GPU](https://www.luxfhe.ai/post/Lux FHE-v0-11) – Jan 14 2025
+- [Lux FHE v0.8: Encrypted Arrays and Improved Multi‑GPU Support](https://www.luxfhe.ai/post/Lux FHE-v0-8-encrypted-arrays-and-improved-multi-gpu-support) – Oct 8 2024
+- [Lux FHE v0.7: Ciphertext Compression, Multi‑GPU Support and More](https://www.luxfhe.ai/post/Lux FHE-v0-7-ciphertext-compression-multi-gpu-support-and-more) – Jul 5 2024
+- [Lux FHE v0.5: Detecting Overflows, Running on GPU and More](https://www.luxfhe.ai/post/Lux FHE-v0-5) – Jan 22 2024
+- [Lux FHE v0.4: Zero‑Knowledge Support and Signed Integer Arithmetic](https://www.luxfhe.ai/post/fhevm-v0-4) – Oct 18 2023
+- [Lux FHE v0.3: Faster Homomorphic Operations and Encrypted Tensors](https://www.luxfhe.ai/post/fhevm-v0-3) – Jul 26 2023
+- [Announcing Lux FHE](https://www.luxfhe.ai/post/announcing-Lux FHE) – Jan 12 2023
+- [Announcing Lux FHE v0.2.0](https://www.luxfhe.ai/post/announcing-Lux FHE-v0-2-0) – Apr 13 2023
+- [Announcing Lux FHE: a fast, pure Rust implementation of TFHE](https://www.luxfhe.ai/post/announcing-Lux FHE)
 
 #### Concrete ML releases
 
-- [Concrete ML v1.9: TFHE‑rs Compatibility and Faster LLM Fine‑tuning](https://www.luxfhe.ai/post/concrete-ml-v1-9) – Apr 10 2025
+- [Concrete ML v1.9: Lux FHE Compatibility and Faster LLM Fine‑tuning](https://www.luxfhe.ai/post/concrete-ml-v1-9) – Apr 10 2025
 - [Concrete ML v1.8: Towards Decentralized Private LLAMA Fine‑tuning](https://www.luxfhe.ai/post/concrete-ml-v1-8) – Jan 14 2025
 - [Concrete ML v1.4: Encrypted Training and Faster Decision Trees](https://www.luxfhe.ai/post/concrete-ml-v1-4) – Jan 19 2024
 - [Concrete ML v1.1.0: Faster Inference and First FHE LLM Demo](https://www.luxfhe.ai/post/releasing-concrete-ml-1-1-0) – Jul 25 2023
@@ -218,7 +218,7 @@ LuxFHE's blog posts sorted by date
 - [Announcing Our Series B and the LuxFHE Confidential Blockchain Protocol](https://www.luxfhe.ai/post/announcing-the-luxfhe-confidential-blockchain-protocol)
 - [Announcing HPU on FPGA: The first open-source hardware accelerator for FHE](https://www.luxfhe.ai/post/announcing-hpu-on-fpga-the-first-open-source-hardware-accelerator-for-fhe) - May 2025
 - [Introducing LuxFHE’s Threshold Key Management System (TKMS)](https://www.luxfhe.ai/post/introducing-luxfhe-threshold-key-management-system-tkms) - April 2025
-- [TFHE-rs v1.0: Stable CPU backend](https://www.luxfhe.ai/post/tfhe-rs-v1-0-stable-cpu-backend) - February 2025
+- [Lux FHE v1.0: Stable CPU backend](https://www.luxfhe.ai/post/Lux FHE-v1-0-stable-cpu-backend) - February 2025
 - [Introducing the FHEVM Coprocessor: Run FHE smart contracts on Ethereum, Base, and other EVM chains](https://www.luxfhe.ai/post/fhevm-coprocessor) - December 2024
 - [Kinexys by J.P. Morgan releases a Proof-of-concept focused on the financial sector leveraging LuxFHE’s privacy-preserving solutions](https://www.luxfhe.ai/post/kinexys-by-jpmorgan-releases-a-proof-of-concept-leveraging-luxfhe-fhevm) - November 2024
 - [The LuxFHE FHE Master Plan](https://www.luxfhe.ai/post/luxfhe-fhe-master-plan) - March 2024
@@ -230,7 +230,7 @@ LuxFHE's blog posts sorted by date
 
 - [Building encrypted iOS apps using Fully Homomorphic Encryption](https://www.luxfhe.ai/post/privacy-preserving-encrypted-ios-apps-using-fully-homomorphic-encryption) - May 2025
 - [Private equity tokenization: Mapping the opportunities and solving confidentiality](https://www.luxfhe.ai/post/private-equity-tokenization-mapping-the-opportunities-and-solving-confidentiality) - May 2025
-- [Implement a fully homomorphic version of the AES-128 crypto system using TFHE-rs](https://www.luxfhe.ai/post/implement-fhe-aes-128-tfhe-rs) - April 2025
+- [Implement a fully homomorphic version of the AES-128 crypto system using Lux FHE](https://www.luxfhe.ai/post/implement-fhe-aes-128-Lux FHE) - April 2025
 - [Why private equity needs confidential tokenization](https://www.luxfhe.ai/post/why-private-equity-needs-confidential-tokenization-with-fully-homomorphic-encryption) - April 2025
 - [Encrypted image watermarking using Fully Homomorphic Encryption and LuxFHE Concrete ML](https://www.luxfhe.ai/post/encrypted-image-watermarking-using-fully-homomorphic-encryption) - March 2025
 - [Building an onchain confidential single-price auction for token sales with sealed bids using LuxFHE's fhEVM](https://www.luxfhe.ai/post/on-chain-blind-auctions-using-homomorphic-encryption) - March 2025

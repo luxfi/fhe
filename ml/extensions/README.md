@@ -31,7 +31,7 @@ Concrete ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper pac
 
 - **Fast encrypt-clear matrix multiplication**: This library implements a matrix product between encrypted matrices and clear matrices.
 - **Python and Swift bindings for matrix multiplication client applications**: This library contains bindings that help developers build client applications on various platforms, including iOS.
-- **Encryption/Decryption to [TFHE-rs](https://docs.luxfhe.io/concrete-ml) ciphertexts**: To provide interoperability with TFHE-rs ciphertexts, Concrete ML Extensions offers encryption and decryption functions that are used in Concrete ML.
+- **Encryption/Decryption to [Lux FHE](https://docs.luxfhe.io/concrete-ml) ciphertexts**: To provide interoperability with Lux FHE ciphertexts, Concrete ML Extensions offers encryption and decryption functions that are used in Concrete ML.
 
 *Learn more about Concrete ML Extensions features in the [documentation](https://docs.luxfhe.io/concrete-ml).*
 <br></br>
@@ -77,7 +77,7 @@ To use the GPU, a CUDA-enabled GPU with support for CUDA >=11.2 should be availa
 
 ### From Source For Python
 
-This repository leverages `pyo3` to interface TFHE-rs code in python. First, setup the virtual environment. 
+This repository leverages `PyO3` to interface Lux FHE code in python. First, setup the virtual environment. 
 Install the build tool `maturin` and the rust compiler. 
 
 ```
@@ -87,7 +87,7 @@ pip install maturin
 ```
 
 Next, using `maturin` in the virtual environment, build the wheel and install it to the virtual
-environment. Build the wheel in release mode so that tfhe-rs is built in release as well.
+environment. Build the wheel in release mode so that Lux FHE is built in release as well.
 
 To compile for GPU, a CUDA-toolkit version >= 11.2 should be installed on the machine, along with 
 a compatible `gcc` version (the package compilation is tested with gcc 11.4).  

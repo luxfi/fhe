@@ -71,8 +71,8 @@ This software is distributed under the **BSD-3-Clause-Clear** license. Read [thi
 
 <a target="_blank" href="https://community.luxfhe.ai">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe-ai/tfhe-rs/assets/157474013/08656d0a-3f44-4126-b8b6-8c601dff5380">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe-ai/tfhe-rs/assets/157474013/1c9c9308-50ac-4aab-a4b9-469bb8c536a4">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe-ai/Lux FHE/assets/157474013/08656d0a-3f44-4126-b8b6-8c601dff5380">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe-ai/Lux FHE/assets/157474013/1c9c9308-50ac-4aab-a4b9-469bb8c536a4">
   <img alt="Support">
 </picture>
 </a>
