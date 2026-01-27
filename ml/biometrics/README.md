@@ -13,7 +13,7 @@ The project was implemented in a client-server architecture, with the client res
 
 ### Client Implementation
 
-The initial client implementation was based on TFHE-rs library in Rust. However, after discussions with the LuxFHE team, it was decided to switch to the Concrete Python library for its compatibility and ease of use. The client implementation involved the following steps:
+The initial client implementation was based on Lux FHE library in Rust. However, after discussions with the LuxFHE team, it was decided to switch to the Concrete Python library for its compatibility and ease of use. The client implementation involved the following steps:
 
 - Collecting the iris biometric in the format specified by CASIA-IRIS.
 - Extracting the feature vector from the iris biometric.
