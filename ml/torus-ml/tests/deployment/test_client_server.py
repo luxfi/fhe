@@ -396,7 +396,7 @@ def check_client_server_inference(
     key_dir,
     check_array_equal,
     check_float_array_equal,
-    ciphertext_format=CiphertextFormat.CONCRETE,
+    ciphertext_format=CiphertextFormat.TORUS,
 ):
     """Test the client server interface API.
 
@@ -411,7 +411,7 @@ def check_client_server_inference(
         check_array_equal: Function to compare arrays with integer values.
         check_float_array_equal: Function to compare arrays with float values.
         ciphertext_format: Specifies the ciphertext backend format. Default to
-        CiphertextFormat.CONCRETE.
+        CiphertextFormat.TORUS.
     """
 
     # Create a new network
