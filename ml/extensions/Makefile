@@ -42,7 +42,7 @@ build_wasm: install_rs_build_toolchain
 	@mkdir -p rust/pkg-wasm # Ensure the output directory exists
 	cd rust && RUSTFLAGS="" PYO3_CROSS_PYTHON_VERSION=$(PYTHON_VERSION) PYO3_CROSS=1 wasm-pack build . \
 		--target web \
-		--out-name concrete_ml_extensions_wasm \
+		--out-name torus_ml_extensions_wasm \
 		--out-dir ./pkg-wasm \
 		--release \
 		-- --no-default-features --features wasm_bindings
