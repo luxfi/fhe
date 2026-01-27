@@ -4,8 +4,8 @@ import numpy as np
 import onnx
 import pytest
 
-from concrete.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
-from concrete.ml.onnx.onnx_utils import check_onnx_model
+from torus.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
+from torus.ml.onnx.onnx_utils import check_onnx_model
 
 
 # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4604

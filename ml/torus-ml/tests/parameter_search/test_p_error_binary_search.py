@@ -9,10 +9,10 @@ import torch
 from sklearn.datasets import make_classification
 from sklearn.metrics import r2_score, top_k_accuracy_score
 
-from concrete.ml.common.check_inputs import check_array_and_assert
-from concrete.ml.common.utils import get_model_name, is_regressor_or_partial_regressor
-from concrete.ml.pytest.torch_models import QuantCustomModel, TorchCustomModel
-from concrete.ml.pytest.utils import (
+from torus.ml.common.check_inputs import check_array_and_assert
+from torus.ml.common.utils import get_model_name, is_regressor_or_partial_regressor
+from torus.ml.pytest.torch_models import QuantCustomModel, TorchCustomModel
+from torus.ml.pytest.utils import (
     data_calibration_processing,
     get_sklearn_linear_models_and_datasets,
     get_sklearn_neighbors_models_and_datasets,
@@ -21,8 +21,8 @@ from concrete.ml.pytest.utils import (
     instantiate_model_generic,
     load_torch_model,
 )
-from concrete.ml.quantization import QuantizedModule
-from concrete.ml.search_parameters import BinarySearch
+from torus.ml.quantization import QuantizedModule
+from torus.ml.search_parameters import BinarySearch
 
 # For built-in models (trees and QNNs) we use the fixture `load_data`
 # For custom models, we define the following variables:

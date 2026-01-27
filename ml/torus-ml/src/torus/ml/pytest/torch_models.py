@@ -10,7 +10,7 @@ from brevitas.quant import Int8ActPerTensorFloat, Int8WeightPerTensorFloat, IntB
 from torch import nn
 from torch.nn.utils import prune
 
-from concrete.ml.quantization.qat_quantizers import Int8ActPerTensorPoT, Int8WeightPerTensorPoT
+from torus.ml.quantization.qat_quantizers import Int8ActPerTensorPoT, Int8WeightPerTensorPoT
 
 # pylint: disable=too-many-lines
 
@@ -1197,7 +1197,7 @@ class PaddingNet(nn.Module):
     def __init__(self):
         super().__init__()
 
-        # Use a QAT network to allow the torch result to be the same as the Concrete ML result
+        # Use a QAT network to allow the torch result to be the same as the Torus ML result
         self.input_quant = qnn.QuantIdentity(bit_width=8)
 
     def forward(self, x):
@@ -1221,7 +1221,7 @@ class PaddingNet(nn.Module):
         x = torch.nn.functional.pad(x, (3, 2))
         x = torch.nn.functional.pad(x, (1, 2, 3, 4))
 
-        # Concrete ML only supports padding on the last two dimensions as this is the
+        # Torus ML only supports padding on the last two dimensions as this is the
         # most common setting
         x = torch.nn.functional.pad(x, (1, 1, 2, 2, 0, 0, 0, 0))
         return x

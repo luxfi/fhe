@@ -13,7 +13,7 @@ import torch
 from numpy.random import RandomState
 from torch import nn
 
-from concrete.ml.sklearn.linear_model import SGDClassifier
+from torus.ml.sklearn.linear_model import SGDClassifier
 
 from ..common.serialization.dumpers import dump, dumps
 from ..common.serialization.loaders import load, loads
@@ -174,7 +174,7 @@ def get_sklearn_linear_models_and_datasets(
         List: The pytest parameters to use for testing linear models.
     """
 
-    # Get all linear model classes currently available in Concrete ML
+    # Get all linear model classes currently available in Torus ML
     linear_classes = _get_sklearn_linear_models(
         regressor=regressor,
         classifier=classifier,
@@ -225,7 +225,7 @@ def get_sklearn_tree_models_and_datasets(
     Returns:
         List: The pytest parameters to use for testing tree-based models.
     """
-    # Get all tree-based model classes currently available in Concrete ML
+    # Get all tree-based model classes currently available in Torus ML
     tree_classes = _get_sklearn_tree_models(
         regressor=regressor,
         classifier=classifier,
@@ -258,7 +258,7 @@ def get_sklearn_neural_net_models_and_datasets(
         List: The pytest parameters to use for testing neural network models.
     """
 
-    # Get all neural-network model classes currently available in Concrete ML
+    # Get all neural-network model classes currently available in Torus ML
     selected_neural_net_classes = _get_sklearn_neural_net_models(
         regressor=regressor,
         classifier=classifier,
@@ -321,7 +321,7 @@ def get_sklearn_neighbors_models_and_datasets(
     Returns:
         List: The pytest parameters to use for testing neighbor models.
     """
-    # Get all neighbor model classes currently available in Concrete ML
+    # Get all neighbor model classes currently available in Torus ML
     neighbor_classes = _get_sklearn_neighbors_models(
         regressor=regressor,
         classifier=classifier,
@@ -339,7 +339,7 @@ def get_sklearn_all_models_and_datasets(
     select: Optional[Union[str, List[str]]] = None,
     ignore: Optional[Union[str, List[str]]] = None,
 ) -> List:
-    """Get the pytest parameters to use for testing all models available in Concrete ML.
+    """Get the pytest parameters to use for testing all models available in Torus ML.
 
     Args:
         regressor (bool): If regressors should be selected.
@@ -351,7 +351,7 @@ def get_sklearn_all_models_and_datasets(
             a part of it) do not match the given string or list of strings. Default to None.
 
     Returns:
-        List: The pytest parameters to use for testing all models available in Concrete ML.
+        List: The pytest parameters to use for testing all models available in Torus ML.
     """
     return (
         get_sklearn_linear_models_and_datasets(
@@ -385,17 +385,17 @@ def get_sklearn_all_models_and_datasets(
     )
 
 
-# All scikit-learn models available in Concrete ML to test and their associated dataset parameters
+# All scikit-learn models available in Torus ML to test and their associated dataset parameters
 MODELS_AND_DATASETS = get_sklearn_all_models_and_datasets(regressor=True, classifier=True)
 
-# All unique scikit-learn models available in Concrete ML and their associated dataset parameters
+# All unique scikit-learn models available in Torus ML and their associated dataset parameters
 UNIQUE_MODELS_AND_DATASETS = get_sklearn_all_models_and_datasets(
     regressor=True, classifier=True, unique_models=True
 )
 
 
 def instantiate_model_generic(model_class, n_bits, **parameters):
-    """Instantiate any Concrete ML model type.
+    """Instantiate any Torus ML model type.
 
     Args:
         model_class (class): The type of the model to instantiate.
@@ -589,7 +589,7 @@ def check_serialization(
     """Check that the given object can properly be serialized.
 
     This function serializes all objects using the `dump`, `dumps`, `load` and `loads` functions
-    from Concrete ML. If the given object provides a `dump` and `dumps` method, they are also
+    from Torus ML. If the given object provides a `dump` and `dumps` method, they are also
     serialized using these.
 
     Args:
@@ -612,7 +612,7 @@ def check_serialization(
     dump_method_to_test = [False]
 
     # If the given object provides a `dump`, `dumps` `dump_dict` method (which indicates that they
-    # are Concrete ML serializable classes) and are instantiated, run the check using these as well
+    # are Torus ML serializable classes) and are instantiated, run the check using these as well
     if (
         hasattr(object_to_serialize, "dump")
         and hasattr(object_to_serialize, "dumps")

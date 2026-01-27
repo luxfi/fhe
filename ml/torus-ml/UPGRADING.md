@@ -1,6 +1,6 @@
-# Upgrading Concrete ML In Your Project
+# Upgrading Torus ML In Your Project
 
-This guide aims to help developers who are upgrading from older versions of Concrete ML. Although we cannot cover everything, we have compiled the most important points to assist you in your transition. If you encounter any issues, please reach out through our [community channels](https://luxfhe.io/community-channels).
+This guide aims to help developers who are upgrading from older versions of Torus ML. Although we cannot cover everything, we have compiled the most important points to assist you in your transition. If you encounter any issues, please reach out through our [community channels](https://luxfhe.io/community-channels).
 
 ## Upgrading to 1.0.0
 
@@ -16,7 +16,7 @@ Please take note of the following changes when upgrading to version 1.0.0:
 
 - `compilation_artifacts` parameter has been renamed to `artifacts`.
 
-- `use_virtual_lib` parameter in `concrete.ml.torch` has been removed from the following functions:
+- `use_virtual_lib` parameter in `torus.ml.torch` has been removed from the following functions:
 
   - `compile_onnx_model`
   - `compile_torch_model`

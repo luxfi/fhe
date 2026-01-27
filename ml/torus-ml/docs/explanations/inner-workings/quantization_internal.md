@@ -2,19 +2,19 @@
 
 ## Quantizing data
 
-Concrete ML has support for quantized ML models and also provides quantization tools for Quantization Aware Training and Post-Training Quantization. The core of this functionality is the conversion of floating point values to integers and back. This is done using `QuantizedArray` in `concrete.ml.quantization`.
+Torus ML has support for quantized ML models and also provides quantization tools for Quantization Aware Training and Post-Training Quantization. The core of this functionality is the conversion of floating point values to integers and back. This is done using `QuantizedArray` in `torus.ml.quantization`.
 
-The [`QuantizedArray`](../../references/api/concrete.ml.quantization.quantizers.md#class-quantizedarray) class takes several arguments that determine how float values are quantized:
+The [`QuantizedArray`](../../references/api/torus.ml.quantization.quantizers.md#class-quantizedarray) class takes several arguments that determine how float values are quantized:
 
 - `n_bits` defines the precision used in quantization
 - `values` are floating point values that will be converted to integers
 - `is_signed` determines if the quantized integer values should allow negative values
 - `is_symmetric` determines if the range of floating point values to be quantized should be taken as symmetric around zero
 
-See also the [UniformQuantizer](../../references/api/concrete.ml.quantization.quantizers.md#class-uniformquantizer) reference for more information:
+See also the [UniformQuantizer](../../references/api/torus.ml.quantization.quantizers.md#class-uniformquantizer) reference for more information:
 
 ```python
-from concrete.ml.quantization import QuantizedArray
+from torus.ml.quantization import QuantizedArray
 import numpy
 numpy.random.seed(0)
 A = numpy.random.uniform(-2, 2, 10)
@@ -60,7 +60,7 @@ In the following example, showing the de-quantization of model outputs, the `Qua
 
 ```python
 import numpy
-from concrete.ml.quantization.quantizers import QuantizationOptions
+from torus.ml.quantization.quantizers import QuantizationOptions
 
 q_values = [0, 0, 1, 2, 3, -1]
 QuantizedArray(
@@ -78,7 +78,7 @@ QuantizedArray(
 
 Machine learning models are implemented with a diverse set of operations, such as convolution, linear transformations, activation functions, and element-wise operations. When working with quantized values, these operations cannot be carried out in an equivalent way to floating point values. With quantization, it is necessary to re-scale the input and output values of each operation to fit in the quantization domain.
 
-In Concrete ML, the quantized equivalent of a scikit-learn model or a PyTorch `nn.Module` is the `QuantizedModule`. Note that only inference is implemented in the `QuantizedModule`, and it is built through a conversion of the inference function of the corresponding scikit-learn or PyTorch module.
+In Torus ML, the quantized equivalent of a scikit-learn model or a PyTorch `nn.Module` is the `QuantizedModule`. Note that only inference is implemented in the `QuantizedModule`, and it is built through a conversion of the inference function of the corresponding scikit-learn or PyTorch module.
 
 Built-in neural networks expose the `quantized_module` member, while a `QuantizedModule` is also the result of the compilation of custom models through `compile_torch_model` and `compile_brevitas_qat_model`.
 

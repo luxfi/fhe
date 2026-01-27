@@ -11,7 +11,7 @@ import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from concrete.ml.torch.hybrid_model import HybridFHEModel
+from torus.ml.torch.hybrid_model import HybridFHEModel
 
 
 def compile_model(

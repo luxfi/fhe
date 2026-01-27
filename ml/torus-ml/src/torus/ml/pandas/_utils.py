@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple, Union
 
 import numpy
 
-from concrete import fhe
+from torus import fhe
 
 
 def encrypt_value(

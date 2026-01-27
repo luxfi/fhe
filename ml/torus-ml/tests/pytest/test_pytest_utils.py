@@ -4,7 +4,7 @@ import numpy
 import pytest
 from numpy.random import RandomState
 
-from concrete.ml.pytest.utils import values_are_equal
+from torus.ml.pytest.utils import values_are_equal
 
 
 @pytest.mark.parametrize(

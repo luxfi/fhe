@@ -15,7 +15,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from utility_functions import text_to_tensor
 
-from concrete.ml.sklearn import XGBClassifier
+from torus.ml.sklearn import XGBClassifier
 
 
 def train(dev_folder="./dev"):
@@ -196,7 +196,7 @@ def train(dev_folder="./dev"):
     X_test_numpy_df.to_csv("samples_for_compilation.csv")
 
     # Save the model to be pushed to a server later
-    from concrete.ml.deployment import FHEModelDev
+    from torus.ml.deployment import FHEModelDev
 
     fhe_api = FHEModelDev(dev_folder, best_model)
     fhe_api.save()

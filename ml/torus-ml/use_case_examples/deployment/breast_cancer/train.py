@@ -1,8 +1,8 @@
 import numpy
 from sklearn.datasets import load_breast_cancer
 
-from concrete.ml.deployment import FHEModelClient, FHEModelDev, FHEModelServer
-from concrete.ml.sklearn import XGBClassifier
+from torus.ml.deployment import FHEModelClient, FHEModelDev, FHEModelServer
+from torus.ml.sklearn import XGBClassifier
 
 if __name__ == "__main__":
     # First get some data and train a model.

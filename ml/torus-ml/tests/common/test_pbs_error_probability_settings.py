@@ -6,9 +6,9 @@ import numpy
 import pytest
 from torch import nn
 
-from concrete.ml.pytest.torch_models import FCSmall
-from concrete.ml.pytest.utils import MODELS_AND_DATASETS
-from concrete.ml.torch.compile import compile_torch_model
+from torus.ml.pytest.torch_models import FCSmall
+from torus.ml.pytest.utils import MODELS_AND_DATASETS
+from torus.ml.torch.compile import compile_torch_model
 
 INPUT_OUTPUT_FEATURE = [5, 10]
 

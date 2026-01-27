@@ -1,7 +1,7 @@
 # Healthcare diagnosis
 
 Give a diagnosis using FHE to preserve the privacy of the patient. We show how
-to train several models using Concrete ML and choose the one that provides
+to train several models using Torus ML and choose the one that provides
 the best accuracy with the lowest inference time. Finally, we export the model
 in order to use it in the [Hugging Face space](https://huggingface.co/spaces/luxfhe-fhe/health_prediction/)
 which provides a live interactive demo this model in use.

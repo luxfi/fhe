@@ -14,6 +14,6 @@ If you are using macOS with arm then you might need to launch the `./fix_grpc.sh
 To train the model with federated learning just use the `run.sh` script.
 Once this is done you have a pickled `LogisticRegression` model that was trained using federated learning with 2 clients.
 
-## Using the model with Concrete ML
+## Using the model with Torus ML
 
 You can then launch `python load_to_cml.py` script to load the model, compile it to FHE and then evaluate the loaded model on the test set.
