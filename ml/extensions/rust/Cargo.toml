@@ -1,13 +1,13 @@
 [package]
-name = "concrete-ml-extensions"
+name = "torus-ml-extensions"
 version = "0.2.0"
 edition = "2021"
 description = "Private matrix multiplication library using fully homomorphic encryption"
 license = "BSD-3-Clause-Clear"
-homepage = "https://luxfhe.io"
+homepage = "https://lux.network/fhe"
 
 [lib]
-name="concrete_ml_extensions"
+name="torus_ml_extensions"
 path = "src/lib_switcher.rs"
 crate-type = ["cdylib", "staticlib"]
 
