@@ -6,9 +6,9 @@
 
 p_error binary search for classification and regression tasks.
 
-Only PyTorch neural networks and Concrete built-in models are supported.
+Only PyTorch neural networks and Torus built-in models are supported.
 
-- Concrete built-in models include trees and QNN
+- Torus built-in models include trees and QNN
 - Quantized aware trained model are supported using Brevitas framework
 - Torch models can be converted into post-trained quantized models
 

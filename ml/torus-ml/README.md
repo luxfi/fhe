@@ -24,7 +24,7 @@
 
 ### What is Torus ML
 
-**Torus ML** is a Privacy-Preserving Machine Learning (PPML) open-source set of tools built on top of [Concrete](https://github.com/luxfhe-ai/torus) by [LuxFHE](https://github.com/luxfhe-ai).
+**Torus ML** is a Privacy-Preserving Machine Learning (PPML) open-source set of tools built on top of [Torus](https://github.com/luxfhe-ai/torus) by [LuxFHE](https://github.com/luxfhe-ai).
 
 It simplifies the use of fully homomorphic encryption (FHE) for data scientists so that they can automatically turn machine learning models into their homomorphic equivalents, and use them without knowledge of cryptography.
 
@@ -235,8 +235,8 @@ Full, comprehensive documentation is available here: [https://docs.luxfhe.ai/tor
 To cite Torus ML in academic papers, please use the following entry:
 
 ```text
-@Misc{ConcreteML,
-  title={Concrete {ML}: a Privacy-Preserving Machine Learning Library using Fully Homomorphic Encryption for Data Scientists},
+@Misc{TorusML,
+  title={Torus {ML}: a Privacy-Preserving Machine Learning Library using Fully Homomorphic Encryption for Data Scientists},
   author={LuxFHE},
   year={2022},
   note={\url{https://github.com/luxfhe-ai/torus-ml}},

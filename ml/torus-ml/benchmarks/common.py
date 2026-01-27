@@ -244,7 +244,7 @@ BENCHMARK_CONFIGURATION = fhe.Configuration(
     dump_artifacts_on_unexpected_failures=True,
     enable_unsafe_features=True,
     use_insecure_key_cache=True,
-    insecure_key_cache_location="ConcretePythonKeyCache",
+    insecure_key_cache_location="TorusPythonKeyCache",
 )
 
 

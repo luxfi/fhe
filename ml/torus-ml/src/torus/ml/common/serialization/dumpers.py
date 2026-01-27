@@ -3,7 +3,7 @@
 import json
 from typing import Any, TextIO
 
-from .encoder import ConcreteEncoder
+from .encoder import TorusEncoder
 
 
 def dumps(obj: Any) -> str:
@@ -16,7 +16,7 @@ def dumps(obj: Any) -> str:
         str: A string representation of the object.
     """
 
-    return json.dumps(obj, cls=ConcreteEncoder)
+    return json.dumps(obj, cls=TorusEncoder)
 
 
 def dump(obj: Any, file: TextIO):

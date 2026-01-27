@@ -110,7 +110,7 @@ def object_hook(d: Any) -> Any:
     """Define a custom object hook that enables loading any supported serialized values.
 
     If the input's type is non-native, then we expect it to have the following format.More
-    information is available in the ConcreteEncoder class.
+    information is available in the TorusEncoder class.
 
     Args:
         d (Any): The serialized value to load.
@@ -230,7 +230,7 @@ def object_hook(d: Any) -> Any:
     return d
 
 
-class ConcreteDecoder(json.JSONDecoder):
+class TorusDecoder(json.JSONDecoder):
     """Custom json decoder to handle non-native types found in serialized Torus ML objects."""
 
     def __init__(self, *args, **kwargs):

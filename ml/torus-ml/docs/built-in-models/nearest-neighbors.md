@@ -8,7 +8,7 @@ This document introduces the nearest neighbors non-parametric classification mod
 
 ## Ciphertext format compatibility
 
-These models only support _Concrete_ ciphertexts. See [the ciphertexts format](../getting-started/concepts.md#ciphertext-formats) documentation for more details.
+These models only support _Torus_ ciphertexts. See [the ciphertexts format](../getting-started/concepts.md#ciphertext-formats) documentation for more details.
 
 ## Example
 

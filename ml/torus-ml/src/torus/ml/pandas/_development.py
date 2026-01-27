@@ -185,7 +185,7 @@ def load_server() -> fhe.Server:
     return fhe.Server.load(SERVER_PATH)
 
 
-# This part is used for updating the files when needed (for example, when Concrete Python is updated
+# This part is used for updating the files when needed (for example, when Torus Python is updated
 # and some backward compatibility issues arise)
 if __name__ == "__main__":
     save_client_server()  # pragma: no cover
