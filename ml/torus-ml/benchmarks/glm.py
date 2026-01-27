@@ -280,7 +280,7 @@ def score_estimator(
     # issue a warning if for some reason (e.g., low quantization, user error), the regressor
     # predictions are negative.
 
-    # Concrete predictions' shape is (n, 1) but mean_tweedie_deviance only accepts arrays
+    # Torus predictions' shape is (n, 1) but mean_tweedie_deviance only accepts arrays
     # of shape (n,)
     y_pred = np.squeeze(y_pred, axis=1)
 

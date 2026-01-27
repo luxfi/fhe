@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 
 # pylint: disable=ungrouped-imports
 from torus import ml
-from torus.ml.sklearn import DecisionTreeClassifier as ConcreteDecisionTreeClassifier
+from torus.ml.sklearn import DecisionTreeClassifier as TorusDecisionTreeClassifier
 
 # pylint: enable=ungrouped-imports
 
@@ -43,7 +43,7 @@ def ml_check(args, keyring_dir_as_str):
         random_state=42,
     )
 
-    model = ConcreteDecisionTreeClassifier(n_bits=3, max_depth=6)
+    model = TorusDecisionTreeClassifier(n_bits=3, max_depth=6)
     model.fit(x_train, y_train)
 
     # Compute average precision on test
@@ -100,7 +100,7 @@ def ml_check(args, keyring_dir_as_str):
 
 
 def cn_check(args, keyring_dir_as_str):
-    """Test about Concrete functions"""
+    """Test about Torus functions"""
 
     is_fast = args.fast
 
@@ -157,7 +157,7 @@ def main(args):
 
     keyring_dir_as_str = None
     if is_fast:
-        keyring_dir = Path.home().resolve() / "ConcretePythonKeyCache"
+        keyring_dir = Path.home().resolve() / "TorusPythonKeyCache"
         keyring_dir.mkdir(parents=True, exist_ok=True)
         keyring_dir_as_str = str(keyring_dir)
         print(f"Using {keyring_dir_as_str} as key cache dir")
@@ -166,7 +166,7 @@ def main(args):
     cn_check(args, keyring_dir_as_str)
 
     if is_fast:
-        keyring_dir = Path.home().resolve() / "ConcretePythonKeyCache"
+        keyring_dir = Path.home().resolve() / "TorusPythonKeyCache"
         if keyring_dir is not None:
             # Remove incomplete keys
             for incomplete_keys in keyring_dir.glob("**/*incomplete*"):

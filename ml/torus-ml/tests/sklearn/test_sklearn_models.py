@@ -1369,7 +1369,7 @@ def check_rounding_consistency(
         with pytest.warns(
             DeprecationWarning,
             match=(
-                "Using Concrete tree-based models without the `rounding feature` is " "deprecated.*"
+                "Using Torus tree-based models without the `rounding feature` is " "deprecated.*"
             ),
         ):
 
@@ -2398,7 +2398,7 @@ def test_tfhers_inputs_outputs_trees(model_class, parameters, n_bits, load_data,
             model.compile(x, ciphertext_format=CiphertextFormat.TFHE_RS, device=get_device)
         return
 
-    # Check that we can first compile to Concrete, then to
+    # Check that we can first compile to Torus, then to
     # TFHE-rs input/outputs then to torus again
     model.compile(x, device=get_device)
 

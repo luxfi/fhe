@@ -1,7 +1,7 @@
 # Description
 
 In this directory we show how to solve a classification task on CIFAR-10 and CIFAR-100, by converting a pre-trained CNN to its fully homomorphic encryption (FHE) equivalent using Quantization Aware Training (QAT) and Torus ML. We evaluate it using the FHE simulation
-mode provided by the Concrete stack.
+mode provided by the Torus stack.
 
 To do so, we divided this use case in 4 notebooks :
 

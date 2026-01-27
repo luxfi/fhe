@@ -6,11 +6,11 @@ As FHE execution is much slower than execution on non-encrypted data, Torus ML h
 
 ## Compilation to FHE
 
-Torus ML implements model inference using Concrete as a backend. In order to execute in FHE, a numerical program written in Concrete needs to be compiled. This functionality is [described here](https://docs.luxfhe.io/torus/get-started/quick_start), and Torus ML hides away most of the complexity of this step, completing the entire compilation process itself.
+Torus ML implements model inference using Torus as a backend. In order to execute in FHE, a numerical program written in Torus needs to be compiled. This functionality is [described here](https://docs.luxfhe.io/torus/get-started/quick_start), and Torus ML hides away most of the complexity of this step, completing the entire compilation process itself.
 
-From the perspective of the Torus ML user, the compilation process performed by Concrete can be broken up into 3 steps:
+From the perspective of the Torus ML user, the compilation process performed by Torus can be broken up into 3 steps:
 
-1. tracing the NumPy program and creating a Concrete op-graph
+1. tracing the NumPy program and creating a Torus op-graph
 1. checking the op-graph for FHE compatibility
 1. producing machine code for the op-graph (this step automatically determines cryptographic parameters)
 
@@ -78,7 +78,7 @@ For custom models, with one of the `compile_brevitas_qat_model` (for Brevitas mo
 
 ## FHE simulation
 
-The first step in the list above takes a Python function implemented using the Concrete [supported operation set](https://docs.luxfhe.io/torus/getting-started/compatibility) and transforms it into an executable operation graph.
+The first step in the list above takes a Python function implemented using the Torus [supported operation set](https://docs.luxfhe.io/torus/getting-started/compatibility) and transforms it into an executable operation graph.
 
 The result of this single step of the compilation pipeline allows the:
 
@@ -101,9 +101,9 @@ Moreover, the maximum accumulator bit-width is determined as follows:
     bit_width = clf.quantized_module_.fhe_circuit.graph.maximum_integer_bit_width()
 ```
 
-## A simple Concrete example
+## A simple Torus example
 
-While Torus ML hides away all the Concrete code that performs model inference, it can be useful to understand how Concrete code works. Here is a toy example for a simple linear regression model on integers to illustrate compilation concepts. Generally, it is recommended to use the [built-in models](../built-in-models/linear.md), which provide linear regression out of the box.
+While Torus ML hides away all the Torus code that performs model inference, it can be useful to understand how Torus code works. Here is a toy example for a simple linear regression model on integers to illustrate compilation concepts. Generally, it is recommended to use the [built-in models](../built-in-models/linear.md), which provide linear regression out of the box.
 
 ```python
 import numpy

@@ -26,7 +26,7 @@ object_hook(d: Any) → Any
 
 Define a custom object hook that enables loading any supported serialized values.
 
-If the input's type is non-native, then we expect it to have the following format.More information is available in the ConcreteEncoder class.
+If the input's type is non-native, then we expect it to have the following format.More information is available in the TorusEncoder class.
 
 **Args:**
 
@@ -44,7 +44,7 @@ ______________________________________________________________________
 
 <a href="../../../src/torus/ml/common/serialization/decoder.py#L233"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>class</kbd> `ConcreteDecoder`
+## <kbd>class</kbd> `TorusDecoder`
 
 Custom json decoder to handle non-native types found in serialized Torus ML objects.
 

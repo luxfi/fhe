@@ -859,7 +859,7 @@ class QuantizedModule:
             "already-quantized values."
         )
 
-        # Concrete does not support variable *args-style functions, so compile a proxy
+        # Torus does not support variable *args-style functions, so compile a proxy
         # function dynamically with a suitable number of arguments
         forward_proxy, orig_args_to_proxy_func_args = generate_proxy_function(
             self._clear_forward, self.ordered_module_input_names
@@ -895,7 +895,7 @@ class QuantizedModule:
             zip(orig_args_to_proxy_func_args.values(), inputs_encryption_status)
         )
 
-        # Set ciphertext format to Concrete as generic models only support this
+        # Set ciphertext format to Torus as generic models only support this
         self.ciphertext_format = CiphertextFormat.CONCRETE
 
         compiler = Compiler(

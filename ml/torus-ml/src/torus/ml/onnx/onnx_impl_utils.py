@@ -25,7 +25,7 @@ def numpy_onnx_pad(
         x (numpy.ndarray): input tensor to pad
         pads (List[int]): padding values according to ONNX spec
         pad_value (Optional[Union[float, int]]): value used to fill in padding, default 0
-        int_only (bool): set to True to generate integer only code with Concrete
+        int_only (bool): set to True to generate integer only code with Torus
 
     Returns:
         res(numpy.ndarray): the input tensor with padding applied

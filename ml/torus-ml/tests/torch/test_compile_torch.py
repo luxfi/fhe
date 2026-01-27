@@ -698,7 +698,7 @@ def test_compile_brevitas_qat(
     )
 
 
-# Update this test to align with Concrete's simulation fix.
+# Update this test to align with Torus's simulation fix.
 # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4578
 @pytest.mark.xfail
 @pytest.mark.parametrize(
