@@ -1,4 +1,0 @@
-grequests
-requests
-tqdm
-transformers
