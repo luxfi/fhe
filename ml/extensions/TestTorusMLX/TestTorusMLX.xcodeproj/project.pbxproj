@@ -7,18 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3283BF3B2D3AADF50064EC41 /* concrete_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3283BF3A2D3AADF50064EC41 /* concrete_ml_extensions.swift */; };
-		3283BF3C2D3AAF240064EC41 /* libconcrete_ml_extensions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3283BF392D3AACEB0064EC41 /* libconcrete_ml_extensions.a */; };
+		3283BF3B2D3AADF50064EC41 /* torus_ml_extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3283BF3A2D3AADF50064EC41 /* torus_ml_extensions.swift */; };
+		3283BF3C2D3AAF240064EC41 /* libtorus_ml_extensions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3283BF392D3AACEB0064EC41 /* libtorus_ml_extensions.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3226DAE22D3AA0E900595BBC /* TestConcretMLX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestConcretMLX.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		3283BF392D3AACEB0064EC41 /* libconcrete_ml_extensions.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libconcrete_ml_extensions.a; path = "../rust/target/aarch64-apple-ios-sim/debug/libconcrete_ml_extensions.a"; sourceTree = "<group>"; };
-		3283BF3A2D3AADF50064EC41 /* concrete_ml_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = concrete_ml_extensions.swift; path = ../rust/GENERATED/concrete_ml_extensions.swift; sourceTree = SOURCE_ROOT; };
+		3226DAE22D3AA0E900595BBC /* TestTorusMLX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestTorusMLX.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3283BF392D3AACEB0064EC41 /* libtorus_ml_extensions.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtorus_ml_extensions.a; path = "../rust/target/aarch64-apple-ios-sim/debug/libtorus_ml_extensions.a"; sourceTree = "<group>"; };
+		3283BF3A2D3AADF50064EC41 /* torus_ml_extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = torus_ml_extensions.swift; path = ../rust/GENERATED/torus_ml_extensions.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3226DAE42D3AA0E900595BBC /* TestConcretMLX */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TestConcretMLX; sourceTree = "<group>"; };
+		3226DAE42D3AA0E900595BBC /* TestTorusMLX */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TestTorusMLX; sourceTree = "<group>"; };
 		32AEA1192D7AF983005EE03B /* Helpers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Helpers; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3283BF3C2D3AAF240064EC41 /* libconcrete_ml_extensions.a in Frameworks */,
+				3283BF3C2D3AAF240064EC41 /* libtorus_ml_extensions.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -37,7 +37,7 @@
 		3226DAD92D3AA0E900595BBC = {
 			isa = PBXGroup;
 			children = (
-				3226DAE42D3AA0E900595BBC /* TestConcretMLX */,
+				3226DAE42D3AA0E900595BBC /* TestTorusMLX */,
 				32AEA1192D7AF983005EE03B /* Helpers */,
 				3226DAF32D3AA17A00595BBC /* Frameworks */,
 				3226DAE32D3AA0E900595BBC /* Products */,
@@ -47,7 +47,7 @@
 		3226DAE32D3AA0E900595BBC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3226DAE22D3AA0E900595BBC /* TestConcretMLX.app */,
+				3226DAE22D3AA0E900595BBC /* TestTorusMLX.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,8 +55,8 @@
 		3226DAF32D3AA17A00595BBC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3283BF3A2D3AADF50064EC41 /* concrete_ml_extensions.swift */,
-				3283BF392D3AACEB0064EC41 /* libconcrete_ml_extensions.a */,
+				3283BF3A2D3AADF50064EC41 /* torus_ml_extensions.swift */,
+				3283BF392D3AACEB0064EC41 /* libtorus_ml_extensions.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -64,9 +64,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3226DAE12D3AA0E900595BBC /* TestConcretMLX */ = {
+		3226DAE12D3AA0E900595BBC /* TestTorusMLX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3226DAF02D3AA0EA00595BBC /* Build configuration list for PBXNativeTarget "TestConcretMLX" */;
+			buildConfigurationList = 3226DAF02D3AA0EA00595BBC /* Build configuration list for PBXNativeTarget "TestTorusMLX" */;
 			buildPhases = (
 				3226DADE2D3AA0E900595BBC /* Sources */,
 				3226DADF2D3AA0E900595BBC /* Frameworks */,
@@ -77,14 +77,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				3226DAE42D3AA0E900595BBC /* TestConcretMLX */,
+				3226DAE42D3AA0E900595BBC /* TestTorusMLX */,
 				32AEA1192D7AF983005EE03B /* Helpers */,
 			);
-			name = TestConcretMLX;
+			name = TestTorusMLX;
 			packageProductDependencies = (
 			);
-			productName = TestConcretMLX;
-			productReference = 3226DAE22D3AA0E900595BBC /* TestConcretMLX.app */;
+			productName = TestTorusMLX;
+			productReference = 3226DAE22D3AA0E900595BBC /* TestTorusMLX.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -103,7 +103,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3226DADD2D3AA0E900595BBC /* Build configuration list for PBXProject "TestConcretMLX" */;
+			buildConfigurationList = 3226DADD2D3AA0E900595BBC /* Build configuration list for PBXProject "TestTorusMLX" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -117,7 +117,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3226DAE12D3AA0E900595BBC /* TestConcretMLX */,
+				3226DAE12D3AA0E900595BBC /* TestTorusMLX */,
 			);
 		};
 /* End PBXProject section */
@@ -137,7 +137,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3283BF3B2D3AADF50064EC41 /* concrete_ml_extensions.swift in Sources */,
+				3283BF3B2D3AADF50064EC41 /* torus_ml_extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,7 +286,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "\"$(PROJECT_DIR)/../rust/target/aarch64-apple-ios-sim/debug\"";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.TestConcretMLX;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.TestTorusMLX;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = "\"$(PROJECT_DIR)/../rust/GENERATED\"";
@@ -319,7 +319,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "\"$(PROJECT_DIR)/../rust/target/aarch64-apple-ios-sim/debug\"";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.TestConcretMLX;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.zama.fhedemo.TestTorusMLX;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = "\"$(PROJECT_DIR)/../rust/GENERATED\"";
@@ -331,7 +331,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3226DADD2D3AA0E900595BBC /* Build configuration list for PBXProject "TestConcretMLX" */ = {
+		3226DADD2D3AA0E900595BBC /* Build configuration list for PBXProject "TestTorusMLX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3226DAEE2D3AA0EA00595BBC /* Debug */,
@@ -340,7 +340,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3226DAF02D3AA0EA00595BBC /* Build configuration list for PBXNativeTarget "TestConcretMLX" */ = {
+		3226DAF02D3AA0EA00595BBC /* Build configuration list for PBXNativeTarget "TestTorusMLX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3226DAF12D3AA0EA00595BBC /* Debug */,

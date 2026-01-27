@@ -1,5 +1,5 @@
-name: CMLBuild
-description: Build concrete-ml with Python 3.9 for x86 plateform.
+name: TMLBuild
+description: Build torus-ml with Python 3.9 for x86 plateform.
 schemaVersion: 1.0
 
 phases:
@@ -36,14 +36,14 @@ phases:
           commands:
             - apt install -y python3.9 python3.9-distutils
 
-      - name: InstallConcreteML
+      - name: InstallTorusML
         action: ExecuteBash
         inputs:
           commands:
             - virtualenv venv --python=python3.9
             - echo "source $(pwd)/venv/bin/activate" >> .bashrc
             - source venv/bin/activate
-            - python -m pip install "concrete-ml[dev]==${CML_VERSION}"
+            - python -m pip install "torus-ml[dev]==${TML_VERSION}"
 
   - name: test
     steps:
@@ -57,7 +57,7 @@ phases:
       - name: DownloadGithubDeployKey
         action: S3Download
         inputs:
-          - source: s3://concrete-ml-ami-build/github_deploy_private_key
+          - source: s3://torus-ml-ami-build/github_deploy_private_key
             destination: /root/.ssh/deploy_private_key
             expectedBucketOwner: ${AWS_ACCOUNT_ID}
 
@@ -83,8 +83,8 @@ phases:
         inputs:
           commands:
             - source venv/bin/activate
-            - git clone git@github.com:luxfhe-ai/concrete-ml.git
-            - cd concrete-ml
+            - git clone git@github.com:luxfhe-ai/torus-ml.git
+            - cd torus-ml
             - git lfs pull
-            - git checkout v$(pip show concrete-ml | grep "Version" | cut -c 10-)
+            - git checkout v$(pip show torus-ml | grep "Version" | cut -c 10-)
             - pytest ./tests -k "not test_deploy"

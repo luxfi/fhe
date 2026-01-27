@@ -449,7 +449,7 @@ fn is_cuda_enabled() -> PyResult<bool> {
     return Ok(false);
 }
 
-fn concrete_ml_extensions_base(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn torus_ml_extensions_base(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Maybe we could put this in a loop?
     m.add_function(wrap_pyfunction!(cpu_create_private_key, m)?)?;
     m.add_function(wrap_pyfunction!(encrypt_matrix, m)?)?;
@@ -489,7 +489,7 @@ fn concrete_ml_extensions_base(m: &Bound<'_, PyModule>) -> PyResult<()> {
 /// import the module.
 #[cfg(all(feature = "cuda", target_arch = "x86_64"))]
 #[pymodule]
-fn concrete_ml_extensions(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn torus_ml_extensions(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(cuda_create_private_key, m)?)?;
     m.add_function(wrap_pyfunction!(is_cuda_available, m)?)?;
     m.add_function(wrap_pyfunction!(cuda_matrix_multiplication, m)?)?;
@@ -498,13 +498,13 @@ fn concrete_ml_extensions(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CudaCompressionKey>()?;
     m.add_class::<CudaClearMatrix>()?;
 
-    concrete_ml_extensions_base(m)
+    torus_ml_extensions_base(m)
 }
 
 #[cfg(not(feature = "cuda"))]
 #[pymodule]
-fn concrete_ml_extensions(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    concrete_ml_extensions_base(m)
+fn torus_ml_extensions(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    torus_ml_extensions_base(m)
 }
 
 const SERIALIZE_SIZE_LIMIT: u64 = 1_000_000_000;

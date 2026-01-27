@@ -3,7 +3,7 @@
 import SwiftUI
 
 @main
-struct TestConcretMLXApp: App {
+struct TestTorusMLXApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

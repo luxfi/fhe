@@ -2,7 +2,7 @@ import initWasmModule, {
         keygen_radix_u64_wasm,
         encrypt_serialize_u64_radix_flat_wasm,
         decrypt_serialized_u64_radix_flat_wasm
-    } from '../../rust/pkg-wasm/concrete_ml_extensions_wasm.js';
+    } from '../../rust/pkg-wasm/torus_ml_extensions_wasm.js';
     
     let wasmModule = null;
     
