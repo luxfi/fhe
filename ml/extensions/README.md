@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/75a78517-d423-4a28-8db3-1f50e7d86925">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/674c368f-8030-4407-985b-417a09e1fe87">
-  <img width=600 alt="LuxFHE Concrete ML">
+  <img width=600 alt="LuxFHE Torus ML">
 </picture>
 </p>
 
@@ -22,18 +22,18 @@
 
 ## About
 
-### What is Concrete ML Extensions
+### What is Torus ML Extensions
 
-Concrete ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper package that helps developers build applications based on **Concrete ML**. It implements low-level cryptographic functions using Fully Homomorphic Encryption (FHE). 
+Torus ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper package that helps developers build applications based on **Torus ML**. It implements low-level cryptographic functions using Fully Homomorphic Encryption (FHE). 
 <br></br>
 
 ### Main features
 
 - **Fast encrypt-clear matrix multiplication**: This library implements a matrix product between encrypted matrices and clear matrices.
 - **Python and Swift bindings for matrix multiplication client applications**: This library contains bindings that help developers build client applications on various platforms, including iOS.
-- **Encryption/Decryption to [Lux FHE](https://docs.luxfhe.io/torus-ml) ciphertexts**: To provide interoperability with Lux FHE ciphertexts, Concrete ML Extensions offers encryption and decryption functions that are used in Concrete ML.
+- **Encryption/Decryption to [Lux FHE](https://docs.luxfhe.io/torus-ml) ciphertexts**: To provide interoperability with Lux FHE ciphertexts, Torus ML Extensions offers encryption and decryption functions that are used in Torus ML.
 
-*Learn more about Concrete ML Extensions features in the [documentation](https://docs.luxfhe.io/torus-ml).*
+*Learn more about Torus ML Extensions features in the [documentation](https://docs.luxfhe.io/torus-ml).*
 <br></br>
 
 ## Table of Contents
@@ -43,7 +43,7 @@ Concrete ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper pac
   - [Demos](#demos)
   - [Tutorials](#tutorials)
   - [Documentation](#documentation)
-- **[Working with Concrete ML Extensions](#working-with-torus-ml-extensions)**
+- **[Working with Torus ML Extensions](#working-with-torus-ml-extensions)**
   - [Citations](#citations)
   - [Contributing](#contributing)
   - [License](#license)
@@ -53,7 +53,7 @@ Concrete ML Extensions by [LuxFHE](https://github.com/luxfhe.io) is a helper pac
 
 ## Installation
 
-Depending on your OS, Concrete ML Extensions may have GPU support.
+Depending on your OS, Torus ML Extensions may have GPU support.
 
 |                 OS / HW                 | Available  | Has GPU support |
 | :-------------------------------------: | :-----------------: | :--------------: |
@@ -63,11 +63,11 @@ Depending on your OS, Concrete ML Extensions may have GPU support.
 | macOS 11+ (Apple Silicon: M1, M2, etc.) |     Yes     |       No        |
 
 >[!Note]
->Concrete ML Extensions only supports Python `3.8`, `3.9`, `3.10`, `3.11` and `3.12`.
+>Torus ML Extensions only supports Python `3.8`, `3.9`, `3.10`, `3.11` and `3.12`.
 
 ### Pip
 
-Concrete ML Extensions is installed automatically when installing Concrete ML. To install manually from PyPi, run the following:
+Torus ML Extensions is installed automatically when installing Torus ML. To install manually from PyPi, run the following:
 
 ```
 pip install torus-ml-extensions
@@ -105,7 +105,7 @@ maturin develop --release --no-default-features --features "python_bindings"
 
 ### From Source for iOS
 
-You can also use Concrete ML Extensions in iOS projects. To do so:
+You can also use Torus ML Extensions in iOS projects. To do so:
 
 1. Compile the library for both iOS and iOS simulator targets (produces two `.a` static libs).
 2. Generate Swift bindings (produces `.h`, `.modulemap` and `.swift` wrapper).
@@ -163,7 +163,7 @@ Next steps:
         -headers GENERATED/include/ \
         -library target/aarch64-apple-ios-sim/release/libtorus_ml_extensions.a \
         -headers GENERATED/include/ \
-        -output GENERATED/ConcreteMLExtensions.xcframework
+        -output GENERATED/TorusMLExtensions.xcframework
 ```
 
 ##### 4. Use the `.xcframework` in your iOS project
@@ -190,14 +190,14 @@ Solution: Ensure Xcode.app/Settings/Locations/Command Line Tools is set to the r
 To fix, a workaround [suggested here](https://github.com/jessegrosjean/module-map-error) is to wrap the .h and .modulemap in a subfolder:
 
 ```shell
-    mkdir -p GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/torusHeaders
-    mkdir -p GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/torusHeaders
-    mv GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/torus_ml_extensionsFFI.h \
-        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/module.modulemap \
-        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64/Headers/torusHeaders
-    mv GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/torus_ml_extensionsFFI.h \
-        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/module.modulemap \
-        GENERATED/ConcreteMLExtensions.xcframework/ios-arm64-simulator/Headers/torusHeaders
+    mkdir -p GENERATED/TorusMLExtensions.xcframework/ios-arm64/Headers/torusHeaders
+    mkdir -p GENERATED/TorusMLExtensions.xcframework/ios-arm64-simulator/Headers/torusHeaders
+    mv GENERATED/TorusMLExtensions.xcframework/ios-arm64/Headers/torus_ml_extensionsFFI.h \
+        GENERATED/TorusMLExtensions.xcframework/ios-arm64/Headers/module.modulemap \
+        GENERATED/TorusMLExtensions.xcframework/ios-arm64/Headers/torusHeaders
+    mv GENERATED/TorusMLExtensions.xcframework/ios-arm64-simulator/Headers/torus_ml_extensionsFFI.h \
+        GENERATED/TorusMLExtensions.xcframework/ios-arm64-simulator/Headers/module.modulemap \
+        GENERATED/TorusMLExtensions.xcframework/ios-arm64-simulator/Headers/torusHeaders
 ```
 
 <p align="right">
@@ -214,10 +214,10 @@ To fix, a workaround [suggested here](https://github.com/jessegrosjean/module-ma
 ### Demos
 
 - [Encrypted LLM fine-tuning](https://github.com/luxfhe.io/torus-ml/tree/main/use_case_examples/lora_finetuning): This demo shows
-how to fine-tune a LLM using the Low Rank Approximation approach. It leverages the Concrete ML Extensions package to perform the fine-tuning
+how to fine-tune a LLM using the Low Rank Approximation approach. It leverages the Torus ML Extensions package to perform the fine-tuning
 on encrypted data. 
 
-*If you have built awesome projects using Concrete ML that leverages the Concrete ML Extensions package, please let us know and we will be happy to showcase them here!*
+*If you have built awesome projects using Torus ML that leverages the Torus ML Extensions package, please let us know and we will be happy to showcase them here!*
 <br></br>
 
 ### Tutorials
@@ -235,15 +235,15 @@ Full, comprehensive documentation is available here: [https://docs.luxfhe.io/tor
   <a href="#about" > ↑ Back to top </a>
 </p>
 
-## Working with Concrete ML Extensions
+## Working with Torus ML Extensions
 
 ### Citations
 
-To cite Concrete ML Extensions in academic papers, please use the following entry:
+To cite Torus ML Extensions in academic papers, please use the following entry:
 
 ```text
-@Misc{ConcreteML,
-  title={Concrete {ML}: a Privacy-Preserving Machine Learning Library using Fully Homomorphic Encryption for Data Scientists},
+@Misc{TorusML,
+  title={Torus {ML}: a Privacy-Preserving Machine Learning Library using Fully Homomorphic Encryption for Data Scientists},
   author={LuxFHE},
   year={2022},
   note={\url{https://github.com/luxfhe.io/torus-ml}},
@@ -252,7 +252,7 @@ To cite Concrete ML Extensions in academic papers, please use the following entr
 
 ### Contributing
 
-To contribute to Concrete ML Extensions, please refer to [this section of the documentation](docs/developer/contributing.md).
+To contribute to Torus ML Extensions, please refer to [this section of the documentation](docs/developer/contributing.md).
 <br></br>
 
 ### License
