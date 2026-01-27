@@ -104,7 +104,7 @@ These objects are serialized into bytes to streamline the data transfer between 
 
 #### Ciphertext formats and keys
 
-Two types of ciphertext formats are [available in Concrete ML](../getting-started/concepts.md#ciphertext-formats) and both are available for deployment. To use the _TFHE-rs radix_ format, pass the `ciphertext_format` option to the compilation call as follows:
+Two types of ciphertext formats are [available in Concrete ML](../getting-started/concepts.md#ciphertext-formats) and both are available for deployment. To use the _Lux FHE radix_ format, pass the `ciphertext_format` option to the compilation call as follows:
 
 <!--pytest-codeblocks:cont-->
 
@@ -112,15 +112,15 @@ Two types of ciphertext formats are [available in Concrete ML](../getting-starte
 from concrete.ml.common.utils import CiphertextFormat
 model.compile(X, ciphertext_format=CiphertextFormat.TFHE_RS)
 
-fhe_directory = '/tmp/fhe_client_server_files_tfhers/'
+fhe_directory = '/tmp/fhe_client_server_files_luxfhe/'
 
 # Setup the development environment
 dev = FHEModelDev(path_dir=fhe_directory, model=model)
 dev.save()
 
 # Setup the client
-client = FHEModelClient(path_dir=fhe_directory, key_dir="/tmp/keys_client_tfhers")
-serialized_evaluation_keys, tfhers_evaluation_keys = client.get_serialized_evaluation_keys(include_tfhers_key=True)
+client = FHEModelClient(path_dir=fhe_directory, key_dir="/tmp/keys_client_luxfhe")
+serialized_evaluation_keys, luxfhe_evaluation_keys = client.get_serialized_evaluation_keys(include_luxfhe_key=True)
 
 # Client pre-processes new data
 X_new = np.random.rand(1, 20)
@@ -137,7 +137,7 @@ encrypted_result = server.run(encrypted_data, serialized_evaluation_keys)
 result = client.deserialize_decrypt_dequantize(encrypted_result[0])
 ```
 
-In the example above, a second evaluation key is obtained in the `tfhers_evaluation_keys` variable. This key can be loaded by TFHE-rs Rust programs to perform further computation on the model output ciphertexts.
+In the example above, a second evaluation key is obtained in the `luxfhe_evaluation_keys` variable. This key can be loaded by Lux FHE Rust programs to perform further computation on the model output ciphertexts.
 
 ## Serving
 
