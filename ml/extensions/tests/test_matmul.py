@@ -1,5 +1,5 @@
 import time
-import concrete_ml_extensions as fhext
+import torus_ml_extensions as fhext
 import numpy as np
 import pytest
 from conftest import Timing

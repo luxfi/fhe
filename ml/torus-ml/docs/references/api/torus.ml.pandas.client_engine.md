@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/pandas/client_engine.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/client_engine.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.pandas.client_engine`
 
@@ -12,13 +12,13 @@ Define the framework used for managing keys (encrypt, decrypt) for encrypted dat
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/client_engine.py#L21"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/client_engine.py#L21"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `ClientEngine`
 
 Define a framework that manages keys.
 
-<a href="../../../src/concrete/ml/pandas/client_engine.py#L24"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/client_engine.py#L24"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -28,7 +28,7 @@ __init__(keygen: bool = True, keys_path: Optional[Path, str] = None)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/client_engine.py#L80"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/client_engine.py#L80"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `decrypt_to_pandas`
 
@@ -48,7 +48,7 @@ Decrypt an encrypted data-frame using the loaded client and return a Pandas data
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/client_engine.py#L44"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/client_engine.py#L44"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `encrypt_from_pandas`
 
@@ -72,7 +72,7 @@ Encrypt a Pandas data-frame using the loaded client.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/client_engine.py#L30"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/client_engine.py#L30"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `keygen`
 

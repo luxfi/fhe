@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-from concrete.fhe.tracing import Tracer
+from torus.fhe.tracing import Tracer
 from utility_functions import enc_split, max_fhe_relu, simple_slice
 
 EPSILON = 2**-11
@@ -425,7 +425,7 @@ class DualArray:
 
     # Concrete-Python does not support numpy.array_split and numpy.take so we need to build a custom
     # split method instead
-    # FIXME: https://github.com/luxfi/concrete-internal/issues/329
+    # FIXME: https://github.com/luxfi/torus-internal/issues/329
     def enc_split(self, n: int, axis: int, key: str) -> Tuple[DualArray]:
         """Split the arrays in n parts along a given axis."""
         self_int_array = self._ensure_quantized(key=f"{key}_self")

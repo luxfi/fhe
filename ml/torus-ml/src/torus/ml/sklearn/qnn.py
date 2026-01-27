@@ -47,7 +47,7 @@ ATTRIBUTE_PREFIXES = [
 
 
 # We should also check that the `module__n_layers` parameter is properly set
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3553
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3553
 def _check_qnn_kwargs(input_kwargs: Dict[str, Any]) -> None:
     """Check that a QNN model is not constructed with automatically computed parameters.
 
@@ -182,7 +182,7 @@ class NeuralNetRegressor(QuantizedTorchEstimatorMixin, skorch.regressor.NeuralNe
     # method accessible by anyone, without having any FHE implementation. As this could create some
     # confusion, a NotImplementedError is raised. This issue could be fixed by making these classes
     # not inherit from skorch.
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
     def predict_proba(self, X: Data, fhe: Union[FheMode, str] = FheMode.DISABLE) -> numpy.ndarray:
         raise NotImplementedError(
             "The `predict_proba` method is not implemented for neural network regressors. Please "
@@ -238,7 +238,7 @@ class NeuralNetRegressor(QuantizedTorchEstimatorMixin, skorch.regressor.NeuralNe
         metadata["post_processing_params"] = self.post_processing_params
 
         # skorch attributes that cannot be serialized
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3550
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3550
         # Disable mypy as running isinstance with a Callable type unexpectedly raises an issue:
         # https://github.com/python/mypy/issues/3060
         if isinstance(self.train_split, Callable) and not isinstance(  # type: ignore[arg-type]
@@ -299,7 +299,7 @@ class NeuralNetRegressor(QuantizedTorchEstimatorMixin, skorch.regressor.NeuralNe
 
         # skorch special arguments
         # Coverage is disabled here as refactoring the serialization feature should remove this
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3250
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3250
         for attribute_prefix in ATTRIBUTE_PREFIXES:  # pragma: no cover
             for qnn_attribute in vars(self):
                 if qnn_attribute.startswith(f"{attribute_prefix}__"):
@@ -352,7 +352,7 @@ class NeuralNetRegressor(QuantizedTorchEstimatorMixin, skorch.regressor.NeuralNe
 
         # skorch special arguments
         # Coverage is disabled here as refactoring the serialization feature should remove this
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3250
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3250
         for attribute_prefix in ATTRIBUTE_PREFIXES:  # pragma: no cover
             for qnn_attribute, qnn_value in metadata.items():
                 if qnn_attribute.startswith(f"{attribute_prefix}__"):
@@ -550,7 +550,7 @@ class NeuralNetClassifier(
         metadata["post_processing_params"] = self.post_processing_params
 
         # skorch attributes that cannot be serialized
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3550
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3550
         # Disable mypy as running isinstance with a Callable type unexpectedly raises an issue:
         # https://github.com/python/mypy/issues/3060
         if isinstance(self.train_split, Callable) and not isinstance(  # type: ignore[arg-type]
@@ -612,7 +612,7 @@ class NeuralNetClassifier(
 
         # skorch special arguments
         # Coverage is disabled here as refactoring the serialization feature should remove this
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3250
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3250
         for attribute_prefix in ATTRIBUTE_PREFIXES:  # pragma: no cover
             for qnn_attribute in vars(self):
                 if qnn_attribute.startswith(f"{attribute_prefix}__"):
@@ -666,7 +666,7 @@ class NeuralNetClassifier(
 
         # skorch special arguments
         # Coverage is disabled here as refactoring the serialization feature should remove this
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3250
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3250
         for attribute_prefix in ATTRIBUTE_PREFIXES:  # pragma: no cover
             for qnn_attribute, qnn_value in metadata.items():
                 if qnn_attribute.startswith(f"{attribute_prefix}__"):

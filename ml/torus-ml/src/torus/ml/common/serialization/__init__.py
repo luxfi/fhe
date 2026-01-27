@@ -35,7 +35,7 @@ SUPPORTED_TORCH_ACTIVATIONS = [
 ]
 
 # Some Torch activation functions are currently not supported in Torus ML
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/335
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/335
 UNSUPPORTED_TORCH_ACTIVATIONS = [
     activation.GLU,
     activation.MultiheadAttention,

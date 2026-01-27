@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.sklearn.tree_to_numpy`
 
@@ -15,7 +15,7 @@ Implements the conversion of a tree model to a numpy function.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L49"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L49"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_onnx_model`
 
@@ -38,7 +38,7 @@ Create ONNX model with Hummingbird convert method.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `workaround_squeeze_node_xgboost`
 
@@ -56,7 +56,7 @@ FIXME: https://github.com/luxfhe.io/torus-ml-internal/issues/2778 The squeeze op
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L106"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L106"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `assert_add_node_and_constant_in_xgboost_regressor_graph`
 
@@ -72,7 +72,7 @@ Assert if an Add node with a specific constant exists in the ONNX graph.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L142"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L142"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `add_transpose_after_last_node`
 
@@ -92,7 +92,7 @@ Add transpose after last node.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L173"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L173"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `preprocess_tree_predictions`
 
@@ -116,7 +116,7 @@ Apply post-processing from the graph.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L222"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L222"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `tree_onnx_graph_preprocessing`
 
@@ -141,7 +141,7 @@ Apply pre-processing onto the ONNX graph.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `tree_values_preprocessing`
 
@@ -168,7 +168,7 @@ Pre-process tree values.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L336"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L336"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `tree_to_numpy`
 
@@ -201,7 +201,7 @@ Convert the tree inference to a numpy functions using Hummingbird.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/tree_to_numpy.py#L532"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/tree_to_numpy.py#L532"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `onnx_fp32_model_to_quantized_model`
 

@@ -139,7 +139,7 @@ class _GeneralizedLinearRegressor(SklearnLinearRegressorMixin):
 
     def get_sklearn_params(self, deep: bool = True) -> dict:
         # Here, the `get_params` method is the `BaseEstimator.get_params` method from scikit-learn
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3373
         params = super().get_params(deep=deep)  # type: ignore[misc]
 
         # Remove the parameters added by Torus ML

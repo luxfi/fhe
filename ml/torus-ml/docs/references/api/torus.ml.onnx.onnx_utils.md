@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.onnx.onnx_utils`
 
@@ -19,7 +19,7 @@ Utils to interpret an ONNX model with numpy.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L441"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L441"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_attribute`
 
@@ -39,7 +39,7 @@ Get the attribute from an ONNX AttributeProto.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L453"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L453"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_op_type`
 
@@ -59,7 +59,7 @@ Construct the qualified type name of the ONNX operator.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L465"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L465"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `execute_onnx_with_numpy`
 
@@ -80,7 +80,7 @@ Execute the provided ONNX graph on the given inputs.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L494"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L494"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `execute_onnx_with_numpy_trees`
 
@@ -106,7 +106,7 @@ Execute the provided ONNX graph on the given inputs for tree-based models only.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L553"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L553"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `remove_initializer_from_input`
 
@@ -128,7 +128,7 @@ In some cases, ONNX initializers may appear, erroneously, as graph inputs. This 
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/onnx/onnx_utils.py#L578"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/onnx/onnx_utils.py#L578"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `check_onnx_model`
 

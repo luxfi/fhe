@@ -6,9 +6,9 @@ from importlib.metadata import version
 from pathlib import Path
 
 import torch
-from concrete.compiler import check_gpu_available, check_gpu_enabled
-from concrete.fhe import Exactness
-from concrete.fhe.compilation.configuration import Configuration
+from torus.compiler import check_gpu_available, check_gpu_enabled
+from torus.fhe import Exactness
+from torus.fhe.compilation.configuration import Configuration
 from models import cnv_2w2a
 from torch.utils.data import DataLoader
 from trainer import get_test_set
@@ -21,7 +21,7 @@ KEYGEN_CACHE_DIR = CURRENT_DIR.joinpath(".keycache")
 
 # Add MPS (for macOS with Apple Silicon or AMD GPUs) support when error is fixed. For now, we
 # observe a decrease in torch's top1 accuracy when using MPS devices
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3953
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3953
 
 # For PyTorch operations, we use CPU (simpler and avoids device mismatch issues)
 DEVICE = "cpu"
@@ -267,8 +267,8 @@ with open("inference_results.csv", "w", encoding="utf-8") as file:
 
 metadata = {
     "p_error": P_ERROR,
-    "cml_version": version("concrete-ml"),
-    "cnp_version": version("concrete-python"),
+    "cml_version": version("torus-ml"),
+    "cnp_version": version("torus-python"),
     # Device and GPU information for benchmark differentiation
     "fhe_compilation_device": COMPILATION_DEVICE,
     "pytorch_device": DEVICE,  # Always CPU in this setup
