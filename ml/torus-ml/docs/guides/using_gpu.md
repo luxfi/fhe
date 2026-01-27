@@ -14,7 +14,7 @@ a model is compiled for CUDA, executing it on a non-CUDA-enabled machine will ra
 
 {% hint style="warning" %}
 When compiling a model for GPU, the model is assigned GPU-specific crypto-system parameters. These parameters are more constrained than the CPU-specific ones.
-As a result, the Concrete compiler may have difficulty finding suitable GPU-compatible crypto-parameters for some models, leading to a `NoParametersFound` error.
+As a result, the Torus compiler may have difficulty finding suitable GPU-compatible crypto-parameters for some models, leading to a `NoParametersFound` error.
 {% endhint %}
 
 ## Performance
@@ -33,7 +33,7 @@ on a desktop CPU.
 
 This section pertains to models that are compiled using the `sklearn`-style built-in model classes or that are compiled using `compile_torch_model` or `compile_brevitas_qat_model`.
 
-To use the CUDA-enabled backend, install the GPU-enabled Concrete compiler:
+To use the CUDA-enabled backend, install the GPU-enabled Torus compiler:
 
 ```bash
 pip install --extra-index-url https://pypi.luxfhe.io/gpu torus-python

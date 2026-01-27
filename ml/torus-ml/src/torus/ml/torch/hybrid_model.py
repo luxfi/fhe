@@ -155,7 +155,7 @@ class RemoteModule(nn.Module):
         self.path_to_keys.mkdir(exist_ok=True)
 
         # List all shapes supported by the server
-        # This is needed until we have generic shape support in Concrete Python
+        # This is needed until we have generic shape support in Torus Python
         assert self.module_name is not None
         shapes_response = requests.get(
             f"{self.server_remote_address}/list_shapes",
@@ -648,7 +648,7 @@ class HybridFHEModel:
             else:
                 # If all layers are linear and the GLWE backend is available
                 # then simply quantize the model without compiling with
-                # Concrete Python.
+                # Torus Python.
                 if self._has_only_large_linear_layers and has_glwe_backend():
                     self.executor = GLWELinearLayerExecutor(
                         use_dynamic_quantization=use_dynamic_quantization

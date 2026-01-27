@@ -1,5 +1,5 @@
 import numpy as np
-import concrete.numpy as cnp
+import torus.numpy as cnp
 from functools import reduce
 from pathlib import Path
 
@@ -28,7 +28,7 @@ def hamming_distance(x, y) -> int:
 
 
 def min_int(x: int, y: int) -> int:
-    """concrete-numpy doesn't yet support min, we have to implement one using
+    """torus-numpy doesn't yet support min, we have to implement one using
     only supported operations"""
     return (x + y - abs(x - y)) // 2
 

@@ -2,7 +2,7 @@
 
 This document explains the essential cryptographic terms and the important concepts of Torus ML model lifecycle with Fully Homomorphic Encryption (FHE).
 
-Torus ML is built on top of Concrete, which enables the conversion from NumPy programs into FHE circuits.
+Torus ML is built on top of Torus, which enables the conversion from NumPy programs into FHE circuits.
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ With Torus ML, you can train a model on clear or encrypted data, then deploy it 
 
 1. **Simulation:** Simulation allows you to execute a model that was quantized, to measure its accuracy in FHE, and to determine the modifications required to make it FHE compatible. Simulation is described in more detail [here](../explanations/compilation.md#fhe-simulation).
 
-1. **Compilation:** After quantizing the model and confirming that it has good FHE accuracy through simulation, the model then needs to be compiled using Concrete's FHE Compiler to produce an equivalent FHE circuit. This circuit is represented as an MLIR program consisting of low level cryptographic operations. You can read more about FHE compilation [here](../explanations/compilation.md), MLIR [here](https://mlir.llvm.org/), and about the low-level Concrete library [here](https://github.com/luxfhe.io/torus).
+1. **Compilation:** After quantizing the model and confirming that it has good FHE accuracy through simulation, the model then needs to be compiled using Torus's FHE Compiler to produce an equivalent FHE circuit. This circuit is represented as an MLIR program consisting of low level cryptographic operations. You can read more about FHE compilation [here](../explanations/compilation.md), MLIR [here](https://mlir.llvm.org/), and about the low-level Torus library [here](https://github.com/luxfhe.io/torus).
 
 1. **Inference:** The compiled model can then be executed on encrypted data, once the proper keys have been generated. The model can also be deployed to a server and used to run private inference on encrypted inputs.
 
@@ -52,7 +52,7 @@ You can find an example of the model deployment workflow [here](../advanced_exam
 
 ## Cryptography concepts
 
-Torus ML and Concrete abstract the details of the underlying cryptography scheme, TFHE. However, understanding some cryptography concepts is still useful:
+Torus ML and Torus abstract the details of the underlying cryptography scheme, TFHE. However, understanding some cryptography concepts is still useful:
 
 - **Encryption and decryption:** Encryption converts human-readable information (plaintext) into data (ciphertext) that is unreadable by a human or computer unless with the proper key. Encryption takes plaintext and an encryption key and produces ciphertext, while decryption is the reverse operation.
 
@@ -68,17 +68,17 @@ Torus ML and Concrete abstract the details of the underlying cryptography scheme
 
 - **Programmable Boostrapping (PBS)** : Programmable Bootstrapping enables the homomorphic evaluation of any function of a ciphertext, with a controlled level of noise. Learn more about PBS in [this paper](https://eprint.iacr.org/2021/091).
 
-- **Ciphertext formats**: To represent encrypted values, Torus ML offers two options: the default Concrete ciphertext format, which is supported by all ML models and highly optimized for performance, or the block-based Lux FHE radix format, which supports larger values, is forward-compatible, and suitable for Blockchain applications, but is limited to certain types of ML models.
+- **Ciphertext formats**: To represent encrypted values, Torus ML offers two options: the default Torus ciphertext format, which is supported by all ML models and highly optimized for performance, or the block-based Lux FHE radix format, which supports larger values, is forward-compatible, and suitable for Blockchain applications, but is limited to certain types of ML models.
 
-For a deeper understanding of the cryptography behind the Concrete stack, refer to the [whitepaper on TFHE and Programmable Boostrapping](https://whitepaper.luxfhe.io/) or [this series of blogs](https://www.luxfhe.io/post/tfhe-deep-dive-part-1).
+For a deeper understanding of the cryptography behind the Torus stack, refer to the [whitepaper on TFHE and Programmable Boostrapping](https://whitepaper.luxfhe.io/) or [this series of blogs](https://www.luxfhe.io/post/tfhe-deep-dive-part-1).
 
 ## Ciphertext formats
 
 Two different types of ciphertexts are usable by Torus ML for model input/outputs.
 
-1. _Concrete_ LWE ciphertexts (default):
+1. _Torus_ LWE ciphertexts (default):
 
-   By default, Torus ML uses Concrete LWE ciphertexts with crypto-system parameters that are tailored to each ML model. These parameters may vary between different versions of Torus ML. Thus, the encryption crypto-parameters may change at any point. Some implications are:
+   By default, Torus ML uses Torus LWE ciphertexts with crypto-system parameters that are tailored to each ML model. These parameters may vary between different versions of Torus ML. Thus, the encryption crypto-parameters may change at any point. Some implications are:
 
 - Typically, a server-side application provides the client with its encryption cryptographic parameters.
 - When the application is updated, the client downloads the new cryptographic parameters.

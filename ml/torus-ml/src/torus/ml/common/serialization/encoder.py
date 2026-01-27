@@ -36,7 +36,7 @@ def dump_name_and_value(name: str, value: Any, **kwargs) -> Dict:
 
     Args:
         name (str): The custom name to use. This name should be unique for each type to encode, as
-            it is used in the ConcreteDecoder class to detect the initial type and apply the proper
+            it is used in the TorusDecoder class to detect the initial type and apply the proper
             load method to the serialized object.
         value (Any): The serialized value to dump.
         **kwargs (dict): Additional arguments to dump.
@@ -56,19 +56,19 @@ def dump_name_and_value(name: str, value: Any, **kwargs) -> Dict:
     return name_and_value
 
 
-class ConcreteEncoder(JSONEncoder):
+class TorusEncoder(JSONEncoder):
     """Custom json encoder to handle non-native types found in serialized Torus ML objects.
 
     Non-native types are serialized manually and dumped in a custom dict format that stores both the
     serialization value of the object and its associated type name.
 
-    The name should be unique for each type, as it is used in the ConcreteDecoder class to detect
+    The name should be unique for each type, as it is used in the TorusDecoder class to detect
     the initial type and apply the proper load method to the serialized object. The serialized
     value is the value that was serialized manually in a native type. Additional arguments such
     as a numpy array's dtype are also properly serialized. If an object has an unexpected type or
     is not serializable, an error is thrown.
 
-    The ConcreteEncoder is only meant to encode Torus ML's built-in models and therefore only
+    The TorusEncoder is only meant to encode Torus ML's built-in models and therefore only
     supports the necessary types. For example, torch.Tensor objects are not serializable using this
     encoder as built-in models only use numpy arrays. However, the list of supported types might
     expand in future releases if new models are added and need new types.
@@ -192,7 +192,7 @@ class ConcreteEncoder(JSONEncoder):
         # Serializing a Circuit object is currently not supported
         # FIXME: https://github.com/luxfi/torus-numpy-internal/issues/1841
         if isinstance(o, fhe.Circuit):
-            raise NotImplementedError("Concrete Circuit object serialization is not implemented.")
+            raise NotImplementedError("Torus Circuit object serialization is not implemented.")
 
         if isinstance(o, RandomState):
             return dump_name_and_value("RandomState", o.get_state())

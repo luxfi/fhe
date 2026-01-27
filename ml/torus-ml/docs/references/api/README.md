@@ -60,8 +60,8 @@
 
 ## Classes
 
-- [`decoder.ConcreteDecoder`](./torus.ml.common.serialization.decoder.md#class-torusdecoder): Custom json decoder to handle non-native types found in serialized Torus ML objects.
-- [`encoder.ConcreteEncoder`](./torus.ml.common.serialization.encoder.md#class-torusencoder): Custom json encoder to handle non-native types found in serialized Torus ML objects.
+- [`decoder.TorusDecoder`](./torus.ml.common.serialization.decoder.md#class-torusdecoder): Custom json decoder to handle non-native types found in serialized Torus ML objects.
+- [`encoder.TorusEncoder`](./torus.ml.common.serialization.encoder.md#class-torusencoder): Custom json encoder to handle non-native types found in serialized Torus ML objects.
 - [`utils.CiphertextFormat`](./torus.ml.common.utils.md#class-ciphertextformat): Type of ciphertext used as input/output for a model.
 - [`utils.FheMode`](./torus.ml.common.utils.md#class-fhemode): Enum representing the execution mode.
 - [`utils.HybridFHEMode`](./torus.ml.common.utils.md#class-hybridfhemode): Simple enum for different modes of execution of HybridModel.
@@ -277,7 +277,7 @@
 - [`utils.is_pandas_series`](./torus.ml.common.utils.md#function-is_pandas_series): Indicate if the input container is a Pandas Series.
 - [`utils.is_pandas_type`](./torus.ml.common.utils.md#function-is_pandas_type): Indicate if the input container is a Pandas DataFrame or Series.
 - [`utils.is_regressor_or_partial_regressor`](./torus.ml.common.utils.md#function-is_regressor_or_partial_regressor): Indicate if the model class represents a regressor.
-- [`utils.manage_parameters_for_pbs_errors`](./torus.ml.common.utils.md#function-manage_parameters_for_pbs_errors): Return (p_error, global_p_error) that we want to give to Concrete.
+- [`utils.manage_parameters_for_pbs_errors`](./torus.ml.common.utils.md#function-manage_parameters_for_pbs_errors): Return (p_error, global_p_error) that we want to give to Torus.
 - [`utils.process_rounding_threshold_bits`](./torus.ml.common.utils.md#function-process_rounding_threshold_bits): Check and process the rounding_threshold_bits parameter.
 - [`utils.replace_invalid_arg_name_chars`](./torus.ml.common.utils.md#function-replace_invalid_arg_name_chars): Sanitize arg_name, replacing invalid chars by \_.
 - [`utils.to_tuple`](./torus.ml.common.utils.md#function-to_tuple): Make the input a tuple if it is not already the case.

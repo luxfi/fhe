@@ -105,7 +105,7 @@ def monkeypatched_compilation_configuration_init_for_codeblocks(
     self.enable_unsafe_features = True
     self.treat_warnings_as_errors = True
     self.use_insecure_key_cache = True
-    self.insecure_key_cache_location = "ConcretePythonKeyCache"
+    self.insecure_key_cache_location = "TorusPythonKeyCache"
 
 
 def pytest_sessionstart(session: pytest.Session):
@@ -159,7 +159,7 @@ def default_configuration():
         dump_artifacts_on_unexpected_failures=False,
         enable_unsafe_features=True,
         use_insecure_key_cache=True,
-        insecure_key_cache_location="ConcretePythonKeyCache",
+        insecure_key_cache_location="TorusPythonKeyCache",
         fhe_simulation=False,
         fhe_execution=True,
         compress_input_ciphertexts=os.environ.get("USE_INPUT_COMPRESSION", "1") == "1",
@@ -177,7 +177,7 @@ def simulation_configuration():
         dump_artifacts_on_unexpected_failures=False,
         enable_unsafe_features=True,
         use_insecure_key_cache=True,
-        insecure_key_cache_location="ConcretePythonKeyCache",
+        insecure_key_cache_location="TorusPythonKeyCache",
         fhe_simulation=True,
         fhe_execution=False,
         compress_input_ciphertexts=os.environ.get("USE_INPUT_COMPRESSION", "1") == "1",
@@ -298,8 +298,8 @@ def get_device():
     force_cuda = os.getenv("POETRY_RUN_GPU_TESTS") == "1"
 
     if force_cuda:
-        assert torus.compiler.check_gpu_available(), "[Concrete] GPU required but not detected."
-        assert torus.compiler.check_gpu_enabled(), "[Concrete] GPU detected but not enabled."
+        assert torus.compiler.check_gpu_available(), "[Torus] GPU required but not detected."
+        assert torus.compiler.check_gpu_enabled(), "[Torus] GPU detected but not enabled."
         assert torch.cuda.is_available(), "[PyTorch] CUDA not available."
         return "cuda"
     return "cpu"
@@ -337,7 +337,7 @@ def check_graph_has_no_input_output_tlu_impl(graph: CPGraph):
     check_graph_output_has_no_tlu_impl(graph)
 
 
-# To update when the feature becomes available Concrete
+# To update when the feature becomes available Torus
 # FIXME: https://github.com/luxfi/torus-numpy-internal/issues/1714
 def check_circuit_has_no_tlu_impl(circuit: Circuit):
     """Check a circuit has no TLU."""
@@ -543,7 +543,7 @@ def load_data():
 
 @pytest.fixture
 def check_is_good_execution_for_cml_vs_circuit():
-    """Compare quantized module or built-in inference vs Concrete circuit."""
+    """Compare quantized module or built-in inference vs Torus circuit."""
 
     def check_is_good_execution_for_cml_vs_circuit_impl(
         inputs: Union[tuple, numpy.ndarray],

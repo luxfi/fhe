@@ -440,7 +440,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
         The is the underlying function that fits the model in FHE if 'fit_encrypted' is enabled.
         A quantized module is first built in order to generate the FHE circuit need for training.
         Then, the method iterates over it in the clear so that outputs of an iteration are used as
-        inputs for the following iteration. Thanks to Concrete's composition feature, no
+        inputs for the following iteration. Thanks to Torus's composition feature, no
         encryption/decryption steps are needed when the training is executed in FHE.
 
         For more details on some of these arguments please refer to:
@@ -690,7 +690,7 @@ class SGDClassifier(SklearnSGDClassifierMixin):
 
             # Else, use the quantized module on the quantized values (works for both quantized
             # clear and FHE simulation modes). It is important to note that 'quantized_forward'
-            # with 'fhe="execute"' is executing Concrete's 'encrypt_run_decrypt' method, as opposed
+            # with 'fhe="execute"' is executing Torus's 'encrypt_run_decrypt' method, as opposed
             # to the 'run' method right above. We thus need to separate these cases since values
             # are already encrypted here.
             else:
