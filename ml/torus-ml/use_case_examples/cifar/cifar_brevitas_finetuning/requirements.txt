@@ -1,4 +1,0 @@
-torus-ml
-jupyter
-torchvision
-matplotlib
