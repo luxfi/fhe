@@ -237,7 +237,7 @@ ______________________________________________________________________
 
 ```python
 get_serialized_evaluation_keys(
-    include_tfhers_key: bool = False
+    include_luxfhe_key: bool = False
 ) → Union[bytes, Tuple[bytes, Union[bytes, NoneType]]]
 ```
 
@@ -245,7 +245,7 @@ Get the serialized evaluation keys.
 
 **Args:**
 
-- <b>`include_tfhers_key`</b> (bool):  Whether to include the serialized TFHE-rs public key.
+- <b>`include_luxfhe_key`</b> (bool):  Whether to include the serialized Lux FHE public key.
 
 **Returns:**
 
@@ -255,19 +255,19 @@ ______________________________________________________________________
 
 <a href="../../../src/concrete/ml/deployment/fhe_client_server.py#L466"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-### <kbd>method</kbd> `get_tfhers_secret_key`
+### <kbd>method</kbd> `get_luxfhe_secret_key`
 
 ```python
-get_tfhers_secret_key() → Union[bytes, NoneType]
+get_luxfhe_secret_key() → Union[bytes, NoneType]
 ```
 
-Get the secret key that decrypts TFHE-rs ciphertexts.
+Get the secret key that decrypts Lux FHE ciphertexts.
 
-This secret key use used by the client object to encrypt TFHE-rs ciphertexts that are sent to the server, but also to decrypt outputs produced by a server-side computation, that can be a Concrete ML model or a TFHE-rs program.
+This secret key use used by the client object to encrypt Lux FHE ciphertexts that are sent to the server, but also to decrypt outputs produced by a server-side computation, that can be a Concrete ML model or a Lux FHE program.
 
 **Returns:**
 
-- <b>`bytes`</b>:  the serialized TFHE-rs secret key
+- <b>`bytes`</b>:  the serialized Lux FHE secret key
 
 ______________________________________________________________________
 

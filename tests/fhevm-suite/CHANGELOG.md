@@ -37,7 +37,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v0.6.0] - 2024-12-12
 
-This version is a specific release for the coprocessor architecture with tfhe-rs v0.9
+This version is a specific release for the coprocessor architecture with Lux FHE v0.9
 
 ## Notes
 
