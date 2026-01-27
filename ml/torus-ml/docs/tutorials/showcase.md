@@ -24,7 +24,7 @@
 
 - [GPT-2 in FHE](../../use_case_examples/llm/README.md): Privacy-preserving text generation based on a user's prompt
 - [Titanic](../../use_case_examples/titanic/README.md): Train an XGB classifier that can perform encrypted prediction for the [Kaggle Titanic competition](https://www.kaggle.com/c/titanic/)
-- [Federated learning and private inference](../../use_case_examples/federated_learning/README.md): Use federated learning to train a Logistic Regression while preserving training data confidentiality. Import the model into Concrete ML and perform encrypted prediction
+- [Federated learning and private inference](../../use_case_examples/federated_learning/README.md): Use federated learning to train a Logistic Regression while preserving training data confidentiality. Import the model into Torus ML and perform encrypted prediction
 - [Neutral network fine-tuning](../../use_case_examples/cifar/cifar_brevitas_finetuning/README.md): Fine-tune a VGG network to classify the CIFAR image data-sets and predict on encrypted data
 - [Encrypted sentiment analysis](../../use_case_examples/sentiment_analysis_with_transformer/README.md):A Hugging Face space that securely analyzes the sentiment expressed in a short text
 - [Credit scoring](../../use_case_examples/credit_scoring/README.md): Predict the chance of a given loan applicant defaulting on loan repayment
@@ -32,16 +32,16 @@
 ### Blog tutorials:
 
 - [Running privacy-preserving inferences on Hugging Face endpoints](https://huggingface.co/blog/fhe-endpoints) - April 2024
-- [Build an end-to-end encrypted Shazam application using Concrete ML](https://www.luxfhe.io/post/encrypted-shazam-using-fully-homomorphic-encryption-concrete-ml-tutorial) - February 2024
-- [Linear regression over encrypted data with homomorphic encryption](https://www.luxfhe.io/post/linear-regression-using-linear-svr-and-concrete-ml-homomorphic-encryption) - June 2023
-- [Comparison of Concrete ML regressors](https://www.luxfhe.io/post/comparison-of-concrete-ml-regressors) - June 2023
-- [How to deploy a machine learning model with Concrete ML](https://www.luxfhe.io/post/how-to-deploy-machine-learning-models-with-concrete-ml) - May 2023
+- [Build an end-to-end encrypted Shazam application using Torus ML](https://www.luxfhe.io/post/encrypted-shazam-using-fully-homomorphic-encryption-torus-ml-tutorial) - February 2024
+- [Linear regression over encrypted data with homomorphic encryption](https://www.luxfhe.io/post/linear-regression-using-linear-svr-and-torus-ml-homomorphic-encryption) - June 2023
+- [Comparison of Torus ML regressors](https://www.luxfhe.io/post/comparison-of-torus-ml-regressors) - June 2023
+- [How to deploy a machine learning model with Torus ML](https://www.luxfhe.io/post/how-to-deploy-machine-learning-models-with-torus-ml) - May 2023
 - [Encrypted image filtering using homomorphic encryption](https://www.luxfhe.io/post/encrypted-image-filtering-using-homomorphic-encryption) - February 2023
 - [Sentiment analysis over encrypted data](https://huggingface.co/blog/sentiment-analysis-fhe) - November 2022
-- [Titanic Competition with Privacy Preserving Machine Learning](https://www.luxfhe.io/post/titanic-competition-with-privacy-preserving-machine-learning-using-concrete-ml) - August 2022
+- [Titanic Competition with Privacy Preserving Machine Learning](https://www.luxfhe.io/post/titanic-competition-with-privacy-preserving-machine-learning-using-torus-ml) - August 2022
 
 ### Video tutorials
 
-- [Work with encrypted DataFrames using Concrete ML](https://www.luxfhe.io/post/video-tutorial-work-with-encrypted-dataframes-using-concrete-ml) - May 2024
-- [Train a linear classifier on encrypted data using Concrete ML and Fully Homomorphic Encryption (FHE)](https://www.luxfhe.io/post/video-tutorial-train-a-linear-classifier-on-encrypted-data-using-concrete-ml-and-fully-homomorphic-encryption-fhe) - February 2024
+- [Work with encrypted DataFrames using Torus ML](https://www.luxfhe.io/post/video-tutorial-work-with-encrypted-dataframes-using-torus-ml) - May 2024
+- [Train a linear classifier on encrypted data using Torus ML and Fully Homomorphic Encryption (FHE)](https://www.luxfhe.io/post/video-tutorial-train-a-linear-classifier-on-encrypted-data-using-torus-ml-and-fully-homomorphic-encryption-fhe) - February 2024
 - [How to convert a scikit-learn model into its homomorphic equivalent](https://www.luxfhe.io/post/how-to-convert-a-scikit-learn-model-into-its-homomorphic-equivalent) - June 2023

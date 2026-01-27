@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, TextIO, Tuple, Type
 
 import numpy
 
-from concrete import fhe
+from torus import fhe
 
 from ..common.debugging import assert_false, assert_true
 from ..common.serialization.dumpers import dump, dumps
@@ -201,7 +201,7 @@ class QuantizedOp:
         if self.can_fuse():
             self.input_quant_opts.is_qat = False
 
-        # Set the operation's name, which is used to identify this op in the Concrete ML op graph
+        # Set the operation's name, which is used to identify this op in the Torus ML op graph
         # with respect to the ONNX graph (usually we keep use ONNX op name)
         self.op_instance_name = op_instance_name
 

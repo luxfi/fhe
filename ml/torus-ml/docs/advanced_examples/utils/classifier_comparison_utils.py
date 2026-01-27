@@ -4,7 +4,7 @@
 # Code source: Gaël Varoquaux
 #              Andreas Müller
 # Modified for documentation by Jaques Grobler
-# Modified to integrate Concrete ML functions by Lux
+# Modified to integrate Torus ML functions by Lux
 # License: BSD 3 clause
 
 import warnings
@@ -21,7 +21,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from concrete.ml.sklearn.base import BaseTreeEstimatorMixin
+from torus.ml.sklearn.base import BaseTreeEstimatorMixin
 from concrete.fhe import Configuration
 
 
@@ -115,14 +115,14 @@ def make_classifier_comparison(title, classifiers, decision_level, verbose=False
             # Instantiate the model
             model = classifier()
 
-            # Train the model and retrieve both the Concrete ML model and its equivalent one from
+            # Train the model and retrieve both the Torus ML model and its equivalent one from
             # scikit-learn
             concrete_model, sklearn_model = model.fit_benchmark(X_train, y_train)
 
             # Compute the predictions in clear using the scikit-learn model
             sklearn_y_pred = sklearn_model.predict(X_test)
 
-            # Compile the Concrete ML model
+            # Compile the Torus ML model
             time_begin = time.time()
             circuit = concrete_model.compile(X_train,)
 
@@ -146,7 +146,7 @@ def make_classifier_comparison(title, classifiers, decision_level, verbose=False
 
             fhe = "simulate" if simulate else "execute"
             
-            # Compute the predictions in FHE (with simulation or not) using the Concrete ML model
+            # Compute the predictions in FHE (with simulation or not) using the Torus ML model
             time_begin = time.time()
             concrete_y_pred = concrete_model.predict(X_test, fhe=fhe)
 
@@ -163,7 +163,7 @@ def make_classifier_comparison(title, classifiers, decision_level, verbose=False
 
             is_a_tree_based_model = isinstance(concrete_model, BaseTreeEstimatorMixin)
 
-            # Compile the Concrete ML model with FHE simulation mode to evaluate the domain grid
+            # Compile the Torus ML model with FHE simulation mode to evaluate the domain grid
             circuit = concrete_model.compile(
                 X_train,
             )
@@ -188,7 +188,7 @@ def make_classifier_comparison(title, classifiers, decision_level, verbose=False
 
             for k, (framework, score, Z) in enumerate(
                 zip(
-                    ["scikit-learn", "Concrete ML"],
+                    ["scikit-learn", "Torus ML"],
                     [sklearn_score, concrete_score],
                     [sklearn_Z, concrete_Z],
                 )
@@ -237,7 +237,7 @@ def make_classifier_comparison(title, classifiers, decision_level, verbose=False
                     horizontalalignment="right",
                 )
 
-                if bitwidth and framework == "Concrete ML":
+                if bitwidth and framework == "Torus ML":
                     ax.text(
                         xx.max() - 0.3,
                         yy.min() + 1.0,
@@ -345,7 +345,7 @@ def make_classifier_comparison_from_sklearn(title, classifiers, decision_level, 
             # Instantiate the model
             model = classifier()
 
-            # Train the model and retrieve both the Concrete ML model and its equivalent one from
+            # Train the model and retrieve both the Torus ML model and its equivalent one from
             # scikit-learn
             concrete_model, sklearn_model = model.fit_benchmark(X_train, y_train)
 
@@ -354,7 +354,7 @@ def make_classifier_comparison_from_sklearn(title, classifiers, decision_level, 
             # Compute the predictions in clear using the scikit-learn model
             sklearn_y_pred = sklearn_model.predict(X_test)
 
-            # Compile the Concrete ML model
+            # Compile the Torus ML model
             time_begin = time.time()
             cfg = Configuration(detect_overflow_in_simulation=False)
             circuit_cml = concrete_model.compile(X_train,)
@@ -382,7 +382,7 @@ def make_classifier_comparison_from_sklearn(title, classifiers, decision_level, 
 
                 fhe = "simulate" if simulate else "execute"
             
-            # Compute the predictions in FHE (with simulation or not) using the Concrete ML model
+            # Compute the predictions in FHE (with simulation or not) using the Torus ML model
             time_begin = time.time()
             concrete_y_pred = concrete_model.predict(X_test, fhe=fhe)
 
@@ -410,7 +410,7 @@ def make_classifier_comparison_from_sklearn(title, classifiers, decision_level, 
 
             is_a_tree_based_model = isinstance(concrete_model, BaseTreeEstimatorMixin)
 
-            # Compile the Concrete ML model with FHE simulation mode to evaluate the domain grid
+            # Compile the Torus ML model with FHE simulation mode to evaluate the domain grid
             circuit = concrete_model.compile(
                 X_train,
             )
@@ -437,7 +437,7 @@ def make_classifier_comparison_from_sklearn(title, classifiers, decision_level, 
 
             for k, (framework, score, Z) in enumerate(
                 zip(
-                    ["scikit-learn", "Concrete ML", "from_sklearn"],
+                    ["scikit-learn", "Torus ML", "from_sklearn"],
                     [sklearn_score, concrete_score, sklearn_fhe_score],
                     [sklearn_Z, concrete_Z, sklearn_fhe_Z],
                 )
@@ -486,7 +486,7 @@ def make_classifier_comparison_from_sklearn(title, classifiers, decision_level, 
                     horizontalalignment="right",
                 )
 
-                if bitwidth and framework == "Concrete ML":
+                if bitwidth and framework == "Torus ML":
                     ax.text(
                         xx.max() - 0.3,
                         yy.min() + 1.0,

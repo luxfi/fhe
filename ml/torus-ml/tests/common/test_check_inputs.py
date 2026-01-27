@@ -3,7 +3,7 @@
 import numpy
 import pytest
 
-from concrete.ml.common.check_inputs import check_array_and_assert, check_X_y_and_assert
+from torus.ml.common.check_inputs import check_array_and_assert, check_X_y_and_assert
 
 x_with_nans = [numpy.array([[numpy.nan], [0.0]]), numpy.array([[numpy.nan], [numpy.nan]])]
 x_clean = [numpy.array([[1.0], [2.0]]), numpy.array([[0], [10]])]

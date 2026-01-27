@@ -8,7 +8,7 @@ from pathlib import Path
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
 
-from concrete.ml.torch.hybrid_model import HybridFHEMode, HybridFHEModel
+from torus.ml.torch.hybrid_model import HybridFHEMode, HybridFHEModel
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"

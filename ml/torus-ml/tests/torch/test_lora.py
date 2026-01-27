@@ -15,12 +15,12 @@ from sklearn.datasets import make_circles
 from torch import nn
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
-from concrete.ml.torch.hybrid_backprop_linear import (
+from torus.ml.torch.hybrid_backprop_linear import (
     BackwardModuleLinear,
     CustomLinear,
     ForwardModuleLinear,
 )
-from concrete.ml.torch.lora import LoraTrainer, LoraTraining, get_remote_names, optimizer_to
+from torus.ml.torch.lora import LoraTrainer, LoraTraining, get_remote_names, optimizer_to
 
 # Dummy models and datasets for testing
 
@@ -426,8 +426,8 @@ def test_replace_layers_with_transformer_conv1d(monkeypatch):
             return x @ self.weight.t() + self.bias
 
     # Patch TransformerConv1D and LINEAR_LAYERS in the lora module
-    monkeypatch.setattr("concrete.ml.torch.lora.TransformerConv1D", MockTransformerConv1D)
-    monkeypatch.setattr("concrete.ml.torch.lora.LINEAR_LAYERS", (nn.Linear, MockTransformerConv1D))
+    monkeypatch.setattr("torus.ml.torch.lora.TransformerConv1D", MockTransformerConv1D)
+    monkeypatch.setattr("torus.ml.torch.lora.LINEAR_LAYERS", (nn.Linear, MockTransformerConv1D))
 
     class ModelWithConv1D(nn.Module):
         """Model with Conv1D layer for testing."""

@@ -1,12 +1,12 @@
 # Using Torch
 
-This document explains how to implement machine learning models with Torch in Concrete ML, leveraging Fully Homomorphic Encryption (FHE).
+This document explains how to implement machine learning models with Torch in Torus ML, leveraging Fully Homomorphic Encryption (FHE).
 
 ## Introduction
 
 There are two approaches to build [FHE-compatible deep networks](../getting-started/concepts.md#model-accuracy-considerations-under-fhe-constraints):
 
-- [**Quantization Aware Training (QAT)**](../getting-started/concepts.md#i-model-development): This method requires using custom layers to quantize weights and activations to low bit-widths. Concrete ML works with [Brevitas](../explanations/inner-workings/external_libraries.md#brevitas), a library that provides QAT support for PyTorch.
+- [**Quantization Aware Training (QAT)**](../getting-started/concepts.md#i-model-development): This method requires using custom layers to quantize weights and activations to low bit-widths. Torus ML works with [Brevitas](../explanations/inner-workings/external_libraries.md#brevitas), a library that provides QAT support for PyTorch.
 
   - Use `compile_brevitas_qat_model` to compile models in this mode.
 
@@ -52,12 +52,12 @@ class QATSimpleNet(nn.Module):
 
 ```
 
-Once the model is trained, use [`compile_brevitas_qat_model`](../references/api/concrete.ml.torch.compile.md#function-compile_brevitas_qat_model) from Concrete ML to perform conversion and compilation of the QAT network. Here, 3-bit quantization is used for both the weights and activations. This function automatically identifies the number of quantization bits used in the Brevitas model.
+Once the model is trained, use [`compile_brevitas_qat_model`](../references/api/torus.ml.torch.compile.md#function-compile_brevitas_qat_model) from Torus ML to perform conversion and compilation of the QAT network. Here, 3-bit quantization is used for both the weights and activations. This function automatically identifies the number of quantization bits used in the Brevitas model.
 
 <!--pytest-codeblocks:cont-->
 
 ```python
-from concrete.ml.torch.compile import compile_brevitas_qat_model
+from torus.ml.torch.compile import compile_brevitas_qat_model
 import numpy
 
 torch_input = torch.randn(100, N_FEAT)
@@ -99,7 +99,7 @@ class PTQSimpleNet(nn.Module):
         x = self.fc3(x)
         return x
 
-from concrete.ml.torch.compile import compile_torch_model
+from torus.ml.torch.compile import compile_torch_model
 import numpy
 
 torch_input = torch.randn(100, N_FEAT)
@@ -149,7 +149,7 @@ FHE simulation allows to measure the impact of the Table Lookup error on the mod
 
 ## Supported operators and activations
 
-Concrete ML supports a variety of PyTorch operators that can be used to build fully connected or convolutional neural networks, with normalization and activation layers. Moreover, many element-wise operators are supported.
+Torus ML supports a variety of PyTorch operators that can be used to build fully connected or convolutional neural networks, with normalization and activation layers. Moreover, many element-wise operators are supported.
 
 ### Operators
 
@@ -208,7 +208,7 @@ Concrete ML supports a variety of PyTorch operators that can be used to build fu
 - [`torch.nn.AvgPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.AvgPool2d.html)
 - [`torch.nn.MaxPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html)
 
-Concrete ML also supports some of their QAT equivalents from Brevitas.
+Torus ML also supports some of their QAT equivalents from Brevitas.
 
 - `brevitas.nn.QuantLinear`
 - `brevitas.nn.QuantConv1d`

@@ -7,11 +7,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, Tuple, Union
 
-import concrete_ml_extensions as fhext
+import torus_ml_extensions as fhext
 import numpy
 from concrete.fhe import tfhers
 
-from concrete import fhe
+from torus import fhe
 
 from ..common.debugging.custom_assert import assert_true
 from ..common.serialization.dumpers import dump
@@ -55,7 +55,7 @@ def check_concrete_versions(zip_path: Path):
     """Check that current versions match the ones used in development.
 
     This function loads the version JSON file found in client.zip or server.zip files and then
-    checks that current package versions (Concrete Python, Concrete ML) as well as the Python
+    checks that current package versions (Concrete Python, Torus ML) as well as the Python
     current version all match the ones that are currently installed.
 
     Args:
@@ -481,7 +481,7 @@ class FHEModelClient:
 
         This secret key use used by the client object to encrypt TFHE-rs ciphertexts
         that are sent to the server, but also to decrypt outputs produced by
-        a server-side computation, that can be a Concrete ML model or a TFHE-rs program.
+        a server-side computation, that can be a Torus ML model or a TFHE-rs program.
 
         Returns:
             bytes: the serialized TFHE-rs secret key

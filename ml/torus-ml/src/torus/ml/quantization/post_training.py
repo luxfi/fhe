@@ -199,7 +199,7 @@ class CalibrationMode(enum.Enum):
 
 
 class ONNXConverter:
-    """Base ONNX to Concrete ML computation graph conversion class.
+    """Base ONNX to Torus ML computation graph conversion class.
 
     This class provides a method to parse an ONNX graph and apply several transformations. First,
     it creates QuantizedOps for each ONNX graph op. These quantized ops have calibrated
@@ -1060,7 +1060,7 @@ class PostTrainingQATImporter(ONNXConverter):
     """Converter of Quantization Aware Training networks.
 
     This class provides specific configuration for QAT networks during ONNX network conversion
-    to Concrete ML computation graphs.
+    to Torus ML computation graphs.
     """
 
     def _process_layer(

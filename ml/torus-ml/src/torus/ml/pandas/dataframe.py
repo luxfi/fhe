@@ -10,10 +10,10 @@ import numpy
 import pandas
 from pandas.io.formats.format import get_dataframe_repr_params
 
-from concrete import fhe
-from concrete.ml.pandas._development import load_server
-from concrete.ml.pandas._operators import encrypted_merge
-from concrete.ml.pandas._utils import (
+from torus import fhe
+from torus.ml.pandas._development import load_server
+from torus.ml.pandas._operators import encrypted_merge
+from torus.ml.pandas._utils import (
     deserialize_elementwise,
     deserialize_evaluation_keys,
     deserialize_value,

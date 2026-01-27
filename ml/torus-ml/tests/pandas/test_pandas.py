@@ -12,10 +12,10 @@ import pandas
 import pytest
 from concrete.fhe.compilation.specs import ClientSpecs
 
-import concrete.ml.pandas
-from concrete.ml.pandas import ClientEngine, load_encrypted_dataframe
-from concrete.ml.pandas._development import CLIENT_PATH, get_min_max_allowed, save_client_server
-from concrete.ml.pytest.utils import pandas_dataframe_are_equal
+import torus.ml.pandas
+from torus.ml.pandas import ClientEngine, load_encrypted_dataframe
+from torus.ml.pandas._development import CLIENT_PATH, get_min_max_allowed, save_client_server
+from torus.ml.pytest.utils import pandas_dataframe_are_equal
 
 
 def generate_pandas_dataframe(
@@ -206,7 +206,7 @@ def test_merge(as_method, how, selected_column):
 
     else:
         pandas_joined_df = pandas.merge(pandas_df_left, pandas_df_right, **pandas_kwargs)
-        encrypted_df_joined = concrete.ml.pandas.merge(
+        encrypted_df_joined = torus.ml.pandas.merge(
             encrypted_df_left, encrypted_df_right, **pandas_kwargs
         )
 

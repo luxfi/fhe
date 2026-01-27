@@ -7,8 +7,8 @@ import pytest
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import MinMaxScaler
 
-from concrete.ml.common.utils import array_allclose_and_same_shape
-from concrete.ml.sklearn import SGDClassifier
+from torus.ml.common.utils import array_allclose_and_same_shape
+from torus.ml.sklearn import SGDClassifier
 
 
 def get_blob_data(

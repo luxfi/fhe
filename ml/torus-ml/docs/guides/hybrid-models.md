@@ -1,6 +1,6 @@
 # Hybrid models
 
-This document explains how to use Concrete ML API to deploy hybrid models in Fully Homomorphic Encryption (FHE).
+This document explains how to use Torus ML API to deploy hybrid models in Fully Homomorphic Encryption (FHE).
 
 ## Introduction
 
@@ -17,13 +17,13 @@ Hybrid models provide a balance between on-device deployment and cloud-based dep
 - Executing parts of the model on the client side.
 - Securely processing other parts with FHE on the server side.
 
-Concrete ML supports hybrid deployment for various neural network models, including Multilayer Perceptron (MLP), Convolutional Neural Network (CNN), and Large Language Models(LLM).
+Torus ML supports hybrid deployment for various neural network models, including Multilayer Perceptron (MLP), Convolutional Neural Network (CNN), and Large Language Models(LLM).
 
 {% hint style="warning" %}
 To protect model IP, carefully choose the model parts to execute in the cloud. Some black-box model stealing attacks use knowledge distillation or differential methods. Generally, the difficulty of stealing a machine learning model increases with the model's size, number of parameters, and depth.
 {% endhint %}
 
-The hybrid model deployment API simplifies integrating the [standard deployment procedure](client_server.md) into neural network style models that are compiled with [`compile_brevitas_qat_model`](../references/api/concrete.ml.torch.compile.md#function-compile_brevitas_qat_model) or [`compile_torch_model`](../references/api/concrete.ml.torch.compile.md#function-compile_torch_model).
+The hybrid model deployment API simplifies integrating the [standard deployment procedure](client_server.md) into neural network style models that are compiled with [`compile_brevitas_qat_model`](../references/api/torus.ml.torch.compile.md#function-compile_brevitas_qat_model) or [`compile_torch_model`](../references/api/torus.ml.torch.compile.md#function-compile_torch_model).
 
 ## Compilation
 
@@ -39,8 +39,8 @@ import torch
 from pathlib import Path
 from torch import nn
 
-from concrete.ml.torch.hybrid_model import HybridFHEModel, tuple_to_underscore_str
-from concrete.ml.deployment import FHEModelServer
+from torus.ml.torch.hybrid_model import HybridFHEModel, tuple_to_underscore_str
+from torus.ml.deployment import FHEModelServer
 
 
 class FCSmall(nn.Module):
@@ -83,13 +83,13 @@ hybrid_model.save_and_clear_private_info(model_dir, via_mlir=True)
 
 ## Server Side Deployment
 
-The [`save_and_clear_private_info`](../references/api/concrete.ml.torch.hybrid_model.md#method-save_and_clear_private_info) functions as follows:
+The [`save_and_clear_private_info`](../references/api/torus.ml.torch.hybrid_model.md#method-save_and_clear_private_info) functions as follows:
 
 - Serializes the FHE circuits for the model parts chosen to be server-side.
 - Saves the client-side model, removing the weights of the layers transferred to the server.
-- Saves all necessary information required to serve these sub-models with FHE using the [`FHEModelDev`](../references/api/concrete.ml.deployment.fhe_client_server.md#class-fhemodeldev) class.
+- Saves all necessary information required to serve these sub-models with FHE using the [`FHEModelDev`](../references/api/torus.ml.deployment.fhe_client_server.md#class-fhemodeldev) class.
 
-To create a server application that serves these sub-models, use the [`FHEModelServer`](../references/api/concrete.ml.deployment.fhe_client_server.md#class-fhemodelserver) class:
+To create a server application that serves these sub-models, use the [`FHEModelServer`](../references/api/torus.ml.deployment.fhe_client_server.md#class-fhemodelserver) class:
 
 <!--pytest-codeblocks:skip-->
 

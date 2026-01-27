@@ -89,7 +89,7 @@ def build_quantized_module(
         torch_inputset (Dataset): the calibration input-set, can contain either torch
             tensors or numpy.ndarray
         import_qat (bool): Flag to signal that the network being imported contains quantizers in
-            in its computation graph and that Concrete ML should not re-quantize it
+            in its computation graph and that Torus ML should not re-quantize it
         n_bits: the number of bits for the quantization
         rounding_threshold_bits (Union[None, int, Dict[str, Union[str, int]]]): Defines precision
             rounding for model accumulators. Accepts None, an int, or a dict.
@@ -177,7 +177,7 @@ def _compile_torch_or_onnx_model(
         torch_inputset (Dataset): the calibration input-set, can contain either torch
             tensors or numpy.ndarray
         import_qat (bool): Flag to signal that the network being imported contains quantizers in
-            in its computation graph and that Concrete ML should not re-quantize it
+            in its computation graph and that Torus ML should not re-quantize it
         configuration (Configuration): Configuration object to use during compilation
         artifacts (DebugArtifacts): Artifacts object to fill during compilation
         show_mlir (bool): if set, the MLIR produced by the converter and which is going
@@ -392,7 +392,7 @@ def compile_onnx_model(
         torch_inputset (Dataset): the calibration input-set, can contain either torch
             tensors or numpy.ndarray.
         import_qat (bool): Flag to signal that the network being imported contains quantizers in
-            in its computation graph and that Concrete ML should not re-quantize it.
+            in its computation graph and that Torus ML should not re-quantize it.
         configuration (Configuration): Configuration object to use
             during compilation
         artifacts (DebugArtifacts): Artifacts object to fill
@@ -476,7 +476,7 @@ def compile_brevitas_qat_model(
         torch_inputset (Dataset): the calibration input-set, can contain either torch
             tensors or numpy.ndarray.
         n_bits (Optional[Union[int, dict]): the number of bits for the quantization. By default,
-            for most models, a value of None should be given, which instructs Concrete ML to use the
+            for most models, a value of None should be given, which instructs Torus ML to use the
             bit-widths configured using Brevitas quantization options. For some networks, that
             perform a non-linear operation on an input on an output, if None is given, a default
             value of 8 bits is used for the input/output quantization. For such models the user can

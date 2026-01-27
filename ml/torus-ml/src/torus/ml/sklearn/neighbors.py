@@ -66,7 +66,7 @@ class KNeighborsClassifier(SklearnKNeighborsClassifierMixin):
 
         metadata: Dict[str, Any] = {}
 
-        # Concrete ML
+        # Torus ML
         metadata["n_bits"] = self.n_bits
         metadata["sklearn_model"] = self.sklearn_model
         metadata["_is_fitted"] = self._is_fitted
@@ -97,7 +97,7 @@ class KNeighborsClassifier(SklearnKNeighborsClassifierMixin):
         # Instantiate the model
         obj = cls(n_bits=metadata["n_bits"])
 
-        # Concrete ML
+        # Torus ML
         obj.sklearn_model = metadata["sklearn_model"]
         obj._is_fitted = metadata["_is_fitted"]
         obj._is_compiled = metadata["_is_compiled"]
@@ -129,7 +129,7 @@ class KNeighborsClassifier(SklearnKNeighborsClassifierMixin):
             X (Data): The input values to predict, as a Numpy array, Torch tensor, Pandas DataFrame
                 or List.
             fhe (Union[FheMode, str]): The mode to use for prediction.
-                Can be FheMode.DISABLE for Concrete ML Python inference,
+                Can be FheMode.DISABLE for Torus ML Python inference,
                 FheMode.SIMULATE for FHE simulation and FheMode.EXECUTE for actual FHE execution.
                 Can also be the string representation of any of these values.
                 Default to FheMode.DISABLE.

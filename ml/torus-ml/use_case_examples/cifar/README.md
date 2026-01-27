@@ -14,7 +14,7 @@ This repository provides resources and documentation on different use-cases for 
 
 ### Fine-Tuning CIFAR
 
-- **Description**: This use-case explores how to convert a pre-trained CNN (on imagenet) to its FHE equivalent using Quantization Aware Training (QAT) and Concrete ML. The conversion process involves adapting a VGG11 network and quantizing the network for FHE.
+- **Description**: This use-case explores how to convert a pre-trained CNN (on imagenet) to its FHE equivalent using Quantization Aware Training (QAT) and Torus ML. The conversion process involves adapting a VGG11 network and quantizing the network for FHE.
 
 Notebooks:
 
@@ -27,8 +27,8 @@ Notebooks:
 
 ### Training Ternary VGG on CIFAR10
 
-- **Description**: Train a VGG-like neural network from scratch using Brevitas on CIFAR-10 and run it in FHE. This use-case modifies the original VGG model for compatibility with Concrete ML, and explores the performance gains of rounding operations in FHE.
-- **Training & Inference**: Scripts provided to train the network and evaluate its performance. It also includes simulations in Concrete ML and insights into the performance enhancement using rounding.
+- **Description**: Train a VGG-like neural network from scratch using Brevitas on CIFAR-10 and run it in FHE. This use-case modifies the original VGG model for compatibility with Torus ML, and explores the performance gains of rounding operations in FHE.
+- **Training & Inference**: Scripts provided to train the network and evaluate its performance. It also includes simulations in Torus ML and insights into the performance enhancement using rounding.
 
 [Results & Metrics](./cifar_brevitas_training/README.md#accuracy-and-performance)
 
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 ## Further Reading
 
-- [Concrete ML Documentation](https://docs.luxfhe.ai/concrete-ml/)
+- [Torus ML Documentation](https://docs.luxfhe.ai/torus-ml/)
 - [Brevitas Github Repository](https://github.com/Xilinx/brevitas)
 - [Fully Homomorphic Encryption Basics](https://www.luxfhe.ai/post/tfhe-deep-dive-part-1)
 - [CIFAR Datasets Overview](https://www.cs.toronto.edu/~kriz/cifar.html)
