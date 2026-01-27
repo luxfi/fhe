@@ -66,9 +66,9 @@ if ${USE_PIP_WHEEL}; then
 
 else
     if [ -z "${VERSION}" ]; then
-        python -m pip install concrete-ml[dev]
+        python -m pip install torus-ml[dev]
     else
-        python -m pip install concrete-ml[dev]=="${VERSION}"
+        python -m pip install torus-ml[dev]=="${VERSION}"
     fi
 fi
 

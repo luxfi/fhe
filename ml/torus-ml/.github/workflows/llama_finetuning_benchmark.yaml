@@ -1,4 +1,4 @@
-name: LLama Fine-tuning Benchmark CML
+name: LLama Fine-tuning Benchmark TML
 on:
   schedule:
     - cron: '0 0 1 * *'
@@ -195,7 +195,7 @@ jobs:
             pip install -r requirements.txt
           fi
           
-          # Install concrete-ml requirements
+          # Install torus-ml requirements
           pip install -e .
 
       - name: Alternative Concrete Python Wheel Download
@@ -205,14 +205,14 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          -o concrete-python.whl.zip \
+          -o torus-python.whl.zip \
           https://api.github.com/repos/luxfhe-ai/concrete/actions/artifacts/${{ github.event.inputs.alternative-cp-wheel-artifact-id }}/zip
 
       - name: Alternative Concrete Python Wheel Install
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.alternative-cp-wheel-artifact-id != 'none'
         run: |
           source .venv/bin/activate
-          unzip concrete-python.whl.zip
+          unzip torus-python.whl.zip
           pip install concrete_python-*.whl
 
       - name: Alternative Concrete Python Branch Checkout
@@ -227,7 +227,7 @@ jobs:
       - name: Alternative Concrete Python Branch Source Install
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.alternative-cp-branch != 'none'
         run: |
-          cp -R concrete/frontends/concrete-python/concrete/* .venv/lib/python3.*/site-packages/concrete/
+          cp -R concrete/frontends/torus-python/concrete/* .venv/lib/python3.*/site-packages/concrete/
 
       - name: Run Benchmark - LLama LoRA Math Word Problems (${{ matrix.device }})
         id: run-benchmark
