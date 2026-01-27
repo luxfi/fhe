@@ -9,11 +9,11 @@ if grep -r "tree/main" docs | grep "\.md:" | grep -v "https://huggingface.co/spa
 fi
 
 
-# We don't want links to our internal repositories (Concrete ML or Concrete), expect if they are
+# We don't want links to our internal repositories (Torus ML or Concrete), expect if they are
 # GitHub issues
-if grep -r "concrete-ml-internal" docs | grep "\.md:" | grep -v "concrete-ml-internal/issues"; then
-    echo -n -e "\nThe above links contain references to the 'concrete-ml-internal' private "
-    echo -n -e "repository that are not issues. Please remove them as only the 'concrete-ml' "
+if grep -r "torus-ml-internal" docs | grep "\.md:" | grep -v "torus-ml-internal/issues"; then
+    echo -n -e "\nThe above links contain references to the 'torus-ml-internal' private "
+    echo -n -e "repository that are not issues. Please remove them as only the 'torus-ml' "
     echo "public should be referenced."
     exit 255
 fi

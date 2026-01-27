@@ -13,8 +13,8 @@ set -e
 
 # Things you may want to change
 FROM_WHEN="2023-01-01"
-LIST_OF_REPOSITORIES=(concrete-ml-internal
-                      concrete-ml)
+LIST_OF_REPOSITORIES=(torus-ml-internal
+                      torus-ml)
 
 # Will not work when we have more than 999 issues/PR, but does gh with search does not accept a
 # larger size

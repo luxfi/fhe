@@ -26,9 +26,9 @@ declare -A MIGRATE_REPOS=(
     ["concrete-fft"]="fhe-fft"
 
     # ML
-    ["concrete-ml"]="fhe-ml"
-    ["concrete-ml-extensions"]="fhe-ml-extensions"
-    ["concrete-ml-processing-rs"]="fhe-ml-rs"
+    ["torus-ml"]="fhe-ml"
+    ["torus-ml-extensions"]="fhe-ml-extensions"
+    ["torus-ml-processing-rs"]="fhe-ml-rs"
 
     # Templates & dApps
     ["dapps"]="fhe-dapps"
@@ -106,7 +106,7 @@ declare -A REPLACEMENTS=(
     ["tfhe-rs"]="luxfi/fhe"
     ["github.com/zama-ai"]="github.com/luxfi"
     ["@zama-ai"]="@luxfi"
-    ["concrete-ml"]="fhe-ml"
+    ["torus-ml"]="fhe-ml"
     ["concrete-ntt"]="fhe-ntt"
     ["concrete-fft"]="fhe-fft"
     ["fhevm-"]="fhe-"
@@ -198,7 +198,7 @@ update_imports() {
     find "$dir" -name "*.py" -type f 2>/dev/null | xargs -I {} sed -i '' \
         -e 's/from concrete\./from luxfhe./g' \
         -e 's/import concrete/import luxfhe/g' \
-        -e 's/concrete-ml/fhe-ml/g' \
+        -e 's/torus-ml/fhe-ml/g' \
         {} 2>/dev/null || true
 
     # Rust imports
