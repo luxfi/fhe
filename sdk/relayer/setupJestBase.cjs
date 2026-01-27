@@ -43,7 +43,7 @@ function setupGlobalJestFhevmConfig(type, envFile) {
       network:
         parsedEnv['RPC_URL'] ?? 'https://ethereum-sepolia-rpc.publicnode.com',
       relayerUrl:
-        parsedEnv['RELAYER_URL'] ?? 'https://relayer.testnet.zama.org',
+        parsedEnv['RELAYER_URL'] ?? 'https://relayer.testnet.lux.network',
     },
     testContracts: {
       FHECounterUserDecryptAddress:
