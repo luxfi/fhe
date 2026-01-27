@@ -49,7 +49,7 @@ def remove_unused_constant_nodes(onnx_model: onnx.ModelProto):
 
 
 # This algorithm needs to be improved, currently it runs in O(N^2)
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/410
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/410
 def remove_identity_nodes(onnx_model: onnx.ModelProto):
     """Remove identity nodes from a model.
 
@@ -291,7 +291,7 @@ def _clean_graph_at_node_name(
     keep_following_outputs_discard_others(onnx_model, [output_to_follow])
 
 
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4532
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/4532
 # Function to convert the first Gather nodes
 # to matrix multiplications with one-hot encoding as a pre-processing step
 def convert_first_gather_to_matmul(

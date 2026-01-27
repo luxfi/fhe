@@ -4,7 +4,7 @@ This section provides a set of tools and guidelines to help users debug errors a
 
 ## Simulation
 
-The [simulation functionality](../explanations/compilation.md#fhe-simulation) of Torus ML provides a way to evaluate, using clear data, the results that ML models produce on encrypted data. The simulation includes any probabilistic behavior FHE may induce. The simulation is implemented with [Concrete's simulation](https://docs.luxfhe.io/concrete/execution-analysis/simulation).
+The [simulation functionality](../explanations/compilation.md#fhe-simulation) of Torus ML provides a way to evaluate, using clear data, the results that ML models produce on encrypted data. The simulation includes any probabilistic behavior FHE may induce. The simulation is implemented with [Concrete's simulation](https://docs.luxfhe.io/torus/execution-analysis/simulation).
 
 The simulation mode can be useful when developing and iterating on an ML model implementation. As FHE non-linear models work with integers up to 16 bits, with a trade-off between the number of bits and the FHE execution speed, the simulation can help to find the optimal model design.
 
@@ -18,15 +18,15 @@ from torus.ml.sklearn import RandomForestClassifier
 
 n_bits = 2
 X, y = make_circles(n_samples=1000, noise=0.1, factor=0.6, random_state=0)
-concrete_clf = RandomForestClassifier(
+torus_clf = RandomForestClassifier(
     n_bits=n_bits, n_estimators=10, max_depth=5
 )
-concrete_clf.fit(X, y)
+torus_clf.fit(X, y)
 
-concrete_clf.compile(X)
+torus_clf.compile(X)
 
 # Running the model using FHE-simulation
-y_preds_clear = concrete_clf.predict(X, fhe="simulate")
+y_preds_clear = torus_clf.predict(X, fhe="simulate")
 ```
 
 ## Caching keys during debugging
@@ -36,7 +36,7 @@ It is possible to avoid re-generating the keys of the models you are debugging. 
 ```python
 from sklearn.datasets import fetch_openml, make_circles
 from torus.ml.sklearn import RandomForestClassifier
-from concrete.fhe import Configuration
+from torus.fhe import Configuration
 debug_config = Configuration(
     enable_unsafe_features=True,
     use_insecure_key_cache=True,
@@ -45,12 +45,12 @@ debug_config = Configuration(
 
 n_bits = 2
 X, y = make_circles(n_samples=1000, noise=0.1, factor=0.6, random_state=0)
-concrete_clf = RandomForestClassifier(
+torus_clf = RandomForestClassifier(
     n_bits=n_bits, n_estimators=10, max_depth=5
 )
-concrete_clf.fit(X, y)
+torus_clf.fit(X, y)
 
-concrete_clf.compile(X, debug_config)
+torus_clf.compile(X, debug_config)
 ```
 
 ## Common compilation errors

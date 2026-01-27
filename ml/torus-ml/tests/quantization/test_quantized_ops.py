@@ -201,7 +201,7 @@ def test_univariate_ops_no_attrs(
 
 
 # Manage ranges/improve tests for exponential
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/229
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/229
 @pytest.mark.parametrize(
     "n_bits",
     [pytest.param(n_bits) for n_bits in N_BITS_LIST],
@@ -1685,7 +1685,7 @@ def test_brevitas_quant(check_r2_score, is_signed: bool, narrow: bool):
         )
 
     if not is_signed and narrow:
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4544
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4544
         # Reinstate warning check when brevitas export is fixed
         pytest.skip("Skipping checking of invalid brevitas quant setting (signed=0,narrow=1)")
     #        with pytest.raises(AssertionError, match=r"Can not use narrow range.*"):

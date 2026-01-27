@@ -108,7 +108,7 @@ These issues are currently being addressed, and significant improvements are exp
 
 ## Concrete stack
 
-Torus ML is built on top of LuxFHE's [Concrete](https://github.com/luxfhe-ai/concrete).
+Torus ML is built on top of LuxFHE's [Concrete](https://github.com/luxfhe-ai/torus).
 
 ## Online demos and tutorials
 

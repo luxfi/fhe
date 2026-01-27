@@ -6,17 +6,17 @@ Torus ML supports a wide range of models through the integration of ONNX nodes. 
 
 ### Floating-point Implementation
 
-The [`ops_impl.py`](../../src/concrete/ml/onnx/ops_impl.py) file is responsible for implementing the computation of ONNX operators using floating-point arithmetic. The implementation should mirror the behavior of the corresponding ONNX operator precisely. This includes adhering to the expected inputs, outputs, and operational semantics.
+The [`ops_impl.py`](../../src/torus/ml/onnx/ops_impl.py) file is responsible for implementing the computation of ONNX operators using floating-point arithmetic. The implementation should mirror the behavior of the corresponding ONNX operator precisely. This includes adhering to the expected inputs, outputs, and operational semantics.
 
 Refer to the [ONNX documentation](https://github.com/onnx/onnx/blob/main/docs/Operators.md) to grasp the expected behavior, inputs and outputs of the operator.
 
 ### Operator Mapping
 
-After implementing the operator in [`ops_impl.py`](../../src/concrete/ml/onnx/ops_impl.py), you need to import it into [`onnx_utils.py`](../../src/concrete/ml/onnx/onnx_utils.py) and map it within the `ONNX_OPS_TO_NUMPY_IMPL` dictionary. This mapping is crucial for the framework to recognize and utilize the new operator.
+After implementing the operator in [`ops_impl.py`](../../src/torus/ml/onnx/ops_impl.py), you need to import it into [`onnx_utils.py`](../../src/torus/ml/onnx/onnx_utils.py) and map it within the `ONNX_OPS_TO_NUMPY_IMPL` dictionary. This mapping is crucial for the framework to recognize and utilize the new operator.
 
 ### Quantized Operator
 
-Quantized operators are defined in [`quantized_ops.py`](../../src/concrete/ml/quantization/quantized_ops.py) and are used to handle integer arithmetic. Their implementation is required for the new ONNX to be executed in FHE.
+Quantized operators are defined in [`quantized_ops.py`](../../src/torus/ml/quantization/quantized_ops.py) and are used to handle integer arithmetic. Their implementation is required for the new ONNX to be executed in FHE.
 
 There exist two types of quantized operators:
 
@@ -41,7 +41,7 @@ There are many locations where tests can be added:
 
 - [`test_onnx_ops_impl.py`](../../tests/onnx/test_onnx_ops_impl.py): Tests the implementation of the ONNX node in floating points.
 - [`test_quantized_ops.py`](../../tests/quantization/test_quantized_ops.py): Tests the implementation of the ONNX node in integer arithmetic.
-- Optional: [`test_compile_torch.py`](../../tests/torch/test_compile_torch.py): Tests the implementation of a specific torch model that contains the new ONNX operator. The model needs to be added in [`torch_models.py`](../../src/concrete/ml/pytest/torch_models.py).
+- Optional: [`test_compile_torch.py`](../../tests/torch/test_compile_torch.py): Tests the implementation of a specific torch model that contains the new ONNX operator. The model needs to be added in [`torch_models.py`](../../src/torus/ml/pytest/torch_models.py).
 
 ## Update Documentation
 

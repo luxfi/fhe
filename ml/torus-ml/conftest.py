@@ -11,9 +11,9 @@ from typing import Any, Callable, Optional, Union
 import numpy
 import pytest
 import torch
-from concrete.fhe import Graph as CPGraph
-from concrete.fhe.compilation import Circuit, Configuration
-from concrete.fhe.mlir.utils import MAXIMUM_TLU_BIT_WIDTH
+from torus.fhe import Graph as CPGraph
+from torus.fhe.compilation import Circuit, Configuration
+from torus.fhe.mlir.utils import MAXIMUM_TLU_BIT_WIDTH
 from sklearn.datasets import make_classification, make_regression
 from sklearn.metrics import accuracy_score
 
@@ -298,8 +298,8 @@ def get_device():
     force_cuda = os.getenv("POETRY_RUN_GPU_TESTS") == "1"
 
     if force_cuda:
-        assert concrete.compiler.check_gpu_available(), "[Concrete] GPU required but not detected."
-        assert concrete.compiler.check_gpu_enabled(), "[Concrete] GPU detected but not enabled."
+        assert torus.compiler.check_gpu_available(), "[Concrete] GPU required but not detected."
+        assert torus.compiler.check_gpu_enabled(), "[Concrete] GPU detected but not enabled."
         assert torch.cuda.is_available(), "[PyTorch] CUDA not available."
         return "cuda"
     return "cpu"
@@ -313,7 +313,7 @@ def enforce_gpu_determinism():
 
 
 # Method is not ideal as some MLIR can contain TLUs but not the associated graph
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2381
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/2381
 def check_graph_input_has_no_tlu_impl(graph: CPGraph):
     """Check that the graph's input node does not contain a TLU."""
     succ = list(graph.graph.successors(graph.input_nodes[0]))
@@ -322,7 +322,7 @@ def check_graph_input_has_no_tlu_impl(graph: CPGraph):
 
 
 # Method is not ideal as some MLIR can contain TLUs but not the associated graph
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2381
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/2381
 def check_graph_output_has_no_tlu_impl(graph: CPGraph):
     """Check that the graph's output node does not contain a TLU."""
     if graph.output_nodes[0].converted_to_table_lookup:
@@ -330,7 +330,7 @@ def check_graph_output_has_no_tlu_impl(graph: CPGraph):
 
 
 # Method is not ideal as some MLIR can contain TLUs but not the associated graph
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2381
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/2381
 def check_graph_has_no_input_output_tlu_impl(graph: CPGraph):
     """Check that the graph's input and output nodes do not contain a TLU."""
     check_graph_input_has_no_tlu_impl(graph)
@@ -338,7 +338,7 @@ def check_graph_has_no_input_output_tlu_impl(graph: CPGraph):
 
 
 # To update when the feature becomes available Concrete
-# FIXME: https://github.com/luxfi/concrete-numpy-internal/issues/1714
+# FIXME: https://github.com/luxfi/torus-numpy-internal/issues/1714
 def check_circuit_has_no_tlu_impl(circuit: Circuit):
     """Check a circuit has no TLU."""
     if "apply_" in circuit.mlir and "_lookup_table" in circuit.mlir:
@@ -596,7 +596,7 @@ def check_is_good_execution_for_cml_vs_circuit():
                     # tests), especially since these results are tested in other tests such as the
                     # `check_subfunctions_in_fhe`
                     # For KNN `predict_proba` is not supported for now
-                    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3962
+                    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3962
                     if is_classifier_or_partial_classifier(model) and not isinstance(
                         model, SklearnKNeighborsMixin
                     ):
@@ -609,7 +609,7 @@ def check_is_good_execution_for_cml_vs_circuit():
 
                 else:
                     raise ValueError(
-                        "numpy_function should be a built-in concrete sklearn model or "
+                        "numpy_function should be a built-in torus sklearn model or "
                         "a QuantizedModule object."
                     )
 

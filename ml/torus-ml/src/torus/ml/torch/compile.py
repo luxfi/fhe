@@ -11,9 +11,9 @@ import torch
 from brevitas.export.onnx.qonnx.manager import QONNXManager as BrevitasONNXManager
 from brevitas.nn.quant_layer import QuantInputOutputLayer as QNNMixingLayer
 from brevitas.nn.quant_layer import QuantNonLinearActLayer as QNNUnivariateLayer
-from concrete.fhe import ParameterSelectionStrategy
-from concrete.fhe.compilation.artifacts import DebugArtifacts
-from concrete.fhe.compilation.configuration import Configuration
+from torus.fhe import ParameterSelectionStrategy
+from torus.fhe.compilation.artifacts import DebugArtifacts
+from torus.fhe.compilation.configuration import Configuration
 
 from ..common.debugging import assert_false, assert_true
 from ..common.utils import (
@@ -141,7 +141,7 @@ def build_quantized_module(
         *inputset_as_numpy_tuple, keep_onnx=keep_onnx
     )
 
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4127
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4127
     if reduce_sum_copy:
         quantized_module.set_reduce_sum_copy()
 

@@ -12,7 +12,7 @@ One can also run this example locally using Docker, or just by running the scrip
 1. To train your model you can use `train.py`, or `train_with_docker.sh` to use Docker (recommended). This operation might take some time.
    This will train a model and [serialize the FHE circuit](../../../docs/guides/client_server.md).
    This will result in a new folder called `./dev`.
-1. Once that's done you can use the script provided in Torus ML in `src/concrete/ml/deployment/`, use `deploy_to_docker.py`.
+1. Once that's done you can use the script provided in Torus ML in `src/torus/ml/deployment/`, use `deploy_to_docker.py`.
 
 - `python use_case_examples/deployment/server/deploy_to_docker.py`
 

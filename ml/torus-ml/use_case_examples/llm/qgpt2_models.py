@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
-from concrete.fhe.compilation import Circuit, Configuration
+from torus.fhe.compilation import Circuit, Configuration
 from qgpt2_class import QGPT2
 from quant_framework import DualArray
 from transformers import GPT2LMHeadModel
