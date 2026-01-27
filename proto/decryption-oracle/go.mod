@@ -1,4 +1,4 @@
-module github.com/fhenixprotocol/decryption-oracle-proto
+module github.com/luxfhe/decryption-oracle-proto
 
 go 1.24.9
 
