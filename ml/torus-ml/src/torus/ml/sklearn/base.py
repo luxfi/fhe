@@ -541,7 +541,7 @@ class BaseEstimator:
         self,
         X: Data,
         configuration: Optional[Configuration] = None,
-        ciphertext_format: Union[str, CiphertextFormat] = CiphertextFormat.CONCRETE,
+        ciphertext_format: Union[str, CiphertextFormat] = CiphertextFormat.TORUS,
         artifacts: Optional[DebugArtifacts] = None,
         show_mlir: bool = False,
         p_error: Optional[float] = None,
@@ -610,7 +610,7 @@ class BaseEstimator:
             ),
         )
 
-        if ciphertext_format == CiphertextFormat.CONCRETE:
+        if ciphertext_format == CiphertextFormat.TORUS:
             # Retrieve the compiler instance
             module_to_compile = self._get_module_to_compile()
         else:
@@ -1341,7 +1341,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
         self,
         X: Data,
         configuration: Optional[Configuration] = None,
-        ciphertext_format: Union[str, CiphertextFormat] = CiphertextFormat.CONCRETE,
+        ciphertext_format: Union[str, CiphertextFormat] = CiphertextFormat.TORUS,
         artifacts: Optional[DebugArtifacts] = None,
         show_mlir: bool = False,
         p_error: Optional[float] = None,
@@ -1367,7 +1367,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
         )
 
         assert_true(
-            ciphertext_format == CiphertextFormat.CONCRETE,
+            ciphertext_format == CiphertextFormat.TORUS,
             (
                 "TFHE-rs ciphertext inputs/outputs is only "
                 "supported for 8-bit tree-based classifiers: "
