@@ -14,7 +14,7 @@ NOISE_PROFILE_DIR_NAME = 'noise_profiles'
 
 def _get_package_resource_path(filename: str):
     """Gets the path to a resource within the noise_profiles directory."""
-    with importlib.resources.path('concrete_ml_extensions', NOISE_PROFILE_DIR_NAME) as base_path:
+    with importlib.resources.path('torus_ml_extensions', NOISE_PROFILE_DIR_NAME) as base_path:
         return base_path / filename
 
 def _load_manifest() -> Dict[str, Any]:
@@ -34,7 +34,7 @@ def _load_manifest() -> Dict[str, Any]:
 def _get_default_params_hash() -> Optional[str]:
     """Gets the hash of the default crypto parameters."""
     # Need to import late to avoid circular dependency during package init
-    from . import concrete_ml_extensions as fhext
+    from . import torus_ml_extensions as fhext
     try:
         default_params_serialized = fhext.default_params()
         default_params_dict = json.loads(default_params_serialized)
@@ -69,7 +69,7 @@ def find_noise_profile(
     inner_dim = matrix_a_shape[1]
 
     # Need to import late to avoid circular dependency
-    from . import concrete_ml_extensions as fhext
+    from . import torus_ml_extensions as fhext
 
     if crypto_params_serialized is None:
         # Use default parameters if none are provided

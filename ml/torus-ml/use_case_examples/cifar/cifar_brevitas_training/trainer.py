@@ -201,7 +201,7 @@ class Trainer(object):
         else:
             # Add MPS (for macOS with Apple Silicon or AMD GPUs) support when error is fixed. For
             # now, we observe a decrease in torch's top1 accuracy when using MPS devices
-            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3953
+            # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3953
             self.device = "cpu"
 
         self.device = torch.device(self.device)

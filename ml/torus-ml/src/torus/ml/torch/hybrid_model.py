@@ -16,7 +16,7 @@ import numpy
 import requests
 import torch
 from brevitas.quant_tensor import QuantTensor
-from concrete.fhe import Configuration
+from torus.fhe import Configuration
 from torch import nn
 from tqdm.autonotebook import tqdm
 
@@ -57,7 +57,7 @@ def underscore_str_to_tuple(tup: str) -> Tuple:
     return ast.literal_eval(tup.replace("po_", "(").replace("_pc", ")").replace("_", ", "))
 
 
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3858
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3858
 def convert_conv1d_to_linear(layer_or_module):
     """Convert all Conv1D layers in a module or a Conv1D layer itself to nn.Linear.
 
@@ -293,7 +293,7 @@ class RemoteModule(nn.Module):
 
         elif self.fhe_local_mode == HybridFHEMode.REMOTE:  # pragma:no cover
             # Remote call
-            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4672
+            # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4672
             assert self.executor is None, "Remote optimized linear layers are not yet implemented"
             y = self.remote_call(x)
 
@@ -423,7 +423,7 @@ class HybridFHEModel:
         """Replace the private modules in the model with remote layers."""
         self._has_only_large_linear_layers = True
         for module_name in self.module_names:
-            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3858
+            # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3858
             # Conv1d introduce reshaping operations which adds more TLU
             self.private_modules[module_name] = convert_conv1d_to_linear(
                 self.private_modules[module_name]
@@ -605,7 +605,7 @@ class HybridFHEModel:
                 FHE model compilation. Default is 8.
             p_error (float): Error allowed for each table look-up in the circuit.
             device: FHE compilation device, can be either 'cpu' or 'cuda'.
-            configuration (Configuration): A concrete Configuration object specifying the FHE
+            configuration (Configuration): A torus Configuration object specifying the FHE
                 encryption parameters. If not specified, a default configuration is used.
             use_dynamic_quantization (bool): If True, use dynamic quantization;
                 otherwise, use static quantization. (only for GLWE backend)
@@ -755,7 +755,7 @@ class HybridFHEModel:
         # Save the model with a specific filename
         model_path = path / "model.pth"
         # Save the model state dict due to a Brevitas issue
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4572
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4572
         torch.save(self.model.state_dict(), model_path.resolve())
 
         # Save the FHE circuit in the same directory

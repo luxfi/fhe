@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/torch/numpy_module.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/numpy_module.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.torch.numpy_module`
 
@@ -12,7 +12,7 @@ A torch to numpy module.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/numpy_module.py#L20"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/numpy_module.py#L20"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `NumpyModule`
 
@@ -24,7 +24,7 @@ General interface to transform a torch.nn.Module to numpy module.
 - <b>`dummy_input`</b> (Union\[torch.Tensor, Tuple\[torch.Tensor, ...\]\]):  Sample tensors for all the  module inputs, used in the ONNX export to get a simple to manipulate nn representation.
 - <b>`debug_onnx_output_file_path`</b>:  (Optional\[Union\[Path, str\]\], optional): An optional path to  indicate where to save the ONNX file exported by torch for debug.  Defaults to None.
 
-<a href="../../../src/concrete/ml/torch/numpy_module.py#L33"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/numpy_module.py#L33"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -62,7 +62,7 @@ Get the ONNX preprocessing.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/numpy_module.py#L116"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/numpy_module.py#L116"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 
@@ -82,7 +82,7 @@ Apply a forward pass on args with the equivalent numpy function only.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/numpy_module.py#L100"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/numpy_module.py#L100"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `pre_processing`
 

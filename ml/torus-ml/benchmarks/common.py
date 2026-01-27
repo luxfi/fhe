@@ -25,17 +25,17 @@ from sklearn.utils.class_weight import compute_class_weight
 from torus import fhe
 
 try:
-    from concrete.fhe.mlir.utils import MAXIMUM_TLU_BIT_WIDTH
+    from torus.fhe.mlir.utils import MAXIMUM_TLU_BIT_WIDTH
 except ImportError:  # For backward compatibility purposes
     try:
-        from concrete.fhe.mlir.utils import (
+        from torus.fhe.mlir.utils import (
             MAXIMUM_SIGNED_BIT_WIDTH_WITH_TLUS as MAXIMUM_TLU_BIT_WIDTH,
         )
     except ImportError:
         try:
-            from concrete.fhe import MAXIMUM_TLU_BIT_WIDTH
+            from torus.fhe import MAXIMUM_TLU_BIT_WIDTH
         except ImportError:
-            from concrete.fhe import MAXIMUM_BIT_WIDTH as MAXIMUM_TLU_BIT_WIDTH
+            from torus.fhe import MAXIMUM_BIT_WIDTH as MAXIMUM_TLU_BIT_WIDTH
 
 # Hack to import all models currently implemented in Torus ML
 # (but that might not be implemented in targeted version)
@@ -394,7 +394,7 @@ def train_and_test_regressor(
         x_train = normalizer.fit_transform(x_train)
         x_test = normalizer.transform(x_test)
 
-    concrete_regressor = regressor(**config)
+    torus_regressor = regressor(**config)
 
     if local_args.verbose:
         print(f"  -- Done in {time.time() - time_current} seconds")
@@ -403,7 +403,7 @@ def train_and_test_regressor(
 
     # We call fit_benchmark to both fit our Torus ML regressors but also to return the sklearn
     # one that we would use if we were not using FHE. This regressor will be our baseline
-    concrete_regressor, sklearn_regressor = concrete_regressor.fit_benchmark(x_train, y_train)
+    torus_regressor, sklearn_regressor = torus_regressor.fit_benchmark(x_train, y_train)
 
     if local_args.verbose:
         print(f"  -- Done in {time.time() - time_current} seconds")
@@ -420,7 +420,7 @@ def train_and_test_regressor(
         print("Predict in clear")
 
     # Now predict with our regressor and report its goodness of fit
-    y_pred_q = concrete_regressor.predict(x_test, fhe="disable")
+    y_pred_q = torus_regressor.predict(x_test, fhe="disable")
     run_and_report_regression_metrics(y_test, y_pred_q, "quantized-clear", "Quantized Clear")
 
     if should_test_config_in_fhe(regressor, config, local_args):
@@ -434,13 +434,13 @@ def train_and_test_regressor(
 
         # Compile and report compilation time
         t_start = time.time()
-        fhe_circuit = concrete_regressor.compile(x_test_comp, configuration=BENCHMARK_CONFIGURATION)
+        fhe_circuit = torus_regressor.compile(x_test_comp, configuration=BENCHMARK_CONFIGURATION)
 
         # Dump MLIR
         if local_args.mlir_only:
             mlirs_dir: Path = Path(__file__).parents[1] / "MLIRs"
             benchmark_name = benchmark_name_generator(
-                dataset, concrete_regressor.__class__, config, "_"
+                dataset, torus_regressor.__class__, config, "_"
             )
             mlirs_dir.mkdir(parents=True, exist_ok=True)
             with open(mlirs_dir / f"{benchmark_name}.mlir", "w", encoding="utf-8") as file:
@@ -472,7 +472,7 @@ def train_and_test_regressor(
         # Now predict with our regressor and report its goodness of fit. We also measure
         # execution time per test sample
         t_start = time.time()
-        y_pred_c = concrete_regressor.predict(x_test, fhe="execute")
+        y_pred_c = torus_regressor.predict(x_test, fhe="execute")
         duration = time.time() - t_start
 
         run_and_report_regression_metrics(y_test, y_pred_c, "fhe", "FHE")
@@ -557,7 +557,7 @@ def train_and_test_classifier(
         classes = np.unique(y_all)
         config["criterion__weight"] = compute_class_weight("balanced", classes=classes, y=y_train)
 
-    concrete_classifier = classifier(**config)
+    torus_classifier = classifier(**config)
 
     if local_args.verbose:
         print(f"  -- Done in {time.time() - time_current} seconds")
@@ -569,7 +569,7 @@ def train_and_test_classifier(
     # after training the underlying sklearn classifier.
     # We call fit_benchmark to both fit our Torus ML classifiers but also to return the sklearn
     # one that we would use if we were not using FHE. This classifier will be our baseline
-    concrete_classifier, sklearn_classifier = concrete_classifier.fit_benchmark(x_train, y_train)
+    torus_classifier, sklearn_classifier = torus_classifier.fit_benchmark(x_train, y_train)
 
     if local_args.verbose:
         print(f"  -- Done in {time.time() - time_current} seconds")
@@ -588,7 +588,7 @@ def train_and_test_classifier(
         print("Predict in clear")
 
     # Now predict with our classifier and report its accuracy
-    y_pred_q = concrete_classifier.predict(x_test, fhe="disable")
+    y_pred_q = torus_classifier.predict(x_test, fhe="disable")
     run_and_report_classification_metrics(y_test, y_pred_q, "quantized-clear", "Quantized Clear")
 
     if should_test_config_in_fhe(classifier, config, local_args):
@@ -602,7 +602,7 @@ def train_and_test_classifier(
 
         # Compile and report compilation time
         t_start = time.time()
-        fhe_circuit = concrete_classifier.compile(
+        fhe_circuit = torus_classifier.compile(
             x_test_comp, configuration=BENCHMARK_CONFIGURATION
         )
 
@@ -610,7 +610,7 @@ def train_and_test_classifier(
         if local_args.mlir_only:
             mlirs_dir: Path = Path(__file__).parents[1] / "MLIRs"
             benchmark_name = benchmark_name_generator(
-                dataset, concrete_classifier.__class__, config, "_"
+                dataset, torus_classifier.__class__, config, "_"
             )
             mlirs_dir.mkdir(parents=True, exist_ok=True)
             with open(mlirs_dir / f"{benchmark_name}.mlir", "w", encoding="utf-8") as file:
@@ -642,7 +642,7 @@ def train_and_test_classifier(
         # Now predict with our classifier and report its accuracy. We also measure
         # execution time per test sample
         t_start = time.time()
-        y_pred_c = concrete_classifier.predict(x_test, fhe="execute")
+        y_pred_c = torus_classifier.predict(x_test, fhe="execute")
         duration = time.time() - t_start
 
         run_and_report_classification_metrics(y_test, y_pred_c, "fhe", "FHE")
@@ -767,7 +767,7 @@ def benchmark_name_generator(
 # Add tests:
 # - Bijection between both functions
 # - The functions support all models
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/1866
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/1866
 
 
 # pylint: disable-next=too-many-branches, redefined-outer-name

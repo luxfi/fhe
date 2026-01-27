@@ -9,7 +9,7 @@ from typing import Any, Optional, Tuple, Union
 
 import torus_ml_extensions as fhext
 import numpy
-from concrete.fhe import tfhers
+from torus.fhe import tfhers
 
 from torus import fhe
 
@@ -51,7 +51,7 @@ class DeploymentMode(Enum):
         return mode in {member.value for member in DeploymentMode.__members__.values()}
 
 
-def check_concrete_versions(zip_path: Path):
+def check_torus_versions(zip_path: Path):
     """Check that current versions match the ones used in development.
 
     This function loads the version JSON file found in client.zip or server.zip files and then
@@ -72,14 +72,14 @@ def check_concrete_versions(zip_path: Path):
             versions = json.load(file)
 
     # Check for package coherence
-    packages_to_check = {"concrete-python", "concrete-ml"}
+    packages_to_check = {"torus-python", "torus-ml"}
 
     errors = []
     for package_name, package_version in versions.items():
         if package_name not in packages_to_check:
             continue
 
-        if package_name == "concrete-ml":
+        if package_name == "torus-ml":
             current_version = CML_VERSION
 
         else:
@@ -130,7 +130,7 @@ class FHEModelServer:
         """Load the circuit."""
         server_zip_path = Path(self.path_dir).joinpath("server.zip")
 
-        check_concrete_versions(server_zip_path)
+        check_torus_versions(server_zip_path)
 
         self.server = fhe.Server.load(Path(self.path_dir).joinpath("server.zip"))
 
@@ -150,10 +150,10 @@ class FHEModelServer:
 
     # We should make 'serialized_encrypted_quantized_data' handle unpacked inputs, as Concrete does,
     # instead of tuples
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4477
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4477
     # We should also rename the input arguments to remove the `serialized` part, as we now accept
     # both serialized and deserialized input values
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4476
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4476
     def run(
         self,
         serialized_encrypted_quantized_data: Union[
@@ -190,7 +190,7 @@ class FHEModelServer:
         # Make sure inputs are either only serialized values or encrypted values
         assert (
             inputs_are_serialized ^ inputs_are_encrypted_values
-        ), "Inputs must be all of the same types, either 'bytes' or 'concrete.fhe.Value'"
+        ), "Inputs must be all of the same types, either 'bytes' or 'torus.fhe.Value'"
 
         # Deserialize the values if they are all serialized
         if inputs_are_serialized:
@@ -348,8 +348,8 @@ class FHEModelDev:
         # Add versions
         versions_path = Path(self.path_dir).joinpath("versions.json")
         versions = {
-            "concrete-python": version("concrete-python"),
-            "concrete-ml": CML_VERSION,
+            "torus-python": version("torus-python"),
+            "torus-ml": CML_VERSION,
             "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         }
         with open(versions_path, "w", encoding="utf-8") as file:
@@ -403,7 +403,7 @@ class FHEModelClient:
                 serialized_processing = load(file)
 
         # Load and check versions
-        check_concrete_versions(client_zip_path)
+        check_torus_versions(client_zip_path)
 
         # Initialize the model
         self.model = serialized_processing["model_type"]()
@@ -416,7 +416,7 @@ class FHEModelClient:
         if "is_fitted" in serialized_processing:
             # This private access should be temporary as the Client-Server interface could benefit
             # from built-in serialization load/dump methods
-            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3243
+            # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3243
             # pylint: disable-next=protected-access
             self.model._is_fitted = serialized_processing["is_fitted"]
 
@@ -431,7 +431,7 @@ class FHEModelClient:
 
         # Load model parameters
         # Add some checks on post-processing-params
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3131
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3131
         self.model.post_processing_params = serialized_processing["model_post_processing_params"]
 
     def generate_private_and_evaluation_keys(self, force=False):
@@ -530,7 +530,7 @@ class FHEModelClient:
         return serialize_encrypted_values(*x_quant_encrypted)
 
     # We should find a better name for `serialized_encrypted_quantized_result`
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4476
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4476
     def deserialize_decrypt(
         self, *serialized_encrypted_quantized_result: Optional[bytes]
     ) -> Union[Any, Tuple[Any, ...]]:
@@ -574,7 +574,7 @@ class FHEModelClient:
         return result_quant
 
     # We should find a better name for `serialized_encrypted_quantized_result`
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4476
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4476
     def deserialize_decrypt_dequantize(
         self, *serialized_encrypted_quantized_result: Optional[bytes]
     ) -> Union[numpy.ndarray, Tuple[numpy.ndarray, ...]]:
@@ -598,7 +598,7 @@ class FHEModelClient:
         # handles a single input. Calling the following is however not an issue for now as we expect
         # 'result' to be a tuple of length 1 in this case anyway. Still, we need to make sure this
         # does not break in the future if any built-in models starts to handle multiple outputs :
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4474
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4474
         assert len(result) == 1 or isinstance(
             self.model, QuantizedModule
         ), "Only 'QuantizedModule' instances can handle multi-outputs."

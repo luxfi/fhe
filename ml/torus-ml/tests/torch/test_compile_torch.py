@@ -11,7 +11,7 @@ import onnx
 import pytest
 import torch
 import torch.quantization
-from concrete.fhe import ParameterSelectionStrategy  # pylint: disable=ungrouped-imports
+from torus.fhe import ParameterSelectionStrategy  # pylint: disable=ungrouped-imports
 from torch import nn
 
 from torus.ml.common.utils import (
@@ -56,7 +56,7 @@ from torus.ml.pytest.torch_models import (
 )
 from torus.ml.quantization import QuantizedModule
 
-# pylint sees separated imports from concrete but does not understand they come from two different
+# pylint sees separated imports from torus but does not understand they come from two different
 # packages/projects, disable the warning
 # pylint: disable=ungrouped-imports
 from torus.ml.torch.compile import (
@@ -398,13 +398,13 @@ def accuracy_test_rounding(
     for key, module in compiled_modules.items():
 
         # low bit-width rounding is not behaving as expected with new simulation
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4331
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4331
         if "low" not in key:
             check_is_good_execution_for_cml_vs_circuit(x_test, module, simulate=simulate)
 
     # FIXME: The following MSE comparison is commented out due to instability issues.
     # We will investigate a better way to assess the rounding feature's performance.
-    # https://github.com/luxfi/concrete-ml-internal/issues/3662
+    # https://github.com/luxfi/torus-ml-internal/issues/3662
     # mse_results = {
     #     key: numpy.mean(numpy.square(numpy.subtract(results['original'], result_list)))
     #     for key, result_list in results.items()
@@ -416,7 +416,7 @@ def accuracy_test_rounding(
 
 
 # This test is a known flaky
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3429
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3429
 @pytest.mark.flaky
 @pytest.mark.parametrize(
     "activation_function",
@@ -481,7 +481,7 @@ def test_compile_torch_or_onnx_networks(
 
 
 # This test is a known flaky
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3660
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/3660
 @pytest.mark.flaky
 @pytest.mark.parametrize(
     "activation_function",
@@ -564,7 +564,7 @@ def test_compile_torch_or_onnx_conv_networks(  # pylint: disable=unused-argument
         pytest.param(nn.GELU, id="GELU"),
         pytest.param(nn.LogSigmoid, id="LogSigmoid"),
         # Some issues are still encountered with some activations
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/335
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/335
         #
         # Other problems, certainly related to tests:
         # Required positional arguments: 'embed_dim' and 'num_heads' and fails with a partial
@@ -699,7 +699,7 @@ def test_compile_brevitas_qat(
 
 
 # Update this test to align with Concrete's simulation fix.
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4578
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/4578
 @pytest.mark.xfail
 @pytest.mark.parametrize(
     "model_class, expected_onnx_str",
@@ -1031,7 +1031,7 @@ def test_shape_operations_net(
     model = model_class(is_qat)
 
     # Shape transformation do not support >1 example in the inputset
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3871
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3871
     inputset = numpy.random.uniform(size=(1, n_channels, 2, 2))
 
     if is_qat:

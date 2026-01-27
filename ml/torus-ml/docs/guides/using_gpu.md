@@ -36,31 +36,31 @@ This section pertains to models that are compiled using the `sklearn`-style buil
 To use the CUDA-enabled backend, install the GPU-enabled Concrete compiler:
 
 ```bash
-pip install --extra-index-url https://pypi.luxfhe.io/gpu concrete-python
+pip install --extra-index-url https://pypi.luxfhe.io/gpu torus-python
 ```
 
-If you already have an existing version of `concrete-python` installed, it will not be re-installed automatically. In that case, manually uninstall the current version and then install the GPU-enabled version:
+If you already have an existing version of `torus-python` installed, it will not be re-installed automatically. In that case, manually uninstall the current version and then install the GPU-enabled version:
 
 ```bash
-pip uninstall concrete-python
-pip install --extra-index-url https://pypi.luxfhe.io/gpu concrete-python
+pip uninstall torus-python
+pip install --extra-index-url https://pypi.luxfhe.io/gpu torus-python
 ```
 
 To switch back to the CPU-only version of the compiler, change the index-url to the CPU-only repository or remove the index-url parameter:
 
 ```bash
-pip uninstall concrete-python
-pip install --extra-index-url https://pypi.luxfhe.io/cpu concrete-python
+pip uninstall torus-python
+pip install --extra-index-url https://pypi.luxfhe.io/cpu torus-python
 ```
 
 ## Checking GPU can be enabled
 
-To check if the CUDA acceleration is available, use the following helper functions from `concrete-python`:
+To check if the CUDA acceleration is available, use the following helper functions from `torus-python`:
 
 ```python
-import concrete.compiler; 
-print("GPU enabled: ", concrete.compiler.check_gpu_enabled())
-print("GPU available: ", concrete.compiler.check_gpu_available())
+import torus.compiler; 
+print("GPU enabled: ", torus.compiler.check_gpu_enabled())
+print("GPU available: ", torus.compiler.check_gpu_available())
 ```
 
 ## Usage

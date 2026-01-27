@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.torch.hybrid_backprop_linear`
 
@@ -8,13 +8,13 @@ Linear layer implementations for backprop FHE-compatible models.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L8"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L8"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `ForwardModuleLinear`
 
 Forward module for linear layers.
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L11"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L11"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -24,7 +24,7 @@ __init__(weight, bias=None, weight_transposed=False)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L17"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L17"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 
@@ -43,13 +43,13 @@ The output tensor after applying the linear transformation.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L37"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L37"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `BackwardModuleLinear`
 
 Backward module for linear layers.
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -59,7 +59,7 @@ __init__(weight, weight_transposed=False)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L45"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L45"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 
@@ -78,13 +78,13 @@ The gradient input tensor after applying the backward pass.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L61"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L61"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `CustomLinear`
 
 Custom linear module.
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L64"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L64"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -94,7 +94,7 @@ __init__(weight, bias=None, weight_transposed=False)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L69"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L69"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 
@@ -113,7 +113,7 @@ The output tensor after applying the custom linear module.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L81"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `ForwardBackwardModule`
 
@@ -121,7 +121,7 @@ Custom autograd function for forward and backward passes.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L101"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L101"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `backward`
 
@@ -141,7 +141,7 @@ The gradient input tensor after applying the backward pass.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/hybrid_backprop_linear.py#L84"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/hybrid_backprop_linear.py#L84"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 

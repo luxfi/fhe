@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional, TextIO, Union, get_type_hints
 import numpy
 import numpy.typing
 import torch
-from concrete.fhe.tracing.tracer import Tracer
+from torus.fhe.tracing.tracer import Tracer
 
 from ..common.debugging import assert_true
 from ..common.serialization.dumpers import dump, dumps
@@ -526,7 +526,7 @@ class UniformQuantizationParameters:
 
 
 # Change UniformQuantizer inheritance from UniformQuantizationParameters to composition.
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/1434
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/1434
 class UniformQuantizer(UniformQuantizationParameters, QuantizationOptions, MinMaxQuantizationStats):
     """Uniform quantizer.
 
