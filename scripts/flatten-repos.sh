@@ -154,7 +154,7 @@ for (const section of ['dependencies', 'peerDependencies', 'devDependencies']) {
         'cofhe-hardhat-plugin': '@luxfhe/hardhat-plugin',
         'cofhejs': '@luxfhe/v2-sdk',
         'cofhejs-permit': '@luxfhe/permit',
-        '@fhenixprotocol/contracts': '@luxfhe/contracts',
+        '@luxfhe/contracts': '@luxfhe/contracts',
         '@luxfhe/cofhe-contracts': '@luxfhe/contracts',
         '@luxfhe/cofhe-mock-contracts': '@luxfhe/mocks',
     };
@@ -182,7 +182,7 @@ update_go_mod() {
     fi
     
     log "Updating $file"
-    run "sed -i '' 's|module github.com/fhenixprotocol/[^[:space:]]*|module github.com/${ORG}/${repo_name}|g' '$file'"
+    run "sed -i '' 's|module github.com/luxfhe/[^[:space:]]*|module github.com/${ORG}/${repo_name}|g' '$file'"
 }
 
 # Process each repo

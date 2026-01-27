@@ -55,7 +55,7 @@ cli
 clientspecs
 codeblocks
 concat
-concreteestimators
+torusestimators
 config
 configs
 conv
@@ -359,6 +359,7 @@ tokenizer
 toml
 toolkits
 torchvision
+torus
 tqdm
 traceback
 tweedie
@@ -384,4 +385,4 @@ xgboost
 xilinx
 yaml
 yurchak
-zama
+lux
