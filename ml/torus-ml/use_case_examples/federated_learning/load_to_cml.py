@@ -31,16 +31,16 @@ if __name__ == "__main__":
     # Load MNIST dataset from https://www.openml.org/d/554
     (_, _), (X_test, y_test) = federated_utils.load_mnist()
 
-    concrete_predictions = model.predict(X_test)
+    torus_predictions = model.predict(X_test)
     sklearn_predictions = sklearn_model.predict(X_test)
     simulation_predictions = model.predict(X_test, fhe="simulate")
 
     print(
-        (concrete_predictions == sklearn_predictions).sum() / len(y_test),
+        (torus_predictions == sklearn_predictions).sum() / len(y_test),
         "quantized vs scikit-learn",
     )
     print(
-        (concrete_predictions == simulation_predictions).sum() / len(y_test),
+        (torus_predictions == simulation_predictions).sum() / len(y_test),
         "quantized vs simulation",
     )
     print(
@@ -48,6 +48,6 @@ if __name__ == "__main__":
         "simulation vs scikit-learn",
     )
 
-    print((concrete_predictions == y_test).sum() / len(y_test), "quantized accuracy")
+    print((torus_predictions == y_test).sum() / len(y_test), "quantized accuracy")
     print((sklearn_predictions == y_test).sum() / len(y_test), "scikit-learn accuracy")
     print((simulation_predictions == y_test).sum() / len(y_test), "simulation accuracy")

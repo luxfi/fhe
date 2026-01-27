@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/quantization/linear_op_glwe_backend.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/linear_op_glwe_backend.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.quantization.linear_op_glwe_backend`
 
@@ -8,7 +8,7 @@ GLWE backend for some supported layers.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/linear_op_glwe_backend.py#L14"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/linear_op_glwe_backend.py#L14"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `has_glwe_backend`
 
@@ -24,13 +24,13 @@ Check if the GLWE backend is installed.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/linear_op_glwe_backend.py#L27"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/linear_op_glwe_backend.py#L27"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `GLWELinearLayerExecutor`
 
 GLWE execution helper for pure linear layers.
 
-<a href="../../../src/concrete/ml/quantization/linear_op_glwe_backend.py#L30"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/linear_op_glwe_backend.py#L30"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -52,7 +52,7 @@ Initialize the GLWE linear layer executor.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/linear_op_glwe_backend.py#L492"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/linear_op_glwe_backend.py#L492"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 
@@ -74,7 +74,7 @@ Perform the inference of this linear layer.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/quantization/linear_op_glwe_backend.py#L62"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/quantization/linear_op_glwe_backend.py#L62"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `keygen`
 

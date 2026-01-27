@@ -7,7 +7,7 @@ from pathlib import Path
 import torch
 import torchvision
 import torchvision.transforms as transforms
-from concrete.fhe import Configuration
+from torus.fhe import Configuration
 from models import cnv_2w2a
 
 from torus.ml.deployment import FHEModelDev

@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/common/serialization/dumpers.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/common/serialization/dumpers.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.common.serialization.dumpers`
 
@@ -8,7 +8,7 @@ Dump functions for serialization.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/common/serialization/dumpers.py#L9"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/common/serialization/dumpers.py#L9"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `dumps`
 
@@ -28,7 +28,7 @@ Dump any object as a string.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/common/serialization/dumpers.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/common/serialization/dumpers.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `dump`
 

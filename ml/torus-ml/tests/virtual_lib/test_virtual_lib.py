@@ -1,8 +1,8 @@
 """Test file for FHE simulation specific tests."""
 
 import numpy
-from concrete.fhe.compilation.circuit import Circuit
-from concrete.fhe.compilation.compiler import Compiler
+from torus.fhe.compilation.circuit import Circuit
+from torus.fhe.compilation.compiler import Compiler
 
 
 def test_torch_matmul_fhe_simulation(default_configuration):

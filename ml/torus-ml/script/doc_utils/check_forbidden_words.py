@@ -69,8 +69,8 @@ def process_file(file_str: str, do_open_problematic_files=False):
         ("Concrete-ml", [], []),  # use `Torus ML`
         ("Concrete-Ml", [], []),  # use `Torus ML`
         ("Concrete-ML", [], []),  # use `Torus ML`
-        ("concrete ml", [], []),  # use `Torus ML`
-        ("concrete-ml", [], []),  # use `Torus ML`
+        ("torus ml", [], []),  # use `Torus ML`
+        ("torus-ml", [], []),  # use `Torus ML`
         ("pytorch", [], []),  # use `PyTorch`
         ("Pytorch", [], []),  # use `PyTorch`
         ("pytorch", [], []),  # use `PyTorch`
@@ -116,12 +116,12 @@ def process_file(file_str: str, do_open_problematic_files=False):
             ["import brevitas", "from brevitas", "bit accuracy brevitas"],
             [".py"],
         ),  # use Brevitas
-        ("concrete-numpy", [], []),  # use Concrete
-        ("concrete-Numpy", [], []),  # use Concrete
+        ("torus-numpy", [], []),  # use Concrete
+        ("torus-Numpy", [], []),  # use Concrete
         ("Concrete-numpy", [], []),  # use Concrete
         ("Concrete-Numpy", [], []),  # use Concrete
-        ("concrete numpy", [], []),  # use Concrete
-        ("concrete Numpy", [], []),  # use Concrete
+        ("torus numpy", [], []),  # use Concrete
+        ("torus Numpy", [], []),  # use Concrete
         ("Concrete numpy", [], []),  # use Concrete
         ("Concrete Numpy", [], []),  # use Concrete
         ("cnp", [], []),  # use fhe (or cp, worst case)

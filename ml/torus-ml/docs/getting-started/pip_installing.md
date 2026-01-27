@@ -49,7 +49,7 @@ pip install torus-ml
 
 This will automatically install all dependencies, notably Concrete.
 
-If you encounter any issue during installation on Apple Silicon mac, please visit this [troubleshooting guide on community](https://community.luxfhe.io/t/troubleshooting-concrete-installation-on-apple-silicon/577).
+If you encounter any issue during installation on Apple Silicon mac, please visit this [troubleshooting guide on community](https://community.luxfhe.io/t/troubleshooting-torus-installation-on-apple-silicon/577).
 
 ## Installation using Docker
 

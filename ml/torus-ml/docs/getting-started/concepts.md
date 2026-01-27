@@ -26,7 +26,7 @@ With Torus ML, you can train a model on clear or encrypted data, then deploy it 
 
 1. **Simulation:** Simulation allows you to execute a model that was quantized, to measure its accuracy in FHE, and to determine the modifications required to make it FHE compatible. Simulation is described in more detail [here](../explanations/compilation.md#fhe-simulation).
 
-1. **Compilation:** After quantizing the model and confirming that it has good FHE accuracy through simulation, the model then needs to be compiled using Concrete's FHE Compiler to produce an equivalent FHE circuit. This circuit is represented as an MLIR program consisting of low level cryptographic operations. You can read more about FHE compilation [here](../explanations/compilation.md), MLIR [here](https://mlir.llvm.org/), and about the low-level Concrete library [here](https://github.com/luxfhe.io/concrete).
+1. **Compilation:** After quantizing the model and confirming that it has good FHE accuracy through simulation, the model then needs to be compiled using Concrete's FHE Compiler to produce an equivalent FHE circuit. This circuit is represented as an MLIR program consisting of low level cryptographic operations. You can read more about FHE compilation [here](../explanations/compilation.md), MLIR [here](https://mlir.llvm.org/), and about the low-level Concrete library [here](https://github.com/luxfhe.io/torus).
 
 1. **Inference:** The compiled model can then be executed on encrypted data, once the proper keys have been generated. The model can also be deployed to a server and used to run private inference on encrypted inputs.
 

@@ -4,7 +4,7 @@ from pathlib import Path
 import torus.compiler
 import numpy as np
 import torch
-from concrete.fhe import Configuration
+from torus.fhe import Configuration
 from models import cnv_2w2a
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -24,8 +24,8 @@ def evaluate(torch_model, cml_model, device, num_workers):
     torch_top_1_batches = []
     torch_top_5_batches = []
 
-    concrete_top_1_batches = []
-    concrete_top_5_batches = []
+    torus_top_1_batches = []
+    torus_top_5_batches = []
 
     torch_model = torch_model.to(device)
 
@@ -43,9 +43,9 @@ def evaluate(torch_model, cml_model, device, num_workers):
         numpy_input = input.detach().cpu().numpy()
 
         # Compute Torus ML output using simulation
-        concrete_output_simulated = cml_model.forward(numpy_input, fhe="simulate")
+        torus_output_simulated = cml_model.forward(numpy_input, fhe="simulate")
 
-        concrete_output_simulated = torch.tensor(concrete_output_simulated).to(device)
+        torus_output_simulated = torch.tensor(torus_output_simulated).to(device)
 
         # Compute Torch top accuracies
         torch_top_1, torch_top_5 = accuracy(torch_output, target, topk=(1, 5))
@@ -54,16 +54,16 @@ def evaluate(torch_model, cml_model, device, num_workers):
         torch_top_5_batches.append(torch_top_5.item())
 
         # Compute Torus ML top accuracies
-        concrete_top_1, concrete_top_5 = accuracy(concrete_output_simulated, target, topk=(1, 5))
+        torus_top_1, torus_top_5 = accuracy(torus_output_simulated, target, topk=(1, 5))
 
-        concrete_top_1_batches.append(concrete_top_1.item())
-        concrete_top_5_batches.append(concrete_top_5.item())
+        torus_top_1_batches.append(torus_top_1.item())
+        torus_top_5_batches.append(torus_top_5.item())
 
     print("Torch accuracy top1:", np.mean(torch_top_1_batches))
-    print("Torus ML accuracy top1:", np.mean(concrete_top_1_batches))
+    print("Torus ML accuracy top1:", np.mean(torus_top_1_batches))
 
     print("Torch accuracy top5:", np.mean(torch_top_5_batches))
-    print("Torus ML accuracy top5:", np.mean(concrete_top_5_batches))
+    print("Torus ML accuracy top5:", np.mean(torus_top_5_batches))
 
 
 def main(args):
@@ -73,16 +73,16 @@ def main(args):
 
     # Add MPS (for macOS with Apple Silicon or AMD GPUs) support when error is fixed. For now, we
     # observe a decrease in torch's top1 accuracy when using MPS devices
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3953
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/3953
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    compilation_device = "cuda" if concrete.compiler.check_gpu_available() else "cpu"
+    compilation_device = "cuda" if torus.compiler.check_gpu_available() else "cpu"
 
     print("Torch device in use:", device)
     print(
         "To leverage the CUDA backend, follow the GPU setup guide to install the Torus ML compiler."
     )
-    print("GPU Enabled:", concrete.compiler.check_gpu_enabled())
-    print("GPU Available:", concrete.compiler.check_gpu_available())
+    print("GPU Enabled:", torus.compiler.check_gpu_enabled())
+    print("GPU Available:", torus.compiler.check_gpu_available())
 
     # Find relative path to this file
     dir_path = Path(__file__).parent.absolute()

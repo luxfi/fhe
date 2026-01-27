@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 ISSUE_URL_PATTERN = re.compile(
-    r"(?:FIXME|TODO): https\:\/\/github\.com\/luxfi\/concrete-ml-internal\/issues\/([0-9]+)"
+    r"(?:FIXME|TODO): https\:\/\/github\.com\/luxfi\/torus-ml-internal\/issues\/([0-9]+)"
 )
 EXTENSIONS_TO_CHECK = [".py", ".md"]
 FOLDERS_TO_CHECK = ["src", "docs", "use_case_examples", "tests", "script"]
@@ -52,7 +52,7 @@ def check_file(path, root):
         if index not in issues:
             output = subprocess.check_output(
                 shell=True,
-                args=f'gh issue view {index} --json state --repo "luxfi/concrete-ml-internal"',
+                args=f'gh issue view {index} --json state --repo "luxfi/torus-ml-internal"',
                 cwd=root,
             ).decode()
             issues[index] = json.loads(output)

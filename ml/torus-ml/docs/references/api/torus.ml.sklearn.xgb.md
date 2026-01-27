@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.sklearn.xgb`
 
@@ -8,7 +8,7 @@ Implements XGBoost models.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L19"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L19"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `XGBClassifier`
 
@@ -16,7 +16,7 @@ Implements the XGBoost classifier.
 
 See https://xgboost.readthedocs.io/en/release_3.0.0/python/python_api.html for more information about the parameters used.
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L31"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L31"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -71,7 +71,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -135,7 +135,7 @@ Using this attribute is deprecated.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -145,7 +145,7 @@ dump_dict() → Dict[str, Any]
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L205"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L205"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -155,7 +155,7 @@ load_dict(metadata: Dict)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L278"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L278"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `XGBRegressor`
 
@@ -163,7 +163,7 @@ Implements the XGBoost regressor.
 
 See https://xgboost.readthedocs.io/en/release_3.0.0/python/python_api.html for more information about the parameters used.
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L290"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L290"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -217,7 +217,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/concrete/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -257,7 +257,7 @@ Is None if the model is not fitted.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L417"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L417"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `dump_dict`
 
@@ -267,7 +267,7 @@ dump_dict() → Dict[str, Any]
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L393"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L393"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `fit`
 
@@ -277,7 +277,7 @@ fit(X, y, *args, **kwargs) → Any
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L484"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L484"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load_dict`
 
@@ -287,7 +287,7 @@ load_dict(metadata: Dict)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/sklearn/xgb.py#L408"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/sklearn/xgb.py#L408"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `post_processing`
 

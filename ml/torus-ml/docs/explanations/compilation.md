@@ -6,7 +6,7 @@ As FHE execution is much slower than execution on non-encrypted data, Torus ML h
 
 ## Compilation to FHE
 
-Torus ML implements model inference using Concrete as a backend. In order to execute in FHE, a numerical program written in Concrete needs to be compiled. This functionality is [described here](https://docs.luxfhe.io/concrete/get-started/quick_start), and Torus ML hides away most of the complexity of this step, completing the entire compilation process itself.
+Torus ML implements model inference using Concrete as a backend. In order to execute in FHE, a numerical program written in Concrete needs to be compiled. This functionality is [described here](https://docs.luxfhe.io/torus/get-started/quick_start), and Torus ML hides away most of the complexity of this step, completing the entire compilation process itself.
 
 From the perspective of the Torus ML user, the compilation process performed by Concrete can be broken up into 3 steps:
 
@@ -78,7 +78,7 @@ For custom models, with one of the `compile_brevitas_qat_model` (for Brevitas mo
 
 ## FHE simulation
 
-The first step in the list above takes a Python function implemented using the Concrete [supported operation set](https://docs.luxfhe.io/concrete/getting-started/compatibility) and transforms it into an executable operation graph.
+The first step in the list above takes a Python function implemented using the Concrete [supported operation set](https://docs.luxfhe.io/torus/getting-started/compatibility) and transforms it into an executable operation graph.
 
 The result of this single step of the compilation pipeline allows the:
 
@@ -107,7 +107,7 @@ While Torus ML hides away all the Concrete code that performs model inference, i
 
 ```python
 import numpy
-from concrete.fhe import compiler
+from torus.fhe import compiler
 
 # Assume Quantization has been applied and we are left with integers only. This is essentially the work of Torus ML
 

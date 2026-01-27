@@ -6,7 +6,7 @@ This document explains the deployment workflow and the model serving pattern for
 
 The steps to prepare a model for encrypted inference in a client/server setting is illustrated as follows:
 
-![](../figures/concretemlgraph1.jpg)
+![](../figures/torusmlgraph1.jpg)
 
 ### Model training and compilation
 
@@ -143,7 +143,7 @@ In the example above, a second evaluation key is obtained in the `luxfhe_evaluat
 
 The client-side deployment of a secured inference machine learning model is illustrated as follows:
 
-![](../figures/concretemlgraph3.jpg)
+![](../figures/torusmlgraph3.jpg)
 
 The workflow contains the following steps:
 
@@ -158,7 +158,7 @@ The workflow contains the following steps:
 
 The server-side implementation of a Torus ML model is illustrated as follows:
 
-![](../figures/concretemlgraph2.jpg)
+![](../figures/torusmlgraph2.jpg)
 
 The workflow contains the following steps:
 

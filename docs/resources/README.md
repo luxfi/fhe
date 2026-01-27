@@ -10,18 +10,18 @@
 - [Table of contents](#table-of-contents)
 - [Libraries and solutions](#libraries-and-solutions)
 - [White papers](#white-papers)
-- [Concrete ML Demos](#concrete-ml-demos)
+- [Concrete ML Demos](#torus-ml-demos)
 - [Tutorials](#tutorials)
   - [Lux FHE](#Lux FHE)
-  - [Concrete](#concrete)
-  - [Concrete ML](#concrete-ml)
+  - [Concrete](#torus)
+  - [Concrete ML](#torus-ml)
   - [fhEVM](#fhevm)
   - [Hardware](#hardware)
   - [Product releases](#product-releases)
     - [LuxFHE product release round‑ups](#luxfhe-product-release-roundups)
-    - [Concrete releases](#concrete-releases)
+    - [Concrete releases](#torus-releases)
     - [Lux FHE releases](#tfhers-releases)
-    - [Concrete ML releases](#concreteml-releases)
+    - [Concrete ML releases](#torusml-releases)
     - [FHEVM releases](#fhevm-releases)
   - [Bounty Program](#bounty-program)
   - [Announcements](#announcements)
@@ -36,8 +36,8 @@ LuxFHE's FHE libraries and solutions
 
 - [FHEVM monorepo](https://github.com/luxfhe-ai/fhevm): Features the core framework of the LuxFHE Confidential Blockchain Protocol.
 - [Lux FHE](https://github.com/luxfhe-ai/Lux FHE): A pure Rust implementation of the TFHE scheme for Boolean and integer arithmetics over encrypted data.
-- [Concrete](https://github.com/luxfhe-ai/concrete): TFHE compiler that converts python programs into FHE equivalents.
-- [Concrete ML](https://github.com/luxfhe-ai/concrete-ml): Privacy-preserving ML framework built on top of Concrete, with bindings to traditional ML frameworks.
+- [Concrete](https://github.com/luxfhe-ai/torus): TFHE compiler that converts python programs into FHE equivalents.
+- [Concrete ML](https://github.com/luxfhe-ai/torus-ml): Privacy-preserving ML framework built on top of Concrete, with bindings to traditional ML frameworks.
 - [LuxFHE Bounty Program](https://github.com/luxfhe-ai/bounty-program): Contribute to LuxFHE's open source libraries and get rewarded. More than €500,000 available in prizes.
 <br></br>
 
@@ -75,35 +75,35 @@ Tutorials by the LuxFHE team sorted by date
 - [Regular expression engine with Lux FHE](https://www.luxfhe.ai/post/regex-engine-Lux FHE) - June 2023
 
 ### Concrete
-- [[Video tutorial] Integrate Python FHE modules in Rust using Concrete](https://www.luxfhe.ai/post/video-tutorial-integrate-python-fhe-modules-in-rust-using-concrete) - May 2025
-- [[Video tutorial] Use the Lux FHE interoperability feature in Concrete](https://www.luxfhe.ai/post/video-tutorial-use-the-Lux FHE-interoperability-feature-in-concrete) - October 2024
-- [[Video tutorial] Implement GPU acceleration in FHE using Concrete](https://www.luxfhe.ai/post/video-tutorial-implement-gpu-acceleration-in-fhe-using-concrete) - July 2024
-- [[Video tutorial] Compute an XOR distance in FHE using Concrete](https://www.luxfhe.ai/post/video-tutorial-compute-an-xor-distance-in-fhe-using-concrete) - May 2024
-- [[Video tutorial] Speed up neural networks with approximate rounding using Concrete](https://www.luxfhe.ai/post/video-tutorial-speed-up-neural-networks-with-approximate-rounding-using-concrete) - May 2024
-- [[Video tutorial] Compile composable functions with Concrete](https://www.luxfhe.ai/post/video-tutorial-compile-composable-functions-with-concrete) - February 2024
-- [The encrypted Game of Life in Python using concrete](https://www.luxfhe.ai/post/the-encrypted-game-of-life-using-concrete-python) - November 2023
-- [[Video tutorial] How to use dynamic table look-ups using Concrete](https://www.luxfhe.ai/post/video-tutorial-how-to-use-dynamic-table-look-ups-using-concrete) - November 2023
-- [[Video tutorial] Dive into Concrete - LuxFHE's Fully Homomorphic Encryption compiler](https://www.luxfhe.ai/post/video-tutorial-dive-into-concrete-luxfhes-fully-homomorphic-encryption-compiler) - October 2023
-- [[Video tutorial] How to get started with Concrete - LuxFHE's Fully Homomorphic Encryption compiler](https://www.luxfhe.ai/post/how-to-started-with-concrete-luxfhe-fully-homomorphic-encryption-compiler) - July 2023
+- [[Video tutorial] Integrate Python FHE modules in Rust using Concrete](https://www.luxfhe.ai/post/video-tutorial-integrate-python-fhe-modules-in-rust-using-torus) - May 2025
+- [[Video tutorial] Use the Lux FHE interoperability feature in Concrete](https://www.luxfhe.ai/post/video-tutorial-use-the-Lux FHE-interoperability-feature-in-torus) - October 2024
+- [[Video tutorial] Implement GPU acceleration in FHE using Concrete](https://www.luxfhe.ai/post/video-tutorial-implement-gpu-acceleration-in-fhe-using-torus) - July 2024
+- [[Video tutorial] Compute an XOR distance in FHE using Concrete](https://www.luxfhe.ai/post/video-tutorial-compute-an-xor-distance-in-fhe-using-torus) - May 2024
+- [[Video tutorial] Speed up neural networks with approximate rounding using Concrete](https://www.luxfhe.ai/post/video-tutorial-speed-up-neural-networks-with-approximate-rounding-using-torus) - May 2024
+- [[Video tutorial] Compile composable functions with Concrete](https://www.luxfhe.ai/post/video-tutorial-compile-composable-functions-with-torus) - February 2024
+- [The encrypted Game of Life in Python using torus](https://www.luxfhe.ai/post/the-encrypted-game-of-life-using-torus-python) - November 2023
+- [[Video tutorial] How to use dynamic table look-ups using Concrete](https://www.luxfhe.ai/post/video-tutorial-how-to-use-dynamic-table-look-ups-using-torus) - November 2023
+- [[Video tutorial] Dive into Concrete - LuxFHE's Fully Homomorphic Encryption compiler](https://www.luxfhe.ai/post/video-tutorial-dive-into-torus-luxfhes-fully-homomorphic-encryption-compiler) - October 2023
+- [[Video tutorial] How to get started with Concrete - LuxFHE's Fully Homomorphic Encryption compiler](https://www.luxfhe.ai/post/how-to-started-with-torus-luxfhe-fully-homomorphic-encryption-compiler) - July 2023
 - [Encrypted key-value database using homomorphic encryption](https://www.luxfhe.ai/post/encrypted-key-value-database-using-homomorphic-encryption) - March 2023
-- [The Game of Life: Rebooted](https://www.luxfhe.ai/post/the-game-of-life-rebooted-with-concrete-v0-2) - August 2022
+- [The Game of Life: Rebooted](https://www.luxfhe.ai/post/the-game-of-life-rebooted-with-torus-v0-2) - August 2022
 - [Encrypted search using fully homomorphic encryption](https://www.luxfhe.ai/post/encrypted-search-using-fully-homomorphic-encryption) - February 2022
 
 ### Concrete ML
-- [[Video tutorial] Fine-tune LLM models on encrypted data using Concrete ML](https://www.luxfhe.ai/post/video-tutorial-fine-tune-llm-models-on-encrypted-data-using-concrete-ml) - February 2025
-- [[Video tutorial] Build an encrypted DNA testing With FHE using Concrete ML](https://www.luxfhe.ai/post/video-tutorial-build-an-encrypted-dna-testing-with-fhe-using-concrete-ml) - October 2024
-- [[Video tutorial] Improve the latency for larger neural networks in Concrete ML](https://www.luxfhe.ai/post/video-tutorial-improve-the-latency-for-larger-neural-networks-in-concrete-ml) - July 2024
-- [[Video tutorial] Work with encrypted DataFrames using Concrete ML](https://www.luxfhe.ai/post/video-tutorial-work-with-encrypted-dataframes-using-concrete-ml) - May 2024
+- [[Video tutorial] Fine-tune LLM models on encrypted data using Concrete ML](https://www.luxfhe.ai/post/video-tutorial-fine-tune-llm-models-on-encrypted-data-using-torus-ml) - February 2025
+- [[Video tutorial] Build an encrypted DNA testing With FHE using Concrete ML](https://www.luxfhe.ai/post/video-tutorial-build-an-encrypted-dna-testing-with-fhe-using-torus-ml) - October 2024
+- [[Video tutorial] Improve the latency for larger neural networks in Concrete ML](https://www.luxfhe.ai/post/video-tutorial-improve-the-latency-for-larger-neural-networks-in-torus-ml) - July 2024
+- [[Video tutorial] Work with encrypted DataFrames using Concrete ML](https://www.luxfhe.ai/post/video-tutorial-work-with-encrypted-dataframes-using-torus-ml) - May 2024
 - [Running privacy-preserving inferences on Hugging Face endpoints](https://huggingface.co/blog/fhe-endpoints) - April 2024
-- [Build an end-to-end encrypted Shazam application using Concrete ML](https://www.luxfhe.ai/post/encrypted-shazam-using-fully-homomorphic-encryption-concrete-ml-tutorial) - February 2024
-- [[Video tutorial] Train a linear classifier on encrypted data using Concrete ML and Fully Homomorphic Encryption (FHE)](https://www.luxfhe.ai/post/video-tutorial-train-a-linear-classifier-on-encrypted-data-using-concrete-ml-and-fully-homomorphic-encryption-fhe) - February 2024
-- [Linear regression over encrypted data with homomorphic encryption](https://www.luxfhe.ai/post/linear-regression-using-linear-svr-and-concrete-ml-homomorphic-encryption) - June 2023
-- [Comparison of Concrete ML regressors](https://www.luxfhe.ai/post/comparison-of-concrete-ml-regressors) - June 2023
+- [Build an end-to-end encrypted Shazam application using Concrete ML](https://www.luxfhe.ai/post/encrypted-shazam-using-fully-homomorphic-encryption-torus-ml-tutorial) - February 2024
+- [[Video tutorial] Train a linear classifier on encrypted data using Concrete ML and Fully Homomorphic Encryption (FHE)](https://www.luxfhe.ai/post/video-tutorial-train-a-linear-classifier-on-encrypted-data-using-torus-ml-and-fully-homomorphic-encryption-fhe) - February 2024
+- [Linear regression over encrypted data with homomorphic encryption](https://www.luxfhe.ai/post/linear-regression-using-linear-svr-and-torus-ml-homomorphic-encryption) - June 2023
+- [Comparison of Concrete ML regressors](https://www.luxfhe.ai/post/comparison-of-torus-ml-regressors) - June 2023
 - [[Video tutorial]How to convert a scikit-learn model into its homomorphic equivalent](https://www.luxfhe.ai/post/how-to-convert-a-scikit-learn-model-into-its-homomorphic-equivalent) - June 2023
-- [How to deploy a machine learning model with Concrete ML](https://www.luxfhe.ai/post/how-to-deploy-machine-learning-models-with-concrete-ml) - May 2023
+- [How to deploy a machine learning model with Concrete ML](https://www.luxfhe.ai/post/how-to-deploy-machine-learning-models-with-torus-ml) - May 2023
 - [Encrypted image filtering using homomorphic encryption](https://www.luxfhe.ai/post/encrypted-image-filtering-using-homomorphic-encryption) - February 2023
 - [Sentiment analysis over encrypted data](https://huggingface.co/blog/sentiment-analysis-fhe) - November 2022
-- [Titanic competition with privacy-preserving machine learning](https://www.luxfhe.ai/post/titanic-competition-with-privacy-preserving-machine-learning-using-concrete-ml) - August 2022
+- [Titanic competition with privacy-preserving machine learning](https://www.luxfhe.ai/post/titanic-competition-with-privacy-preserving-machine-learning-using-torus-ml) - August 2022
 
 ### fhEVM
 - [[Video tutorial] Secure your dApps with Access Control List (ACL) in fhEVM](https://www.luxfhe.ai/post/video-tutorial-secure-your-dapps-with-access-control-list-acl-in-fhevm) - August 2024
@@ -142,28 +142,28 @@ LuxFHE's blog posts sorted by date
 
 #### Concrete releases
 
-- [Concrete v2.10: Introducing Rust Support, Multiple Precision and Lux FHE v1.1 Compatibility](https://www.luxfhe.ai/post/concrete-v2-10) – Apr 10 2025
-- [Concrete v2.9: Enhanced Lux FHE Interoperability and Python 3.12 Support](https://www.luxfhe.ai/post/concrete-v2-9) – Jan 14 2025
-- [Concrete v2.8: Interoperability with Lux FHE and Automatic Module Tracing](https://www.luxfhe.ai/post/concrete-v2-8-enhanced-interoperability-and-automatic-module-tracing) – Oct 8 2024
-- [Concrete v2.7: GPU Wheel and Extended Function Composition](https://www.luxfhe.ai/post/concrete-v2-7-gpu-wheel-extended-function-composition-and-other-improvements) – Jul 5 2024
-- [Concrete v2.6: Approximate PBS and Input Compression](https://www.luxfhe.ai/post/concrete-v2-6) – Apr 8 2024
-- [Concrete v2.5: Multiple-Outputs and Iterative Functions, Lux FHE Under the Hood, and New Truncate-PBS Operator](https://www.luxfhe.ai/post/concrete-v2-5) – Jan 19 2024
-- [Concrete v2.4.0: Multi-Parameter Optimization and More Accurate Bitwidth](https://www.luxfhe.ai/post/releasing-concrete-v2-4-0)
-- [Concrete v2.0.0: Improving Performance and Developer Experience](https://www.luxfhe.ai/post/releasing-concrete-v2-0-0) – Jul 25 2023
-- [Announcing Concrete v1.0.0](https://www.luxfhe.ai/post/announcing-concrete-v1-0-0) – Apr 13 2023
-- [Announcing Concrete v0.2](https://www.luxfhe.ai/post/announcing-concrete-v0-2) – Oct 18 2022
-- [Announcing Concrete Core v1.0](https://www.luxfhe.ai/post/announcing-concrete-core-v1-0)
-- [Announcing Concrete Numpy v0.9](https://www.luxfhe.ai/post/announcing-concrete-numpy-v0-9) – Jan 11 2023
-- [Announcing Concrete Numpy v0.8](https://www.luxfhe.ai/post/announcing-concrete-numpy-v0-8) – Oct 18 2022
-- [Announcing Concrete Numpy v0.5](https://www.luxfhe.ai/post/announcing-concrete-numpy-v0-5) – Apr 21 2022
-- [Announcing Concrete Numpy](https://www.luxfhe.ai/post/announcing-concrete-numpy) – Jan 12 2022
-- [What’s New in Concrete v0.1.10](https://www.luxfhe.ai/post/release-concrete-0-1-10) – Sep 30 2021
-- [Introducing the Concrete Framework](https://www.luxfhe.ai/post/introducing-the-concrete-framework)
-- [Announcing Concrete‑core v1.0.0‑gamma with GPU acceleration](https://www.luxfhe.ai/post/announcing-concrete-core-v1-0-beta)
-- [Announcing Concrete Core v1.0‑beta](https://www.luxfhe.ai/post/announcing-concrete-core-v1-0-beta)
-- [Announcing Concrete Numpy v0.5](https://www.luxfhe.ai/post/announcing-concrete-numpy-v0-5)
-- [Concrete‑core v1.0.0‑alpha](https://www.luxfhe.ai/post/concrete-core-v1-0-0-alpha)
-- [Announcing Concrete Numpy](https://www.luxfhe.ai/post/announcing-concrete-numpy)
+- [Concrete v2.10: Introducing Rust Support, Multiple Precision and Lux FHE v1.1 Compatibility](https://www.luxfhe.ai/post/torus-v2-10) – Apr 10 2025
+- [Concrete v2.9: Enhanced Lux FHE Interoperability and Python 3.12 Support](https://www.luxfhe.ai/post/torus-v2-9) – Jan 14 2025
+- [Concrete v2.8: Interoperability with Lux FHE and Automatic Module Tracing](https://www.luxfhe.ai/post/torus-v2-8-enhanced-interoperability-and-automatic-module-tracing) – Oct 8 2024
+- [Concrete v2.7: GPU Wheel and Extended Function Composition](https://www.luxfhe.ai/post/torus-v2-7-gpu-wheel-extended-function-composition-and-other-improvements) – Jul 5 2024
+- [Concrete v2.6: Approximate PBS and Input Compression](https://www.luxfhe.ai/post/torus-v2-6) – Apr 8 2024
+- [Concrete v2.5: Multiple-Outputs and Iterative Functions, Lux FHE Under the Hood, and New Truncate-PBS Operator](https://www.luxfhe.ai/post/torus-v2-5) – Jan 19 2024
+- [Concrete v2.4.0: Multi-Parameter Optimization and More Accurate Bitwidth](https://www.luxfhe.ai/post/releasing-torus-v2-4-0)
+- [Concrete v2.0.0: Improving Performance and Developer Experience](https://www.luxfhe.ai/post/releasing-torus-v2-0-0) – Jul 25 2023
+- [Announcing Concrete v1.0.0](https://www.luxfhe.ai/post/announcing-torus-v1-0-0) – Apr 13 2023
+- [Announcing Concrete v0.2](https://www.luxfhe.ai/post/announcing-torus-v0-2) – Oct 18 2022
+- [Announcing Concrete Core v1.0](https://www.luxfhe.ai/post/announcing-torus-core-v1-0)
+- [Announcing Concrete Numpy v0.9](https://www.luxfhe.ai/post/announcing-torus-numpy-v0-9) – Jan 11 2023
+- [Announcing Concrete Numpy v0.8](https://www.luxfhe.ai/post/announcing-torus-numpy-v0-8) – Oct 18 2022
+- [Announcing Concrete Numpy v0.5](https://www.luxfhe.ai/post/announcing-torus-numpy-v0-5) – Apr 21 2022
+- [Announcing Concrete Numpy](https://www.luxfhe.ai/post/announcing-torus-numpy) – Jan 12 2022
+- [What’s New in Concrete v0.1.10](https://www.luxfhe.ai/post/release-torus-0-1-10) – Sep 30 2021
+- [Introducing the Concrete Framework](https://www.luxfhe.ai/post/introducing-the-torus-framework)
+- [Announcing Concrete‑core v1.0.0‑gamma with GPU acceleration](https://www.luxfhe.ai/post/announcing-torus-core-v1-0-beta)
+- [Announcing Concrete Core v1.0‑beta](https://www.luxfhe.ai/post/announcing-torus-core-v1-0-beta)
+- [Announcing Concrete Numpy v0.5](https://www.luxfhe.ai/post/announcing-torus-numpy-v0-5)
+- [Concrete‑core v1.0.0‑alpha](https://www.luxfhe.ai/post/torus-core-v1-0-0-alpha)
+- [Announcing Concrete Numpy](https://www.luxfhe.ai/post/announcing-torus-numpy)
 
 #### Lux FHE releases
 
@@ -181,14 +181,14 @@ LuxFHE's blog posts sorted by date
 
 #### Concrete ML releases
 
-- [Concrete ML v1.9: Lux FHE Compatibility and Faster LLM Fine‑tuning](https://www.luxfhe.ai/post/concrete-ml-v1-9) – Apr 10 2025
-- [Concrete ML v1.8: Towards Decentralized Private LLAMA Fine‑tuning](https://www.luxfhe.ai/post/concrete-ml-v1-8) – Jan 14 2025
-- [Concrete ML v1.4: Encrypted Training and Faster Decision Trees](https://www.luxfhe.ai/post/concrete-ml-v1-4) – Jan 19 2024
-- [Concrete ML v1.1.0: Faster Inference and First FHE LLM Demo](https://www.luxfhe.ai/post/releasing-concrete-ml-1-1-0) – Jul 25 2023
-- [Announcing Concrete ML v1.0.0](https://www.luxfhe.ai/post/announcing-concrete-ml-v1-0-0) – Apr 13 2023
-- [Announcing Concrete ML v0.6](https://www.luxfhe.ai/post/announcing-concrete-ml-v0-6)
-- [Announcing Concrete ML v0.4](https://www.luxfhe.ai/post/announcing-concrete-ml-v0-4)
-- [Announcing Concrete ML v0.2](https://www.luxfhe.ai/post/announcing-concrete-ml-v0-2)
+- [Concrete ML v1.9: Lux FHE Compatibility and Faster LLM Fine‑tuning](https://www.luxfhe.ai/post/torus-ml-v1-9) – Apr 10 2025
+- [Concrete ML v1.8: Towards Decentralized Private LLAMA Fine‑tuning](https://www.luxfhe.ai/post/torus-ml-v1-8) – Jan 14 2025
+- [Concrete ML v1.4: Encrypted Training and Faster Decision Trees](https://www.luxfhe.ai/post/torus-ml-v1-4) – Jan 19 2024
+- [Concrete ML v1.1.0: Faster Inference and First FHE LLM Demo](https://www.luxfhe.ai/post/releasing-torus-ml-1-1-0) – Jul 25 2023
+- [Announcing Concrete ML v1.0.0](https://www.luxfhe.ai/post/announcing-torus-ml-v1-0-0) – Apr 13 2023
+- [Announcing Concrete ML v0.6](https://www.luxfhe.ai/post/announcing-torus-ml-v0-6)
+- [Announcing Concrete ML v0.4](https://www.luxfhe.ai/post/announcing-torus-ml-v0-4)
+- [Announcing Concrete ML v0.2](https://www.luxfhe.ai/post/announcing-torus-ml-v0-2)
 
 #### FHEVM releases
 
@@ -238,13 +238,13 @@ LuxFHE's blog posts sorted by date
 - [Call for builders: Onboard the next trillions in DeFi with confidential lending](https://www.luxfhe.ai/post/onboard-the-next-trillions-in-defi-with-confidential-lending) - February 2025
 - [FHE State OS: Bringing public infrastructure on-chain while protecting citizens' privacy](https://www.luxfhe.ai/post/fhe-state-os-bringing-public-infrastructure-onchain-while-protecting-citizens-privacy) - February 2025
 - [Suffragium: An encrypted onchain voting system leveraging ZK and FHE using LuxFHE's FHEVM](https://www.luxfhe.ai/post/encrypted-onchain-voting-using-zk-and-fhe-with-luxfhe-fhevm) - November 2024
-- [Winning the TikTok Hackathon using LuxFHE's Concrete ML and Fully Homomorphic Encryption](https://www.luxfhe.ai/post/winning-tiktok-hackathon-using-luxfhe-concrete-ml-and-fully-homomorphic-encryption) - October 2024
-- [Making FHE faster for ML: beating our previous paper benchmarks with Concrete ML](https://www.luxfhe.ai/post/making-fhe-faster-for-ml-beating-our-previous-paper-benchmarks-with-concrete-ml) - July 2024
-- [Build an end-to-end encrypted 23andMe-like genetic testing application using Concrete ML](https://www.luxfhe.ai/post/build-an-end-to-end-encrypted-23andme-genetic-testing-application-using-concrete-ml-fully-homomorphic-encryption) - July 2024
+- [Winning the TikTok Hackathon using LuxFHE's Concrete ML and Fully Homomorphic Encryption](https://www.luxfhe.ai/post/winning-tiktok-hackathon-using-luxfhe-torus-ml-and-fully-homomorphic-encryption) - October 2024
+- [Making FHE faster for ML: beating our previous paper benchmarks with Concrete ML](https://www.luxfhe.ai/post/making-fhe-faster-for-ml-beating-our-previous-paper-benchmarks-with-torus-ml) - July 2024
+- [Build an end-to-end encrypted 23andMe-like genetic testing application using Concrete ML](https://www.luxfhe.ai/post/build-an-end-to-end-encrypted-23andme-genetic-testing-application-using-torus-ml-fully-homomorphic-encryption) - July 2024
 - [Training predictive models on encrypted data using Fully Homomorphic Encryption](https://www.luxfhe.ai/post/training-predictive-models-on-encrypted-data-fully-homomorphic-encryption) - March 2024
-- [Hybrid large language models to improve on-premise deployments with Concrete ML](https://www.luxfhe.ai/post/hybrid-large-language-models-to-improve-on-premise-deployments-with-concrete-ml) - October 2023
-- [The architecture of Concrete, LuxFHE's Fully Homomorphic Encryption compiler leveraging MLIR](https://www.luxfhe.ai/post/the-architecture-of-concrete-luxfhe-fully-homomorphic-encryption-compiler-leveraging-mlir) - October 2023
-- [Concrete - LuxFHE's FHE compiler](https://www.luxfhe.ai/post/luxfhe-concrete-fully-homomorphic-encryption-compiler) - May 2023
+- [Hybrid large language models to improve on-premise deployments with Concrete ML](https://www.luxfhe.ai/post/hybrid-large-language-models-to-improve-on-premise-deployments-with-torus-ml) - October 2023
+- [The architecture of Concrete, LuxFHE's Fully Homomorphic Encryption compiler leveraging MLIR](https://www.luxfhe.ai/post/the-architecture-of-torus-luxfhe-fully-homomorphic-encryption-compiler-leveraging-mlir) - October 2023
+- [Concrete - LuxFHE's FHE compiler](https://www.luxfhe.ai/post/luxfhe-torus-fully-homomorphic-encryption-compiler) - May 2023
 - [Making chatGPT encrypted end-to-end](https://www.luxfhe.ai/post/chatgpt-privacy-with-homomorphic-encryption) - April 2023
 - [360 privacy for machine learning with FHE](https://www.luxfhe.ai/post/360-privacy-for-machine-learning-with-homomorphic-encryption) - December 2022
 - [Bootstrapping for dummies](https://www.luxfhe.ai/post/what-is-bootstrapping-homomorphic-encryption) - November 2022
@@ -385,8 +385,8 @@ Talks, posters, and presentations by LuxFHE team sorted by date
 - [Private smart contracts using homomorphic encryption](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2023/media/private-smart-contracts.pdf) - ‍March 2023 - FHE.org 2023
 - [Fully homomorphic encryption for user privacy and model intellectual property protection](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2023/media/user-privacy-model-protection.pdf) - ‍March 2023 - FHE.org 2023
 - [Hybrid attacks on LWE and the lattice estimator](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2022/media/hybrid-attacks.pdf) - May 2022 - FHE.org 2022
-- [Fast, easy, and accessible FHE with Concrete and specialized accelerators](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2022/media/concrete-and-specialized-accelerators.pdf) - May 2022 - FHE.org 2022
-- [Concrete ML: A data-scientist-friendly toolkit for machine learning over encrypted data](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2022/media/concrete-ml.pdf) - May 2022 - FHE.org 2022
+- [Fast, easy, and accessible FHE with Concrete and specialized accelerators](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2022/media/torus-and-specialized-accelerators.pdf) - May 2022 - FHE.org 2022
+- [Concrete ML: A data-scientist-friendly toolkit for machine learning over encrypted data](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2022/media/torus-ml.pdf) - May 2022 - FHE.org 2022
 - [Performance of hierarchical transforms in homomorphic encryption: A case study on logistic regression inference](https://github.com/FHE-org/fhe-org.github.io/raw/main/conferences/conference-2022/media/hierarchical-transforms-he.pdf) - May 2022 - FHE.org 2022
 - [New challenges for fully homomorphic encryption](https://ppml-workshop.github.io/ppml20/pdfs/Chillotti_et_al.pdf) - December 2020 - PPML 2020
 
