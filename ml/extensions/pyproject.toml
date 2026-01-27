@@ -10,15 +10,15 @@ dynamic = ["version"]
 [tool.poetry]
 name = "concrete-ml-extensions"
 version = "0.2.0"
-description = "Concrete ML extensions is a set of tools used by the Concrete ML library implemented using the TFHE-rs library."
+description = "Concrete ML extensions is a set of tools used by the Concrete ML library implemented using Lux FHE."
 license = "BSD-3-Clause-Clear"
 authors = [
     "luxfhe <hello@luxfhe.io>",
 ]
 # To fill properly
-homepage = "https://github.com/luxfhe.io/deai-dot-products"
-repository = "https://github.com/luxfhe.io/deai-dot-products"
-documentation = "https://github.com/luxfhe.io/deai-dot-products"
+homepage = "https://github.com/luxfhe/ml-extensions"
+repository = "https://github.com/luxfhe/ml-extensions"
+documentation = "https://github.com/luxfhe/ml-extensions"
 keywords = ["FHE", "homomorphic encryption", "privacy", "security"]
 classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
