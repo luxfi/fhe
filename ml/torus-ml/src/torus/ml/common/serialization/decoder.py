@@ -50,14 +50,14 @@ _TRUSTED_TORCH_ACTIVATIONS = [
     _get_fully_qualified_name(activation_class) for activation_class in SUPPORTED_TORCH_ACTIVATIONS
 ]
 
-_TRUSTED_CONCRETE_MODELS = [
+_TRUSTED_TORUS_MODELS = [
     _get_fully_qualified_name(model_class) for model_class in _get_sklearn_all_models()
 ]
 
 # Define all the trusted types that Skops should consider
 TRUSTED_SKOPS = (
     _TRUSTED_TORCH_ACTIVATIONS
-    + _TRUSTED_CONCRETE_MODELS
+    + _TRUSTED_TORUS_MODELS
     + [_get_fully_qualified_name(QuantizedModule)]
     + [
         "numpy.int64",
