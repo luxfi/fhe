@@ -269,7 +269,7 @@ This software is distributed under the **BSD-3-Clause-Clear** license. Read [thi
 
 **What do I need to do if I want to use LuxFHE’s technology for commercial purposes?**
 
-> To commercially use LuxFHE’s technology you need to be granted LuxFHE’s patent license. Please contact us at hello@luxfhe.io for more information.
+> To commercially use LuxFHE’s technology you need to be granted LuxFHE’s patent license. Please contact us at fhe@lux.network for more information.
 
 **Do you file IP on your technology?**
 
@@ -277,7 +277,7 @@ This software is distributed under the **BSD-3-Clause-Clear** license. Read [thi
 
 **Can you customize a solution for my specific use case?**
 
-> We are open to collaborating and advancing the FHE space with our partners. If you have specific needs, please email us at hello@luxfhe.io.
+> We are open to collaborating and advancing the FHE space with our partners. If you have specific needs, please email us at fhe@lux.network.
 
 <p align="right">
   <a href="#about" > ↑ Back to top </a>
