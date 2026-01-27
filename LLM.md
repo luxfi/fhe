@@ -69,9 +69,12 @@ luxfhe/
 │   └── fhe/              # CoFHE SDK monorepo
 │
 ├── ml/                     # Machine Learning with FHE
-│   ├── concrete-ml/        # ML with FHE (Python)
+│   ├── torus-ml/           # ML with FHE (Python)
 │   ├── biometrics/         # FHE biometrics demo
-│   └── extensions/         # Concrete ML extensions
+│   └── extensions/         # Torus ML extensions
+│
+├── cmd/                    # Command-line applications
+│   └── fhed/               # FHE daemon (standalone server)
 │
 ├── go/                     # Go implementations
 │   └── tfhe/               # Go TFHE bindings + server
@@ -245,7 +248,7 @@ Rust implementation of threshold TFHE:
 
 ## ML with FHE
 
-### concrete-ml/
+### torus-ml/
 Machine learning on encrypted data:
 - `src/` - Core library
 - `use_case_examples/` - Real-world ML examples
@@ -259,9 +262,120 @@ FHE biometric verification demo:
 - `notebooks/` - Jupyter demos
 
 ### extensions/
-Concrete-ML extensions:
+Torus-ML extensions:
 - `rust/` - Rust accelerations
 - Additional ML operations
+
+## FHE Daemon (fhed)
+
+The `fhed` daemon provides a standalone FHE server for fully homomorphic encryption operations.
+
+### Quick Start
+```bash
+# Install
+go install github.com/luxfi/fhe/cmd/fhed@latest
+
+# Start daemon (auto-generates keys on first run)
+fhed start --http :8448
+
+# Or with custom data directory
+fhed start --http :8448 --data /path/to/keys
+
+# Generate keys separately
+fhed keygen --output ./keys --params PN10QP27
+```
+
+### Threshold Mode (t-of-n)
+```bash
+# Start in threshold mode with mDNS discovery
+fhed start --mode threshold --threshold 2
+
+# Generate 2-of-3 threshold keys
+fhed keygen --threshold --t 2 --n 3 --output ./keys
+
+# Reshare to new threshold/parties (LSSS)
+fhed reshare --input ./keys --new-t 3 --new-n 5 --output ./reshared
+```
+
+### Features
+- **HTTP API** for encrypt/decrypt/evaluate operations
+- **Automatic key management** - generates keys on first start
+- **Boolean gates** - AND, OR, XOR, NOT, NAND, NOR, XNOR, MUX, MAJORITY
+- **Bit-by-bit encryption** - true TFHE with bootstrapping
+- **Integer support** - uint32/uint64 as arrays of encrypted bits
+- **mDNS discovery** - zero-config cluster formation via `github.com/luxfi/mdns`
+- **LSSS resharing** - add/remove nodes without full key regeneration
+- **Proactive security** - share refresh to invalidate compromised shares
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check with params info |
+| `/publickey` | GET | Get public key (hex-encoded) |
+| `/encrypt` | POST | Encrypt bit or integer |
+| `/decrypt` | POST | Decrypt ciphertext(s) |
+| `/evaluate` | POST | Boolean gate evaluation |
+| `/cluster/status` | GET | Cluster state (threshold mode) |
+| `/cluster/peers` | GET | Discovered peers (threshold mode) |
+| `/cluster/reshare` | POST | Trigger reshare (threshold mode) |
+
+### Parameters
+- `PN10QP27` (default) - ~128-bit security, good performance
+- `PN11QP54` - ~128-bit security, higher precision
+- `STD128` - OpenFHE compatible
+
+### Example Usage
+```bash
+# Encrypt a bit
+curl -X POST http://localhost:8448/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"bit": true}'
+
+# Encrypt an integer
+curl -X POST http://localhost:8448/encrypt \
+  -H "Content-Type: application/json" \
+  -d '{"uint32": 42}'
+
+# Boolean AND gate
+curl -X POST http://localhost:8448/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "and", "operands": ["<ct1>", "<ct2>"]}'
+
+# Check cluster status (threshold mode)
+curl http://localhost:8448/cluster/status
+```
+
+## mDNS Discovery Package
+
+Zero-config peer discovery for local networks: `github.com/luxfi/mdns`
+
+```go
+import "github.com/luxfi/mdns"
+
+// Create discovery
+disc := mdns.New("_fhed._tcp", "node-1", 8448,
+    mdns.WithMetadata(map[string]string{"version": "1.0"}),
+)
+
+// Handle peer events
+disc.OnPeer(func(peer *mdns.Peer, joined bool) {
+    if joined {
+        fmt.Printf("Peer: %s at %s\n", peer.NodeID, peer.Address())
+    }
+})
+
+// Start/stop
+disc.Start()
+defer disc.Stop()
+
+// Query peers
+for _, peer := range disc.Peers() {
+    fmt.Println(peer.NodeID, peer.Get("version"))
+}
+```
+
+Used by: fhed, mpcd, and other Lux daemons for local cluster formation.
 
 ## Go & WASM
 
@@ -459,4 +573,4 @@ All code uses permissive licenses:
 | `core/fhevm/sdk/` | FHEVM TypeScript SDK |
 | `core/kms/core/` | KMS core logic |
 | `go/tfhe/cmd/` | Go FHE server |
-| `ml/concrete-ml/src/` | ML with FHE |
+| `ml/torus-ml/src/` | ML with FHE |

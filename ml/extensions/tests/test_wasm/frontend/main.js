@@ -2,7 +2,7 @@ import init, {
   keygen_radix_u64_wasm as keygen,
   encrypt_serialize_u64_radix_flat_wasm as enc,
   decrypt_serialized_u64_radix_flat_wasm as dec,
-} from './pkg/concrete_ml_extensions_wasm.js';
+} from './pkg/torus_ml_extensions_wasm.js';
 
 const out = document.getElementById('out');
 const log = (txt) => (out.textContent += `${txt}\n`);

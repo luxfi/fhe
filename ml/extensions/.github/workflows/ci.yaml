@@ -187,28 +187,28 @@ jobs:
             --bin uniffi-bindgen \
             --no-default-features \
             --features "uniffi/cli swift_bindings" generate \
-            --library target/aarch64-apple-ios/release/libconcrete_ml_extensions.dylib \
+            --library target/aarch64-apple-ios/release/libtorus_ml_extensions.dylib \
             --language swift \
             --out-dir GENERATED/
-          
+
           mkdir -p GENERATED/include
-          mv GENERATED/concrete_ml_extensionsFFI.modulemap GENERATED/include/module.modulemap
-          mv GENERATED/concrete_ml_extensionsFFI.h GENERATED/include/concrete_ml_extensionsFFI.h
-  
+          mv GENERATED/torus_ml_extensionsFFI.modulemap GENERATED/include/module.modulemap
+          mv GENERATED/torus_ml_extensionsFFI.h GENERATED/include/torus_ml_extensionsFFI.h
+
           xcodebuild -create-xcframework \
-            -library target/aarch64-apple-ios/release/libconcrete_ml_extensions.a \
+            -library target/aarch64-apple-ios/release/libtorus_ml_extensions.a \
             -headers GENERATED/include/ \
-            -library target/aarch64-apple-ios-sim/release/libconcrete_ml_extensions.a \
+            -library target/aarch64-apple-ios-sim/release/libtorus_ml_extensions.a \
             -headers GENERATED/include/ \
-            -output GENERATED/ConcreteMLExtensions.xcframework
+            -output GENERATED/TorusMLExtensions.xcframework
 
       - name: Test iOS project compiles
         if: false
         run: |
           cd ..
-          cd TestConcretMLX
-          xcodebuild -project TestConcretMLX.xcodeproj \
-                -scheme TestConcretMLX \
+          cd TestTorusMLX
+          xcodebuild -project TestTorusMLX.xcodeproj \
+                -scheme TestTorusMLX \
                 -sdk iphonesimulator \
                 -configuration Debug \
                 ARCHS="arm64" \
