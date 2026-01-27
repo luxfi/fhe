@@ -896,7 +896,7 @@ class QuantizedModule:
         )
 
         # Set ciphertext format to Torus as generic models only support this
-        self.ciphertext_format = CiphertextFormat.CONCRETE
+        self.ciphertext_format = CiphertextFormat.TORUS
 
         compiler = Compiler(
             forward_proxy,

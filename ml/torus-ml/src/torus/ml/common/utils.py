@@ -107,7 +107,7 @@ class FheMode(str, enum.Enum):
 class CiphertextFormat(str, enum.Enum):
     """Type of ciphertext used as input/output for a model."""
 
-    CONCRETE = "torus"
+    TORUS = "torus"
     TFHE_RS = "tfhe-rs"
 
     @staticmethod
