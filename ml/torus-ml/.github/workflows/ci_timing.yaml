@@ -1,6 +1,6 @@
-# This workflow uses GitHub CLI to get timings of last 50 runs of Concrete ML main CI
+# This workflow uses GitHub CLI to get timings of last 50 runs of Torus ML main CI
 # and send it to slack and add it as an artifact on the workflow
-name: CML build time
+name: TML build time
 on:
   workflow_dispatch:
 
@@ -59,8 +59,8 @@ jobs:
       - name: Archive figure
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: cml_ci_time_evolution.png
-          path: cml_ci_time_evolution.png
+          name: tml_ci_time_evolution.png
+          path: tml_ci_time_evolution.png
 
       - name: Archive raw data
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -82,12 +82,12 @@ jobs:
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
           SLACK_ICON: https://pbs.twimg.com/profile_images/1274014582265298945/OjBKP9kn_400x400.png
           SLACK_COLOR: ${{ job.status }}
-          SLACK_MESSAGE: "CML-CI timings over last 4 weeks available at: (${{ env.ACTION_RUN_URL }})"
+          SLACK_MESSAGE: "TML-CI timings over last 4 weeks available at: (${{ env.ACTION_RUN_URL }})"
           SLACK_USERNAME: ${{ secrets.BOT_USERNAME }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Upload figure to Slack
         run: |
-          curl -F file=@cml_ci_time_evolution.png -F "initial_comment=CML CI time evolution (over last 4 weeks)" -F channels=${{ secrets.CML_INTERNAL_UPDATE_SLACK_CHANNEL_ID }} -H "Authorization: Bearer ${{ secrets.SLACK_CI_MONITORING_BOT_TOKEN }}" https://slack.com/api/files.upload
+          curl -F file=@tml_ci_time_evolution.png -F "initial_comment=TML CI time evolution (over last 4 weeks)" -F channels=${{ secrets.TML_INTERNAL_UPDATE_SLACK_CHANNEL_ID }} -H "Authorization: Bearer ${{ secrets.SLACK_CI_MONITORING_BOT_TOKEN }}" https://slack.com/api/files.upload
 
 

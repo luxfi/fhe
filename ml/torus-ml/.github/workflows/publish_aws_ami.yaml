@@ -1,4 +1,4 @@
-# Trigger AWS ImageBuidler pipeline to produce an AmazonMachineImage (AMI) containing concrete-ml
+# Trigger AWS ImageBuidler pipeline to produce an AmazonMachineImage (AMI) containing torus-ml
 name: Publish AWS AMI
 on:
   release:
@@ -25,23 +25,23 @@ jobs:
       # Just a way to check that if triggered by workflow_dispatch the tag exists
       # FIXME: We still need to check that it matches a version tag
       # This won't work on automatically triggered based on release
-      - name: Checkout Concrete ML Repository
+      - name: Checkout Torus ML Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: 'false'
           ref: ${{ inputs.version || github.ref_name}}
           fetch-depth: 1
           lfs: false
-          path: "concrete-ml-version"
+          path: "torus-ml-version"
 
       # To use the files and all
-      - name: Checkout Concrete ML Repository
+      - name: Checkout Torus ML Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: 'false'
           fetch-depth: 1
           lfs: false
-          path: "concrete-ml-latest"
+          path: "torus-ml-latest"
 
       - name: Checkout Slab Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -64,15 +64,15 @@ jobs:
       - name: Trigger build pipeline via Slab
         run: |
 
-          CML_VERSION="${{ steps.git_ref.outputs.git-ref }}"
-          CML_VERSION="$(echo $CML_VERSION | cut -d 'v' -f 2)"
+          TML_VERSION="${{ steps.git_ref.outputs.git-ref }}"
+          TML_VERSION="$(echo $TML_VERSION | cut -d 'v' -f 2)"
 
           # This basically takes the files and modifies some values from it
-          COMPONENT_USER_DATA="$(cat concrete-ml-latest/ci/aws_ami_build_component.yaml | sed -e 's|\(concrete-ml==\)${CML_VERSION}|\1'${CML_VERSION}'|' -e  's|${AWS_ACCOUNT_ID}|${{ secrets.AWS_ACCOUNT_ID }}|')"
+          COMPONENT_USER_DATA="$(cat torus-ml-latest/ci/aws_ami_build_component.yaml | sed -e 's|\(torus-ml==\)${TML_VERSION}|\1'${TML_VERSION}'|' -e  's|${AWS_ACCOUNT_ID}|${{ secrets.AWS_ACCOUNT_ID }}|')"
 
           COMPONENT_USER_DATA=$(echo "$COMPONENT_USER_DATA" | base64 | tr -d "\n")
 
-          PAYLOAD='{"name": "luxfhe-concrete-ml-py39-x86_64", "description": "luxfhe Concrete ML ${{ steps.git_ref.outputs.git-ref }} (with Python 3.9 for x86_64 architecture)", "release_tag": "${{ steps.git_ref.outputs.git-ref }}", "region": "eu-west-3", "image_pipeline_arn": "${{ secrets.AMI_PIPELINE_ARN }}", "distribution_configuration_arn": "${{ secrets.AMI_DISTRIB_CONFIG_ARN }}", "component_user_data": "'"${COMPONENT_USER_DATA}"'"}'
+          PAYLOAD='{"name": "luxfhe-torus-ml-py39-x86_64", "description": "luxfhe Torus ML ${{ steps.git_ref.outputs.git-ref }} (with Python 3.9 for x86_64 architecture)", "release_tag": "${{ steps.git_ref.outputs.git-ref }}", "region": "eu-west-3", "image_pipeline_arn": "${{ secrets.AMI_PIPELINE_ARN }}", "distribution_configuration_arn": "${{ secrets.AMI_DISTRIB_CONFIG_ARN }}", "component_user_data": "'"${COMPONENT_USER_DATA}"'"}'
 
           echo -n "${PAYLOAD}" > payload.json
 
@@ -94,6 +94,6 @@ jobs:
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
           SLACK_ICON: https://pbs.twimg.com/profile_images/1274014582265298945/OjBKP9kn_400x400.png
           SLACK_COLOR: ${{ job.status }}
-          SLACK_MESSAGE: "AWS AMI build pipeline triggered for concrete-ml ${{ steps.git_ref.outputs.git-ref }}"
+          SLACK_MESSAGE: "AWS AMI build pipeline triggered for torus-ml ${{ steps.git_ref.outputs.git-ref }}"
           SLACK_USERNAME: ${{ secrets.BOT_USERNAME }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

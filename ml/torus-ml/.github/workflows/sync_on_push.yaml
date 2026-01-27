@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   sync-repo:
-    if: ${{ github.repository == 'luxfhe-ai/concrete-ml' }}
+    if: ${{ github.repository == 'luxfhe-ai/torus-ml' }}
     runs-on: ubuntu-24.04
     steps:
       # Initial action can be found here: https://github.com/wei/git-sync
@@ -25,7 +25,7 @@ jobs:
       - name: git-sync
         uses: RomanBredehoft/git-sync@4cb5df92a32e6b0881903ebb4e7b2e7d5643891b
         with:
-          source_repo: "luxfhe-ai/concrete-ml"
+          source_repo: "luxfhe-ai/torus-ml"
           source_branch: "main"
           destination_repo: "https://${{ secrets.BOT_USERNAME }}:${{ secrets.CONCRETE_ACTIONS_TOKEN }}@github.com/${{ secrets.SYNC_DEST_REPO }}.git"
           destination_branch: "main"
