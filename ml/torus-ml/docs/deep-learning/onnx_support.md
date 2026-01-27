@@ -19,7 +19,7 @@ import numpy
 import onnx
 
 from torus.ml.torch.compile import compile_onnx_model
-from concrete.fhe.compilation import Configuration
+from torus.fhe.compilation import Configuration
 
 
 

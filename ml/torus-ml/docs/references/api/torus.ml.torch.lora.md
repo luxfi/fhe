@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/torch/lora.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.torch.lora`
 
@@ -12,7 +12,7 @@ This module contains classes for LoRA (Low-Rank Adaptation) FHE training and cus
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L33"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L33"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `setup_logger`
 
@@ -33,7 +33,7 @@ Set up a logger that logs to both console and a file.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L67"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L67"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `grad_to`
 
@@ -50,7 +50,7 @@ Move parameter gradient to device.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L78"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L78"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `optimizer_to`
 
@@ -67,7 +67,7 @@ Move optimizer object to device.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L668"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L668"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_remote_names`
 
@@ -91,7 +91,7 @@ Get names of modules to be executed remotely.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L95"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L95"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `LoraTraining`
 
@@ -107,7 +107,7 @@ The class replaces standard linear layers with custom layers that are compatible
 - <b>`n_layers_to_skip_for_backprop`</b> (int):  Number of initial linear layers to keep as standard  layers. Since the first layer doesn't need backpropagation (no previous layer to  update), we typically skip 1 layer. Defaults to 1.
 - <b>`loss_fn`</b> (callable, optional):  Loss function to compute the loss. If None, the model  is expected to return a loss.
 
-<a href="../../../src/concrete/ml/torch/lora.py#L114"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L114"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -117,7 +117,7 @@ __init__(model, n_layers_to_skip_for_backprop=1, loss_fn=None)
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L152"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L152"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `assert_has_lora_layers`
 
@@ -137,7 +137,7 @@ Assert that the model contains LoRA layers.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L226"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L226"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `forward`
 
@@ -160,7 +160,7 @@ A tuple containing the original (unscaled) loss and None.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L297"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L297"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `process_inputs`
 
@@ -182,7 +182,7 @@ Process training inputs such as labels and attention mask.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L180"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L180"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `replace_layers_with_custom`
 
@@ -202,7 +202,7 @@ Replace linear layers with custom ones.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L138"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L138"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `set_loss_scaling_factor`
 
@@ -220,7 +220,7 @@ This ensures that gradients are correctly averaged over multiple mini-batches wh
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L330"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L330"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `LoraTrainer`
 
@@ -247,7 +247,7 @@ This class handles:
 - <b>`eval_steps`</b> (int, optional):  Evaluate on eval set every N training steps. Defaults to 10.
 - <b>`train_log_path`</b> (str, optional):  Path to a log file for training. Defaults to "training.log".
 
-<a href="../../../src/concrete/ml/torch/lora.py#L356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -270,7 +270,7 @@ __init__(
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L416"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L416"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `compile`
 
@@ -292,7 +292,7 @@ Compile the hybrid model with the given input set.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L659"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L659"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_gradient_stats`
 
@@ -308,7 +308,7 @@ Return recorded gradient statistics.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L624"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L624"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_training_losses`
 
@@ -324,7 +324,7 @@ Return all recorded training losses.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L487"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L487"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `load_checkpoint`
 
@@ -348,7 +348,7 @@ Load a training checkpoint and restore model, optimizer, and lr_scheduler.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L632"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L632"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `save_and_clear_private_info`
 
@@ -364,7 +364,7 @@ Save the model and remove private information.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L464"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L464"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `save_checkpoint`
 
@@ -381,7 +381,7 @@ Save a training checkpoint.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/torch/lora.py#L515"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/torch/lora.py#L515"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `train`
 

@@ -441,7 +441,7 @@ def create_benchmark_json(results):
                     "model_architecture": "llama-3.2-1b",
                     "task": "lora-finetuning-math",
                     "dataset": "orca-math-word-problems-200k",
-                    "framework": "concrete-ml",
+                    "framework": "torus-ml",
                 },
                 "git_hash": git_info["hash"],
                 "git_timestamp": git_info["timestamp"],

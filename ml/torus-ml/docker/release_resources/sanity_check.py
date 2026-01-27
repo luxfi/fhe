@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 
 import numpy
-from concrete.fhe import Compiler, Configuration
+from torus.fhe import Compiler, Configuration
 from sklearn.datasets import make_classification
 from sklearn.metrics import average_precision_score, confusion_matrix
 from sklearn.model_selection import train_test_split

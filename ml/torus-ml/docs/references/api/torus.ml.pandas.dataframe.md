@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `torus.ml.pandas.dataframe`
 
@@ -12,13 +12,13 @@ Define the encrypted data-frame framework.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L29"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L29"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `EncryptedDataFrame`
 
 Define an encrypted data-frame framework that supports Pandas operators and parameters.
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L32"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L32"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -105,7 +105,7 @@ Get the evaluation keys.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_schema`
 
@@ -123,7 +123,7 @@ The scheme can include column names, dtypes or dtype mappings. It is displayed a
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L336"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L336"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>classmethod</kbd> `load`
 
@@ -143,7 +143,7 @@ Load an encrypted data-frame from disk.
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L173"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L173"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `merge`
 
@@ -193,7 +193,7 @@ Pandas documentation for version 2.0 can be found here: https://pandas.pydata.or
 
 ______________________________________________________________________
 
-<a href="../../../src/concrete/ml/pandas/dataframe.py#L317"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../../src/torus/ml/pandas/dataframe.py#L317"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `save`
 

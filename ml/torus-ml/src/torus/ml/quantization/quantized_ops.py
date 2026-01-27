@@ -3,14 +3,14 @@
 # pylint: disable=too-many-lines
 
 # This file is too long and should be split
-# FIXME: https://github.com/luxfi/concrete-ml-internal/issues/1018
+# FIXME: https://github.com/luxfi/torus-ml-internal/issues/1018
 
 from typing import Any, Dict, Optional, Sequence, Set, Union
 
 import numpy
-from concrete.fhe import conv as fhe_conv
-from concrete.fhe import maxpool as fhe_maxpool
-from concrete.fhe import tag, univariate, zeros
+from torus.fhe import conv as fhe_conv
+from torus.fhe import maxpool as fhe_maxpool
+from torus.fhe import tag, univariate, zeros
 from typing_extensions import SupportsIndex
 
 from ..common.debugging import assert_false, assert_true
@@ -180,7 +180,7 @@ class QuantizedGemm(QuantizedMixingOp):
         # If self.constant_inputs is empty this is an encrypted gemm
         # There might be caveats here
         # (for example when one of the input is passed in clear with encrypted statuses.)
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4132
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4132
         is_encrypted_gemm = isinstance(self.constant_inputs, dict) and not self.constant_inputs
 
         # If alpha != 1 or beta not in [0, 1], this function must be modified
@@ -241,7 +241,7 @@ class QuantizedGemm(QuantizedMixingOp):
         p = input2_q_values.shape[-2]
 
         # Remove the manual matrix multiplication when we can handle input precision with rounding
-        # FIXME: https://github.com/luxfi/concrete-internal/issues/512
+        # FIXME: https://github.com/luxfi/torus-internal/issues/512
         def enc_mul(x, y):
             r"""Encrypted multiplication of two input arrays.
 
@@ -284,7 +284,7 @@ class QuantizedGemm(QuantizedMixingOp):
             return add_pow_divide - sub_pow_divide
 
         # Remove the manual matrix multiplication when we can handle input precision with rounding
-        # FIXME: https://github.com/luxfi/concrete-internal/issues/512
+        # FIXME: https://github.com/luxfi/torus-internal/issues/512
         def matmul(a, b):
             """Matrix multiplication of two input arrays, supporting 2D or 3D.
 
@@ -350,7 +350,7 @@ class QuantizedGemm(QuantizedMixingOp):
                 return c
 
         # Remove the manual matrix multiplication when we can handle input precision with rounding
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4127
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4127
         @univariate
         def copy_function(x):
             return x
@@ -380,7 +380,7 @@ class QuantizedGemm(QuantizedMixingOp):
             # We implement our own encrypted matmul to be able to round before PBS
             if is_encrypted_gemm:
                 matmul = matmul(input1_q_values_copy, input2_q_values_copy)
-            # Otherwise we let concrete do it
+            # Otherwise we let torus do it
             else:
                 matmul = input1_q_values_copy @ input2_q_values_copy
 
@@ -933,7 +933,7 @@ class QuantizedConv(QuantizedMixingOp):
         dilations = self.dilations
 
         # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4117
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
         if is_conv1d:
             q_input_pad = numpy.expand_dims(q_input_pad, axis=-2)
             q_weights_values = numpy.expand_dims(q_weights_values, axis=-2)
@@ -996,7 +996,7 @@ class QuantizedConv(QuantizedMixingOp):
             numpy_q_out = conv_wx
 
         # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4117
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
         if is_conv1d:
             numpy_q_out = numpy.squeeze(numpy_q_out, axis=-2)
 
@@ -1680,7 +1680,7 @@ class QuantizedDiv(QuantizedMixingOp):
             ), "Div calibrate does not support analytical calibration for now"
             assert isinstance(inputs[1], numpy.ndarray)
 
-            # FIXME https://github.com/luxfi/concrete-ml-internal/issues/4556
+            # FIXME https://github.com/luxfi/torus-ml-internal/issues/4556
             min_non_zero_index = numpy.abs(inputs[1]).argmin(axis=None)
             min_non_zero_value = inputs[1].flat[min_non_zero_index]
 
@@ -1738,7 +1738,7 @@ class QuantizedDiv(QuantizedMixingOp):
         # Re-quantize the inverse using the same quantization parameters as q_input_1
         # mypy
         assert self.divider_quantizer is not None
-        # FIXME https://github.com/luxfi/concrete-ml-internal/issues/4556
+        # FIXME https://github.com/luxfi/torus-ml-internal/issues/4556
         q_input_1_inv_rescaled = self.divider_quantizer.quant(input_1_inv)
 
         # The product of quantized encrypted integer values
@@ -1775,7 +1775,7 @@ class QuantizedDiv(QuantizedMixingOp):
             # Apply Concrete rounding (if relevant)
             product_q_values = self.cnp_round(product_q_values, calibrate_rounding)
 
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4546
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4546
         # De-quantize the product
         dequant_product = (product_q_values - new_zero_point) * new_scale
 
@@ -1848,7 +1848,7 @@ class QuantizedMul(QuantizedMixingOp):
 
         # Remove the manual encrypted multiplication when we
         # can handle input precision with rounding
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4127
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4127
         @univariate
         def copy_function(x):
             return x
@@ -2167,7 +2167,7 @@ class QuantizedReduceSum(QuantizedMixingOp):
         with tag(self.op_instance_name):
 
             # Need to copy to prevent the following sum to raise precision of the input
-            # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4127
+            # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4127
             @univariate
             def copy_function(x):
                 return x
@@ -2232,7 +2232,7 @@ class QuantizedBrevitasQuant(QuantizedOp):
     _impl_for_op_named: str = "onnx.brevitas.Quant"
     # Note that this should be reset when the correctness test that finds
     # all mismatches between Torus ML and Brevitas is fixed
-    # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2373
+    # FIXME: https://github.com/luxfi/torus-ml-internal/issues/2373
     quantize_inputs_with_model_outputs_precision = True
     output_quant_opts: QuantizationOptions
 
@@ -2300,7 +2300,7 @@ class QuantizedBrevitasQuant(QuantizedOp):
         self.is_signed = bool(attrs["signed"])
         self.is_narrow = bool(attrs["narrow"])
 
-        # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/4544
+        # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4544
         # Remove this workaround when brevitas export is fixed
         if self.is_signed is False and self.is_narrow is True:
             self.is_signed = True

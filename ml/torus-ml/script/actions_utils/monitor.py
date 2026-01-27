@@ -47,7 +47,7 @@ def generate_figure(data: Dict[str, Any], path_to_csv: Path, path_to_png: Path):
     assert isinstance(sub_df, pd.DataFrame)
     mask = sub_df["name"].apply(
         lambda elt: elt
-        in {"CML builds (weekly or not)", "CML weekly builds", "concrete-ml CI Pipeline"}
+        in {"CML builds (weekly or not)", "CML weekly builds", "torus-ml CI Pipeline"}
     )
     assert isinstance(mask, pd.Series)
     sub_df = sub_df[mask]
@@ -99,7 +99,7 @@ def generate_figure(data: Dict[str, Any], path_to_csv: Path, path_to_png: Path):
 
 
 def get_data(token: str, path_to_json: Path):
-    """Get all information from workflow runs from github for the concrete-ml repo.
+    """Get all information from workflow runs from github for the torus-ml repo.
 
     Arguments:
         token (str): Github API token
@@ -127,7 +127,7 @@ def get_data(token: str, path_to_json: Path):
         "event": "push",
     }
     user = "luxfi"
-    repo = "concrete-ml"
+    repo = "torus-ml"
     final_result = {}
 
     while True:

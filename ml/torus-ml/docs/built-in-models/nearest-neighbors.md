@@ -15,7 +15,7 @@ These models only support _Concrete_ ciphertexts. See [the ciphertexts format](.
 ```python
 from torus.ml.sklearn import KNeighborsClassifier
 
-concrete_classifier = KNeighborsClassifier(n_bits=2, n_neighbors=3)
+torus_classifier = KNeighborsClassifier(n_bits=2, n_neighbors=3)
 ```
 
 ## Quantization parameters

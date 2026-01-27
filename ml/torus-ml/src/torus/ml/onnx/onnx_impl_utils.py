@@ -3,10 +3,10 @@
 from typing import Callable, Tuple, Union
 
 import numpy
-from concrete.fhe import conv as fhe_conv
-from concrete.fhe import ones as fhe_ones
-from concrete.fhe import truncate_bit_pattern
-from concrete.fhe.tracing import Tracer
+from torus.fhe import conv as fhe_conv
+from torus.fhe import ones as fhe_ones
+from torus.fhe import truncate_bit_pattern
+from torus.fhe.tracing import Tracer
 
 from ..common.debugging import assert_true
 

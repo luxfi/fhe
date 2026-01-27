@@ -1,4 +1,4 @@
-import concrete_ml_extensions as fhext
+import torus_ml_extensions as fhext
 import numpy as np
 import json
 import time
@@ -210,7 +210,7 @@ def update_manifest(manifest_path: str, profile_key: str, profile_data: dict):
 def main():
     parser = argparse.ArgumentParser(description="Generate FHE noise profile for matrix multiplication.")
     parser.add_argument(
-        "--output-dir", default="src/concrete_ml_extensions/noise_profiles",
+        "--output-dir", default="src/torus_ml_extensions/noise_profiles",
         help="Directory to save the generated noise profile JSON file."
     )
     parser.add_argument(
