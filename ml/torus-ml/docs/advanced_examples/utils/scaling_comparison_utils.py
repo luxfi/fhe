@@ -5,14 +5,14 @@ from sklearn.metrics import accuracy_score
 
 # pylint: disable=too-many-locals
 def plot_data(axs, X_train, y_train, X_test, y_test, model, name, h=0.04, font_size_text=20):
-    # Train the model and retrieve both the Concrete ML model and its equivalent one from
+    # Train the model and retrieve both the Torus ML model and its equivalent one from
     # scikit-learn
     concrete_model, sklearn_model = model.fit_benchmark(X_train, y_train)
 
     # Compute the predictions in clear using the scikit-learn model
     sklearn_y_pred = sklearn_model.predict(X_test)
 
-    # Compile the Concrete ML model
+    # Compile the Torus ML model
     circuit = concrete_model.compile(X_test)
     concrete_y_pred = concrete_model.predict(X_test, fhe="simulate")
 
@@ -45,7 +45,7 @@ def plot_data(axs, X_train, y_train, X_test, y_test, model, name, h=0.04, font_s
     for _, (ax, framework, score, Z) in enumerate(
         zip(
             axs,
-            ["scikit-learn", "Concrete ML"],
+            ["scikit-learn", "Torus ML"],
             [sklearn_score, concrete_score],
             [sklearn_Z, concrete_Z],
         )
@@ -94,7 +94,7 @@ def plot_data(axs, X_train, y_train, X_test, y_test, model, name, h=0.04, font_s
             horizontalalignment="right",
         )
 
-        if bitwidth and framework == "Concrete ML":
+        if bitwidth and framework == "Torus ML":
             ax.text(
                 xx.max() - 0.3,
                 yy.min() + 1.0,

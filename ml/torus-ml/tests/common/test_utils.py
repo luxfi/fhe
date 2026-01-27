@@ -7,14 +7,14 @@ import torch
 from concrete.compiler import check_gpu_enabled
 from torch.utils.data import DataLoader, TensorDataset
 
-from concrete.ml.common.debugging.custom_assert import assert_true
-from concrete.ml.common.utils import (
+from torus.ml.common.debugging.custom_assert import assert_true
+from torus.ml.common.utils import (
     check_compilation_device_is_valid_and_is_cuda,
     check_execution_device_is_valid_and_is_cuda,
     compute_bits_precision,
 )
-from concrete.ml.pytest.torch_models import QuantCustomModel
-from concrete.ml.pytest.utils import data_calibration_processing
+from torus.ml.pytest.torch_models import QuantCustomModel
+from torus.ml.pytest.utils import data_calibration_processing
 
 
 def get_data(load_data):

@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 from concrete.fhe import Configuration
 from concrete.fhe.tracing import Tracer
 
-from concrete import fhe
+from torus import fhe
 
 script_dir = Path(__file__).parent
 

@@ -42,7 +42,7 @@ class GLWELinearLayerExecutor:
         """
         assert has_glwe_backend(), "GLWE backend not installed"
 
-        import concrete_ml_extensions as fhext
+        import torus_ml_extensions as fhext
 
         self.fhext = fhext
 

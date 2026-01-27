@@ -45,9 +45,9 @@ USE_OLD_VL = False
 # Debug option for testing round PBS optimization
 # Setting this option to true will make quantizers "round half up"
 # For example: 0.5 -> 1, 1.5 -> 2 instead of "round half to even"
-# When the option is set to false, Concrete ML uses numpy.rint
+# When the option is set to false, Torus ML uses numpy.rint
 # which has the same behavior as torch.round -> Brevitas nets
-# should be exact compared to their Concrete ML QuantizedModule
+# should be exact compared to their Torus ML QuantizedModule
 QUANT_ROUND_LIKE_ROUND_PBS = False
 
 # Enable input ciphertext compression
@@ -216,7 +216,7 @@ def manage_parameters_for_pbs_errors(
     """Return (p_error, global_p_error) that we want to give to Concrete.
 
     The returned (p_error, global_p_error) depends on user's parameters and the way we want to
-    manage defaults in Concrete ML, which may be different from the way defaults are managed in
+    manage defaults in Torus ML, which may be different from the way defaults are managed in
     Concrete.
 
     Principle:

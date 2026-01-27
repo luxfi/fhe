@@ -7,7 +7,7 @@ import pytest
 import torch
 from torch import nn
 
-from concrete.ml.pytest.torch_models import (
+from torus.ml.pytest.torch_models import (
     CNN,
     FC,
     CNNGrouped,
@@ -17,7 +17,7 @@ from concrete.ml.pytest.torch_models import (
     NetWithLoops,
     QATTestModule,
 )
-from concrete.ml.torch import NumpyModule
+from torus.ml.torch import NumpyModule
 
 
 @pytest.mark.parametrize(

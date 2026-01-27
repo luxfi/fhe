@@ -17,7 +17,7 @@ from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 
 # No relative import here because when not used in the package itself
-from concrete.ml.deployment import FHEModelServer
+from torus.ml.deployment import FHEModelServer
 
 if __name__ == "__main__":
     app = FastAPI(debug=False)

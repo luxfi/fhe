@@ -15,9 +15,9 @@ from scipy import special
 from typing_extensions import SupportsIndex
 
 # pylint: disable=ungrouped-imports
-from concrete.ml.common import utils
-from concrete.ml.common.debugging import assert_false, assert_true
-from concrete.ml.onnx.onnx_impl_utils import (
+from torus.ml.common import utils
+from torus.ml.common.debugging import assert_false, assert_true
+from torus.ml.onnx.onnx_impl_utils import (
     compute_onnx_pool_padding,
     numpy_onnx_pad,
     onnx_avgpool_compute_norm_const,
@@ -1227,7 +1227,7 @@ def numpy_reshape(
     Returns:
         Tuple[numpy.ndarray]: Output tensor
     """
-    assert_true(allowzero == 0, "Concrete ML currently only accepts numpy style reshape in ONNX")
+    assert_true(allowzero == 0, "Torus ML currently only accepts numpy style reshape in ONNX")
 
     return (numpy.reshape(x, newshape),)
 
@@ -1363,7 +1363,7 @@ def numpy_avgpool(
         ceil_mode (int): Whether to use ONNX's ceil (1) or floor (0, the default) to compute the
             output shape.
         count_include_pad (int): Whether include pad pixels when calculating values for the edges.
-            Currently, setting this parameter to 0 is not supported in Concrete ML.
+            Currently, setting this parameter to 0 is not supported in Torus ML.
         pads (Tuple[int, ...]): Padding for the beginning and ending along each spatial axis.
             Expected format is [x1_begin, x2_begin...x1_end, x2_end, ...] where xi_begin (resp.
             xi_end) is the number of pixels added at the beginning (resp. end) of axis `i`.
@@ -1399,7 +1399,7 @@ def numpy_avgpool(
 
     assert_true(
         pads is None or len(pads) == 2 * len(kernel_shape),
-        "The Average Pool operator in Concrete ML requires padding to be specified as "
+        "The Average Pool operator in Torus ML requires padding to be specified as "
         " (pad_left_dim1, pad_right_dim1, pad_left_dim2, pad_right_dim2, ...), following ONNX"
         " standard.",
     )

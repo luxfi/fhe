@@ -5,9 +5,9 @@ import inspect
 import numpy
 import pytest
 
-from concrete.ml.common.utils import get_model_class
-from concrete.ml.pytest.utils import MODELS_AND_DATASETS
-from concrete.ml.sklearn import _get_sklearn_all_models
+from torus.ml.common.utils import get_model_class
+from torus.ml.pytest.utils import MODELS_AND_DATASETS
+from torus.ml.sklearn import _get_sklearn_all_models
 
 
 def test_sklearn_args():

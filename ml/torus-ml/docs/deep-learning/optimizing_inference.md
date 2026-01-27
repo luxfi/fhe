@@ -12,7 +12,7 @@ Neural networks are challenging for encrypted inference. Each neuron in a networ
 
 ## Structured pruning
 
-While using unstructured pruning ensures the accumulator bit-width stays low, [structured pruning](https://pytorch.org/docs/stable/generated/torch.nn.utils.prune.ln_structured.html) can eliminate entire neurons from the network as many neural networks are over-parametrized for easier training. You can apply structured pruning to a trained network as a fine-tuning step. [This example](../advanced_examples/FullyConnectedNeuralNetworkOnMNIST.ipynb) demonstrates how to apply structured pruning to built-in neural networks using the [prune](../references/api/concrete.ml.sklearn.base.md#method-prune) helper function. To apply structured pruning to custom models, it is recommended to use the [torch-pruning](https://github.com/VainF/Torch-Pruning) package.
+While using unstructured pruning ensures the accumulator bit-width stays low, [structured pruning](https://pytorch.org/docs/stable/generated/torch.nn.utils.prune.ln_structured.html) can eliminate entire neurons from the network as many neural networks are over-parametrized for easier training. You can apply structured pruning to a trained network as a fine-tuning step. [This example](../advanced_examples/FullyConnectedNeuralNetworkOnMNIST.ipynb) demonstrates how to apply structured pruning to built-in neural networks using the [prune](../references/api/torus.ml.sklearn.base.md#method-prune) helper function. To apply structured pruning to custom models, it is recommended to use the [torch-pruning](https://github.com/VainF/Torch-Pruning) package.
 
 ## Rounded activations and quantizers
 

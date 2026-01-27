@@ -857,7 +857,7 @@ class QuantizedConv(QuantizedMixingOp):
         )
         assert_true(
             len(self.pads) == 2 * len(self.kernel_shape),
-            "The convolution operator in Concrete ML requires padding to be specified as "
+            "The convolution operator in Torus ML requires padding to be specified as "
             " (pad_left_dim1, pad_right_dim1, pad_left_dim2, pad_right_dim2, ...), following ONNX"
             " standard",
         )
@@ -1145,7 +1145,7 @@ class QuantizedAvgPool(QuantizedMixingOp):
 
         assert_true(
             len(self.pads) == 2 * len(self.kernel_shape),
-            "The Average Pool operator in Concrete ML requires padding to be specified as "
+            "The Average Pool operator in Torus ML requires padding to be specified as "
             " (pad_left_dim1, pad_right_dim1, pad_left_dim2, pad_right_dim2, ...), following ONNX"
             " standard.",
         )
@@ -1293,7 +1293,7 @@ class QuantizedMaxPool(QuantizedOp):
         )
         assert_true(
             len(self.pads) == 2 * len(self.kernel_shape),
-            "The Max Pool operator in Concrete ML requires padding to be specified as "
+            "The Max Pool operator in Torus ML requires padding to be specified as "
             " (pad_left_dim1, pad_right_dim1, pad_left_dim2, pad_right_dim2, ...), following ONNX"
             " standard",
         )
@@ -1419,7 +1419,7 @@ class QuantizedPad(QuantizedOp):
 
         assert_true(
             all(pads[i] == 0 and pads[4 + i] == 0 for i in range(0, 2)),
-            "Concrete ML only supports padding along the width & height dimensions, padding"
+            "Torus ML only supports padding along the width & height dimensions, padding"
             f" requested was {pads}",
         )
 
@@ -1431,7 +1431,7 @@ class QuantizedPad(QuantizedOp):
         assert_true(pads.size == 4, "Not currently supporting padding of 3D tensors")
 
         pad_value = 0 if prepared_inputs[2] is None else prepared_inputs[2]
-        assert_true(pad_value == 0, "Concrete ML only supports padding with constant zero values")
+        assert_true(pad_value == 0, "Torus ML only supports padding with constant zero values")
 
         assert q_input.quantizer.zero_point is not None
         q_input_pad = numpy_onnx_pad(q_input.qvalues, pads, q_input.quantizer.zero_point, True)
@@ -2231,7 +2231,7 @@ class QuantizedBrevitasQuant(QuantizedOp):
 
     _impl_for_op_named: str = "onnx.brevitas.Quant"
     # Note that this should be reset when the correctness test that finds
-    # all mismatches between Concrete ML and Brevitas is fixed
+    # all mismatches between Torus ML and Brevitas is fixed
     # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2373
     quantize_inputs_with_model_outputs_precision = True
     output_quant_opts: QuantizationOptions
@@ -2947,7 +2947,7 @@ class QuantizedUnfold(QuantizedMixingOp):
         )
         assert_true(
             len(self.pads) == 2 * len(self.kernel_shape),
-            "The Unfold operator in Concrete ML requires padding to be specified as "
+            "The Unfold operator in Torus ML requires padding to be specified as "
             " (pad_left_dim1, pad_right_dim1, pad_left_dim2, pad_right_dim2, ...), following ONNX"
             " standard",
         )

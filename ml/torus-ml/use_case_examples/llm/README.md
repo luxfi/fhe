@@ -12,7 +12,7 @@ This repository contains Python code illustrating how to apply GPT-2, a Large La
 
 You will need Python 3 and the following dependencies to use the code from this repository:
 
-- concrete-ml
+- torus-ml
 - transformers
 
 You can install these dependencies with the following command:

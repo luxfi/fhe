@@ -1,8 +1,8 @@
 # Working in the cloud
 
-This document illustrate how Concrete ML model and DataFrames are deployed in client/server setting when creating privacy-preserving services in the cloud.
+This document illustrate how Torus ML model and DataFrames are deployed in client/server setting when creating privacy-preserving services in the cloud.
 
-Once compiled to FHE, a Concrete ML model or DataFrame generates machine code that execute prediction, training or pre-processing on encrypted data. During this process, Concrete ML generates [the private encryption keys](concepts.md#cryptography-concepts) and [the pubic evaluation keys](concepts.md#cryptography-concepts).
+Once compiled to FHE, a Torus ML model or DataFrame generates machine code that execute prediction, training or pre-processing on encrypted data. During this process, Torus ML generates [the private encryption keys](concepts.md#cryptography-concepts) and [the pubic evaluation keys](concepts.md#cryptography-concepts).
 
 ## Communication protocols
 
@@ -12,7 +12,7 @@ The overall communications protocol to enable cloud deployment of machine learni
 
 The steps detailed above are:
 
-1. **Model Deployment**: The model developer deploys the compiled machine learning model to the server. This model includes the cryptographic parameters. The server is now ready to provide private inference. Cryptographic parameters and compiled programs for DataFrames are included directly in Concrete ML.
+1. **Model Deployment**: The model developer deploys the compiled machine learning model to the server. This model includes the cryptographic parameters. The server is now ready to provide private inference. Cryptographic parameters and compiled programs for DataFrames are included directly in Torus ML.
 
 1. **Client request**: The client requests the cryptographic parameters (client specs). Once the client receives them from the server, the _secret_ and _evaluation_ keys are generated.
 

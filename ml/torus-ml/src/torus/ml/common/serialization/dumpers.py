@@ -20,7 +20,7 @@ def dumps(obj: Any) -> str:
 
 
 def dump(obj: Any, file: TextIO):
-    """Dump any Concrete ML object in a file.
+    """Dump any Torus ML object in a file.
 
     Arguments:
         obj (Any): The object to dump.

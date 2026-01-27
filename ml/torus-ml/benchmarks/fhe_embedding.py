@@ -6,8 +6,8 @@ from typing import Dict, List
 
 import numpy
 
-from concrete import fhe
-from concrete.ml.quantization.quantized_module import QuantizedArray
+from torus import fhe
+from torus.ml.quantization.quantized_module import QuantizedArray
 
 
 # The simplest tokenizer there is

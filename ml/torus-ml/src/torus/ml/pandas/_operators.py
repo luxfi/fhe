@@ -24,12 +24,12 @@ UNSUPPORTED_PANDAS_PARAMETERS = {
 
 
 def check_parameter_is_supported(parameter: Any, parameter_name: str, operator: str):
-    """Check that the given Pandas parameter is supported by the Concrete ML operator.
+    """Check that the given Pandas parameter is supported by the Torus ML operator.
 
     Args:
         parameter (Any): The Pandas parameter to consider.
         parameter_name (str): The Pandas parameter's name.
-        operator (str): The Concrete ML operator to check.
+        operator (str): The Torus ML operator to check.
 
     Raises:
         ValueError: If the parameter is not supported by the operator.

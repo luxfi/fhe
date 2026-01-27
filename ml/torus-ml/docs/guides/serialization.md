@@ -1,6 +1,6 @@
 # Serializing Built-In Models
 
-This document explains how to serialize build-in models in Concrete ML.
+This document explains how to serialize build-in models in Torus ML.
 
 ## Introduction
 
@@ -19,7 +19,7 @@ For example, a logistic regression model can be dumped in a string as follows:
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 
-from concrete.ml.sklearn import LogisticRegression
+from torus.ml.sklearn import LogisticRegression
 
 # Create the data for classification:
 X, y = make_classification()
@@ -56,12 +56,12 @@ with dumped_model_path.open("w") as f:
     model.dump(f)
 ```
 
-Alternatively, Concrete ML provides two equivalent global functions:
+Alternatively, Torus ML provides two equivalent global functions:
 
 <!--pytest-codeblocks:cont-->
 
 ```python
-from concrete.ml.common.serialization.dumpers import dump, dumps
+from torus.ml.common.serialization.dumpers import dump, dumps
 
 # Dump the model in a string
 dumped_model_str = dumps(model)
@@ -96,7 +96,7 @@ The same logistic regression model can be loaded as follows:
 
 ```python
 import numpy
-from concrete.ml.common.serialization.loaders import load, loads
+from torus.ml.common.serialization.loaders import load, loads
 
 # Load the model from a string
 loaded_model = loads(dumped_model_str)

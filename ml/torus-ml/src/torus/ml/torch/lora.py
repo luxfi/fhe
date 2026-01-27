@@ -391,7 +391,7 @@ class LoraTrainer:
             or training_args["use_cpu"] is True,
             (
                 "When specifying custom training_args for the LoraTrainer, you "
-                "must set use_cpu=True. The Concrete ML LoraTrainer can be "
+                "must set use_cpu=True. The Torus ML LoraTrainer can be "
                 "executed on GPU by setting device='cuda' in the `train` call"
             ),
         )

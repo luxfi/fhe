@@ -1,6 +1,6 @@
 # Deployment
 
-In this folder we show how to deploy a Concrete ML model that classifies images from CIFAR-10, either through Docker or Amazon Web Services.
+In this folder we show how to deploy a Torus ML model that classifies images from CIFAR-10, either through Docker or Amazon Web Services.
 We use the model showcased in [CIFAR QAT training from scratch](../../cifar/cifar_brevitas_training/README.md).
 
 ## Get started
@@ -12,7 +12,7 @@ One can also run this example locally using Docker, or just by running the scrip
 Deployment this model on your personal machine is not recommended as running a VGG in FHE is computationally intensive. It is recommended to run this on a `m6i.metal` instance from AWS.
 
 1. To compile your model you can use `compile.py`, or `compile_with_docker.py` to use Docker. This will compile the model to an FHE circuit and [serialize it](../../../docs/guides/client_server.md). This will result in a new folder called `./dev`.
-1. Once that's done you can use the script provided in Concrete ML in `use_case_examples/deployment/server/`, use `deploy_to_docker.py`.
+1. Once that's done you can use the script provided in Torus ML in `use_case_examples/deployment/server/`, use `deploy_to_docker.py`.
 
 - `python use_case_examples/deployment/server/deploy_to_docker.py`
 

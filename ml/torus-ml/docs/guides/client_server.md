@@ -1,6 +1,6 @@
 # Production Deployment
 
-This document explains the deployment workflow and the model serving pattern for deploying Fully Homomorphic Encryption machine learning models in a client/server setting using Concrete ML.
+This document explains the deployment workflow and the model serving pattern for deploying Fully Homomorphic Encryption machine learning models in a client/server setting using Torus ML.
 
 ## Deployment
 
@@ -32,7 +32,7 @@ The compiled model (`server.zip`) is deployed to a server. The cryptographic par
 
 ### Using the API Classes
 
-The `FHEModelDev`, `FHEModelClient`, and `FHEModelServer` classes in the `concrete.ml.deployment` module simplifies the deployment and interaction between the client and server:
+The `FHEModelDev`, `FHEModelClient`, and `FHEModelServer` classes in the `torus.ml.deployment` module simplifies the deployment and interaction between the client and server:
 
 - **`FHEModelDev`**:
 
@@ -54,8 +54,8 @@ The `FHEModelDev`, `FHEModelClient`, and `FHEModelServer` classes in the `concre
 ### Example Usage
 
 ```python
-from concrete.ml.sklearn import DecisionTreeClassifier
-from concrete.ml.deployment import FHEModelDev, FHEModelClient, FHEModelServer
+from torus.ml.sklearn import DecisionTreeClassifier
+from torus.ml.deployment import FHEModelDev, FHEModelClient, FHEModelServer
 import numpy as np
 
 # Define the directory for FHE client/server files
@@ -104,12 +104,12 @@ These objects are serialized into bytes to streamline the data transfer between 
 
 #### Ciphertext formats and keys
 
-Two types of ciphertext formats are [available in Concrete ML](../getting-started/concepts.md#ciphertext-formats) and both are available for deployment. To use the _Lux FHE radix_ format, pass the `ciphertext_format` option to the compilation call as follows:
+Two types of ciphertext formats are [available in Torus ML](../getting-started/concepts.md#ciphertext-formats) and both are available for deployment. To use the _Lux FHE radix_ format, pass the `ciphertext_format` option to the compilation call as follows:
 
 <!--pytest-codeblocks:cont-->
 
 ```python
-from concrete.ml.common.utils import CiphertextFormat
+from torus.ml.common.utils import CiphertextFormat
 model.compile(X, ciphertext_format=CiphertextFormat.TFHE_RS)
 
 fhe_directory = '/tmp/fhe_client_server_files_luxfhe/'
@@ -156,7 +156,7 @@ The workflow contains the following steps:
 1. **Data decryption**: The client decrypts it using its private key.
 1. **Post-processing**: The client performs any necessary post-processing of the decrypted result as specified in `serialized_processing.json` (part of `client.zip`).
 
-The server-side implementation of a Concrete ML model is illustrated as follows:
+The server-side implementation of a Torus ML model is illustrated as follows:
 
 ![](../figures/concretemlgraph2.jpg)
 

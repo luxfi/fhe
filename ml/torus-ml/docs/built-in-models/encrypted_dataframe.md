@@ -16,7 +16,7 @@ Encrypted DataFrames are a storage format for encrypted tabular data. You can ex
 To encrypt a pandas DataFrame, construct a `ClientEngine` that manages keys and then call the `encrypt_from_pandas` function:
 
 ```python
-from concrete.ml.pandas import ClientEngine
+from torus.ml.pandas import ClientEngine
 from io import StringIO
 import pandas
 
@@ -100,7 +100,7 @@ To save or load an encrypted DataFrame from a file, use the following commands:
 <!--pytest-codeblocks:cont-->
 
 ```python
-from concrete.ml.pandas import load_encrypted_dataframe
+from torus.ml.pandas import load_encrypted_dataframe
 
 # Save
 df_encrypted_merged.save("df_encrypted_merged")
@@ -118,7 +118,7 @@ During the pre-processing and post-processing stages, the `ValueError` can happe
 
 - A column contains values outside the allowed range for integers
 - Too many unique strings
-- Unsupported data type by Concrete ML
+- Unsupported data type by Torus ML
 - Unsupported data type by the operation attempted
 
 ## Example workflow
