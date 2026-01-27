@@ -22,8 +22,8 @@ from fastapi.responses import FileResponse, StreamingResponse
 from loguru import logger
 
 # No relative import here because when not used in the package itself
-from concrete.ml.deployment import FHEModelServer
-from concrete.ml.torch.hybrid_model import HybridFHEModelServer, underscore_str_to_tuple
+from torus.ml.deployment import FHEModelServer
+from torus.ml.torch.hybrid_model import HybridFHEModelServer, underscore_str_to_tuple
 
 if __name__ == "__main__":
     FILE_FOLDER = Path(__file__).parent

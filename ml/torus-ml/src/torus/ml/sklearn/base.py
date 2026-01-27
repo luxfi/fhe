@@ -19,8 +19,8 @@ from typing import Any, Callable, Dict, List, Optional, Set, TextIO, Type, Union
 import brevitas.nn as qnn
 
 # pylint: disable-next=ungrouped-imports
-import concrete.fhe as cp
-import concrete_ml_extensions as fhext
+import torus.fhe as cp
+import torus_ml_extensions as fhext
 import numpy
 import onnx
 import sklearn
@@ -122,7 +122,7 @@ os.environ["TREES_USE_ROUNDING"] = os.environ.get("TREES_USE_ROUNDING", "1")
 
 # pylint: disable=too-many-public-methods, too-many-instance-attributes
 class BaseEstimator:
-    """Base class for all estimators in Concrete ML.
+    """Base class for all estimators in Torus ML.
 
     This class does not inherit from sklearn.base.BaseEstimator as it creates some conflicts
     with skorch in QuantizedTorchEstimatorMixin's subclasses (more specifically, the `get_params`
@@ -201,7 +201,7 @@ class BaseEstimator:
 
         # If the attribute ends with a single underscore and can be found in the underlying
         # scikit-learn model (once fitted), retrieve its value
-        # Enable non-training attributes as well once Concrete ML models initialize their
+        # Enable non-training attributes as well once Torus ML models initialize their
         # underlying scikit-learn models during initialization
         # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
         if (
@@ -212,7 +212,7 @@ class BaseEstimator:
             return getattr(self.sklearn_model, attr)
 
         raise AttributeError(
-            f"Attribute {attr} cannot be found in the Concrete ML {self.__class__.__name__} object "
+            f"Attribute {attr} cannot be found in the Torus ML {self.__class__.__name__} object "
             f"and is not a training attribute from the underlying scikit-learn "
             f"{self.sklearn_model_class} one. If the attribute is meant to represent one from that "
             f"latter, please check that the model is properly fitted."
@@ -351,7 +351,7 @@ class BaseEstimator:
     def get_sklearn_params(self, deep: bool = True) -> dict:
         """Get parameters for this estimator.
 
-        This method is used to instantiate a scikit-learn model using the Concrete ML model's
+        This method is used to instantiate a scikit-learn model using the Torus ML model's
         parameters. It does not override scikit-learn's existing `get_params` method in order to
         not break its implementation of `set_params`.
 
@@ -369,7 +369,7 @@ class BaseEstimator:
         # pylint: disable-next=no-member
         params = super().get_params(deep=deep)  # type: ignore[misc]
 
-        # Remove the n_bits parameters as this attribute is added by Concrete ML
+        # Remove the n_bits parameters as this attribute is added by Torus ML
         params.pop("n_bits", None)
 
         return params
@@ -434,7 +434,7 @@ class BaseEstimator:
         random_state: Optional[int] = None,
         **fit_parameters,
     ):
-        """Fit both the Concrete ML and its equivalent float estimators.
+        """Fit both the Torus ML and its equivalent float estimators.
 
         Args:
             X (Data): The training data, as a Numpy array, Torch tensor, Pandas DataFrame or List.
@@ -444,7 +444,7 @@ class BaseEstimator:
             **fit_parameters: Keyword arguments to pass to the float estimator's fit method.
 
         Returns:
-            The Concrete ML and float equivalent fitted estimators.
+            The Torus ML and float equivalent fitted estimators.
         """
 
         # Retrieve sklearn's init parameters
@@ -468,12 +468,12 @@ class BaseEstimator:
         # Train the scikit-learn model
         sklearn_model.fit(X, y, **fit_parameters)
 
-        # Update the Concrete ML model's parameters
+        # Update the Torus ML model's parameters
         # Disable mypy attribute definition errors as this attribute is expected to be
         # initialized once the model inherits from skorch
         self.set_params(n_bits=self.n_bits, **params)  # type: ignore[attr-defined]
 
-        # Train the Concrete ML model
+        # Train the Torus ML model
         self.fit(X, y, **fit_parameters)
 
         return self, sklearn_model
@@ -772,7 +772,7 @@ class BaseEstimator:
             X (Data): The input values to predict, as a Numpy array, Torch tensor, Pandas DataFrame
                 or List.
             fhe (Union[FheMode, str]): The mode to use for prediction.
-                Can be FheMode.DISABLE for Concrete ML Python inference,
+                Can be FheMode.DISABLE for Torus ML Python inference,
                 FheMode.SIMULATE for FHE simulation and FheMode.EXECUTE for actual FHE execution.
                 Can also be the string representation of any of these values.
                 Default to FheMode.DISABLE.
@@ -896,7 +896,7 @@ class BaseEstimator:
 # methods are implemented and we need to disable pylint from checking that
 # pylint: disable-next=abstract-method
 class BaseClassifier(BaseEstimator):
-    """Base class for linear and tree-based classifiers in Concrete ML.
+    """Base class for linear and tree-based classifiers in Torus ML.
 
     This class inherits from BaseEstimator and modifies some of its methods in order to align them
     with classifier behaviors. This notably include applying a sigmoid/softmax post-processing to
@@ -968,7 +968,7 @@ class BaseClassifier(BaseEstimator):
             X (Data): The input values to predict, as a Numpy array, Torch tensor, Pandas DataFrame
                 or List.
             fhe (Union[FheMode, str]): The mode to use for prediction.
-                Can be FheMode.DISABLE for Concrete ML Python inference,
+                Can be FheMode.DISABLE for Torus ML Python inference,
                 FheMode.SIMULATE for FHE simulation and FheMode.EXECUTE for actual FHE execution.
                 Can also be the string representation of any of these values.
                 Default to FheMode.DISABLE.
@@ -1302,7 +1302,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
             **fit_parameters: Keyword arguments to pass to skorch's fit method.
 
         Returns:
-            The Concrete ML and equivalent skorch fitted estimators.
+            The Torus ML and equivalent skorch fitted estimators.
         """
 
         assert (
@@ -1475,7 +1475,7 @@ class QuantizedTorchEstimatorMixin(BaseEstimator):
         # Enable pruning again, this time with structured pruning
         pruned_model.base_module.enable_pruning()
 
-        # The .module_ was initialized manually, prevent .fit (for both skorch and Concrete ML)
+        # The .module_ was initialized manually, prevent .fit (for both skorch and Torus ML)
         # from creating a new one
         # Setting both attributes could be avoided by initializing `sklearn_model` in __init__
         # # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
@@ -1762,7 +1762,7 @@ class BaseTreeEstimatorMixin(BaseEstimator, sklearn.base.BaseEstimator, ABC):
     def get_sklearn_params(self, deep: bool = True) -> dict:
         """Get parameters for this estimator.
 
-        This method is used to instantiate a scikit-learn model using the Concrete ML model's
+        This method is used to instantiate a scikit-learn model using the Torus ML model's
         parameters. It does not override scikit-learn's existing `get_params` method in order to
         not break its implementation of `set_params`.
 
@@ -1881,15 +1881,15 @@ class SklearnLinearModelMixin(BaseEstimator, sklearn.base.BaseEstimator, ABC):
         # Ensure compatibility for both sklearn 1.1 and >=1.5
         # This parameter was removed in 1.5. If this package is installed
         # with sklearn 1.1 which has it, then remove it when
-        # instantiating the 1.5 API compatible Concrete ML model
+        # instantiating the 1.5 API compatible Torus ML model
         init_params.pop("normalize", None)
 
-        # Instantiate the Concrete ML model and update initialization parameters
-        # This update is necessary as we currently store scikit-learn attributes in Concrete ML
+        # Instantiate the Torus ML model and update initialization parameters
+        # This update is necessary as we currently store scikit-learn attributes in Torus ML
         # classes during initialization (for example: link or power attributes in GLMs)
         # Without it, these attributes will have default values instead of the ones used by the
         # scikit-learn models
-        # This should be fixed once Concrete ML models initialize their underlying scikit-learn
+        # This should be fixed once Torus ML models initialize their underlying scikit-learn
         # models during initialization
         # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/3373
         model = cls(n_bits=n_bits, **init_params)
@@ -2112,7 +2112,7 @@ class SklearnLinearClassifierMixin(
             X (Data): The input values to predict, as a Numpy array, Torch tensor, Pandas DataFrame
                 or List.
             fhe (Union[FheMode, str]): The mode to use for prediction.
-                Can be FheMode.DISABLE for Concrete ML Python inference,
+                Can be FheMode.DISABLE for Torus ML Python inference,
                 FheMode.SIMULATE for FHE simulation and FheMode.EXECUTE for actual FHE execution.
                 Can also be the string representation of any of these values.
                 Default to FheMode.DISABLE.
@@ -2572,7 +2572,7 @@ class SklearnKNeighborsMixin(BaseEstimator, sklearn.base.BaseEstimator, ABC):
             X (Data): The input values to predict, as a Numpy array, Torch tensor, Pandas DataFrame
                 or List.
             fhe (Union[FheMode, str]): The mode to use for prediction.
-                Can be FheMode.DISABLE for Concrete ML Python inference,
+                Can be FheMode.DISABLE for Torus ML Python inference,
                 FheMode.SIMULATE for FHE simulation and FheMode.EXECUTE for actual FHE execution.
                 Can also be the string representation of any of these values.
                 Default to FheMode.DISABLE.

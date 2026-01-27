@@ -1,17 +1,17 @@
 # Neural networks
 
-This document introduces the simple built-in neural networks models that Concrete ML provides with a scikit-learn interface through the `NeuralNetClassifier` and `NeuralNetRegressor` classes.
+This document introduces the simple built-in neural networks models that Torus ML provides with a scikit-learn interface through the `NeuralNetClassifier` and `NeuralNetRegressor` classes.
 
 ## Supported models
 
-|                                          Concrete ML                                          | scikit-learn                                                                                                 |
+|                                          Torus ML                                          | scikit-learn                                                                                                 |
 | :-------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------------------------------------------ |
-| [NeuralNetClassifier](../references/api/concrete.ml.sklearn.qnn.md#class-neuralnetclassifier) | [MLPClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) |
-|  [NeuralNetRegressor](../references/api/concrete.ml.sklearn.qnn.md#class-neuralnetregressor)  | [MLPRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)   |
+| [NeuralNetClassifier](../references/api/torus.ml.sklearn.qnn.md#class-neuralnetclassifier) | [MLPClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) |
+|  [NeuralNetRegressor](../references/api/torus.ml.sklearn.qnn.md#class-neuralnetregressor)  | [MLPRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)   |
 
 The neural network models are implemented with [skorch](https://skorch.readthedocs.io/en/stable/index.html), which provides a scikit-learn-like interface to Torch models (more [here](../explanations/inner-workings/external_libraries.md#skorch)).
 
-Concrete ML models are multi-layer, fully-connected, networks with customizable activation functions and have a number of neurons in each layer. This approach is similar to what is available in scikit-learn when using the `MLPClassifier`/`MLPRegressor` classes. The built-in models train easily with a single call to `.fit()`, which will automatically quantize weights and activations. These models use Quantization Aware Training, allowing good performance for low precision (down to 2-3 bits) weights and activations.
+Torus ML models are multi-layer, fully-connected, networks with customizable activation functions and have a number of neurons in each layer. This approach is similar to what is available in scikit-learn when using the `MLPClassifier`/`MLPRegressor` classes. The built-in models train easily with a single call to `.fit()`, which will automatically quantize weights and activations. These models use Quantization Aware Training, allowing good performance for low precision (down to 2-3 bits) weights and activations.
 
 While `NeuralNetClassifier` and `NeuralNetClassifier` provide scikit-learn-like models, their architecture is somewhat restricted to make training easy and robust. If you need more advanced models, you can convert custom neural networks as described in the [FHE-friendly models documentation](../deep-learning/fhe_friendly_models.md).
 
@@ -34,7 +34,7 @@ To create an instance of a Fully Connected Neural Network (FCNN), you need to in
 Note that some parameters need to be prefixed by `module__`, while others don't. The parameters related to the model must have the prefix, such as the underlying `nn.Module`. The parameters related to training options do not require the prefix.
 
 ```python
-from concrete.ml.sklearn import NeuralNetClassifier
+from torus.ml.sklearn import NeuralNetClassifier
 import torch.nn as nn
 
 n_inputs = 10
@@ -49,7 +49,7 @@ concrete_classifier = NeuralNetClassifier(**params)
 
 The [Classifier Comparison notebook](../tutorials/ml_examples.md) shows the behavior of built-in neural networks on several synthetic data-sets.
 
-The folowing figure shows the Concrete ML neural network trained with Quantization Aware Training in an FHE-compatible configuration and compares it to the floating-point equivalent trained with scikit-learn.
+The folowing figure shows the Torus ML neural network trained with Quantization Aware Training in an FHE-compatible configuration and compares it to the floating-point equivalent trained with scikit-learn.
 
 ![Comparison neural networks](../figures/neural_nets_builtin.png)
 

@@ -3,7 +3,7 @@
 import numpy
 import pytest
 
-from concrete.ml.onnx.ops_impl import numpy_gemm, onnx_func_raw_args
+from torus.ml.onnx.ops_impl import numpy_gemm, onnx_func_raw_args
 
 
 @pytest.mark.parametrize(

@@ -1,22 +1,22 @@
 # Tree-based models
 
-This document introduces several [scikit-learn](https://scikit-learn.org/stable/)'s linear models for  `classification` and `regression` tree models that Concrete ML provides.
+This document introduces several [scikit-learn](https://scikit-learn.org/stable/)'s linear models for  `classification` and `regression` tree models that Torus ML provides.
 
 ## Supported models
 
-|                                             Concrete ML                                              |                                                                           scikit-learn                                                                           |
+|                                             Torus ML                                              |                                                                           scikit-learn                                                                           |
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [DecisionTreeClassifier](../references/api/concrete.ml.sklearn.tree.md#class-decisiontreeclassifier) |     [DecisionTreeClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html#sklearn.tree.DecisionTreeClassifier)     |
-|  [DecisionTreeRegressor](../references/api/concrete.ml.sklearn.tree.md#class-decisiontreeregressor)  |      [DecisionTreeRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html#sklearn.tree.DecisionTreeRegressor)       |
-|  [RandomForestClassifier](../references/api/concrete.ml.sklearn.rf.md#class-randomforestclassifier)  | [RandomForestClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier) |
-|   [RandomForestRegressor](../references/api/concrete.ml.sklearn.rf.md#class-randomforestregressor)   |  [RandomForestRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor)   |
+| [DecisionTreeClassifier](../references/api/torus.ml.sklearn.tree.md#class-decisiontreeclassifier) |     [DecisionTreeClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html#sklearn.tree.DecisionTreeClassifier)     |
+|  [DecisionTreeRegressor](../references/api/torus.ml.sklearn.tree.md#class-decisiontreeregressor)  |      [DecisionTreeRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html#sklearn.tree.DecisionTreeRegressor)       |
+|  [RandomForestClassifier](../references/api/torus.ml.sklearn.rf.md#class-randomforestclassifier)  | [RandomForestClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier) |
+|   [RandomForestRegressor](../references/api/torus.ml.sklearn.rf.md#class-randomforestregressor)   |  [RandomForestRegressor](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor)   |
 
-Concrete ML also supports [XGBoost](https://xgboost.ai/)'s `XGBClassifier` and `XGBRegressor`:
+Torus ML also supports [XGBoost](https://xgboost.ai/)'s `XGBClassifier` and `XGBRegressor`:
 
-|                                    Concrete ML                                    |                                                XGboost                                                 |
+|                                    Torus ML                                    |                                                XGboost                                                 |
 | :-------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------: |
-| [XGBClassifier](../references/api/concrete.ml.sklearn.xgb.md#class-xgbclassifier) | [XGBClassifier](https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBClassifier) |
-|  [XGBRegressor](../references/api/concrete.ml.sklearn.xgb.md#class-xgbregressor)  |  [XGBRegressor](https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBRegressor)  |
+| [XGBClassifier](../references/api/torus.ml.sklearn.xgb.md#class-xgbclassifier) | [XGBClassifier](https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBClassifier) |
+|  [XGBRegressor](../references/api/torus.ml.sklearn.xgb.md#class-xgbregressor)  |  [XGBRegressor](https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBRegressor)  |
 
 {% hint style="info" %}
 For a formal explanation of the mechanisms that enable FHE-compatible decision trees, please see the following paper: [Privacy-Preserving Tree-Based Inference with Fully Homomorphic Encryption, arXiv:2303.01254](https://arxiv.org/abs/2303.01254)
@@ -34,7 +34,7 @@ To compile a model to use _Lux FHE ciphertexts_ as inputs and outputs, set `ciph
 
 ## Pre-trained models
 
-You can convert an already trained scikit-learn tree-based model to a Concrete ML one by using the [`from_sklearn_model`](../references/api/concrete.ml.sklearn.base.md#classmethod-from_sklearn_model) method.
+You can convert an already trained scikit-learn tree-based model to a Torus ML one by using the [`from_sklearn_model`](../references/api/torus.ml.sklearn.base.md#classmethod-from_sklearn_model) method.
 
 ## Example
 
@@ -47,7 +47,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from concrete.ml.sklearn.xgb import XGBClassifier
+from torus.ml.sklearn.xgb import XGBClassifier
 
 
 # Get data-set and split into train and test
@@ -122,13 +122,13 @@ print(f"{(y_pred_fhe == y_pred_clear[:N_TEST_FHE]).sum()} "
 #  1 examples over 1 have an FHE inference equal to the clear inference
 ```
 
-We can plot and compare the decision boundaries of the Concrete ML model and the classical XGBoost model executed in the clear. Here we show a 6-bit model to illustrate the impact of quantization on classification. You will find similar plots in the [Classifier Comparison notebook](../tutorials/ml_examples.md).
+We can plot and compare the decision boundaries of the Torus ML model and the classical XGBoost model executed in the clear. Here we show a 6-bit model to illustrate the impact of quantization on classification. You will find similar plots in the [Classifier Comparison notebook](../tutorials/ml_examples.md).
 
 ![Comparison of clasification decision boundaries between FHE and plaintext models](../figures/xgb_comparison_pipeline.png)
 
 ## Quantization parameters
 
-When using a sufficiently high bit-width, quantization has little impact on the decision boundaries of the Concrete ML FHE decision tree model, as quantization is done individually on each input feature. It means FHE models can achieve similar accuracy levels as floating point models. Using 6 bits for quantization is effective in reaching or even exceeding floating point accuracy.
+When using a sufficiently high bit-width, quantization has little impact on the decision boundaries of the Torus ML FHE decision tree model, as quantization is done individually on each input feature. It means FHE models can achieve similar accuracy levels as floating point models. Using 6 bits for quantization is effective in reaching or even exceeding floating point accuracy.
 
 To adjust the number of bits for quantization, use the `n_bits` parameter. Setting `n_bits` to a low value may introduce artifacts, potentially reducing accuracy. However, the execution speed in FHE could improve. This adjustment allows you to manage the accuracy/speed trade-off. Additionally, you can recover some accuracy by increasing the `n_estimators` parameter.
 

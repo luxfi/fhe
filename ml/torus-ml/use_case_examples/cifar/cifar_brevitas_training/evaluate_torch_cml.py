@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-import concrete.compiler
+import torus.compiler
 import numpy as np
 import torch
 from concrete.fhe import Configuration
@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from trainer import accuracy, get_test_set, get_train_set
 
-from concrete.ml.torch.compile import compile_brevitas_qat_model
+from torus.ml.torch.compile import compile_brevitas_qat_model
 
 CURRENT_DIR = Path(__file__).resolve().parent
 
@@ -39,10 +39,10 @@ def evaluate(torch_model, cml_model, device, num_workers):
         # Compute Torch output
         torch_output = torch_model(input)
 
-        # Concrete ML inference only handles Numpy inputs
+        # Torus ML inference only handles Numpy inputs
         numpy_input = input.detach().cpu().numpy()
 
-        # Compute Concrete ML output using simulation
+        # Compute Torus ML output using simulation
         concrete_output_simulated = cml_model.forward(numpy_input, fhe="simulate")
 
         concrete_output_simulated = torch.tensor(concrete_output_simulated).to(device)
@@ -53,17 +53,17 @@ def evaluate(torch_model, cml_model, device, num_workers):
         torch_top_1_batches.append(torch_top_1.item())
         torch_top_5_batches.append(torch_top_5.item())
 
-        # Compute Concrete ML top accuracies
+        # Compute Torus ML top accuracies
         concrete_top_1, concrete_top_5 = accuracy(concrete_output_simulated, target, topk=(1, 5))
 
         concrete_top_1_batches.append(concrete_top_1.item())
         concrete_top_5_batches.append(concrete_top_5.item())
 
     print("Torch accuracy top1:", np.mean(torch_top_1_batches))
-    print("Concrete ML accuracy top1:", np.mean(concrete_top_1_batches))
+    print("Torus ML accuracy top1:", np.mean(concrete_top_1_batches))
 
     print("Torch accuracy top5:", np.mean(torch_top_5_batches))
-    print("Concrete ML accuracy top5:", np.mean(concrete_top_5_batches))
+    print("Torus ML accuracy top5:", np.mean(concrete_top_5_batches))
 
 
 def main(args):
@@ -79,7 +79,7 @@ def main(args):
 
     print("Torch device in use:", device)
     print(
-        "To leverage the CUDA backend, follow the GPU setup guide to install the Concrete ML compiler."
+        "To leverage the CUDA backend, follow the GPU setup guide to install the Torus ML compiler."
     )
     print("GPU Enabled:", concrete.compiler.check_gpu_enabled())
     print("GPU Available:", concrete.compiler.check_gpu_available())
@@ -139,7 +139,7 @@ def main(args):
             quantized_numpy_module.fhe_circuit.graph.maximum_integer_bit_width(),
         )
 
-        # Evaluate torch and Concrete ML model
+        # Evaluate torch and Torus ML model
         evaluate(model, quantized_numpy_module, device, args.num_workers)
 
 

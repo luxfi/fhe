@@ -12,16 +12,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch import nn
 
-from concrete.ml.common import utils
-from concrete.ml.common.utils import (
+from torus.ml.common import utils
+from torus.ml.common.utils import (
     MAX_BITWIDTH_BACKWARD_COMPATIBLE,
     is_classifier_or_partial_classifier,
     is_regressor_or_partial_regressor,
 )
-from concrete.ml.quantization.base_quantized_op import QuantizedMixingOp
-from concrete.ml.quantization.post_training import PowerOfTwoScalingRoundPBSAdapter
-from concrete.ml.sklearn import _get_sklearn_neural_net_models
-from concrete.ml.sklearn.qnn_module import SparseQuantNeuralNetwork
+from torus.ml.quantization.base_quantized_op import QuantizedMixingOp
+from torus.ml.quantization.post_training import PowerOfTwoScalingRoundPBSAdapter
+from torus.ml.sklearn import _get_sklearn_neural_net_models
+from torus.ml.sklearn.qnn_module import SparseQuantNeuralNetwork
 
 
 @pytest.mark.parametrize("model_class", _get_sklearn_neural_net_models())

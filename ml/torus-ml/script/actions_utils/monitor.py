@@ -1,4 +1,4 @@
-"""Module to generate figure of evolution of Concrete ML-CI time on main for last 4 weeks."""
+"""Module to generate figure of evolution of Torus ML-CI time on main for last 4 weeks."""
 
 import argparse
 import datetime
@@ -85,7 +85,7 @@ def generate_figure(data: Dict[str, Any], path_to_csv: Path, path_to_png: Path):
     fig, axis = plt.subplots(figsize=(8, 4), dpi=800)
     assert isinstance(axis, Axes)
 
-    fig.suptitle("Successful Concrete ML-CI time execution in minutes over the 4 last weeks")
+    fig.suptitle("Successful Torus ML-CI time execution in minutes over the 4 last weeks")
     axis.set_xlabel("Date")
     axis.set_ylabel("Minutes")
     # ax.set_yscale("log")

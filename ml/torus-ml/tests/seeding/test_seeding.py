@@ -7,7 +7,7 @@ import numpy
 import pytest
 from sklearn.tree import plot_tree
 
-from concrete.ml.pytest.utils import MODELS_AND_DATASETS
+from torus.ml.pytest.utils import MODELS_AND_DATASETS
 
 
 def test_seed_1():

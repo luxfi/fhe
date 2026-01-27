@@ -10,15 +10,15 @@ Small models can be fine-tuned using a single-client/single-server setup. For la
 Refer to [this notebook](../advanced_examples/LoraMLP.ipynb) to see the tutorial about applying FHE LoRA fine-tuning to a small neural network.
 {% endhint %}
 
-Concrete ML supports LoRA, a parameter-efficient fine-tuning (PEFT) approach, in the [hybrid model](../guides/hybrid-models.md) paradigm. LoRA adds adapter layers, which contain a small number of trainable parameters, to the linear layers of a base model.
+Torus ML supports LoRA, a parameter-efficient fine-tuning (PEFT) approach, in the [hybrid model](../guides/hybrid-models.md) paradigm. LoRA adds adapter layers, which contain a small number of trainable parameters, to the linear layers of a base model.
 
-In this setup, Concrete ML outsources the computationally intensive parts of forward and backward passes for large models to one or more remote servers. The training client machine only handles the LoRA-adapter forward/backward passes, loss computation, and adapter weight updates. Since the LoRA adapters are small, this additional computation on the client side is minimal. For large LLMs, over 99% of the model's weights can remain outsourced.
+In this setup, Torus ML outsources the computationally intensive parts of forward and backward passes for large models to one or more remote servers. The training client machine only handles the LoRA-adapter forward/backward passes, loss computation, and adapter weight updates. Since the LoRA adapters are small, this additional computation on the client side is minimal. For large LLMs, over 99% of the model's weights can remain outsourced.
 
-The main benefit of hybrid-model LoRA training is outsourcing the computation of linear layers, which are typically large in LLMs. These layers require substantial hardware for inference and gradient computation. By securely outsourcing this work, Concrete ML removes the memory bottleneck that previously limited such operations.
+The main benefit of hybrid-model LoRA training is outsourcing the computation of linear layers, which are typically large in LLMs. These layers require substantial hardware for inference and gradient computation. By securely outsourcing this work, Torus ML removes the memory bottleneck that previously limited such operations.
 
 ## Usage
 
-Concrete ML integrates with the [`peft` package](https://huggingface.co/docs/peft/index) to add LoRA adapters to a model's linear layers. Below are the steps to convert a model into a hybrid FHE LoRA training setup.
+Torus ML integrates with the [`peft` package](https://huggingface.co/docs/peft/index) to add LoRA adapters to a model's linear layers. Below are the steps to convert a model into a hybrid FHE LoRA training setup.
 
 ### 1. Apply the `peft` LoRA layers
 
@@ -32,8 +32,8 @@ import torch
 import torch.nn.functional as F
 from torch import nn, optim
 from peft import LoraConfig, get_peft_model
-from concrete.ml.torch.lora import LoraTrainer
-from concrete.ml.torch.hybrid_model import HybridFHEModel
+from torus.ml.torch.lora import LoraTrainer
+from torus.ml.torch.hybrid_model import HybridFHEModel
 from sklearn.datasets import make_circles
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -76,9 +76,9 @@ train_loader_task2 = DataLoader(
 )
 ```
 
-### 2. Convert the LoRA model to use custom Concrete ML layers
+### 2. Convert the LoRA model to use custom Torus ML layers
 
-Next, we need to integrate the LoRA-adapted `peft_model` into the Concrete ML hybrid FHE training framework. This is done using the `LoraTrainer` class, which handles the logic of encrypting outsourced computations, running the forward and backward passes, and updating the LoRA adapter weights.
+Next, we need to integrate the LoRA-adapted `peft_model` into the Torus ML hybrid FHE training framework. This is done using the `LoraTrainer` class, which handles the logic of encrypting outsourced computations, running the forward and backward passes, and updating the LoRA adapter weights.
 
 You can configure:
 

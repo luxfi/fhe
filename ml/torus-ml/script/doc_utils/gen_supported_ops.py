@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from concrete.ml.onnx.onnx_utils import ONNX_OPS_TO_NUMPY_IMPL
+from torus.ml.onnx.onnx_utils import ONNX_OPS_TO_NUMPY_IMPL
 
 SCRIPT_NAME = Path(__file__).name
 

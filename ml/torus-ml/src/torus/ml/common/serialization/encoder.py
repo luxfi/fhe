@@ -15,7 +15,7 @@ import torch
 from numpy.random import RandomState
 from skorch.dataset import ValidSplit
 
-from concrete import fhe
+from torus import fhe
 
 from ...common.utils import Exactness
 from . import USE_SKOPS
@@ -57,7 +57,7 @@ def dump_name_and_value(name: str, value: Any, **kwargs) -> Dict:
 
 
 class ConcreteEncoder(JSONEncoder):
-    """Custom json encoder to handle non-native types found in serialized Concrete ML objects.
+    """Custom json encoder to handle non-native types found in serialized Torus ML objects.
 
     Non-native types are serialized manually and dumped in a custom dict format that stores both the
     serialization value of the object and its associated type name.
@@ -68,7 +68,7 @@ class ConcreteEncoder(JSONEncoder):
     as a numpy array's dtype are also properly serialized. If an object has an unexpected type or
     is not serializable, an error is thrown.
 
-    The ConcreteEncoder is only meant to encode Concrete ML's built-in models and therefore only
+    The ConcreteEncoder is only meant to encode Torus ML's built-in models and therefore only
     supports the necessary types. For example, torch.Tensor objects are not serializable using this
     encoder as built-in models only use numpy arrays. However, the list of supported types might
     expand in future releases if new models are added and need new types.
@@ -199,7 +199,7 @@ class ConcreteEncoder(JSONEncoder):
 
         # scikit-learn does not provide a particular dumping/loading method. We thus need to dump
         # these models using either Skops or pickle as a hexadecimal byte string. Additionally,
-        # Concrete ML models, which currently inherit from scikit-learn models, have their own
+        # Torus ML models, which currently inherit from scikit-learn models, have their own
         # serialization methods. We therefore make sure that they do not get serialized here
         if isinstance(o, sklearn.base.BaseEstimator) and not hasattr(o, "_is_a_public_cml_model"):
             return dump_name_and_value("sklearn_model", pickle_or_skops_dumps(o).hex())
@@ -260,7 +260,7 @@ class ConcreteEncoder(JSONEncoder):
                 )
             return dump_name_and_value("valid_split", vars(o))
 
-        # All serializable classes from Concrete ML provide a `dump_dict` method that serializes
+        # All serializable classes from Torus ML provide a `dump_dict` method that serializes
         # their attributes
         if hasattr(o, "dump_dict"):
             return dump_name_and_value(type(o).__name__, o.dump_dict())

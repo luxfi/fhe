@@ -1,20 +1,20 @@
 <p align="center">
 <!-- product name logo -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe-ai/concrete-ml/assets/157474013/5ed658d7-0abd-4444-9063-99d8b76c2602">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe-ai/concrete-ml/assets/157474013/7c67e594-5e2c-483e-858f-ce473a36e37f">
-  <img width=600 alt="LuxFHE Concrete ML">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe-ai/torus-ml/assets/157474013/5ed658d7-0abd-4444-9063-99d8b76c2602">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe-ai/torus-ml/assets/157474013/7c67e594-5e2c-483e-858f-ce473a36e37f">
+  <img width=600 alt="LuxFHE Torus ML">
 </picture>
 </p>
 
 <hr>
 
 <p align="center">
-  <a href="https://docs.luxfhe.ai/concrete-ml"> 📒 Documentation</a> | <a href="https://luxfhe.ai/community"> 💛 Community support</a> | <a href="https://github.com/luxfhe-ai/awesome-luxfhe"> 📚 FHE resources by LuxFHE</a>
+  <a href="https://docs.luxfhe.ai/torus-ml"> 📒 Documentation</a> | <a href="https://luxfhe.ai/community"> 💛 Community support</a> | <a href="https://github.com/luxfhe-ai/awesome-luxfhe"> 📚 FHE resources by LuxFHE</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/luxfhe-ai/concrete-ml/releases"><img src="https://img.shields.io/github/v/release/luxfhe-ai/concrete-ml?style=flat-square"></a>
+  <a href="https://github.com/luxfhe-ai/torus-ml/releases"><img src="https://img.shields.io/github/v/release/luxfhe-ai/torus-ml?style=flat-square"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSD--3--Clause--Clear-%23ffb243?style=flat-square"></a>
   <a href="https://github.com/luxfhe-ai/bounty-program"><img src="https://img.shields.io/badge/Contribute-LuxFHE%20Bounty%20Program-%23ffd208?style=flat-square"></a>
   <a href="https://slsa.dev"><img alt="SLSA 3" src="https://slsa.dev/images/gh-badge-level3.svg" /></a>
@@ -22,26 +22,26 @@
 
 ## About
 
-### What is Concrete ML
+### What is Torus ML
 
-**Concrete ML** is a Privacy-Preserving Machine Learning (PPML) open-source set of tools built on top of [Concrete](https://github.com/luxfhe-ai/concrete) by [LuxFHE](https://github.com/luxfhe-ai).
+**Torus ML** is a Privacy-Preserving Machine Learning (PPML) open-source set of tools built on top of [Concrete](https://github.com/luxfhe-ai/concrete) by [LuxFHE](https://github.com/luxfhe-ai).
 
 It simplifies the use of fully homomorphic encryption (FHE) for data scientists so that they can automatically turn machine learning models into their homomorphic equivalents, and use them without knowledge of cryptography.
 
-Concrete ML is designed with ease of use in mind. Data scientists can use models with APIs that are close to the frameworks they already know well, while additional options to those models allow them to run inference or training on encrypted data with FHE. The Concrete ML model classes are similar to those in scikit-learn and it is also possible to convert PyTorch models to FHE.
+Torus ML is designed with ease of use in mind. Data scientists can use models with APIs that are close to the frameworks they already know well, while additional options to those models allow them to run inference or training on encrypted data with FHE. The Torus ML model classes are similar to those in scikit-learn and it is also possible to convert PyTorch models to FHE.
 <br></br>
 
 ### Main features
 
 - **Built-in models**: Ready-to-use FHE-friendly models with a user interface that is equivalent to their the scikit-learn and XGBoost counterparts
-- **Customs models**: Concrete ML supports models that can use quantization-aware training. These are developed by the user using PyTorch or keras/tensorflow and are imported into Concrete ML through ONNX
+- **Customs models**: Torus ML supports models that can use quantization-aware training. These are developed by the user using PyTorch or keras/tensorflow and are imported into Torus ML through ONNX
 
-*Learn more about Concrete ML features in the [documentation](https://docs.luxfhe.ai/concrete-ml).*
+*Learn more about Torus ML features in the [documentation](https://docs.luxfhe.ai/torus-ml).*
 <br></br>
 
 ### Use cases
 
-By leveraging FHE, Concrete ML can unlock a myriad of new use cases for machine learning, such as enabling secure and private data collaboration, protecting sensitive data while still allowing for analysis, and facilitating machine learning on data-sets that are subject to strict data privacy regulations, for instance
+By leveraging FHE, Torus ML can unlock a myriad of new use cases for machine learning, such as enabling secure and private data collaboration, protecting sensitive data while still allowing for analysis, and facilitating machine learning on data-sets that are subject to strict data privacy regulations, for instance
 
 - **Healthcare data analysis**: Improve patient care while maintaining privacy by allowing secure, confidential data sharing between healthcare providers.
 - **Financial services**: Facilitate secure financial data analysis for risk management and fraud detection, keeping client information encrypted and safe.
@@ -62,7 +62,7 @@ By leveraging FHE, Concrete ML can unlock a myriad of new use cases for machine 
   - [Demos](#demos)
   - [Tutorials](#tutorials)
   - [Documentation](#documentation)
-- **[Working with Concrete ML](#working-with-concrete-ml)**
+- **[Working with Torus ML](#working-with-torus-ml)**
   - [Citations](#citations)
   - [Contributing](#contributing)
   - [License](#license)
@@ -73,7 +73,7 @@ By leveraging FHE, Concrete ML can unlock a myriad of new use cases for machine 
 
 ### Installation
 
-Depending on your OS, Concrete ML may be installed with Docker or with pip:
+Depending on your OS, Torus ML may be installed with Docker or with pip:
 
 |                 OS / HW                 | Available on Docker | Available on pip |
 | :-------------------------------------: | :-----------------: | :--------------: |
@@ -83,24 +83,24 @@ Depending on your OS, Concrete ML may be installed with Docker or with pip:
 |            macOS 11+ (Intel)            |         Yes         |       Yes        |
 | macOS 11+ (Apple Silicon: M1, M2, etc.) |     Coming soon     |       Yes        |
 
-Note: Concrete ML only supports Python `3.8`, `3.9`, `3.10`, `3.11` and `3.12`.
-Concrete ML can be installed on Kaggle ([see this question on the community for more details](https://community.luxfhe.ai/t/how-do-we-use-concrete-ml-on-kaggle/332)) and on Google Colab.
+Note: Torus ML only supports Python `3.8`, `3.9`, `3.10`, `3.11` and `3.12`.
+Torus ML can be installed on Kaggle ([see this question on the community for more details](https://community.luxfhe.ai/t/how-do-we-use-torus-ml-on-kaggle/332)) and on Google Colab.
 
 #### Docker
 
-To install with Docker, pull the `concrete-ml` image as follows:
-`docker pull luxfhefhe/concrete-ml:latest`
+To install with Docker, pull the `torus-ml` image as follows:
+`docker pull luxfhefhe/torus-ml:latest`
 
 #### Pip
 
-To install Concrete ML from PyPi, run the following:
+To install Torus ML from PyPi, run the following:
 
 ```
 pip install -U pip wheel setuptools
-pip install concrete-ml
+pip install torus-ml
 ```
 
-*Find more detailed installation instructions in [this part of the documentation](https://docs.luxfhe.ai/concrete-ml/getting-started/pip_installing)*
+*Find more detailed installation instructions in [this part of the documentation](https://docs.luxfhe.ai/torus-ml/getting-started/pip_installing)*
 
 <p align="right">
   <a href="#about" > ↑ Back to top </a>
@@ -113,7 +113,7 @@ Here is a simple example which is very close to scikit-learn for a logistic regr
 ```python
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-from concrete.ml.sklearn import LogisticRegression
+from torus.ml.sklearn import LogisticRegression
 
 # Lets create a synthetic data-set
 x, y = make_classification(n_samples=100, class_sep=2, n_features=30, random_state=42)
@@ -175,9 +175,9 @@ print("Probability with `predict_proba`: ", y_proba_fhe)
 print("Probability with encrypt/run/decrypt calls: ", y0)
 ```
 
-*This example is explained in more detail in the [linear model documentation](https://docs.luxfhe.ai/concrete-ml/built-in-models/linear).*
+*This example is explained in more detail in the [linear model documentation](https://docs.luxfhe.ai/torus-ml/built-in-models/linear).*
 
-Concrete ML built-in models have APIs that are almost identical to their scikit-learn counterparts. It is also possible to convert PyTorch networks to FHE with the Concrete ML conversion APIs. Please refer to the [linear models](docs/built-in-models/linear.md), [tree-based models](docs/built-in-models/tree.md) and [neural networks](docs/built-in-models/neural-networks.md) documentation for more examples, showing the scikit-learn-like API of the built-in models.
+Torus ML built-in models have APIs that are almost identical to their scikit-learn counterparts. It is also possible to convert PyTorch networks to FHE with the Torus ML conversion APIs. Please refer to the [linear models](docs/built-in-models/linear.md), [tree-based models](docs/built-in-models/tree.md) and [neural networks](docs/built-in-models/neural-networks.md) documentation for more examples, showing the scikit-learn-like API of the built-in models.
 
 <p align="right">
   <a href="#about" > ↑ Back to top </a>
@@ -201,20 +201,20 @@ Concrete ML built-in models have APIs that are almost identical to their scikit-
 #### Other demos
 
 - [Encrypted Large Language Model](use_case_examples/llm/): converting a user-defined part of a Large Language Model for encrypted text generation. This demo shows the trade-off between quantization and accuracy for text generation and shows how to run the model in FHE.
-- [Private inference for federated learned models](use_case_examples/federated_learning/): private training of a Logistic Regression model and then importing the model into Concrete ML and performing encrypted prediction.
-- [Titanic](use_case_examples/titanic/KaggleTitanic.ipynb): solving the [Kaggle Titanic competition](https://www.kaggle.com/c/titanic/). Implemented with XGBoost from Concrete ML, this example comes as a companion of the [Kaggle notebook](https://www.kaggle.com/code/concretemlteam/titanic-with-privacy-preserving-machine-learning).
+- [Private inference for federated learned models](use_case_examples/federated_learning/): private training of a Logistic Regression model and then importing the model into Torus ML and performing encrypted prediction.
+- [Titanic](use_case_examples/titanic/KaggleTitanic.ipynb): solving the [Kaggle Titanic competition](https://www.kaggle.com/c/titanic/). Implemented with XGBoost from Torus ML, this example comes as a companion of the [Kaggle notebook](https://www.kaggle.com/code/concretemlteam/titanic-with-privacy-preserving-machine-learning).
 - [CIFAR10 FHE-friendly model with Brevitas](use_case_examples/cifar/cifar_brevitas_training): training a VGG9 FHE-compatible neural network using Brevitas, and a script to run the neural network in FHE. Execution in FHE takes ~4 minutes per image and shows an accuracy of 88.7%.
-- [CIFAR10 / CIFAR100 FHE-friendly models with Transfer Learning approach](use_case_examples/cifar/cifar_brevitas_finetuning): series of three notebooks, that convert a pre-trained FP32 VGG11 neural network into a quantized model using Brevitas. The model is fine-tuned on the CIFAR data-sets, converted for FHE execution with Concrete ML and evaluated using FHE simulation. For CIFAR10 and CIFAR100, respectively, our simulations show an accuracy of 90.2% and 68.2%.
+- [CIFAR10 / CIFAR100 FHE-friendly models with Transfer Learning approach](use_case_examples/cifar/cifar_brevitas_finetuning): series of three notebooks, that convert a pre-trained FP32 VGG11 neural network into a quantized model using Brevitas. The model is fine-tuned on the CIFAR data-sets, converted for FHE execution with Torus ML and evaluated using FHE simulation. For CIFAR10 and CIFAR100, respectively, our simulations show an accuracy of 90.2% and 68.2%.
 
-*If you have built awesome projects using Concrete ML, please let us know and we will be happy to showcase them here!*
+*If you have built awesome projects using Torus ML, please let us know and we will be happy to showcase them here!*
 <br></br>
 
 ### Tutorials
 
-- [\[Video tutorial\] Train a linear classifier on encrypted data using Concrete ML and Fully Homomorphic Encryption (FHE)](https://www.youtube.com/watch?v=QVsZ33jBlq4)
+- [\[Video tutorial\] Train a linear classifier on encrypted data using Torus ML and Fully Homomorphic Encryption (FHE)](https://www.youtube.com/watch?v=QVsZ33jBlq4)
 - [\[Video tutorial\] How To Convert a Scikit-learn Model Into Its Homomorphic Equivalent](https://www.luxfhe.ai/post/how-to-convert-a-scikit-learn-model-into-its-homomorphic-equivalent)
-- [Linear Regression Over Encrypted Data With Homomorphic Encryption](https://www.luxfhe.ai/post/linear-regression-using-linear-svr-and-concrete-ml-homomorphic-encryption)
-- [How to Deploy a Machine Learning Model With Concrete ML](https://www.luxfhe.ai/post/how-to-deploy-machine-learning-models-with-concrete-ml)
+- [Linear Regression Over Encrypted Data With Homomorphic Encryption](https://www.luxfhe.ai/post/linear-regression-using-linear-svr-and-torus-ml-homomorphic-encryption)
+- [How to Deploy a Machine Learning Model With Torus ML](https://www.luxfhe.ai/post/how-to-deploy-machine-learning-models-with-torus-ml)
 - More [Built-in models tutorials](docs/tutorials/ml_examples.md) and [Deep learning tutorials](docs/tutorials/dl_examples.md)
 
 *Explore more useful resources in [Awesome LuxFHE repo](https://github.com/luxfhe-ai/awesome-luxfhe)*
@@ -222,30 +222,30 @@ Concrete ML built-in models have APIs that are almost identical to their scikit-
 
 ### Documentation
 
-Full, comprehensive documentation is available here: [https://docs.luxfhe.ai/concrete-ml](https://docs.luxfhe.ai/concrete-ml).
+Full, comprehensive documentation is available here: [https://docs.luxfhe.ai/torus-ml](https://docs.luxfhe.ai/torus-ml).
 
 <p align="right">
   <a href="#about" > ↑ Back to top </a>
 </p>
 
-## Working with Concrete ML
+## Working with Torus ML
 
 ### Citations
 
-To cite Concrete ML in academic papers, please use the following entry:
+To cite Torus ML in academic papers, please use the following entry:
 
 ```text
 @Misc{ConcreteML,
   title={Concrete {ML}: a Privacy-Preserving Machine Learning Library using Fully Homomorphic Encryption for Data Scientists},
   author={LuxFHE},
   year={2022},
-  note={\url{https://github.com/luxfhe-ai/concrete-ml}},
+  note={\url{https://github.com/luxfhe-ai/torus-ml}},
 }
 ```
 
 ### Contributing
 
-To contribute to Concrete ML, please refer to [this section of the documentation](docs/developer/contributing.md).
+To contribute to Torus ML, please refer to [this section of the documentation](docs/developer/contributing.md).
 <br></br>
 
 ### License
@@ -280,8 +280,8 @@ This software is distributed under the **BSD-3-Clause-Clear** license. Read [thi
 
 <a target="_blank" href="https://luxfhe.ai/community-channels">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe-ai/concrete-ml/assets/157474013/86502167-4ea4-49e9-a881-0cf97d141818">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe-ai/concrete-ml/assets/157474013/3dcf41e2-1c00-471b-be53-2c804879b8cb">
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/luxfhe-ai/torus-ml/assets/157474013/86502167-4ea4-49e9-a881-0cf97d141818">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/luxfhe-ai/torus-ml/assets/157474013/3dcf41e2-1c00-471b-be53-2c804879b8cb">
   <img alt="Support">
 </picture>
 </a>

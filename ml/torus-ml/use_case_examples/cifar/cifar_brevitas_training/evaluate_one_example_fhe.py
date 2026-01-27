@@ -13,8 +13,8 @@ from models import cnv_2w2a
 from torch.utils.data import DataLoader
 from trainer import get_test_set
 
-from concrete.ml.quantization import QuantizedModule
-from concrete.ml.torch.compile import compile_brevitas_qat_model
+from torus.ml.quantization import QuantizedModule
+from torus.ml.torch.compile import compile_brevitas_qat_model
 
 CURRENT_DIR = Path(__file__).resolve().parent
 KEYGEN_CACHE_DIR = CURRENT_DIR.joinpath(".keycache")

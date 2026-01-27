@@ -2,7 +2,7 @@
 
 from typing import Optional, Tuple, Union
 
-from concrete import fhe
+from torus import fhe
 
 
 def serialize_encrypted_values(

@@ -8,7 +8,7 @@ Let's use following conventions for the docs. If a new convention needs to be de
 
 1. The documentation can address the user directly e.g., "you can find out more at ..", but this
    style should not be abused, do not be too colloquial !
-1. The documentation should not refer to its writers or to Concrete ML developers/LuxFHE as "we",
+1. The documentation should not refer to its writers or to Torus ML developers/LuxFHE as "we",
    and thus it should not use "our" either.
 
 ## Terms
@@ -23,7 +23,7 @@ Let's use following conventions for the docs. If a new convention needs to be de
 1. google is a verb ("you can google" but not "you can Google") : but try to avoid this
 1. Programs:
    - Jupyter
-   - Concrete ML (no Concrete ML)
+   - Torus ML (no Torus ML)
    - pytest except when title where it is capitalized
    - Python
    - torch (for the code) and PyTorch (for the product)

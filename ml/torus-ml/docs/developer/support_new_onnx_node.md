@@ -1,6 +1,6 @@
-# Supporting New ONNX Nodes in Concrete ML
+# Supporting New ONNX Nodes in Torus ML
 
-Concrete ML supports a wide range of models through the integration of ONNX nodes. In case a specific ONNX node is missing, developers need to add support for the new ONNX nodes.
+Torus ML supports a wide range of models through the integration of ONNX nodes. In case a specific ONNX node is missing, developers need to add support for the new ONNX nodes.
 
 ## Operator Implementation
 

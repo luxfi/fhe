@@ -4,7 +4,7 @@ from pathlib import Path
 import federated_utils
 import numpy
 
-from concrete.ml.sklearn import LogisticRegression
+from torus.ml.sklearn import LogisticRegression
 
 if __name__ == "__main__":
     # Load scikit-learn model

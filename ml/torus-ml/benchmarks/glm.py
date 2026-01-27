@@ -223,7 +223,7 @@ def get_config(args: argparse.Namespace) -> Dict[str, Any]:
         try:  # For backward compatibility
             # flake8: noqa: F401,C0415
             # pylint: disable-next=unused-import,import-outside-toplevel
-            from concrete.ml.quantization.base_quantized_op import DEFAULT_MODEL_BITS
+            from torus.ml.quantization.base_quantized_op import DEFAULT_MODEL_BITS
 
             n_bits_list = [
                 {"model_inputs": 6, "op_inputs": 2, "op_weights": 2, "model_outputs": 6},
@@ -432,8 +432,8 @@ def main():
         in four different ways:
         - using scikit-learn's model, in clear
         - using scikit-learn's model on PCA reduced features, in clear
-        - using Concrete ML's model on PCA reduced features, in clear
-        - using Concrete ML's model on PCA reduced features, in FHE
+        - using Torus ML's model on PCA reduced features, in clear
+        - using Torus ML's model on PCA reduced features, in FHE
         The corresponding deviance scores are then computed in order to determine the impact of
         quantization on the models' performances as well as to verify that executing them in FHE
         correctly gives the same outputs as its equivalent model compiled 'in clear'.
@@ -489,7 +489,7 @@ def main():
         score_parameters = parameters["score_parameters"]
         y_test = score_parameters["y_true"].head(args.fhe_samples)
 
-        # Compute the predictions for both sklearn and Concrete ML clear models
+        # Compute the predictions for both sklearn and Torus ML clear models
         if args.verbose:
             print(f"  -- Done in {time.time() - time_current} seconds")
             time_current = time.time()
@@ -513,7 +513,7 @@ def main():
             time_current = time.time()
             print("Compile")
 
-        # Compile the Concrete ML model for FHE, which needs some preprocessed data in order to run
+        # Compile the Torus ML model for FHE, which needs some preprocessed data in order to run
         x_train_subset_pca = model_pca["pca"].transform(
             model_pca["preprocessor"].transform(fit_parameters["X"].head(100))
         )
@@ -601,8 +601,8 @@ def main():
 
         # Check what prediction performance we lose due to PCA
         if args.verbose:
-            print("Evaluation in clear with PCA transformation (Concrete ML):", score)
-            print("Evaluation in FHE with PCA transformation (Concrete ML):", fhe_score)
+            print("Evaluation in clear with PCA transformation (Torus ML):", score)
+            print("Evaluation in FHE with PCA transformation (Torus ML):", fhe_score)
 
         progress.measure(
             id="quantized-deviance-score",

@@ -34,10 +34,10 @@ from .xgb import XGBClassifier, XGBRegressor
 
 
 def _get_sklearn_models() -> Dict[str, List]:
-    """Return the list of available scikit-learn models in Concrete ML.
+    """Return the list of available scikit-learn models in Torus ML.
 
     Returns:
-        sklearn_models (Dict[str, List]): The lists of scikit-learn models available in Concrete ML.
+        sklearn_models (Dict[str, List]): The lists of scikit-learn models available in Torus ML.
     """
 
     # Import anything in sklearn, just to force the import, to populate _ALL_SKLEARN_MODELS list
@@ -75,7 +75,7 @@ def _filter_models(
             a part of it) do not match the given string or list of strings. Default to None.
 
     Returns:
-        The filtered list of models available in Concrete ML, sorted by name.
+        The filtered list of models available in Torus ML, sorted by name.
 
     """
     assert_true(classifier or regressor, "Please set at least one option")
@@ -121,7 +121,7 @@ def _get_sklearn_linear_models(
     select: Optional[Union[str, List[str]]] = None,
     ignore: Optional[Union[str, List[str]]] = None,
 ):
-    """Return a list of available linear models in Concrete ML.
+    """Return a list of available linear models in Torus ML.
 
     The list is sorted by name and can be filtered using the given conditions.
 
@@ -135,7 +135,7 @@ def _get_sklearn_linear_models(
             to None.
 
     Returns:
-        The filtered list of linear models available in Concrete ML, sorted by name.
+        The filtered list of linear models available in Torus ML, sorted by name.
     """
     linear_models = _get_sklearn_models()["linear"]
     return _filter_models(
@@ -153,7 +153,7 @@ def _get_sklearn_tree_models(
     select: Optional[Union[str, List[str]]] = None,
     ignore: Optional[Union[str, List[str]]] = None,
 ):
-    """Return the list of available tree-based models in Concrete ML.
+    """Return the list of available tree-based models in Torus ML.
 
     The list is sorted by name and can be filtered using the given conditions.
 
@@ -166,7 +166,7 @@ def _get_sklearn_tree_models(
             (or a part of it) do not match the given string or list of strings. Default to None.
 
     Returns:
-        The filtered list of tree-based models available in Concrete ML, sorted by name.
+        The filtered list of tree-based models available in Torus ML, sorted by name.
     """
     tree_models = _get_sklearn_models()["tree"]
     return _filter_models(tree_models, classifier, regressor, select=select, ignore=ignore)
@@ -178,7 +178,7 @@ def _get_sklearn_neural_net_models(
     select: Optional[Union[str, List[str]]] = None,
     ignore: Optional[Union[str, List[str]]] = None,
 ):
-    """Return the list of available neural network models in Concrete ML.
+    """Return the list of available neural network models in Torus ML.
 
     The list is sorted by name and can be filtered using the given conditions.
 
@@ -192,7 +192,7 @@ def _get_sklearn_neural_net_models(
             to None.
 
     Returns:
-        The filtered list of neural network models available in Concrete ML, sorted by name.
+        The filtered list of neural network models available in Torus ML, sorted by name.
     """
     neural_network_models = _get_sklearn_models()["neural_net"]
     return _filter_models(
@@ -210,7 +210,7 @@ def _get_sklearn_neighbors_models(
     select: Optional[Union[str, List[str]]] = None,
     ignore: Optional[Union[str, List[str]]] = None,
 ):
-    """Return the list of available neighbor models in Concrete ML.
+    """Return the list of available neighbor models in Torus ML.
 
     The list is sorted by name and can be filtered using the given conditions.
 
@@ -224,7 +224,7 @@ def _get_sklearn_neighbors_models(
             to None.
 
     Returns:
-        The filtered list of neighbor models available in Concrete ML, sorted by name.
+        The filtered list of neighbor models available in Torus ML, sorted by name.
     """
     neighbor_models = _get_sklearn_models()["neighbors"]
     return _filter_models(
@@ -242,7 +242,7 @@ def _get_sklearn_all_models(
     select: Optional[Union[str, List[str]]] = None,
     ignore: Optional[Union[str, List[str]]] = None,
 ):
-    """Return the list of all available models in Concrete ML.
+    """Return the list of all available models in Torus ML.
 
     The list is sorted by name and can be filtered using the given conditions.
 
@@ -256,7 +256,7 @@ def _get_sklearn_all_models(
             to None.
 
     Returns:
-        The filtered list of all models available in Concrete ML, sorted by name.
+        The filtered list of all models available in Torus ML, sorted by name.
     """
     all_models = _get_sklearn_models()["all"]
     return _filter_models(

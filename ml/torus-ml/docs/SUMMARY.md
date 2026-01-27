@@ -4,7 +4,7 @@
 
 ## Get Started
 
-- [What is Concrete ML?](getting-started/README.md)
+- [What is Torus ML?](getting-started/README.md)
 - [Installation](getting-started/pip_installing.md)
 - [Key concepts](getting-started/concepts.md)
 - [Inference in the cloud](getting-started/cloud.md)
@@ -70,6 +70,6 @@
 - [Support and issues](developer/debug_support_submit_issues.md)
 - [Contributing](developer/contributing.md)
 - [Support new ONNX node](developer/support_new_onnx_node.md)
-- [Release note](https://github.com/luxfhe.io/concrete-ml/releases)
-- [Feature request](https://github.com/luxfhe.io/concrete-ml/issues/new?assignees=&labels=feature&projects=&template=feature_request.md)
-- [Bug report](https://github.com/luxfhe.io/concrete-ml/issues/new?assignees=&labels=bug&projects=&template=bug_report.md)
+- [Release note](https://github.com/luxfhe.io/torus-ml/releases)
+- [Feature request](https://github.com/luxfhe.io/torus-ml/issues/new?assignees=&labels=feature&projects=&template=feature_request.md)
+- [Bug report](https://github.com/luxfhe.io/torus-ml/issues/new?assignees=&labels=bug&projects=&template=bug_report.md)

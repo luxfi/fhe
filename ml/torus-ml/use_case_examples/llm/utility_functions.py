@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 import torch
 
-from concrete import fhe
+from torus import fhe
 
 
 def relu(x):

@@ -1,7 +1,7 @@
 """p_error binary search for classification and regression tasks.
 
-Only PyTorch neural networks and Concrete built-in models are supported.
-- Concrete built-in models include trees and QNN
+Only PyTorch neural networks and Torus built-in models are supported.
+- Torus built-in models include trees and QNN
 - Quantized aware trained model are supported using Brevitas framework
 - Torch models can be converted into post-trained quantized models
 
@@ -88,7 +88,7 @@ def compile_and_simulated_fhe_inference(
         estimator (torch.nn.Module): Torch model or a built-in model
         calibration_data (numpy.ndarray): Calibration data required for compilation
         ground_truth (numpy.ndarray): The ground truth
-        p_error (float): Concrete ML uses table lookup (TLU) to represent any non-linear
+        p_error (float): Torus ML uses table lookup (TLU) to represent any non-linear
         n_bits (int): Quantization bits
         is_qat (bool): True, if the NN has been trained through QAT.
             If `False` it is converted into post-trained quantized model.

@@ -9,8 +9,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-from concrete.ml.pytest.torch_models import ManualLogisticRegressionTraining
-from concrete.ml.torch.compile import build_quantized_module
+from torus.ml.pytest.torch_models import ManualLogisticRegressionTraining
+from torus.ml.torch.compile import build_quantized_module
 
 
 def create_batches(x, y, batch_size, num_iterations):

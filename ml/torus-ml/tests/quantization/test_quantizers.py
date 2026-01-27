@@ -4,8 +4,8 @@ import numpy
 import pytest
 import torch
 
-from concrete.ml.pytest.utils import check_serialization
-from concrete.ml.quantization.quantizers import (
+from torus.ml.pytest.utils import check_serialization
+from torus.ml.quantization.quantizers import (
     STABILITY_CONST,
     MinMaxQuantizationStats,
     QuantizationOptions,
