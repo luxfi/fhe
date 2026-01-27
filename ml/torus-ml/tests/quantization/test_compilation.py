@@ -7,18 +7,18 @@ import torch
 from onnx import helper, numpy_helper
 from torch import nn
 
-from concrete.ml.common.utils import MAX_BITWIDTH_BACKWARD_COMPATIBLE
-from concrete.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
-from concrete.ml.pytest.torch_models import (
+from torus.ml.common.utils import MAX_BITWIDTH_BACKWARD_COMPATIBLE
+from torus.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
+from torus.ml.pytest.torch_models import (
     FCSeq,
     FCSeqAddBiasVec,
     FCSmall,
     MultiOpOnSingleInputConvNN,
     TinyCNN,
 )
-from concrete.ml.quantization import QuantizedGemm
-from concrete.ml.quantization.post_training import PostTrainingAffineQuantization
-from concrete.ml.torch.numpy_module import NumpyModule
+from torus.ml.quantization import QuantizedGemm
+from torus.ml.quantization.post_training import PostTrainingAffineQuantization
+from torus.ml.torch.numpy_module import NumpyModule
 
 # INPUT_OUTPUT_FEATURE is the number of input and output of each of the network layers.
 # (as well as the input of the network itself)

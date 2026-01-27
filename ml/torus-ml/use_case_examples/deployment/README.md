@@ -1,6 +1,6 @@
 # Deployment Examples
 
-This folder contains examples of how to deploy Concrete ML models using Fully Homomorphic Encryption (FHE). These examples demonstrate the process of training, compiling, and deploying models for various use cases.
+This folder contains examples of how to deploy Torus ML models using Fully Homomorphic Encryption (FHE). These examples demonstrate the process of training, compiling, and deploying models for various use cases.
 
 ## Overview
 
@@ -34,7 +34,7 @@ For detailed instructions, please refer to the README in each example folder.
 
 - Docker
 - Python 3.8 or later
-- Concrete ML library installed
+- Torus ML library installed
 
 ## Additional Resources
 

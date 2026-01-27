@@ -66,11 +66,11 @@ def process_file(file_str: str, do_open_problematic_files=False):
     #           word is ignored
     forbidden_word_list: List[Tuple[str, List, List[str]]]
     forbidden_word_list = [
-        ("Concrete-ml", [], []),  # use `Concrete ML`
-        ("Concrete-Ml", [], []),  # use `Concrete ML`
-        ("Concrete-ML", [], []),  # use `Concrete ML`
-        ("concrete ml", [], []),  # use `Concrete ML`
-        ("concrete-ml", [], []),  # use `Concrete ML`
+        ("Concrete-ml", [], []),  # use `Torus ML`
+        ("Concrete-Ml", [], []),  # use `Torus ML`
+        ("Concrete-ML", [], []),  # use `Torus ML`
+        ("concrete ml", [], []),  # use `Torus ML`
+        ("concrete-ml", [], []),  # use `Torus ML`
         ("pytorch", [], []),  # use `PyTorch`
         ("Pytorch", [], []),  # use `PyTorch`
         ("pytorch", [], []),  # use `PyTorch`
@@ -181,7 +181,7 @@ def process_file(file_str: str, do_open_problematic_files=False):
         ("th", [], []),  # use the
         ("appropriat", [], []),  # use appropriate
         ("constrains", [], []),  # use constraints
-        ("CML", [], []),  # use Concrete ML
+        ("CML", [], []),  # use Torus ML
         ("CN", ["CNN"], []),  # use Concrete Python
         ("CP", [], []),  # use Concrete Python
         ("ie", [], []),  # use i.e.,

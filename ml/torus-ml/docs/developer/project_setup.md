@@ -1,20 +1,20 @@
 # Set up the project
 
-Concrete ML is a `Python` library, so `Python` should be installed to develop Concrete ML. `v3.8` and `v3.9` are the only supported versions. Concrete ML also uses `Poetry` and `Make`.
+Torus ML is a `Python` library, so `Python` should be installed to develop Torus ML. `v3.8` and `v3.9` are the only supported versions. Torus ML also uses `Poetry` and `Make`.
 
 First of all, you need to `git clone` the project:
 
 <!--
 ```bash
 cd /tmp
-rm -rf concrete-ml
+rm -rf torus-ml
 ```
 -->
 
 <!--pytest-codeblocks:cont-->
 
 ```bash
-git clone https://github.com/luxfhe.io/concrete-ml
+git clone https://github.com/luxfhe.io/torus-ml
 ```
 
 In order to be able to run all documentation examples, we recommend to also [install git-lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) and then pull the necessary files :
@@ -30,7 +30,7 @@ On the contrary, to disable downloading all these files (which represents up to 
 <!--pytest-codeblocks:skip-->
 
 ```bash
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/luxfhe.io/concrete-ml
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/luxfhe.io/torus-ml
 ```
 
 ## Automatic installation
@@ -88,7 +88,7 @@ In the following sections, be sure to use the proper `make` tool for your system
 
 ### Cloning the repository
 
-To get the source code of Concrete ML, clone the code repository using the link for your favorite communication protocol (ssh or https).
+To get the source code of Torus ML, clone the code repository using the link for your favorite communication protocol (ssh or https).
 
 ## Setting up environment on your host OS
 
@@ -99,7 +99,7 @@ The following command will not work on Windows if you don't have Poetry >= 1.2.
 {% endhint %}
 
 ```shell
-cd concrete-ml
+cd torus-ml
 make setup_env
 ```
 

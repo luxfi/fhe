@@ -10,8 +10,8 @@ import torchvision.transforms as transforms
 from concrete.fhe import Configuration
 from models import cnv_2w2a
 
-from concrete.ml.deployment import FHEModelDev
-from concrete.ml.torch.compile import compile_brevitas_qat_model
+from torus.ml.deployment import FHEModelDev
+from torus.ml.torch.compile import compile_brevitas_qat_model
 
 
 def main():

@@ -17,8 +17,8 @@ from concrete.fhe.mlir.utils import MAXIMUM_TLU_BIT_WIDTH
 from sklearn.datasets import make_classification, make_regression
 from sklearn.metrics import accuracy_score
 
-import concrete
-from concrete.ml.common.utils import (
+import torus
+from torus.ml.common.utils import (
     SUPPORTED_FLOAT_TYPES,
     all_values_are_floats,
     array_allclose_and_same_shape,
@@ -28,14 +28,14 @@ from concrete.ml.common.utils import (
     is_regressor_or_partial_regressor,
     to_tuple,
 )
-from concrete.ml.quantization.quantized_module import QuantizedModule
-from concrete.ml.sklearn import (
+from torus.ml.quantization.quantized_module import QuantizedModule
+from torus.ml.sklearn import (
     GammaRegressor,
     PoissonRegressor,
     TweedieRegressor,
     _get_sklearn_neural_net_models,
 )
-from concrete.ml.sklearn.base import (
+from torus.ml.sklearn.base import (
     BaseTreeEstimatorMixin,
     QuantizedTorchEstimatorMixin,
     SklearnKNeighborsMixin,
@@ -489,7 +489,7 @@ def load_data():
         For classifier, scikit-learn's make_classification() method is directly called.
 
         Args:
-            model_class (Callable): The Concrete ML model class to generate the data for.
+            model_class (Callable): The Torus ML model class to generate the data for.
             *args: Positional arguments to consider for generating the data.
             random_state (int): Determines random number generation for data-set creation.
             **kwargs: Keyword arguments to consider for generating the data.
@@ -534,7 +534,7 @@ def load_data():
             return tuple(generated_regression)
 
         raise ValueError(
-            "Model class type is unsupported. Expected a Concrete ML regressor or classifier, or "
+            "Model class type is unsupported. Expected a Torus ML regressor or classifier, or "
             f"a functool.partial version of it, but got {model_class}."
         )
 
@@ -556,7 +556,7 @@ def check_is_good_execution_for_cml_vs_circuit():
         Args:
             inputs (tuple, numpy.ndarray): inputs for the model.
             model (Callable, QuantizedModule, QuantizedTorchEstimatorMixin): either the
-                Concrete ML sklearn built-in model or a quantized module.
+                Torus ML sklearn built-in model or a quantized module.
             simulate (bool): whether to run the execution in FHE or in simulated mode.
             n_allowed_runs (int): in case of FHE execution randomness can make the output slightly
                 different this allows to run the evaluation multiple times

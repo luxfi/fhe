@@ -1,8 +1,8 @@
 # GPU acceleration
 
-This document provides a complete instruction on using GPU acceleration with Concrete ML.
+This document provides a complete instruction on using GPU acceleration with Torus ML.
 
-Concrete ML support compiling both built-in and custom models using a CUDA-accelerated backend. However, once
+Torus ML support compiling both built-in and custom models using a CUDA-accelerated backend. However, once
 a model is compiled for CUDA, executing it on a non-CUDA-enabled machine will raise an error.
 
 ## Support

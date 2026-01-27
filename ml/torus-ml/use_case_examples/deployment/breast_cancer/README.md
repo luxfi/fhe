@@ -1,6 +1,6 @@
 # Deployment
 
-In this folder we show how to deploy a simple Concrete ML model that does breast cancer classification, either through Docker or Amazon Web Services.
+In this folder we show how to deploy a simple Torus ML model that does breast cancer classification, either through Docker or Amazon Web Services.
 
 ## Get started
 
@@ -63,4 +63,4 @@ pip install -r client_requirements.txt
 URL="http://localhost:8888" python client.py
 ```
 
-And here it is! Whether you use Docker or Python for the client side, you deployed a Concrete ML model and ran an inference using Fully Homormophic Encryption. In particular, you can see that the FHE predictions are correct.
+And here it is! Whether you use Docker or Python for the client side, you deployed a Torus ML model and ran an inference using Fully Homormophic Encryption. In particular, you can see that the FHE predictions are correct.

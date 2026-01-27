@@ -1,11 +1,11 @@
 # Encrypted LLM Inference
 
-LLMs can be converted to use FHE to generate encrypted tokens based on encrypted prompts. Concrete ML implements LLM inference as a client/server protocol where
+LLMs can be converted to use FHE to generate encrypted tokens based on encrypted prompts. Torus ML implements LLM inference as a client/server protocol where
 
 - The client executes non-linear layers in the LLM, such as attention and activation functions.
 - The server executes linear layers, such as projection and embedding.
 
-The FHE LLM implementation in Concrete ML has the following characteristics:
+The FHE LLM implementation in Torus ML has the following characteristics:
 
 - Data transfer is necessary for each linear layer. The size of encrypted data
   is about 4x the size of the clear data that are input/outputs to the linear layers. For instance:
@@ -18,7 +18,7 @@ The FHE LLM implementation in Concrete ML has the following characteristics:
 
 ## Compiling an LLM for FHE Inference
 
-This document introduces how to use Concrete ML to run encrypted LLM inference with FHE.
+This document introduces how to use Torus ML to run encrypted LLM inference with FHE.
 To prepare an LLM model for FHE inference, use the `HybridFHEModel` class:
 
 ```python
@@ -28,7 +28,7 @@ import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, Conv1D, Trainer, TrainingArguments
 
-from concrete.ml.torch.hybrid_model import HybridFHEModel
+from torus.ml.torch.hybrid_model import HybridFHEModel
 
 # Load the GPT2 model
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
@@ -54,7 +54,7 @@ hybrid_model.compile_model(input_tensor, n_bits=8, use_dynamic_quantization=True
 After `compile_model` is called as above, you can retrieve the FHE-enabled model in
 `hybrid_model.model`.
 
-As for all Concrete ML models, to verify accuracy of the converted LLM on clear data, you can use `fhe='disable'` or `fhe='simulate'`. To actually executed on
+As for all Torus ML models, to verify accuracy of the converted LLM on clear data, you can use `fhe='disable'` or `fhe='simulate'`. To actually executed on
 encrypted data, set the `fhe_mode` to `execute`:
 
 <!--pytest-codeblocks:cont-->
@@ -97,5 +97,5 @@ print(f"Response: {generated_text}\n")
 
 ## Latency and throughput
 
-The Concrete ML LLM model inference, as described above, can use GPUs to obtain acceleration. Running on GPU reduces latency by ~30x. For example, generating
+The Torus ML LLM model inference, as described above, can use GPUs to obtain acceleration. Running on GPU reduces latency by ~30x. For example, generating
 a GPT2 token on GPU takes ~11 seconds, while it takes ~300 seconds.

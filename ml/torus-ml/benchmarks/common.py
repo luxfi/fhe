@@ -22,7 +22,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from sklearn.utils.class_weight import compute_class_weight
 
-from concrete import fhe
+from torus import fhe
 
 try:
     from concrete.fhe.mlir.utils import MAXIMUM_TLU_BIT_WIDTH
@@ -37,7 +37,7 @@ except ImportError:  # For backward compatibility purposes
         except ImportError:
             from concrete.fhe import MAXIMUM_BIT_WIDTH as MAXIMUM_TLU_BIT_WIDTH
 
-# Hack to import all models currently implemented in Concrete ML
+# Hack to import all models currently implemented in Torus ML
 # (but that might not be implemented in targeted version)
 # Since we can make no assumption about which models are
 # imported and that one model not existing would cause the
@@ -55,7 +55,7 @@ CLASSIFIERS_NAMES = [
 ]
 for model_name in CLASSIFIERS_NAMES:
     try:
-        model_class = getattr(__import__("concrete.ml.sklearn", fromlist=[model_name]), model_name)
+        model_class = getattr(__import__("torus.ml.sklearn", fromlist=[model_name]), model_name)
         globals()[model_name] = model_class
         CLASSIFIERS.append(model_class)
     except (ImportError, AttributeError) as exception:
@@ -78,7 +78,7 @@ REGRESSORS_NAMES = [
 ]
 for model_name in REGRESSORS_NAMES:
     try:
-        model_class = getattr(__import__("concrete.ml.sklearn", fromlist=[model_name]), model_name)
+        model_class = getattr(__import__("torus.ml.sklearn", fromlist=[model_name]), model_name)
         globals()[model_name] = model_class
         REGRESSORS.append(model_class)
     except (ImportError, AttributeError) as exception:
@@ -95,7 +95,7 @@ GLMS_NAMES = [
 ]
 for model_name in GLMS_NAMES:
     try:
-        model_class = getattr(__import__("concrete.ml.sklearn", fromlist=[model_name]), model_name)
+        model_class = getattr(__import__("torus.ml.sklearn", fromlist=[model_name]), model_name)
         globals()[model_name] = model_class
         GLMS.append(model_class)
     except (ImportError, AttributeError) as exception:
@@ -401,7 +401,7 @@ def train_and_test_regressor(
         time_current = time.time()
         print("Fit")
 
-    # We call fit_benchmark to both fit our Concrete ML regressors but also to return the sklearn
+    # We call fit_benchmark to both fit our Torus ML regressors but also to return the sklearn
     # one that we would use if we were not using FHE. This regressor will be our baseline
     concrete_regressor, sklearn_regressor = concrete_regressor.fit_benchmark(x_train, y_train)
 
@@ -564,10 +564,10 @@ def train_and_test_classifier(
         time_current = time.time()
         print("Fit")
 
-    # Concrete ML classifiers follow the sklearn Estimator API but train differently than those
+    # Torus ML classifiers follow the sklearn Estimator API but train differently than those
     # from sklearn. Our classifiers must work with quantized data or must determine data quantizers
     # after training the underlying sklearn classifier.
-    # We call fit_benchmark to both fit our Concrete ML classifiers but also to return the sklearn
+    # We call fit_benchmark to both fit our Torus ML classifiers but also to return the sklearn
     # one that we would use if we were not using FHE. This classifier will be our baseline
     concrete_classifier, sklearn_classifier = concrete_classifier.fit_benchmark(x_train, y_train)
 

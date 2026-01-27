@@ -1,7 +1,7 @@
 """Testing the version of the package"""
 
-import concrete
-from concrete import ml
+import torus
+from torus import ml
 
 
 def check_version(version):
@@ -11,8 +11,8 @@ def check_version(version):
 
 
 def test_version_1():
-    """Test that concrete.ml.__version__ exists"""
-    version = concrete.ml.__version__
+    """Test that torus.ml.__version__ exists"""
+    version = torus.ml.__version__
     check_version(version)
 
 

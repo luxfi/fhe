@@ -34,7 +34,7 @@ SUPPORTED_TORCH_ACTIVATIONS = [
     activation.Threshold,
 ]
 
-# Some Torch activation functions are currently not supported in Concrete ML
+# Some Torch activation functions are currently not supported in Torus ML
 # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/335
 UNSUPPORTED_TORCH_ACTIVATIONS = [
     activation.GLU,

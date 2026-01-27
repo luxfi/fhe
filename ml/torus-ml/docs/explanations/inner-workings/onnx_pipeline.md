@@ -1,23 +1,23 @@
 # Importing ONNX
 
-Internally, Concrete ML uses [ONNX](https://github.com/onnx/onnx) operators as intermediate representation (or IR) for manipulating machine learning models produced through export for [PyTorch](https://github.com/pytorch/pytorch), [Hummingbird](https://github.com/microsoft/hummingbird), and [skorch](https://github.com/skorch-dev/skorch).
+Internally, Torus ML uses [ONNX](https://github.com/onnx/onnx) operators as intermediate representation (or IR) for manipulating machine learning models produced through export for [PyTorch](https://github.com/pytorch/pytorch), [Hummingbird](https://github.com/microsoft/hummingbird), and [skorch](https://github.com/skorch-dev/skorch).
 
-As ONNX is becoming the standard exchange format for neural networks, this allows Concrete ML to be flexible while also making model representation manipulation easy. In addition, it allows for straight-forward mapping to NumPy operators, supported by Concrete to use Concrete stack's FHE-conversion capabilities.
+As ONNX is becoming the standard exchange format for neural networks, this allows Torus ML to be flexible while also making model representation manipulation easy. In addition, it allows for straight-forward mapping to NumPy operators, supported by Concrete to use Concrete stack's FHE-conversion capabilities.
 
 ## Torch to NumPy conversion using ONNX
 
 The diagram below gives an overview of the steps involved in the conversion of an ONNX graph to an FHE-compatible format (i.e., a format that can be compiled to FHE through Concrete).
 
-All Concrete ML built-in models follow the same pattern for FHE conversion:
+All Torus ML built-in models follow the same pattern for FHE conversion:
 
 1. The models are trained with sklearn or PyTorch.
-1. All models have a PyTorch implementation for inference. This implementation is provided either by a third-party tool such as [Hummingbird](external_libraries.md#hummingbird) or implemented directly in Concrete ML.
-1. The PyTorch model is exported to ONNX. For more information on the use of ONNX in Concrete ML, see [here](onnx_pipeline.md#torch-to-numpy-conversion-using-onnx).
-1. The Concrete ML ONNX parser checks that all the operations in the ONNX graph are supported and assigns reference NumPy operations to them. This step produces a `NumpyModule`.
-1. Quantization is performed on the [`NumpyModule`](../../references/api/concrete.ml.torch.numpy_module.md#class-numpymodule), producing a [`QuantizedModule`](../../references/api/concrete.ml.quantization.quantized_module.md#class-quantizedmodule). Two steps are performed: calibration and assignment of equivalent [`QuantizedOp`](../../references/api/concrete.ml.quantization.base_quantized_op.md#class-quantizedop) objects to each ONNX operation. The `QuantizedModule` class is the quantized counterpart of the `NumpyModule`.
+1. All models have a PyTorch implementation for inference. This implementation is provided either by a third-party tool such as [Hummingbird](external_libraries.md#hummingbird) or implemented directly in Torus ML.
+1. The PyTorch model is exported to ONNX. For more information on the use of ONNX in Torus ML, see [here](onnx_pipeline.md#torch-to-numpy-conversion-using-onnx).
+1. The Torus ML ONNX parser checks that all the operations in the ONNX graph are supported and assigns reference NumPy operations to them. This step produces a `NumpyModule`.
+1. Quantization is performed on the [`NumpyModule`](../../references/api/torus.ml.torch.numpy_module.md#class-numpymodule), producing a [`QuantizedModule`](../../references/api/torus.ml.quantization.quantized_module.md#class-quantizedmodule). Two steps are performed: calibration and assignment of equivalent [`QuantizedOp`](../../references/api/torus.ml.quantization.base_quantized_op.md#class-quantizedop) objects to each ONNX operation. The `QuantizedModule` class is the quantized counterpart of the `NumpyModule`.
 1. Once the `QuantizedModule` is built, Concrete is used to trace the `._forward()` function of the `QuantizedModule`.
 
-Moreover, by passing a user provided `nn.Module` to step 2 of the above process, Concrete ML supports custom user models. See the associated [FHE-friendly model documentation](../../deep-learning/fhe_friendly_models.md) for instructions about working with such models.
+Moreover, by passing a user provided `nn.Module` to step 2 of the above process, Torus ML supports custom user models. See the associated [FHE-friendly model documentation](../../deep-learning/fhe_friendly_models.md) for instructions about working with such models.
 
 ![Torch compilation flow with ONNX](../../.gitbook/assets/torch_to_numpy_with_onnx.svg)
 
@@ -29,14 +29,14 @@ Note that the `NumpyModule` interpreter currently [supports the following ONNX o
 
 ## Inspecting the ONNX models
 
-In order to better understand how Concrete ML works under the hood, it is possible to access each model in their ONNX format and then either print it or visualize it by importing the associated file in [Netron](https://netron.app). For example, with `LogisticRegression`:
+In order to better understand how Torus ML works under the hood, it is possible to access each model in their ONNX format and then either print it or visualize it by importing the associated file in [Netron](https://netron.app). For example, with `LogisticRegression`:
 
 ```python
 import onnx
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 
-from concrete.ml.sklearn import LogisticRegression
+from torus.ml.sklearn import LogisticRegression
 
 # Create the data for classification
 x, y = make_classification(n_samples=250, class_sep=2, n_features=30, random_state=42)

@@ -19,7 +19,7 @@ import requests
 from sklearn.datasets import load_breast_cancer
 from tqdm import tqdm
 
-from concrete.ml.deployment import FHEModelClient
+from torus.ml.deployment import FHEModelClient
 
 URL = os.environ.get("URL", f"http://localhost:8888")
 STATUS_OK = 200

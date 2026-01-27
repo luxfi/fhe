@@ -3,7 +3,7 @@ import json
 import time
 from pathlib import Path
 
-import concrete.compiler
+import torus.compiler
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -11,7 +11,7 @@ from concrete.fhe import Configuration
 from resnet import ResNet18_Weights, resnet18_custom
 from utils_resnet import ImageNetProcessor
 
-from concrete.ml.torch.compile import build_quantized_module, compile_torch_model
+from torus.ml.torch.compile import build_quantized_module, compile_torch_model
 
 BASE_DIR = Path(__file__).resolve().parent
 CALIBRATION_SAMPLES = 10
@@ -298,7 +298,7 @@ def main():
     args = parser.parse_args()
 
     if args.use_gpu and not concrete.compiler.check_gpu_available():
-        print("Follow the GPU setup guide to install the GPU-enabled Concrete ML compiler.")
+        print("Follow the GPU setup guide to install the GPU-enabled Torus ML compiler.")
         print("GPU Enabled:", concrete.compiler.check_gpu_enabled())
         print("GPU Available:", concrete.compiler.check_gpu_available())
 

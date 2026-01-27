@@ -41,8 +41,8 @@ The repository includes two example notebooks:
 
 1. **LLamaFineTuning.ipynb**:
 
-   - Uses Concrete ML's `LoraTrainer` API for simplified implementation
-   - Fine-tunes LLaMA on Concrete ML code examples
+   - Uses Torus ML's `LoraTrainer` API for simplified implementation
+   - Fine-tunes LLaMA on Torus ML code examples
    - Shows how to use the high-level API for encrypted fine-tuning
 
 ### Prepare the data-set
@@ -50,7 +50,7 @@ The repository includes two example notebooks:
 Each notebook includes its own data-set:
 
 - GPT-2 uses a small Q&A data-set about FHE in `data_finetune/what_is_fhe.txt`
-- LLaMA uses Concrete ML code examples in `data_finetune/data-set.jsonl`
+- LLaMA uses Torus ML code examples in `data_finetune/data-set.jsonl`
 
 ### Run the Fine-Tuning Script
 
@@ -101,7 +101,7 @@ After fine-tuning, the model's weights are distributed between the client and se
 - Total weights removed from the server: 68.24%
 - LoRA weights kept on the client: 147,456 (approximately 0.12% of the original model's weights)
 
-Note that the embeddings are not considered for now but contain a significant amount of weights (around 30%) for GPT2. They will be considered in a future version of Concrete ML.
+Note that the embeddings are not considered for now but contain a significant amount of weights (around 30%) for GPT2. They will be considered in a future version of Torus ML.
 
 #### Training Results Visualization
 
@@ -141,4 +141,4 @@ This project showcases the potential of combining LoRA and FHE to fine-tune lang
 
 - [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
 - [PEFT](https://github.com/huggingface/peft)
-- [Concrete ML](https://github.com/luxfhe-ai/concrete-ml)
+- [Torus ML](https://github.com/luxfhe-ai/torus-ml)

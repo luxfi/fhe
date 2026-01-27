@@ -3,8 +3,8 @@
 import onnx
 from onnx import helper
 
-from concrete.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
-from concrete.ml.onnx.onnx_model_manipulations import remove_unused_constant_nodes
+from torus.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
+from torus.ml.onnx.onnx_model_manipulations import remove_unused_constant_nodes
 
 
 def test_remove_unused_constant_nodes():

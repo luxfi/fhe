@@ -1,6 +1,6 @@
 # Credit Scoring in FHE
 
-In this directory, CreditScoring.ipynb compares scikit-learn models and Concrete ML models, in term of speed and accuracy, on a credit scoring task. This notebook was inspired by an existing notebook https://www.kaggle.com/code/ajay1735/my-credit-scoring-model. The data-set hmeq.csv file comes from https://www.kaggle.com/code/ajay1735/my-credit-scoring-model/input .
+In this directory, CreditScoring.ipynb compares scikit-learn models and Torus ML models, in term of speed and accuracy, on a credit scoring task. This notebook was inspired by an existing notebook https://www.kaggle.com/code/ajay1735/my-credit-scoring-model. The data-set hmeq.csv file comes from https://www.kaggle.com/code/ajay1735/my-credit-scoring-model/input .
 
 ## Installation
 

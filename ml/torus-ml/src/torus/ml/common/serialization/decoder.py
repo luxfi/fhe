@@ -99,7 +99,7 @@ TRUSTED_SKOPS = (
     ]
 )
 
-# Initialize the list of all classes that can be serialized in Concrete ML (i.e., that have a
+# Initialize the list of all classes that can be serialized in Torus ML (i.e., that have a
 # `dump_dict` and `load_dict` method)
 # pylint: disable=invalid-name
 SERIALIZABLE_CLASSES: Dict[str, Type] = {}
@@ -186,7 +186,7 @@ def object_hook(d: Any) -> Any:
         # pylint: disable-next=global-statement
         global SERIALIZABLE_CLASSES
 
-        # Define the list of all classes that can be serialized in Concrete ML (i.e., that have a
+        # Define the list of all classes that can be serialized in Torus ML (i.e., that have a
         # `dump_dict` and `load_dict` method) if not already done
         if not SERIALIZABLE_CLASSES:
             serializable_classes = (
@@ -211,7 +211,7 @@ def object_hook(d: Any) -> Any:
             return Exactness(serialized_value)
 
         # If the value reaches this point and the initial object was properly serialized, we
-        # expect it to be a class from Concrete ML that implements a `load_dict` method
+        # expect it to be a class from Torus ML that implements a `load_dict` method
         if type_name in SERIALIZABLE_CLASSES:
             serializable_class = SERIALIZABLE_CLASSES[type_name]
 
@@ -231,7 +231,7 @@ def object_hook(d: Any) -> Any:
 
 
 class ConcreteDecoder(json.JSONDecoder):
-    """Custom json decoder to handle non-native types found in serialized Concrete ML objects."""
+    """Custom json decoder to handle non-native types found in serialized Torus ML objects."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(object_hook=object_hook, *args, **kwargs)

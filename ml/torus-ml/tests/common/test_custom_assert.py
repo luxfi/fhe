@@ -2,7 +2,7 @@
 
 import pytest
 
-from concrete.ml.common.debugging.custom_assert import assert_false, assert_not_reached, assert_true
+from torus.ml.common.debugging.custom_assert import assert_false, assert_not_reached, assert_true
 
 
 def test_assert_not_functions():

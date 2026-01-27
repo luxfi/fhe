@@ -5,10 +5,10 @@ import onnx
 import pytest
 import torch
 
-from concrete.ml.common.utils import to_tuple
-from concrete.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
-from concrete.ml.pytest.torch_models import SimpleNet
-from concrete.ml.torch.compile import compile_onnx_model
+from torus.ml.common.utils import to_tuple
+from torus.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
+from torus.ml.pytest.torch_models import SimpleNet
+from torus.ml.torch.compile import compile_onnx_model
 
 INPUT_OUTPUT_FEATURE = [5, 10]
 

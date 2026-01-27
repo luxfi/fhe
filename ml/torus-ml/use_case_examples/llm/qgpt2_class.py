@@ -10,7 +10,7 @@ from preprocessor import InsertRounding
 from quant_framework import DualArray, Quantizer
 from transformers.models.gpt2.configuration_gpt2 import GPT2Config
 
-from concrete import fhe
+from torus import fhe
 
 
 def quantize_dict_of_tensors(
