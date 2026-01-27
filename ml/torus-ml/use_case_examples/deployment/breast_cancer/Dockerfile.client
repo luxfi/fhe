@@ -1,4 +1,4 @@
-FROM zamafhe/concrete-ml:v1.8.0
+FROM luxfhe/torus-ml:v1.8.0
 WORKDIR /project
 
 # Add a non-root user and group
