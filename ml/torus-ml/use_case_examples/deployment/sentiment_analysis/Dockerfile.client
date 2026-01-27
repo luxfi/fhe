@@ -1,5 +1,5 @@
 ARG CML_VER=v1.8.0
-FROM zamafhe/concrete-ml:${CML_VER}
+FROM luxfhe/torus-ml:${CML_VER}
 WORKDIR /project
 
 # Add a non-root user and group
