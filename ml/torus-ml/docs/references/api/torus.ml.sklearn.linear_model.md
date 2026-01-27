@@ -36,7 +36,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -152,7 +152,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -404,7 +404,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -505,7 +505,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -605,7 +605,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -703,7 +703,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 
@@ -808,7 +808,7 @@ ______________________________________________________________________
 
 Get the FHE circuit.
 
-The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Concrete documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
+The FHE circuit combines computational graph, mlir, client and server into a single object. More information available in Torus documentation (https://docs.luxfhe.io/torus/get-started/terminology) Is None if the model is not fitted.
 
 **Returns:**
 

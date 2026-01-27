@@ -118,7 +118,7 @@ compile_torch_model(
 
 Compile a torch module into an FHE equivalent.
 
-Take a model in torch, turn it to numpy, quantize its inputs / weights / outputs and finally compile it with Concrete
+Take a model in torch, turn it to numpy, quantize its inputs / weights / outputs and finally compile it with Torus
 
 **Args:**
 
@@ -170,7 +170,7 @@ compile_onnx_model(
 
 Compile a torch module into an FHE equivalent.
 
-Take a model in torch, turn it to numpy, quantize its inputs / weights / outputs and finally compile it with Concrete-Python
+Take a model in torch, turn it to numpy, quantize its inputs / weights / outputs and finally compile it with Torus-Python
 
 **Args:**
 

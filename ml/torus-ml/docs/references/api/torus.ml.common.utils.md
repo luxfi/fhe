@@ -97,14 +97,14 @@ manage_parameters_for_pbs_errors(
 )
 ```
 
-Return (p_error, global_p_error) that we want to give to Concrete.
+Return (p_error, global_p_error) that we want to give to Torus.
 
-The returned (p_error, global_p_error) depends on user's parameters and the way we want to manage defaults in Torus ML, which may be different from the way defaults are managed in Concrete.
+The returned (p_error, global_p_error) depends on user's parameters and the way we want to manage defaults in Torus ML, which may be different from the way defaults are managed in Torus.
 
 Principle:
 \- if none are set, we set global_p_error to a default value of our choice
 \- if both are set, we raise an error
-\- if one is set, we use it and forward it to Concrete
+\- if one is set, we use it and forward it to Torus
 
 Note that global_p_error is currently set to 0 in the FHE simulation mode.
 
@@ -119,7 +119,7 @@ Note that global_p_error is currently set to 0 in the FHE simulation mode.
 
 **Raises:**
 
-- <b>`ValueError`</b>:  if the two parameters are set (this is _not_ as in Concrete-Python)
+- <b>`ValueError`</b>:  if the two parameters are set (this is _not_ as in Torus-Python)
 
 ______________________________________________________________________
 
@@ -133,7 +133,7 @@ check_there_is_no_p_error_options_in_configuration(configuration)
 
 Check the user did not set p_error or global_p_error in configuration.
 
-It would be dangerous, since we set them in direct arguments in our calls to Concrete-Python.
+It would be dangerous, since we set them in direct arguments in our calls to Torus-Python.
 
 **Args:**
 

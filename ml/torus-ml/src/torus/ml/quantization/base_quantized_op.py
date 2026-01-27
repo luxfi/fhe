@@ -838,7 +838,7 @@ class QuantizedOp:
         f(x) = x * (x + 1) can be fused. A function that does f(x) = x * (x @ w + 1) can't be fused.
 
         Returns:
-            bool: whether this QuantizedOp instance produces Concrete code that can be fused to TLUs
+            bool: whether this QuantizedOp instance produces Torus code that can be fused to TLUs
         """
         return True
 

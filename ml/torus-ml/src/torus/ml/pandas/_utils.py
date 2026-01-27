@@ -11,7 +11,7 @@ from torus import fhe
 def encrypt_value(
     value: Optional[Union[int, numpy.ndarray, List]], client: fhe.Client, n: int, pos: int
 ) -> Optional[Union[fhe.Value, Tuple[Optional[fhe.Value], ...]]]:
-    """Encrypt a value using a Concrete client and the given configuration parameters.
+    """Encrypt a value using a Torus client and the given configuration parameters.
 
     Args:
         value (Optional[Union[int, numpy.ndarray, List]]): The value(s) to encrypt.
@@ -24,7 +24,7 @@ def encrypt_value(
             encrypted value at position 'pos' and None elsewhere.
     """
     # Build the input to use for encrypting the value
-    # In Concrete Python, if the underlying circuit asks for 4 inputs but we only want to encrypt
+    # In Torus Python, if the underlying circuit asks for 4 inputs but we only want to encrypt
     # a value using the 2nd input, we need to provide (None, value, None, None) to tne '.encrypt'
     clear_inputs = [None] * n
     clear_inputs[pos] = value  # type: ignore[assignment]
@@ -40,7 +40,7 @@ def encrypt_value(
 def decrypt_value(
     value: fhe.Value, client: fhe.Client
 ) -> Optional[Union[int, numpy.ndarray, Tuple[Optional[Union[int, numpy.ndarray]], ...]]]:
-    """Decrypt an FHE value using a Concrete client.
+    """Decrypt an FHE value using a Torus client.
 
     Args:
         value (fhe.Value): The FHE value(s) to decrypt.

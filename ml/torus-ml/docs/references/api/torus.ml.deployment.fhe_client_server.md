@@ -22,7 +22,7 @@ check_torus_versions(zip_path: Path)
 
 Check that current versions match the ones used in development.
 
-This function loads the version JSON file found in client.zip or server.zip files and then checks that current package versions (Concrete Python, Torus ML) as well as the Python current version all match the ones that are currently installed.
+This function loads the version JSON file found in client.zip or server.zip files and then checks that current package versions (Torus Python, Torus ML) as well as the Python current version all match the ones that are currently installed.
 
 **Args:**
 
@@ -139,7 +139,7 @@ Export all needed artifacts for the client and server.
 **Arguments:**
 
 - <b>`mode`</b> (DeploymentMode):  the mode to save the FHE circuit,  either "inference" or "training".
-- <b>`via_mlir`</b> (bool):  serialize with `via_mlir` option from Concrete-Python.
+- <b>`via_mlir`</b> (bool):  serialize with `via_mlir` option from Torus-Python.
 
 **Raises:**
 

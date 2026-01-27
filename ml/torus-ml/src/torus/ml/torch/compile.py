@@ -169,7 +169,7 @@ def _compile_torch_or_onnx_model(
     """Compile a torch module or ONNX into an FHE equivalent.
 
     Take a model in torch or ONNX, turn it to numpy, quantize its inputs / weights / outputs and
-    finally compile it with Concrete
+    finally compile it with Torus
 
     Args:
         model (Union[torch.nn.Module, onnx.ModelProto]): the model to quantize, either in torch or
@@ -212,7 +212,7 @@ def _compile_torch_or_onnx_model(
 
     Raises:
         ValueError: If a input-output mapping ('composition_mapping') is set but composition is not
-            enabled at the Concrete level (in 'configuration').
+            enabled at the Torus level (in 'configuration').
     """
     rounding_threshold_bits = process_rounding_threshold_bits(rounding_threshold_bits)
 
@@ -298,7 +298,7 @@ def compile_torch_model(
     """Compile a torch module into an FHE equivalent.
 
     Take a model in torch, turn it to numpy, quantize its inputs / weights / outputs and finally
-    compile it with Concrete
+    compile it with Torus
 
     Args:
         torch_model (torch.nn.Module): the model to quantize
@@ -385,7 +385,7 @@ def compile_onnx_model(
     """Compile a torch module into an FHE equivalent.
 
     Take a model in torch, turn it to numpy, quantize its inputs / weights / outputs and finally
-    compile it with Concrete-Python
+    compile it with Torus-Python
 
     Args:
         onnx_model (onnx.ModelProto): the model to quantize

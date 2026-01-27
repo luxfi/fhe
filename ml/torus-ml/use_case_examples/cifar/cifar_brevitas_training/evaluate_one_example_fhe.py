@@ -36,8 +36,8 @@ print("=" * 50)
 print("🔍 GPU VERIFICATION & DEVICE INFO")
 print("=" * 50)
 print(f"PyTorch CUDA available: {torch.cuda.is_available()}")
-print(f"Concrete GPU enabled: {check_gpu_enabled()}")
-print(f"Concrete GPU available: {check_gpu_available()}")
+print(f"Torus GPU enabled: {check_gpu_enabled()}")
+print(f"Torus GPU available: {check_gpu_available()}")
 print(f"PyTorch DEVICE: {DEVICE} (CPU for PyTorch operations)")
 print(f"FHE COMPILATION_DEVICE: {COMPILATION_DEVICE} (GPU used for FHE operations)")
 print(f"CML_USE_GPU environment variable: {os.environ.get('CML_USE_GPU', 'Not set')}")
@@ -52,7 +52,7 @@ if torch.cuda.is_available():
         if COMPILATION_DEVICE == "cuda":
             print("✅ GPU will be used for FHE operations")
         else:
-            print("⚠️  GPU available but Concrete GPU not enabled")
+            print("⚠️  GPU available but Torus GPU not enabled")
     except Exception as e:
         print(f"Error getting GPU info: {e}")
 else:

@@ -55,7 +55,7 @@ def check_torus_versions(zip_path: Path):
     """Check that current versions match the ones used in development.
 
     This function loads the version JSON file found in client.zip or server.zip files and then
-    checks that current package versions (Concrete Python, Torus ML) as well as the Python
+    checks that current package versions (Torus Python, Torus ML) as well as the Python
     current version all match the ones that are currently installed.
 
     Args:
@@ -148,7 +148,7 @@ class FHEModelServer:
                 server_client = fhe.Client(self.server.client_specs)
                 self._tfhers_bridge = tfhers.new_bridge(server_client)
 
-    # We should make 'serialized_encrypted_quantized_data' handle unpacked inputs, as Concrete does,
+    # We should make 'serialized_encrypted_quantized_data' handle unpacked inputs, as Torus does,
     # instead of tuples
     # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4477
     # We should also rename the input arguments to remove the `serialized` part, as we now accept
@@ -181,7 +181,7 @@ class FHEModelServer:
 
         input_quant_encrypted = to_tuple(serialized_encrypted_quantized_data)
 
-        # Make sure no inputs are None, to avoid any crash in Concrete
+        # Make sure no inputs are None, to avoid any crash in Torus
         assert not any(x is None for x in input_quant_encrypted), "No input values should be None"
 
         inputs_are_serialized = all(isinstance(x, bytes) for x in input_quant_encrypted)
@@ -295,7 +295,7 @@ class FHEModelDev:
         Arguments:
             mode (DeploymentMode): the mode to save the FHE circuit,
                 either "inference" or "training".
-            via_mlir (bool): serialize with `via_mlir` option from Concrete-Python.
+            via_mlir (bool): serialize with `via_mlir` option from Torus-Python.
 
         Raises:
             Exception: path_dir is not empty or training module does not exist

@@ -53,7 +53,7 @@ python3 evaluate_torch_cml.py
 
 ### Rounding for Improved Performance
 
-In Concrete, a rounding operator is available which removes a specific number of least significant bits to reach a lower desired bit-width. This results in significant performance improvement. The default rounding threshold is set at 6 bits but can be changed to suit your needs.
+In Torus, a rounding operator is available which removes a specific number of least significant bits to reach a lower desired bit-width. This results in significant performance improvement. The default rounding threshold is set at 6 bits but can be changed to suit your needs.
 
 <!--pytest-codeblocks:skip-->
 

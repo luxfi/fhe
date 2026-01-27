@@ -23,7 +23,7 @@ Here is a simple example of classification on encrypted data using logistic regr
 This example shows the typical flow of a Torus ML model:
 
 1. **Training the model**: Train the model on unencrypted (plaintext) data using scikit-learn. Since Fully Homomorphic Encryption (FHE) operates over integers, Torus ML quantizes the model to use only integers during inference.
-1. **Compiling the model**: Compile the quantized model to an FHE equivalent. Under the hood, the model is first converted to a Concrete Python program and then compiled.
+1. **Compiling the model**: Compile the quantized model to an FHE equivalent. Under the hood, the model is first converted to a Torus Python program and then compiled.
 1. **Performing inference**: Perform inference on encrypted data. The example above shows encrypted inference in the model-development phase. Alternatively, during [deployment](cloud.md) in a client/server setting, the client encrypts the data, the server processes it securely, and then the client decrypts the results.
 
 ```python
@@ -95,7 +95,7 @@ print("Probability with encrypt/run/decrypt calls: ", y0)
 
 - **Models availability**: Torus ML currently only supports _training_ on encrypted data for some models, while it supports _inference_ for a large variety of models.
 
-- **Processing**: Concrete currently doesn't support pre-processing model inputs and post-processing model outputs. These processing stages may involve:
+- **Processing**: Torus currently doesn't support pre-processing model inputs and post-processing model outputs. These processing stages may involve:
 
   - Text-to-numerical feature transformation
   - Dimensionality reduction
@@ -106,9 +106,9 @@ print("Probability with encrypt/run/decrypt calls: ", y0)
 
 These issues are currently being addressed, and significant improvements are expected to be released in the near future.
 
-## Concrete stack
+## Torus stack
 
-Torus ML is built on top of LuxFHE's [Concrete](https://github.com/luxfhe-ai/torus).
+Torus ML is built on top of LuxFHE's [Torus](https://github.com/luxfhe-ai/torus).
 
 ## Online demos and tutorials
 

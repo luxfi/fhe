@@ -1,7 +1,7 @@
 import os
 from uuid import uuid4
 
-import concrete.numpy as cnp
+import torus.numpy as cnp
 from fastapi import BackgroundTasks, FastAPI, status
 
 app = FastAPI()
