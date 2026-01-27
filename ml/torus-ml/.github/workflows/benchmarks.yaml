@@ -1,4 +1,4 @@
-name: Benchmark CML
+name: Benchmark TML
 
 on:
   workflow_dispatch:
@@ -42,7 +42,7 @@ on:
         type: string
 
   # Add recurrent launching
-  # FIXME: https://github.com/luxfhe-ai/concrete-ml-internal/issues/1851
+  # FIXME: https://github.com/luxfhe-ai/torus-ml-internal/issues/1851
 
 permissions:
   contents: read

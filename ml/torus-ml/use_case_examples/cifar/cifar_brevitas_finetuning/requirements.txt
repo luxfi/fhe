@@ -1,4 +1,4 @@
-concrete-ml
+torus-ml
 jupyter
 torchvision
 matplotlib
