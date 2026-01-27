@@ -1,6 +1,6 @@
 # Dependency update
 
-## Updating TFHE-RS
+## Updating Lux FHE
 
 Steps:
 

@@ -140,7 +140,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -536,7 +536,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -2247,7 +2247,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -2613,7 +2613,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -3005,7 +3005,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -3379,7 +3379,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -3769,7 +3769,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -4141,7 +4141,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
@@ -4505,7 +4505,7 @@ Compile the model.
 
 - <b>`X`</b> (Data):  A representative set of input values used for building cryptographic  parameters, as a Numpy array, Torch tensor, Pandas DataFrame or List. This is  usually the training data-set or a sub-set of it.
 - <b>`configuration`</b> (Optional\[Configuration\]):  Options to use for compilation. Default  to None.
-- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "tfhe-rs". When using tfhe-rs the model's  latency will be lower because of the necessary conversion between  tfhe-rs and concrete. Using tfhe-rs allows you to use fhEVM ciphertexts.
+- <b>`ciphertext_format`</b> (CiphertextFormat):  The format of input/output ciphertexts. Can  be one of "concrete" or "Lux FHE". When using Lux FHE the model's  latency will be lower because of the necessary conversion between  Lux FHE and concrete. Using Lux FHE allows you to use fhEVM ciphertexts.
 - <b>`artifacts`</b> (Optional\[DebugArtifacts\]):  Artifacts information about the compilation  process to store for debugging. Default to None.
 - <b>`show_mlir`</b> (bool):  Indicate if the MLIR graph should be printed during compilation.  Default to False.
 - <b>`p_error`</b> (Optional\[float\]):  Probability of error of a single PBS. A p_error value cannot  be given if a global_p_error value is already set. Default to None, which sets this  error to a default value.
