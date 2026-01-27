@@ -127,7 +127,7 @@ then
 
     # In --format=csv such that the column length (and so, the diff) do not change with longer
     # names
-    pip-licenses --format=csv | tr -d "\"" | grep -v "pkg-resources\|pkg_resources\|concrete-ml," | \
+    pip-licenses --format=csv | tr -d "\"" | grep -v "pkg-resources\|pkg_resources\|torus-ml," | \
         tee "${NEW_LICENSES_FILENAME}"
 
     # Remove trailing whitespaces and replace "," by ", "
@@ -163,7 +163,7 @@ then
     # And check with a white-list
     # Brevitas has an "UNKNOWN" license, but is actually a BSD, so it is ignored in this test
     # pkg-resources reports UNKNOWN due to a Ubuntu bug, but is Apache - ignore
-    # concrete-ml-extensions has the same license as Concrete ML, so skip checking
+    # torus-ml-extensions has the same license as Torus ML, so skip checking
     LICENSES_WHITELIST="new BSD 3-Clause"
     LICENSES_WHITELIST="${LICENSES_WHITELIST};3-Clause BSD License"
     LICENSES_WHITELIST="${LICENSES_WHITELIST};new BSD"
@@ -184,7 +184,7 @@ then
     LICENSES_WHITELIST="${LICENSES_WHITELIST};ISC License (ISCL)"
     LICENSES_WHITELIST="${LICENSES_WHITELIST};The Unlicense (Unlicense)"
 
-    pip-licenses --allow-only="${LICENSES_WHITELIST}" --ignore-packages brevitas pkg-resources pkg_resources concrete-ml-extensions
+    pip-licenses --allow-only="${LICENSES_WHITELIST}" --ignore-packages brevitas pkg-resources pkg_resources torus-ml-extensions
 
     deactivate
 

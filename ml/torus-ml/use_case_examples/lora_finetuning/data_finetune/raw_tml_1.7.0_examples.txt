@@ -1,80 +1,80 @@
 **1. Linear Models:**
 *   **Logistic Regression:**
 python
-from concrete.ml.sklearn import LogisticRegression as ConcreteLogisticRegression
+from torus.ml.sklearn import LogisticRegression as TorusLogisticRegression
 # ... (Data loading and preprocessing) ...
-concrete_logr = ConcreteLogisticRegression(n_bits=8)
-concrete_logr.fit(x_train, y_train)
-fhe_circuit = concrete_logr.compile(x_train)
+torus_logr = TorusLogisticRegression(n_bits=8)
+torus_logr.fit(x_train, y_train)
+fhe_circuit = torus_logr.compile(x_train)
 # Key generation
 fhe_circuit.client.keygen(force=False)
 # Inference in FHE
-y_pred_fhe = concrete_logr.predict(x_test, fhe="execute")
+y_pred_fhe = torus_logr.predict(x_test, fhe="execute")
 
 *   **Linear Regression:**
 python
-from concrete.ml.sklearn import LinearRegression as ConcreteLinearRegression
+from torus.ml.sklearn import LinearRegression as TorusLinearRegression
 # ... (Data loading and preprocessing) ...
-concrete_lr = ConcreteLinearRegression(n_bits=8)
-concrete_lr.fit(x_train, y_train)
-fhe_circuit = concrete_lr.compile(x_train)
+torus_lr = TorusLinearRegression(n_bits=8)
+torus_lr.fit(x_train, y_train)
+fhe_circuit = torus_lr.compile(x_train)
 # Key generation
 fhe_circuit.client.keygen(force=False)
 # Inference in FHE
-y_pred_fhe = concrete_lr.predict(x_test, fhe="execute")
+y_pred_fhe = torus_lr.predict(x_test, fhe="execute")
 
 *   **Linear SVR:**
 python
-from concrete.ml.sklearn.svm import LinearSVR as ConcreteLinearSVR
+from torus.ml.sklearn.svm import LinearSVR as TorusLinearSVR
 # ... (Data loading and preprocessing) ...
-concrete_svr = ConcreteLinearSVR(n_bits=8, C=0.5)
-concrete_svr.fit(x_train, y_train)
-circuit = concrete_svr.compile(x_train)
+torus_svr = TorusLinearSVR(n_bits=8, C=0.5)
+torus_svr.fit(x_train, y_train)
+circuit = torus_svr.compile(x_train)
 # Key generation
 circuit.client.keygen(force=False)
 # Inference in FHE
-y_pred_fhe = concrete_svr.predict(x_test, fhe="execute")
+y_pred_fhe = torus_svr.predict(x_test, fhe="execute")
 
 *   **Linear SVC**
 python
-from concrete.ml.sklearn.svm import LinearSVC as ConcreteLinearSVC
+from torus.ml.sklearn.svm import LinearSVC as TorusLinearSVC
 # ... (Data loading and preprocessing) ...
-concrete_svc = ConcreteLinearSVC(n_bits=8, C=0.025)
-concrete_svc.fit(x_train, y_train)
-circuit = concrete_svc.compile(x_train)
+torus_svc = TorusLinearSVC(n_bits=8, C=0.025)
+torus_svc.fit(x_train, y_train)
+circuit = torus_svc.compile(x_train)
 # Inference in FHE
-y_pred_fhe = concrete_svc.predict(x_test, fhe="execute")
+y_pred_fhe = torus_svc.predict(x_test, fhe="execute")
 
 **2. Tree-Based Models:**
 *   **XGBoost Classifier:**
 python
-from concrete.ml.sklearn import XGBClassifier as ConcreteXGBClassifier
+from torus.ml.sklearn import XGBClassifier as TorusXGBClassifier
 # ... (Data loading and preprocessing) ...
-concrete_xgb = ConcreteXGBClassifier(n_bits=6, n_estimators=50, max_depth=4)
-concrete_xgb.fit(x_train, y_train)
-circuit = concrete_xgb.compile(x_train)
+torus_xgb = TorusXGBClassifier(n_bits=6, n_estimators=50, max_depth=4)
+torus_xgb.fit(x_train, y_train)
+circuit = torus_xgb.compile(x_train)
 # Key generation
 circuit.client.keygen(force=False)
 # Inference in FHE
-y_preds_fhe = concrete_xgb.predict(x_test, fhe="execute")
+y_preds_fhe = torus_xgb.predict(x_test, fhe="execute")
 
 *   **XGBoost Regressor:**
 python
-from concrete.ml.sklearn import XGBRegressor as ConcreteXGBRegressor
+from torus.ml.sklearn import XGBRegressor as TorusXGBRegressor
 # ... (Data loading and preprocessing) ...
-concrete_xgb = ConcreteXGBRegressor(n_bits=6, n_estimators=50, max_depth=4)
-concrete_xgb.fit(x_train, y_train)
-circuit = concrete_xgb.compile(x_train)
+torus_xgb = TorusXGBRegressor(n_bits=6, n_estimators=50, max_depth=4)
+torus_xgb.fit(x_train, y_train)
+circuit = torus_xgb.compile(x_train)
 # Key generation
 circuit.client.keygen(force=False)
 # Inference in FHE
-y_preds_fhe = concrete_xgb.predict(x_test, fhe="execute")
+y_preds_fhe = torus_xgb.predict(x_test, fhe="execute")
 
 *   **Decision Tree Classifier:**
 python
-from concrete.ml.sklearn import DecisionTreeClassifier as ConcreteDecisionTreeClassifier
+from torus.ml.sklearn import DecisionTreeClassifier as TorusDecisionTreeClassifier
 # ... (Data loading and preprocessing) ...
-model = ConcreteDecisionTreeClassifier(
+model = TorusDecisionTreeClassifier(
     max_features="log2",
     min_samples_leaf=1,
     min_samples_split=2,
@@ -90,9 +90,9 @@ y_pred_fhe = model.predict(x_test, fhe="execute")
 
 *   **Decision Tree Regressor:**
 python
-from concrete.ml.sklearn import DecisionTreeRegressor as ConcreteDecisionTreeRegressor
+from torus.ml.sklearn import DecisionTreeRegressor as TorusDecisionTreeRegressor
 # ... (Data loading and preprocessing) ...
-model = ConcreteDecisionTreeRegressor(
+model = TorusDecisionTreeRegressor(
     max_depth=10,
     max_features=5,
     min_samples_leaf=2,
@@ -109,7 +109,7 @@ y_pred_fhe = model.predict(x_test, fhe="execute")
 
 *   **Random Forest Classifier:**
 python
-from concrete.ml.sklearn import RandomForestClassifier
+from torus.ml.sklearn import RandomForestClassifier
 # ... (Data loading and preprocessing) ...
 model = RandomForestClassifier(max_depth=4, n_estimators=5, n_bits=5)
 model.fit(x_train, y_train)
@@ -121,7 +121,7 @@ y_pred_fhe = model.predict(x_test, fhe="execute")
 
 *   **Random Forest Regressor:**
 python
-from concrete.ml.sklearn import RandomForestRegressor
+from torus.ml.sklearn import RandomForestRegressor
 # ... (Data loading and preprocessing) ...
 model = RandomForestRegressor(n_bits=5, n_estimators=50, max_depth=4)
 model.fit(x_train, y_train)
@@ -135,7 +135,7 @@ y_pred_fhe = model.predict(x_test, fhe="execute")
 *   **Fully Connected Neural Network:**
 python
 from torch import nn
-from concrete.ml.sklearn import NeuralNetClassifier
+from torus.ml.sklearn import NeuralNetClassifier
 # ... (Data loading and preprocessing) ...
 parameters_neural_net = {
     "module__n_w_bits": 2,
@@ -160,7 +160,7 @@ y_pred_fhe = model.predict(x_test, fhe="execute")
 python
 import torch
 from torch import nn
-from concrete.ml.torch.compile import compile_torch_model
+from torus.ml.torch.compile import compile_torch_model
 # ... (Data loading and preprocessing) ...
 class TinyCNN(nn.Module):
     def __init__(self, n_classes) -> None:
@@ -190,7 +190,7 @@ y_pred_fhe = q_module.forward(x_test, fhe="execute")
 **4. Quantization-Aware Training:**
 python
 from torch import nn
-from concrete.ml.torch.compile import compile_brevitas_qat_model
+from torus.ml.torch.compile import compile_brevitas_qat_model
 import brevitas.nn as qnn
 from brevitas.core.bit_width import BitWidthImplType
 from brevitas.core.quant import QuantType
@@ -280,9 +280,9 @@ python
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import numpy as np
-from concrete.ml.deployment import FHEModelClient, FHEModelDev, FHEModelServer
-from concrete.ml.sklearn import SGDClassifier
-from concrete import fhe
+from torus.ml.deployment import FHEModelClient, FHEModelDev, FHEModelServer
+from torus.ml.sklearn import SGDClassifier
+from torus import fhe
 # ... (Data loading, preprocessing, and model training) ...
 # Assuming you have a trained model: sgd_clf_binary_fhe
 # and x_compile_set, y_compile_set for compilation
@@ -337,7 +337,7 @@ deployment_dir.cleanup()
 **6. Hyper-parameter Tuning with GridSearchCV (XGBClassifier.ipynb, DecisionTreeRegressor.ipynb):**
 python
 from sklearn.model_selection import GridSearchCV
-from concrete.ml.sklearn import XGBClassifier as ConcreteXGBClassifier
+from torus.ml.sklearn import XGBClassifier as TorusXGBClassifier
 from sklearn.metrics import make_scorer, matthews_corrcoef
 # ... (Data loading and preprocessing) ...
 # Create scorer with the MCC metric
@@ -348,9 +348,9 @@ param_grid = {
     "max_depth": [2, 3],
     "n_estimators": [10, 20, 50],
 }
-# Instantiate GridSearchCV with the Concrete ML model
+# Instantiate GridSearchCV with the Torus ML model
 grid_search = GridSearchCV(
-    ConcreteXGBClassifier(),
+    TorusXGBClassifier(),
     param_grid,
     cv=5,
     scoring=grid_scorer,
@@ -362,53 +362,53 @@ grid_search.fit(x_train, y_train)
 # Get the best parameters
 best_params = grid_search.best_params_
 # Create a new model with the best parameters
-best_model = ConcreteXGBClassifier(**best_params)
+best_model = TorusXGBClassifier(**best_params)
 best_model.fit(x_train, y_train)
 # Compile and proceed with FHE inference as shown in other examples
 
 **7. GLM Models (GLMComparison.ipynb):**
 *   **Poisson Regressor**
 python
-from concrete.ml.sklearn import PoissonRegressor as ConcretePoissonRegressor
+from torus.ml.sklearn import PoissonRegressor as TorusPoissonRegressor
 # ... (Data loading and preprocessing) ...
-concrete_pr = ConcretePoissonRegressor(n_bits=8)
-concrete_pr.fit(x_train, y_train, sample_weight=train_weights)
-circuit = concrete_pr.compile(x_train)
+torus_pr = TorusPoissonRegressor(n_bits=8)
+torus_pr.fit(x_train, y_train, sample_weight=train_weights)
+circuit = torus_pr.compile(x_train)
 # Key generation
 circuit.client.keygen(force=False)
 # Inference in FHE
-y_pred_fhe = concrete_pr.predict(x_test, fhe="execute")
+y_pred_fhe = torus_pr.predict(x_test, fhe="execute")
 
 *   **Gamma Regressor**
 python
-from concrete.ml.sklearn import GammaRegressor as ConcreteGammaRegressor
+from torus.ml.sklearn import GammaRegressor as TorusGammaRegressor
 # ... (Data loading and preprocessing) ...
-concrete_gr = ConcreteGammaRegressor(n_bits=8)
-concrete_gr.fit(x_train, y_train, sample_weight=train_weights)
-circuit = concrete_gr.compile(x_train)
+torus_gr = TorusGammaRegressor(n_bits=8)
+torus_gr.fit(x_train, y_train, sample_weight=train_weights)
+circuit = torus_gr.compile(x_train)
 # Key generation
 circuit.client.keygen(force=False)
 # Inference in FHE
-y_pred_fhe = concrete_gr.predict(x_test, fhe="execute")
+y_pred_fhe = torus_gr.predict(x_test, fhe="execute")
 
 *   **Tweedie Regressor**
 python
-from concrete.ml.sklearn import TweedieRegressor as ConcreteTweedieRegressor
+from torus.ml.sklearn import TweedieRegressor as TorusTweedieRegressor
 # ... (Data loading and preprocessing) ...
-concrete_tr = ConcreteTweedieRegressor(n_bits=8, power=1.9)
-concrete_tr.fit(x_train, y_train, sample_weight=train_weights)
-circuit = concrete_tr.compile(x_train)
+torus_tr = TorusTweedieRegressor(n_bits=8, power=1.9)
+torus_tr.fit(x_train, y_train, sample_weight=train_weights)
+circuit = torus_tr.compile(x_train)
 # Key generation
 circuit.client.keygen(force=False)
 # Inference in FHE
-y_pred_fhe = concrete_tr.predict(x_test, fhe="execute")
+y_pred_fhe = torus_tr.predict(x_test, fhe="execute")
 
 **8. Fine-tuning with LoRA (LoraMLP.ipynb):**
 python
 import torch
 from peft import LoraConfig, get_peft_model
 from torch import nn, optim
-from concrete.ml.torch.lora import LoraTrainer
+from torus.ml.torch.lora import LoraTrainer
 # ... (Data loading and preprocessing) ...
 # Define an MLP model without LoRA layers
 class SimpleMLP(nn.Module):

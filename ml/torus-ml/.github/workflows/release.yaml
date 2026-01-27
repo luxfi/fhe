@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       skip_tests:
-        description: "Skip tests (only if approved by CML team!)"
+        description: "Skip tests (only if approved by TML team!)"
         type: boolean
         required: false
         default: false
@@ -300,7 +300,7 @@ jobs:
           tags: true
 
   # This action creates docker and pypi images directly on the AWS Slab instance
-  # The 'PRIVATE_RELEASE_IMAGE_BASE' variable is kept here in case Concrete ML starts to publish
+  # The 'PRIVATE_RELEASE_IMAGE_BASE' variable is kept here in case Torus ML starts to publish
   # private nightly releases one day. Currently, release candidates and actual releases are all
   # done through the 'PUBLIC_RELEASE_IMAGE_BASE' image. The private image is also used to list all
   # tags easily
@@ -318,8 +318,8 @@ jobs:
       run:
         shell: bash
     env:
-      PRIVATE_RELEASE_IMAGE_BASE: ghcr.io/luxfhe-ai/concrete-ml
-      PUBLIC_RELEASE_IMAGE_BASE: luxfhefhe/concrete-ml
+      PRIVATE_RELEASE_IMAGE_BASE: ghcr.io/luxfhe-ai/torus-ml
+      PUBLIC_RELEASE_IMAGE_BASE: luxfhefhe/torus-ml
       PIP_INDEX_URL: ${{ secrets.PIP_INDEX_URL }}
       GIT_TAG: ${{ needs.release-checks.outputs.git_tag }}
       PROJECT_VERSION: ${{ needs.release-checks.outputs.project_version }}
@@ -386,7 +386,7 @@ jobs:
           EXISTING_TAGS=$(curl \
           -X GET \
           -H "Authorization: Bearer $(echo ${{ secrets.BOT_TOKEN }} | base64)" \
-          https://ghcr.io/v2/luxfhe-ai/concrete-ml/tags/list | jq -rc '.tags | join(" ")')
+          https://ghcr.io/v2/luxfhe-ai/torus-ml/tags/list | jq -rc '.tags | join(" ")')
 
           # We want the space separated list of versions to be expanded
           # shellcheck disable=SC2086
@@ -482,13 +482,13 @@ jobs:
           CN_VERSION_SPEC_FOR_RC="$(poetry run python \
           ./script/make_utils/pyproject_version_parser_helper.py \
           --pyproject-toml-file pyproject.toml \
-          --get-pip-install-spec-for-dependency concrete-python)"
+          --get-pip-install-spec-for-dependency torus-python)"
 
           SECRETS_FILE="$(mktemp)"
           echo "" >> "${SECRETS_FILE}"
           echo "SECRETS_FILE=${SECRETS_FILE}" >> "$GITHUB_ENV"
 
-      - name: Build Docker Concrete ML Image
+      - name: Build Docker Torus ML Image
         if: ${{ success() && !cancelled() }}
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -527,9 +527,9 @@ jobs:
           cp ./script/actions_utils/RELEASE_TEMPLATE.md "${RELEASE_BODY_FILE}"
           {
             echo "Docker Image: ${PUBLIC_RELEASE_IMAGE_BASE}:${{ env.GIT_TAG }}";
-            echo "Docker Hub: https://hub.docker.com/r/luxfhefhe/concrete-ml/tags";
-            echo "pip: https://pypi.org/project/concrete-ml/${{ env.PROJECT_VERSION }}";
-            echo "Documentation: https://docs.luxfhe.ai/concrete-ml";
+            echo "Docker Hub: https://hub.docker.com/r/luxfhefhe/torus-ml/tags";
+            echo "pip: https://pypi.org/project/torus-ml/${{ env.PROJECT_VERSION }}";
+            echo "Documentation: https://docs.luxfhe.ai/torus-ml";
             echo "";
           } >> "${RELEASE_BODY_FILE}"
           cat "${RAW_CHANGELOG_DIR}"/* >> "${RELEASE_BODY_FILE}"

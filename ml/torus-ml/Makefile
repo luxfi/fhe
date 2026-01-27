@@ -7,15 +7,15 @@ else
 UBUNTU_BASE=20.04
 endif 
 
-DEV_DOCKER_IMG:=concrete-ml-dev
+DEV_DOCKER_IMG:=torus-ml-dev
 DEV_DOCKERFILE:=docker/Dockerfile.dev
-DEV_CONTAINER_VENV_VOLUME:=concrete-ml-venv-$(DEV_DOCKER_PYTHON)
-DEV_CONTAINER_CACHE_VOLUME:=concrete-ml-cache-$(DEV_DOCKER_PYTHON)
+DEV_CONTAINER_VENV_VOLUME:=torus-ml-venv-$(DEV_DOCKER_PYTHON)
+DEV_CONTAINER_CACHE_VOLUME:=torus-ml-cache-$(DEV_DOCKER_PYTHON)
 DOCKER_VENV_PATH:="$${HOME}"/dev_venv/
 SRC_DIR:=src
 TEST?=tests
 N_CPU?=4
-CONCRETE_PACKAGE_PATH=$(SRC_DIR)/concrete
+TORUS_PACKAGE_PATH=$(SRC_DIR)/concrete
 COUNT?=1
 RANDOMLY_SEED?=$$RANDOM
 PYTEST_OPTIONS:=
@@ -82,7 +82,7 @@ sync_env:
 		"$(MAKE)" setup_env; \
 	fi
 
-.PHONY: fix_omp_issues_for_intel_mac # Fix OMP issues for macOS Intel, https://github.com/zama-ai/concrete-ml-internal/issues/3951
+.PHONY: fix_omp_issues_for_intel_mac # Fix OMP issues for macOS Intel, https://github.com/zama-ai/torus-ml-internal/issues/3951
 fix_omp_issues_for_intel_mac:
 	if [[ $$(uname) == "Darwin" ]]; then \
 		./script/make_utils/fix_omp_issues_for_intel_mac.sh; \
@@ -188,7 +188,7 @@ check_issues:
 
 # We need to launch forbidden words aftwerwards because of conflicts with the files created by nbqa
 # https://nbqa.readthedocs.io/en/latest/known-limitations.html#known-limitations
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/3516
+# FIXME: https://github.com/zama-ai/torus-ml-internal/issues/3516
 .PHONY: pcc # Run pre-commit checks
 pcc:
 	@"$(MAKE)" --keep-going --jobs $$(./script/make_utils/ncpus.sh) --output-sync=recurse \
@@ -276,7 +276,7 @@ pytest:
 	${PYTEST_OPTIONS}"
 
 # Coverage options are not included since they look to fail on macOS
-# (see https://github.com/zama-ai/concrete-ml-internal/issues/4428)
+# (see https://github.com/zama-ai/torus-ml-internal/issues/4428)
 .PHONY: pytest_macOS_for_GitHub # Run pytest without coverage options
 pytest_macOS_for_GitHub:
 	"$(MAKE)" pytest_internal_parallel \
@@ -481,7 +481,7 @@ finalize_nb:
 # Run notebook tests without warnings as sources are already tested with warnings treated as errors
 # We need to disable xdist with -n0 to make sure to not have IPython port race conditions
 # The deployment notebook is currently skipped until the AMI is fixed
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4064
+# FIXME: https://github.com/zama-ai/torus-ml-internal/issues/4064
 .PHONY: pytest_nb # Launch notebook tests
 pytest_nb:
 	NOTEBOOKS=$$(find docs -name "*.ipynb" ! -name "*Deployment*" | grep -v _build | grep -v .ipynb_checkpoints || true) && \
@@ -552,13 +552,13 @@ upgrade_py_deps:
 pytest_codeblocks:
 	./script/make_utils/pytest_codeblocks.sh
 
-.PHONY: pytest_codeblocks_pypi_wheel_cml # Test code blocks using the PyPI local wheel of Concrete ML
-pytest_codeblocks_pypi_wheel_cml:
-	./script/make_utils/pytest_pypi_cml.sh --wheel --codeblocks
+.PHONY: pytest_codeblocks_pypi_wheel_tml # Test code blocks using the PyPI local wheel of Torus ML
+pytest_codeblocks_pypi_wheel_tml:
+	./script/make_utils/pytest_pypi_tml.sh --wheel --codeblocks
 
-.PHONY: pytest_codeblocks_pypi_cml # Test code blocks using PyPI Concrete ML
-pytest_codeblocks_pypi_cml:
-	./script/make_utils/pytest_pypi_cml.sh --codeblocks --version "$${VERSION}"
+.PHONY: pytest_codeblocks_pypi_tml # Test code blocks using PyPI Torus ML
+pytest_codeblocks_pypi_tml:
+	./script/make_utils/pytest_pypi_tml.sh --codeblocks --version "$${VERSION}"
 
 .PHONY: pytest_codeblocks_one # Test code blocks using pytest in one file (TEST)
 pytest_codeblocks_one:
@@ -743,7 +743,7 @@ check_links:
 	@# Since 'make docs' automatically calls 'check_links' at the end, there is no obvious reason to 
 	@# manually call 'make check_links' instead of 'make docs' !
 	
-	@# Check that no links target the main branch, some internal repositories (Concrete ML or Concrete) or our internal GitBook
+	@# Check that no links target the main branch, some internal repositories (Torus ML or Concrete) or our internal GitBook
 	./script/make_utils/check_internal_links.sh
 
 	@# To avoid some issues with priviledges and linkcheckmd
@@ -766,14 +766,14 @@ check_links:
 	@#  --ignore-url=https://www.conventionalcommits.org/en/v1.0.0/: because issues to connect to
 	@#		the server from AWS
 	@#  --ignore-url=https://www.openml.org: this website returns a lots of timeouts
-	@#  --ignore-url=https://github.com/zama-ai/concrete-ml-internal/issues: because issues are
+	@#  --ignore-url=https://github.com/zama-ai/torus-ml-internal/issues: because issues are
 	@#		private
 	@#  --ignore-url=https://arxiv.org: this website returns a lots of timeouts
 	poetry run linkchecker docs --check-extern \
 		--no-warnings \
 		--ignore-url=https://www.conventionalcommits.org/en/v1.0.0/ \
 		--ignore-url=https://www.openml.org \
-		--ignore-url=https://github.com/zama-ai/concrete-ml-internal/issues \
+		--ignore-url=https://github.com/zama-ai/torus-ml-internal/issues \
 		--ignore-url=https://arxiv.org
 
 .PHONY: actionlint # Linter for our github actions
@@ -796,21 +796,21 @@ update_dependabot_prs:
 check_unused_images:
 	./script/make_utils/check_all_images_are_used.sh
 
-.PHONY: pytest_pypi_wheel_cml # Run tests using PyPI local wheel of Concrete ML
-pytest_pypi_wheel_cml:
-	./script/make_utils/pytest_pypi_cml.sh --wheel
+.PHONY: pytest_pypi_wheel_tml # Run tests using PyPI local wheel of Torus ML
+pytest_pypi_wheel_tml:
+	./script/make_utils/pytest_pypi_tml.sh --wheel
 
-.PHONY: pytest_pypi_wheel_cml_no_flaky # Run tests (except flaky ones) using PyPI local wheel of Concrete ML
-pytest_pypi_wheel_cml_no_flaky:
-	./script/make_utils/pytest_pypi_cml.sh --wheel --noflaky
+.PHONY: pytest_pypi_wheel_tml_no_flaky # Run tests (except flaky ones) using PyPI local wheel of Torus ML
+pytest_pypi_wheel_tml_no_flaky:
+	./script/make_utils/pytest_pypi_tml.sh --wheel --noflaky
 
-.PHONY: pytest_pypi_cml # Run tests using PyPI Concrete ML
-pytest_pypi_cml:
-	./script/make_utils/pytest_pypi_cml.sh
+.PHONY: pytest_pypi_tml # Run tests using PyPI Torus ML
+pytest_pypi_tml:
+	./script/make_utils/pytest_pypi_tml.sh
 
-.PHONY: pytest_pypi_cml_no_flaky # Run tests (except flaky ones) using PyPI Concrete ML
-pytest_pypi_cml_no_flaky:
-	./script/make_utils/pytest_pypi_cml.sh --noflaky --version "$${VERSION}"
+.PHONY: pytest_pypi_tml_no_flaky # Run tests (except flaky ones) using PyPI Torus ML
+pytest_pypi_tml_no_flaky:
+	./script/make_utils/pytest_pypi_tml.sh --noflaky --version "$${VERSION}"
 
 .PHONY: clean_pycache # Clean __pycache__ directories
 clean_pycache:
@@ -835,7 +835,7 @@ check_utils_use_case:
 # This command does not use a make script because of obscure import issues with Skops on macOS
 .PHONY: update_encrypted_dataframe # Update encrypted data-frame's development files
 update_encrypted_dataframe:
-	poetry run python ./src/concrete/ml/pandas/_development.py
+	poetry run python ./src/torus/ml/pandas/_development.py
 
 .PHONY: check_symlinks # Check that no utils.py are found in use_case_examples
 check_symlinks:

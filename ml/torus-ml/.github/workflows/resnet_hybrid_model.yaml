@@ -1,4 +1,4 @@
-name: ResNet Hybrid FHE Benchmark CML
+name: ResNet Hybrid FHE Benchmark TML
 on:
   schedule:
     - cron: '0 0 1 * *'
@@ -158,7 +158,7 @@ jobs:
           # Install other dependencies
           pip install 'transformers>=4.30.0' 'datasets>=2.12.0' 'tqdm>=4.65.0' 'numpy>=1.24.0' 'psutil>=5.9.0' 'py-cpuinfo>=9.0.0'
           
-          # Install concrete-ml requirements
+          # Install torus-ml requirements
           pip install -e .
 
       - name: Alternative Concrete Python Wheel Download
@@ -168,14 +168,14 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          -o concrete-python.whl.zip \
+          -o torus-python.whl.zip \
           https://api.github.com/repos/luxfhe-ai/concrete/actions/artifacts/${{ github.event.inputs.alternative-cp-wheel-artifact-id }}/zip
 
       - name: Alternative Concrete Python Wheel Install
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.alternative-cp-wheel-artifact-id != 'none'
         run: |
           source .venv/bin/activate
-          unzip concrete-python.whl.zip
+          unzip torus-python.whl.zip
           pip install concrete_python-*.whl
 
       - name: Alternative Concrete Python Branch Checkout
@@ -190,7 +190,7 @@ jobs:
       - name: Alternative Concrete Python Branch Source Install
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.alternative-cp-branch != 'none'
         run: |
-          cp -R concrete/frontends/concrete-python/concrete/* .venv/lib/python3.*/site-packages/concrete/
+          cp -R concrete/frontends/torus-python/concrete/* .venv/lib/python3.*/site-packages/concrete/
 
       - name: Run Benchmark - ResNet18 Hybrid FHE
         id: run-benchmark

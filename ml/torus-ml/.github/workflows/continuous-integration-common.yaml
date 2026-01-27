@@ -1,4 +1,4 @@
-name: CML tests - common
+name: TML tests - common
 
 on:
   workflow_call:
@@ -549,15 +549,15 @@ jobs:
 
       # Run Pytest on all of our tests (except flaky ones) using PyPI's local wheel in the weekly
       # or during the release process
-      - name: PyTest (no flaky) with PyPI local wheel of Concrete ML (weekly, release)
+      - name: PyTest (no flaky) with PyPI local wheel of Torus ML (weekly, release)
         if: |
           (fromJSON(env.IS_WEEKLY) || fromJSON(env.IS_RELEASE))
           && steps.conformance.outcome == 'success'
           && !cancelled()
         run: |
-          make pytest_pypi_wheel_cml_no_flaky
+          make pytest_pypi_wheel_tml_no_flaky
 
-      # Run Pytest on all of our tests (except flaky ones) using Concrete ML's latest version
+      # Run Pytest on all of our tests (except flaky ones) using Torus ML's latest version
       # available on PyPI after publishing a release
       - name: PyTest (no flaky) with PyPI (published release)
         if: |
@@ -567,7 +567,7 @@ jobs:
         run: |
           PROJECT_VERSION="$(poetry version --short)"
 
-          make pytest_pypi_cml_no_flaky VERSION="$PROJECT_VERSION"
+          make pytest_pypi_tml_no_flaky VERSION="$PROJECT_VERSION"
 
       # Compute coverage only on reference build
       - name: Test coverage (regular, weekly)
@@ -614,15 +614,15 @@ jobs:
           make pytest_codeblocks
 
       # Run Pytest on all codeblocks on a weekly basis or while releasing
-      - name: PyTest CodeBlocks with PyPI local wheel of Concrete ML (weekly, release)
+      - name: PyTest CodeBlocks with PyPI local wheel of Torus ML (weekly, release)
         if: |
           (fromJSON(env.IS_WEEKLY) || fromJSON(env.IS_RELEASE))
           && steps.conformance.outcome == 'success'
           && !cancelled()
         run: |
-          make pytest_codeblocks_pypi_wheel_cml
+          make pytest_codeblocks_pypi_wheel_tml
 
-      # Run Pytest on all codeblocks using Concrete ML's latest version available on PyPI after
+      # Run Pytest on all codeblocks using Torus ML's latest version available on PyPI after
       # publishing a release
       - name: PyTest CodeBlocks with PyPI (published release)
         if: |
@@ -632,7 +632,7 @@ jobs:
         run: |
           PROJECT_VERSION="$(poetry version --short)"
 
-          make pytest_codeblocks_pypi_cml VERSION="$PROJECT_VERSION"
+          make pytest_codeblocks_pypi_tml VERSION="$PROJECT_VERSION"
 
       # Run Pytest on all notebooks on a weekly basis
       # Note: some notebooks need specific data stored in LFS

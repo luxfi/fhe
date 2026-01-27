@@ -84,13 +84,13 @@ jobs:
           ./script/make_utils/setup_os_deps.sh
           make setup_env
           source .venv/bin/activate
-          CP_VERSION=$(pip freeze | grep concrete-python)
-          pip uninstall -y concrete-python
+          CP_VERSION=$(pip freeze | grep torus-python)
+          pip uninstall -y torus-python
           pip install --extra-index-url https://pypi.luxfhe.ai/gpu ${CP_VERSION}
 
       - name: Refresh Notebooks
         run: |
-          export CML_USE_GPU=1
+          export TML_USE_GPU=1
           make jupyter_execute_gpu
 
       - name: Prepare PR Body

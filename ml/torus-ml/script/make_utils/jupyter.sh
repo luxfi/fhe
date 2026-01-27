@@ -15,7 +15,7 @@ WHAT_TO_DO="open"
 
 # Create a list of notebooks to skip, usually because of their long execution time.
 # Deployment notebook is currently failing
-# FIXME: https://github.com/zama-ai/concrete-ml-internal/issues/4064
+# FIXME: https://github.com/zama-ai/torus-ml-internal/issues/4064
 NOTEBOOKS_TO_SKIP=("docs/advanced_examples/Deployment.ipynb")
 
 while [ -n "$1" ]
