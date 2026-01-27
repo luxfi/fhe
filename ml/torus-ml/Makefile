@@ -82,7 +82,7 @@ sync_env:
 		"$(MAKE)" setup_env; \
 	fi
 
-.PHONY: fix_omp_issues_for_intel_mac # Fix OMP issues for macOS Intel, https://github.com/zama-ai/torus-ml-internal/issues/3951
+.PHONY: fix_omp_issues_for_intel_mac # Fix OMP issues for macOS Intel, https://github.com/luxfhe/torus-ml-internal/issues/3951
 fix_omp_issues_for_intel_mac:
 	if [[ $$(uname) == "Darwin" ]]; then \
 		./script/make_utils/fix_omp_issues_for_intel_mac.sh; \
@@ -188,7 +188,7 @@ check_issues:
 
 # We need to launch forbidden words aftwerwards because of conflicts with the files created by nbqa
 # https://nbqa.readthedocs.io/en/latest/known-limitations.html#known-limitations
-# FIXME: https://github.com/zama-ai/torus-ml-internal/issues/3516
+# FIXME: https://github.com/luxfhe/torus-ml-internal/issues/3516
 .PHONY: pcc # Run pre-commit checks
 pcc:
 	@"$(MAKE)" --keep-going --jobs $$(./script/make_utils/ncpus.sh) --output-sync=recurse \
@@ -276,7 +276,7 @@ pytest:
 	${PYTEST_OPTIONS}"
 
 # Coverage options are not included since they look to fail on macOS
-# (see https://github.com/zama-ai/torus-ml-internal/issues/4428)
+# (see https://github.com/luxfhe/torus-ml-internal/issues/4428)
 .PHONY: pytest_macOS_for_GitHub # Run pytest without coverage options
 pytest_macOS_for_GitHub:
 	"$(MAKE)" pytest_internal_parallel \
@@ -481,7 +481,7 @@ finalize_nb:
 # Run notebook tests without warnings as sources are already tested with warnings treated as errors
 # We need to disable xdist with -n0 to make sure to not have IPython port race conditions
 # The deployment notebook is currently skipped until the AMI is fixed
-# FIXME: https://github.com/zama-ai/torus-ml-internal/issues/4064
+# FIXME: https://github.com/luxfhe/torus-ml-internal/issues/4064
 .PHONY: pytest_nb # Launch notebook tests
 pytest_nb:
 	NOTEBOOKS=$$(find docs -name "*.ipynb" ! -name "*Deployment*" | grep -v _build | grep -v .ipynb_checkpoints || true) && \
@@ -766,14 +766,14 @@ check_links:
 	@#  --ignore-url=https://www.conventionalcommits.org/en/v1.0.0/: because issues to connect to
 	@#		the server from AWS
 	@#  --ignore-url=https://www.openml.org: this website returns a lots of timeouts
-	@#  --ignore-url=https://github.com/zama-ai/torus-ml-internal/issues: because issues are
+	@#  --ignore-url=https://github.com/luxfhe/torus-ml-internal/issues: because issues are
 	@#		private
 	@#  --ignore-url=https://arxiv.org: this website returns a lots of timeouts
 	poetry run linkchecker docs --check-extern \
 		--no-warnings \
 		--ignore-url=https://www.conventionalcommits.org/en/v1.0.0/ \
 		--ignore-url=https://www.openml.org \
-		--ignore-url=https://github.com/zama-ai/torus-ml-internal/issues \
+		--ignore-url=https://github.com/luxfhe/torus-ml-internal/issues \
 		--ignore-url=https://arxiv.org
 
 .PHONY: actionlint # Linter for our github actions

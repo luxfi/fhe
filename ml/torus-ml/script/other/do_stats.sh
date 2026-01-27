@@ -40,7 +40,7 @@ function measure()
     OLD_PWD="$PWD"
     cd "$TEMP_DIR"
     echo "Getting statistics for $REPO_NAME repository"
-    git clone https://github.com/zama-ai/$REPO_NAME 2>&1 | grep Cloning
+    git clone https://github.com/luxfhe/$REPO_NAME 2>&1 | grep Cloning
     cd $REPO_NAME
 
     # Issues
@@ -60,8 +60,8 @@ function measure()
     NB_CREATED_PR=$(gh     pr    list ${NO_LIMIT_OPTION} --state all    ${CREATED_WHEN_OPTION} | wc -l)
 
     # GitHub stars and forks of public repos
-    NB_STARS=$(curl --silent https://api.github.com/repos/zama-ai/$REPO_NAME | grep 'stargazers_count' | cut -f 2 -d ":" | sed -e "s@ @@g" | sed -e "s@,@@g")
-    NB_FORKS=$(curl --silent https://api.github.com/repos/zama-ai/$REPO_NAME | grep 'forks_count' | cut -f 2 -d ":" | sed -e "s@ @@g" | sed -e "s@,@@g")
+    NB_STARS=$(curl --silent https://api.github.com/repos/luxfhe/$REPO_NAME | grep 'stargazers_count' | cut -f 2 -d ":" | sed -e "s@ @@g" | sed -e "s@,@@g")
+    NB_FORKS=$(curl --silent https://api.github.com/repos/luxfhe/$REPO_NAME | grep 'forks_count' | cut -f 2 -d ":" | sed -e "s@ @@g" | sed -e "s@,@@g")
 
     # Commits
     # NB_COMMITS_PER_USER=$(git shortlog -s -n --since $FROM_WHEN) would be the number of commits

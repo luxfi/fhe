@@ -75,7 +75,7 @@ do
 
         # Install the dependencies as PyPI would do using the wheel file
         PYPI_WHEEL=$(find dist -type f -name "*.whl")
-        python -m pip install --extra-index-url https://pypi.zama.ai/cpu "${PYPI_WHEEL}"
+        python -m pip install --extra-index-url https://pypi.lux.network/cpu "${PYPI_WHEEL}"
 
     elif [ "$METHOD" == "pip" ]
     then
@@ -92,7 +92,7 @@ do
         rm -rf "${TMP_DIR}"
         mkdir "${TMP_DIR}"
         cd "${TMP_DIR}"
-        git clone https://github.com/zama-ai/torus-ml
+        git clone https://github.com/luxfhe/torus-ml
         cd torus-ml
         make sync_env
         cd ../..
