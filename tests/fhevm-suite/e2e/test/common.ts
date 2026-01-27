@@ -214,7 +214,7 @@ export type Operator = {
 
   /**
    * If true, perform trivial encryption for the left scalar operand.
-   * This is a workaround until tfhe-rs supports left scalar operands.
+   * This is a workaround until Lux FHE supports left scalar operands.
    * Optional.
    */
   leftScalarEncrypt?: boolean;
