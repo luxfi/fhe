@@ -18,7 +18,7 @@ from torchvision import datasets, transforms
 from torchvision.utils import make_grid
 from tqdm import tqdm
 
-from concrete.ml.torch.compile import compile_brevitas_qat_model
+from torus.ml.torch.compile import compile_brevitas_qat_model
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

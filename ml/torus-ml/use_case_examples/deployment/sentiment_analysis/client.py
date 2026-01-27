@@ -24,7 +24,7 @@ import requests
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from utility_functions import text_to_tensor
 
-from concrete.ml.deployment import FHEModelClient
+from torus.ml.deployment import FHEModelClient
 
 URL = os.environ.get("URL", f"http://localhost:5000")
 STATUS_OK = 200

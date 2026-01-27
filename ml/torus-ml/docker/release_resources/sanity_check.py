@@ -12,14 +12,14 @@ from sklearn.metrics import average_precision_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 
 # pylint: disable=ungrouped-imports
-from concrete import ml
-from concrete.ml.sklearn import DecisionTreeClassifier as ConcreteDecisionTreeClassifier
+from torus import ml
+from torus.ml.sklearn import DecisionTreeClassifier as ConcreteDecisionTreeClassifier
 
 # pylint: enable=ungrouped-imports
 
 
 def ml_check(args, keyring_dir_as_str):
-    """Test about Concrete ML functions"""
+    """Test about Torus ML functions"""
 
     is_fast = args.fast
 

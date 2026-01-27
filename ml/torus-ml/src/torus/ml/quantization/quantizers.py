@@ -808,7 +808,7 @@ class QuantizedArray:
 
     Contains float values and their quantized integer counter-parts. Quantization is performed
     by the quantizer member object. Float and int values are kept in sync. Having both types
-    of values is useful since quantized operators in Concrete ML graphs might need one or the other
+    of values is useful since quantized operators in Torus ML graphs might need one or the other
     depending on how the operator works (in float or in int). Moreover, when the encrypted
     function needs to return a value, it must return integer values.
 

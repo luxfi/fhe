@@ -12,8 +12,8 @@ from concrete.fhe import Configuration
 from sklearn.model_selection import train_test_split
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
-from concrete.ml.pytest.torch_models import FCSmall, PartialQATModel
-from concrete.ml.torch.hybrid_model import (
+from torus.ml.pytest.torch_models import FCSmall, PartialQATModel
+from torus.ml.torch.hybrid_model import (
     HybridFHEModel,
     tuple_to_underscore_str,
     underscore_str_to_tuple,

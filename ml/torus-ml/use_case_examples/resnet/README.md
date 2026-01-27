@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project executes the ResNet18 image classification model using Fully Homomorphic Encryption (FHE) with Concrete ML. The model is adapted for FHE compatibility and tested on a small subset of imagenet images.
+This project executes the ResNet18 image classification model using Fully Homomorphic Encryption (FHE) with Torus ML. The model is adapted for FHE compatibility and tested on a small subset of imagenet images.
 
 ## Hybrid FHE Implementation
 
@@ -14,7 +14,7 @@ The project includes a hybrid FHE implementation (`resnet_hybrid_fhe.py`) that e
 
 ## ResNet18
 
-The ResNet18 model is adapted from torchvision the original https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py where the adaptive average pooling layer `AdaptiveAvgPool2d` (not yet supported by Concrete ML) is replaced with a standard `AvgPool2d` layer as follows:
+The ResNet18 model is adapted from torchvision the original https://github.com/pytorch/vision/blob/main/torchvision/models/resnet.py where the adaptive average pooling layer `AdaptiveAvgPool2d` (not yet supported by Torus ML) is replaced with a standard `AvgPool2d` layer as follows:
 
 ```diff
 -        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
@@ -40,12 +40,12 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-2. Install Concrete ML:
+2. Install Torus ML:
 
 <!--pytest-codeblocks:skip-->
 
 ```bash
-pip install concrete-ml
+pip install torus-ml
 ```
 
 3. Install the dependencies:

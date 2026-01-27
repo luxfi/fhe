@@ -13,16 +13,16 @@ import pytest
 import torch
 from torch import nn
 
-from concrete import fhe
-from concrete.ml.common.utils import CiphertextFormat, to_tuple
-from concrete.ml.deployment.fhe_client_server import (
+from torus import fhe
+from torus.ml.common.utils import CiphertextFormat, to_tuple
+from torus.ml.deployment.fhe_client_server import (
     DeploymentMode,
     FHEModelClient,
     FHEModelDev,
     FHEModelServer,
 )
-from concrete.ml.pytest.torch_models import EmbeddingModel, FCSmall
-from concrete.ml.pytest.utils import (
+from torus.ml.pytest.torch_models import EmbeddingModel, FCSmall
+from torus.ml.pytest.utils import (
     MODELS_AND_DATASETS,
     _get_sklearn_tree_models,
     get_model_name,
@@ -30,9 +30,9 @@ from concrete.ml.pytest.utils import (
     is_classifier_or_partial_classifier,
     is_model_class_in_a_list,
 )
-from concrete.ml.quantization.quantized_module import QuantizedModule
-from concrete.ml.sklearn.linear_model import SGDClassifier
-from concrete.ml.torch.compile import compile_torch_model
+from torus.ml.quantization.quantized_module import QuantizedModule
+from torus.ml.sklearn.linear_model import SGDClassifier
+from torus.ml.torch.compile import compile_torch_model
 
 # pylint: disable=too-many-statements,too-many-locals
 

@@ -14,13 +14,13 @@ import torch.quantization
 from concrete.fhe import ParameterSelectionStrategy  # pylint: disable=ungrouped-imports
 from torch import nn
 
-from concrete.ml.common.utils import (
+from torus.ml.common.utils import (
     array_allclose_and_same_shape,
     manage_parameters_for_pbs_errors,
     to_tuple,
 )
-from concrete.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
-from concrete.ml.pytest.torch_models import (
+from torus.ml.onnx.convert import OPSET_VERSION_FOR_ONNX_EXPORT
+from torus.ml.pytest.torch_models import (
     FC,
     AddNet,
     AllZeroCNN,
@@ -54,12 +54,12 @@ from concrete.ml.pytest.torch_models import (
     UnivariateModule,
     WhereNet,
 )
-from concrete.ml.quantization import QuantizedModule
+from torus.ml.quantization import QuantizedModule
 
 # pylint sees separated imports from concrete but does not understand they come from two different
 # packages/projects, disable the warning
 # pylint: disable=ungrouped-imports
-from concrete.ml.torch.compile import (
+from torus.ml.torch.compile import (
     _compile_torch_or_onnx_model,
     build_quantized_module,
     compile_brevitas_qat_model,
@@ -394,7 +394,7 @@ def accuracy_test_rounding(
             result = module.dequantize_output(q_result)
             results[key].append(result)
 
-    # Check modules predictions FHE simulation vs Concrete ML.
+    # Check modules predictions FHE simulation vs Torus ML.
     for key, module in compiled_modules.items():
 
         # low bit-width rounding is not behaving as expected with new simulation
@@ -1099,7 +1099,7 @@ def test_torch_padding(default_configuration, check_circuit_has_no_tlu):
     cml_output = quant_model.forward(test_input, fhe="disable")
 
     # We only care about checking that zeros added with padding are in the same positions
-    # between the torch output and the Concrete ML output
+    # between the torch output and the Torus ML output
     torch_output = torch_output > 0
     cml_output = cml_output > 0
 

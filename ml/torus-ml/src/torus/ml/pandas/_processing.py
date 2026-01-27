@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Tuple
 import numpy
 import pandas
 
-from concrete.ml.pandas._development import get_min_max_allowed
-from concrete.ml.quantization.quantizers import STABILITY_CONST
+from torus.ml.pandas._development import get_min_max_allowed
+from torus.ml.quantization.quantizers import STABILITY_CONST
 
 SCHEMA_FLOAT_KEYS = ["min", "max"]
 

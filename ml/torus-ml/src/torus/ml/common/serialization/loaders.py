@@ -7,7 +7,7 @@ from .decoder import ConcreteDecoder
 
 
 def loads(content: Union[str, bytes]) -> Any:
-    """Load any Concrete ML object that provide a `dump_dict` method.
+    """Load any Torus ML object that provide a `dump_dict` method.
 
     Arguments:
         content (Union[str, bytes]): A serialized object.
@@ -19,7 +19,7 @@ def loads(content: Union[str, bytes]) -> Any:
 
 
 def load(file: Union[IO[str], IO[bytes]]):
-    """Load any Concrete ML object that provide a `load_dict` method.
+    """Load any Torus ML object that provide a `load_dict` method.
 
     Arguments:
         file (Union[IO[str], IO[bytes]): The file containing the serialized object.

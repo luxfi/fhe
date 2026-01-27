@@ -4,17 +4,17 @@ This section provides a set of tools and guidelines to help users debug errors a
 
 ## Simulation
 
-The [simulation functionality](../explanations/compilation.md#fhe-simulation) of Concrete ML provides a way to evaluate, using clear data, the results that ML models produce on encrypted data. The simulation includes any probabilistic behavior FHE may induce. The simulation is implemented with [Concrete's simulation](https://docs.luxfhe.io/concrete/execution-analysis/simulation).
+The [simulation functionality](../explanations/compilation.md#fhe-simulation) of Torus ML provides a way to evaluate, using clear data, the results that ML models produce on encrypted data. The simulation includes any probabilistic behavior FHE may induce. The simulation is implemented with [Concrete's simulation](https://docs.luxfhe.io/concrete/execution-analysis/simulation).
 
 The simulation mode can be useful when developing and iterating on an ML model implementation. As FHE non-linear models work with integers up to 16 bits, with a trade-off between the number of bits and the FHE execution speed, the simulation can help to find the optimal model design.
 
 Simulation is much faster than FHE execution. This allows for faster debugging and model optimization. For example, this was used for the red/blue contours in the [Classifier Comparison notebook](../tutorials/ml_examples.md), as computing in FHE for the whole grid and all the classifiers would take significant time.
 
-The following example shows how to use the simulation mode in Concrete ML.
+The following example shows how to use the simulation mode in Torus ML.
 
 ```python
 from sklearn.datasets import fetch_openml, make_circles
-from concrete.ml.sklearn import RandomForestClassifier
+from torus.ml.sklearn import RandomForestClassifier
 
 n_bits = 2
 X, y = make_circles(n_samples=1000, noise=0.1, factor=0.6, random_state=0)
@@ -35,7 +35,7 @@ It is possible to avoid re-generating the keys of the models you are debugging. 
 
 ```python
 from sklearn.datasets import fetch_openml, make_circles
-from concrete.ml.sklearn import RandomForestClassifier
+from torus.ml.sklearn import RandomForestClassifier
 from concrete.fhe import Configuration
 debug_config = Configuration(
     enable_unsafe_features=True,
@@ -59,12 +59,12 @@ concrete_clf.compile(X, debug_config)
 
 **Error message**: `this [N]-bit value is used as an input to a table lookup`
 
-**Cause**: This error can occur when `rounding_threshold_bits` is not used and accumulated intermediate values in the computation exceed 16 bits. To pinpoint the model layer that causes the error, Concrete ML provides the [bitwidth_and_range_report](../references/api/concrete.ml.quantization.quantized_module.md#method-bitwidth_and_range_report) helper function. To use this function, the model must be compiled first so that it can be [simulated](fhe_assistant.md#simulation).
+**Cause**: This error can occur when `rounding_threshold_bits` is not used and accumulated intermediate values in the computation exceed 16 bits. To pinpoint the model layer that causes the error, Torus ML provides the [bitwidth_and_range_report](../references/api/torus.ml.quantization.quantized_module.md#method-bitwidth_and_range_report) helper function. To use this function, the model must be compiled first so that it can be [simulated](fhe_assistant.md#simulation).
 
 **Possible solutions**:
 
 - Reduce quantization `n_bits`. However, this may reduce accuracy. When quantization `n_bits` must be below 6, it is best to use [Quantization Aware Training](../deep-learning/fhe_friendly_models.md).
-- Use `rounding_threshold_bits`. This feature is described [here](../explanations/advanced_features.md#rounded-activations-and-quantizers). It is recommended to use the [`fhe.Exactness.APPROXIMATE`](../references/api/concrete.ml.torch.compile.md#function-compile_torch_model) setting, and set the rounding bits to 1 or 2 bits higher than the quantization `n_bits`
+- Use `rounding_threshold_bits`. This feature is described [here](../explanations/advanced_features.md#rounded-activations-and-quantizers). It is recommended to use the [`fhe.Exactness.APPROXIMATE`](../references/api/torus.ml.torch.compile.md#function-compile_torch_model) setting, and set the rounding bits to 1 or 2 bits higher than the quantization `n_bits`
 - Use [pruning](../explanations/pruning.md)
 
 #### 2. No crypto-parameters can be found
@@ -73,7 +73,7 @@ concrete_clf.compile(X, debug_config)
 
 **Cause**: This error occurs when cryptosystem parameters can not be found for the model bit-width, rounding mode and requested `p_error`, when using `rounding_threshold_bits` in the `compile_torch_model` function. With `rounding_threshold_bits` set, the 16-bit accumulator limit is relaxed, so the `this [N]-bit value is used as an input to a table lookup` does not occur. However, cryptosystem-parameters may still not exist for the model to be compiled.
 
-**Possible solutions**: The solutions in this case are similar to the ones for the previous error: reducing bit-width, or reducing the `rounding_threshold_bits`, or using the [`fhe.Exactness.APPROXIMATE`](../references/api/concrete.ml.torch.compile.md#function-compile_torch_model) rounding method can help. Additionally adjusting the tolerance for one-off errors using the `p_error` parameter can help, as explained in [this section](../explanations/advanced_features.md#approximate-computations).
+**Possible solutions**: The solutions in this case are similar to the ones for the previous error: reducing bit-width, or reducing the `rounding_threshold_bits`, or using the [`fhe.Exactness.APPROXIMATE`](../references/api/torus.ml.torch.compile.md#function-compile_torch_model) rounding method can help. Additionally adjusting the tolerance for one-off errors using the `p_error` parameter can help, as explained in [this section](../explanations/advanced_features.md#approximate-computations).
 
 #### 3. Quantization import failed
 

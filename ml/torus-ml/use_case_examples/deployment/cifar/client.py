@@ -21,7 +21,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
-from concrete.ml.deployment import FHEModelClient
+from torus.ml.deployment import FHEModelClient
 
 PORT = os.environ.get("PORT", "5000")
 IP = os.environ.get("IP", "localhost")

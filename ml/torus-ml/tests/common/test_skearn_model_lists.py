@@ -1,15 +1,15 @@
-"""Tests lists of models in Concrete ML."""
+"""Tests lists of models in Torus ML."""
 
-from concrete.ml.pytest.utils import MODELS_AND_DATASETS, UNIQUE_MODELS_AND_DATASETS
-from concrete.ml.sklearn import (
+from torus.ml.pytest.utils import MODELS_AND_DATASETS, UNIQUE_MODELS_AND_DATASETS
+from torus.ml.sklearn import (
     _get_sklearn_all_models,
     _get_sklearn_linear_models,
     _get_sklearn_neighbors_models,
     _get_sklearn_neural_net_models,
     _get_sklearn_tree_models,
 )
-from concrete.ml.sklearn.glm import GammaRegressor, PoissonRegressor, TweedieRegressor
-from concrete.ml.sklearn.linear_model import (
+from torus.ml.sklearn.glm import GammaRegressor, PoissonRegressor, TweedieRegressor
+from torus.ml.sklearn.linear_model import (
     ElasticNet,
     Lasso,
     LinearRegression,
@@ -18,16 +18,16 @@ from concrete.ml.sklearn.linear_model import (
     SGDClassifier,
     SGDRegressor,
 )
-from concrete.ml.sklearn.neighbors import KNeighborsClassifier
-from concrete.ml.sklearn.qnn import NeuralNetClassifier, NeuralNetRegressor
-from concrete.ml.sklearn.rf import RandomForestClassifier, RandomForestRegressor
-from concrete.ml.sklearn.svm import LinearSVC, LinearSVR
-from concrete.ml.sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from concrete.ml.sklearn.xgb import XGBClassifier, XGBRegressor
+from torus.ml.sklearn.neighbors import KNeighborsClassifier
+from torus.ml.sklearn.qnn import NeuralNetClassifier, NeuralNetRegressor
+from torus.ml.sklearn.rf import RandomForestClassifier, RandomForestRegressor
+from torus.ml.sklearn.svm import LinearSVC, LinearSVR
+from torus.ml.sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from torus.ml.sklearn.xgb import XGBClassifier, XGBRegressor
 
 
 def test_get_sklearn_models():
-    """List all available models in Concrete ML."""
+    """List all available models in Torus ML."""
     all_models = _get_sklearn_all_models()
     linear_models = _get_sklearn_linear_models()
     tree_models = _get_sklearn_tree_models()

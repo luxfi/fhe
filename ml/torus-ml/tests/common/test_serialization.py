@@ -21,17 +21,17 @@ from skops.io.exceptions import UntrustedTypesFoundException
 from skorch.dataset import ValidSplit
 from torch import nn
 
-from concrete.ml.common.serialization import (
+from torus.ml.common.serialization import (
     SUPPORTED_TORCH_ACTIVATIONS,
     UNSUPPORTED_TORCH_ACTIVATIONS,
     USE_SKOPS,
 )
-from concrete.ml.common.serialization.dumpers import dumps
-from concrete.ml.common.serialization.loaders import loads
-from concrete.ml.pytest.torch_models import SimpleNet
-from concrete.ml.pytest.utils import check_serialization, values_are_equal
-from concrete.ml.quantization import QuantizedModule
-from concrete.ml.sklearn import (
+from torus.ml.common.serialization.dumpers import dumps
+from torus.ml.common.serialization.loaders import loads
+from torus.ml.pytest.torch_models import SimpleNet
+from torus.ml.pytest.utils import check_serialization, values_are_equal
+from torus.ml.quantization import QuantizedModule
+from torus.ml.sklearn import (
     LinearRegression,
     _get_sklearn_all_models,
     _get_sklearn_linear_models,
@@ -346,7 +346,7 @@ def test_error_raises_loads(unsupported_object, expected_error, expected_message
 def test_torch_activations():
     """Test supported and unsupported torch activation list."""
 
-    # Torch activation list defined in Concrete ML
+    # Torch activation list defined in Torus ML
     all_torch_activations_cml = [
         activation.__name__
         for activation in SUPPORTED_TORCH_ACTIVATIONS + UNSUPPORTED_TORCH_ACTIVATIONS
@@ -361,6 +361,6 @@ def test_torch_activations():
 
     assert sorted(all_torch_activations_cml) == sorted(all_torch_activations_torch), (
         "Difference found between activations imported from Torch and the ones considered in "
-        "Concrete ML: "
+        "Torus ML: "
         f"{list(set(all_torch_activations_cml).symmetric_difference(all_torch_activations_torch))}"
     )

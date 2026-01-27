@@ -4,10 +4,10 @@ import pytest
 import torch
 from torch import nn
 
-from concrete.ml.pytest.torch_models import FCSmall
-from concrete.ml.quantization.base_quantized_op import DEFAULT_MODEL_BITS
-from concrete.ml.quantization.post_training import ONNXConverter
-from concrete.ml.torch.numpy_module import NumpyModule
+from torus.ml.pytest.torch_models import FCSmall
+from torus.ml.quantization.base_quantized_op import DEFAULT_MODEL_BITS
+from torus.ml.quantization.post_training import ONNXConverter
+from torus.ml.torch.numpy_module import NumpyModule
 
 # Instantiate a simple NumpyModule used for initializing the ONNXConverter. The actual model is not
 # tested here.

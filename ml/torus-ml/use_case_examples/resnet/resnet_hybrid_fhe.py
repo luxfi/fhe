@@ -19,7 +19,7 @@ import torch
 from resnet import ResNet18_Weights, resnet18_custom
 from utils_resnet import ImageNetProcessor
 
-from concrete.ml.torch.hybrid_model import HybridFHEModel
+from torus.ml.torch.hybrid_model import HybridFHEModel
 
 BASE_DIR = Path(__file__).resolve().parent
 CALIBRATION_SAMPLES = 10

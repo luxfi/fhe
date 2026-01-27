@@ -7,10 +7,10 @@ import numpy
 import onnx
 import pytest
 
-from concrete.ml.common.utils import is_model_class_in_a_list
-from concrete.ml.pytest.utils import UNIQUE_MODELS_AND_DATASETS, get_model_name
-from concrete.ml.sklearn import _get_sklearn_tree_models
-from concrete.ml.sklearn.qnn import NeuralNetClassifier, NeuralNetRegressor
+from torus.ml.common.utils import is_model_class_in_a_list
+from torus.ml.pytest.utils import UNIQUE_MODELS_AND_DATASETS, get_model_name
+from torus.ml.sklearn import _get_sklearn_tree_models
+from torus.ml.sklearn.qnn import NeuralNetClassifier, NeuralNetRegressor
 
 # Remark that the dump tests for torch module is directly done in test_compile_torch.py
 

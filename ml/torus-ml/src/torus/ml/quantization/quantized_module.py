@@ -130,7 +130,7 @@ class QuantizedModule:
         )
 
         # Set base attributes for API consistency. This could be avoided if an abstract base class
-        # is created for both Concrete ML models and QuantizedModule
+        # is created for both Torus ML models and QuantizedModule
         # FIXME: https://github.com/luxfi/concrete-ml-internal/issues/2899
         self.input_quantizers: List[UniformQuantizer] = []
         self.output_quantizers: List[UniformQuantizer] = []
@@ -430,11 +430,11 @@ class QuantizedModule:
         Args:
             *x (numpy.ndarray): Input float values to consider.
             fhe (Union[FheMode, str]): The mode to use for prediction. Can be FheMode.DISABLE for
-                Concrete ML Python inference, FheMode.SIMULATE for FHE simulation and
+                Torus ML Python inference, FheMode.SIMULATE for FHE simulation and
                 FheMode.EXECUTE for actual FHE execution. Can also be the string representation of
                 any of these values. Default to FheMode.DISABLE.
             debug (bool): In debug mode, returns quantized intermediary values of the computation.
-                This is useful when a model's intermediary values in Concrete ML need to be
+                This is useful when a model's intermediary values in Torus ML need to be
                 compared with the intermediary values obtained in pytorch/onnx. When set, the
                 second return value is a dictionary containing ONNX operation names as keys and,
                 as values, their input QuantizedArray or ndarray. The use can thus extract the
@@ -493,7 +493,7 @@ class QuantizedModule:
         Args:
             *q_x (numpy.ndarray): Input integer values to consider.
             fhe (Union[FheMode, str]): The mode to use for prediction. Can be FheMode.DISABLE for
-                Concrete ML Python inference, FheMode.SIMULATE for FHE simulation and
+                Torus ML Python inference, FheMode.SIMULATE for FHE simulation and
                 FheMode.EXECUTE for actual FHE execution. Can also be the string representation of
                 any of these values. Default to FheMode.DISABLE.
 
