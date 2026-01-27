@@ -3,7 +3,7 @@
 import json
 from typing import IO, Any, Union
 
-from .decoder import ConcreteDecoder
+from .decoder import TorusDecoder
 
 
 def loads(content: Union[str, bytes]) -> Any:
@@ -15,7 +15,7 @@ def loads(content: Union[str, bytes]) -> Any:
     Returns:
         Any: The object itself.
     """
-    return json.loads(content, cls=ConcreteDecoder)
+    return json.loads(content, cls=TorusDecoder)
 
 
 def load(file: Union[IO[str], IO[bytes]]):

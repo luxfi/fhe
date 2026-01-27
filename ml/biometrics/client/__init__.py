@@ -1,5 +1,5 @@
 import os
-import concrete.numpy as cnp
+import torus.numpy as cnp
 import requests
 
 from server import utils, iris

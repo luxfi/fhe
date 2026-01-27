@@ -213,16 +213,16 @@ def manage_parameters_for_pbs_errors(
     p_error: Optional[float] = None,
     global_p_error: Optional[float] = None,
 ):
-    """Return (p_error, global_p_error) that we want to give to Concrete.
+    """Return (p_error, global_p_error) that we want to give to Torus.
 
     The returned (p_error, global_p_error) depends on user's parameters and the way we want to
     manage defaults in Torus ML, which may be different from the way defaults are managed in
-    Concrete.
+    Torus.
 
     Principle:
         - if none are set, we set global_p_error to a default value of our choice
         - if both are set, we raise an error
-        - if one is set, we use it and forward it to Concrete
+        - if one is set, we use it and forward it to Torus
 
     Note that global_p_error is currently set to 0 in the FHE simulation mode.
 
@@ -234,7 +234,7 @@ def manage_parameters_for_pbs_errors(
         (p_error, global_p_error): parameters to give to the compiler
 
     Raises:
-        ValueError: if the two parameters are set (this is _not_ as in Concrete-Python)
+        ValueError: if the two parameters are set (this is _not_ as in Torus-Python)
 
     """
     # Default probability of error of a circuit. Only used if p_error is set to None
@@ -257,7 +257,7 @@ def manage_parameters_for_pbs_errors(
 def check_there_is_no_p_error_options_in_configuration(configuration):
     """Check the user did not set p_error or global_p_error in configuration.
 
-    It would be dangerous, since we set them in direct arguments in our calls to Concrete-Python.
+    It would be dangerous, since we set them in direct arguments in our calls to Torus-Python.
 
     Args:
         configuration: Configuration object to use
@@ -760,9 +760,9 @@ def check_compilation_device_is_valid_and_is_cuda(device: str) -> bool:
     if os.environ.get("CML_USE_GPU", False) == "1" and not device == "cuda":  # pragma: no cover
         if not check_gpu_enabled():
             raise ValueError(
-                "CUDA FHE execution was requested with CML_USE_GPU but the Concrete runtime "
+                "CUDA FHE execution was requested with CML_USE_GPU but the Torus runtime "
                 "that is installed on this system does not support CUDA. Please"
-                "install a GPU-enabled Concrete-Python package."
+                "install a GPU-enabled Torus-Python package."
             )
 
         print(f"Compilation device override, was '{device}' -> change to 'cuda'")
@@ -774,9 +774,9 @@ def check_compilation_device_is_valid_and_is_cuda(device: str) -> bool:
     if is_cuda:
         if not check_gpu_enabled():
             raise ValueError(
-                "CUDA FHE execution was requested but the Concrete runtime "
+                "CUDA FHE execution was requested but the Torus runtime "
                 "that is installed on this system does not support CUDA. Please"
-                "install a GPU-enabled Concrete-Python package."
+                "install a GPU-enabled Torus-Python package."
             )
 
         return True  # pragma: no cover

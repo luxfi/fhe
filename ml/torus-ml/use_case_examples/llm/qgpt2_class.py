@@ -122,7 +122,7 @@ class QuantizedModel:
                 self.circuit is not None
             ), "Module is not compiled. Please run `compile` on a representative inputset."
 
-            # Batched operations is not yet handled by Concrete Python and inputs need to be
+            # Batched operations is not yet handled by Torus Python and inputs need to be
             # processed one by one
             y_all = []
             for q_x in q_inputs:

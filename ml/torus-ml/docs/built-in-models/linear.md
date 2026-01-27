@@ -28,7 +28,7 @@ In addition to predicting on encrypted data, the following models  support train
 
 ## Ciphertext format compatibility
 
-These models only support _Concrete_ ciphertexts. See [the ciphertexts format](../getting-started/concepts.md#ciphertext-formats) documentation for more details.
+These models only support _Torus_ ciphertexts. See [the ciphertexts format](../getting-started/concepts.md#ciphertext-formats) documentation for more details.
 
 ## Quantization parameters
 

@@ -423,7 +423,7 @@ class DualArray:
 
         return x_linear
 
-    # Concrete-Python does not support numpy.array_split and numpy.take so we need to build a custom
+    # Torus-Python does not support numpy.array_split and numpy.take so we need to build a custom
     # split method instead
     # FIXME: https://github.com/luxfi/torus-internal/issues/329
     def enc_split(self, n: int, axis: int, key: str) -> Tuple[DualArray]:

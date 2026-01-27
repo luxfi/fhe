@@ -146,7 +146,7 @@ def numpy_where_body(
         numpy.ndarray: numpy.where(c, t, f)
 
     """
-    # Use numpy.where (it is currently supported by Concrete) once we investigate why it outputs a
+    # Use numpy.where (it is currently supported by Torus) once we investigate why it outputs a
     # a different dtype then the following workaround
     # FIXME: https://github.com/luxfi/torus-ml-internal/issues/2738
     return c * t + (1.0 - c) * f
@@ -283,7 +283,7 @@ def numpy_gemm(
     Returns:
         Tuple[numpy.ndarray]: The tuple containing the result tensor
     """
-    # If alpha and beta are integer, apply the int type for Concrete to see they are integers
+    # If alpha and beta are integer, apply the int type for Torus to see they are integers
     processed_alpha = int(alpha) if round(alpha) == alpha else alpha
     processed_beta = int(beta) if round(beta) == beta else beta
 
@@ -787,7 +787,7 @@ def numpy_log(
         Tuple[numpy.ndarray]: Output tensor
     """
 
-    # Epsilon is here to avoid problems with 0 or negative values, which may happen when Concrete
+    # Epsilon is here to avoid problems with 0 or negative values, which may happen when Torus
     # creates the table (even if these problematic values would normally never be used)
     epsilon = 10**-8
 
@@ -1288,7 +1288,7 @@ def numpy_conv(
     )
     assert_true(
         bool(numpy.all(numpy.asarray(dilations) == 1)),
-        "The convolution operator in Concrete does not support dilation",
+        "The convolution operator in Torus does not support dilation",
     )
 
     weight_channels = x.shape[1]
@@ -1308,7 +1308,7 @@ def numpy_conv(
 
     is_conv1d = len(kernel_shape) == 1
 
-    # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
+    # Workaround for handling torch's Conv1d operator until it is supported by Torus Python
     # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
     if is_conv1d:
         x_pad = numpy.expand_dims(x_pad, axis=-2)
@@ -1329,7 +1329,7 @@ def numpy_conv(
         group=group,
     )
 
-    # Workaround for handling torch's Conv1d operator until it is supported by Concrete Python
+    # Workaround for handling torch's Conv1d operator until it is supported by Torus Python
     # FIXME: https://github.com/luxfi/torus-ml-internal/issues/4117
     if is_conv1d:
         res = numpy.squeeze(res, axis=-2)
