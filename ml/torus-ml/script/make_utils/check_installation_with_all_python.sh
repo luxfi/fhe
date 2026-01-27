@@ -79,7 +79,7 @@ do
 
     elif [ "$METHOD" == "pip" ]
     then
-        pip install concrete-ml
+        pip install torus-ml
 
     elif [ "$METHOD" == "sync_env" ]
     then
@@ -92,8 +92,8 @@ do
         rm -rf "${TMP_DIR}"
         mkdir "${TMP_DIR}"
         cd "${TMP_DIR}"
-        git clone https://github.com/zama-ai/concrete-ml
-        cd concrete-ml
+        git clone https://github.com/zama-ai/torus-ml
+        cd torus-ml
         make sync_env
         cd ../..
         rm -rf "${TMP_DIR}"

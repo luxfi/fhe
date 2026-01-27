@@ -1,4 +1,4 @@
-concrete-ml
+torus-ml
 jupyter
 transformers==4.38.0
 matplotlib
