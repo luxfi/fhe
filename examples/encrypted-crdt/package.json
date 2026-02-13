@@ -1,0 +1,21 @@
+{
+  "name": "@luxfhe/example-encrypted-crdt",
+  "version": "1.0.0",
+  "description": "Encrypted CRDT for offline-first privacy-preserving collaboration (PIP-0013)",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat task:deploy-crdt",
+    "task:set": "hardhat task:set-register",
+    "task:get": "hardhat task:get-register",
+    "task:merge": "hardhat task:merge-registers"
+  },
+  "devDependencies": {
+    "@luxfhe/hardhat-plugin": "^0.5.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.3.0",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.0.0"
+  }
+}

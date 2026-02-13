@@ -1,0 +1,22 @@
+{
+  "name": "@luxfhe/example-shadow-governance",
+  "version": "1.0.0",
+  "description": "Shadow Government Protocol - anonymous parallel governance with FHE (PIP-7010)",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat task:deploy-gov",
+    "task:propose": "hardhat task:propose",
+    "task:vote": "hardhat task:vote",
+    "task:tally": "hardhat task:tally",
+    "task:ministries": "hardhat task:list-ministries"
+  },
+  "devDependencies": {
+    "@luxfhe/hardhat-plugin": "^0.5.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.3.0",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.0.0"
+  }
+}
