@@ -1,0 +1,21 @@
+{
+  "name": "@luxfhe/example-data-seal",
+  "version": "1.0.0",
+  "description": "Verifiable Data Integrity Seal - FHE-encrypted tamper-proof document sealing (PIP-0010)",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat task:deploy-seal",
+    "task:seal": "hardhat task:seal",
+    "task:verify": "hardhat task:verify-seal",
+    "task:batch-seal": "hardhat task:batch-seal"
+  },
+  "devDependencies": {
+    "@luxfhe/hardhat-plugin": "^0.5.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.3.0",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.0.0"
+  }
+}
