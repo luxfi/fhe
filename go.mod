@@ -5,7 +5,7 @@ go 1.25.5
 require (
 	github.com/google/uuid v1.6.0
 	github.com/luxfi/lattice/v7 v7.0.0
-	github.com/luxfi/mdns v0.0.0-00010101000000-000000000000
+	github.com/luxfi/mdns v0.1.0
 	github.com/urfave/cli/v3 v3.6.2
 )
 

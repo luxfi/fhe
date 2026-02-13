@@ -82,3 +82,11 @@ forge-cache/
 .git-backup/
 python-sdk
 ml-sdk
+
+# Compiled example binaries
+/crdt
+/mediaseal
+/provenance
+/seal
+/stats
+/vote
