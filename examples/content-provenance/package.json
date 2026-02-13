@@ -1,0 +1,21 @@
+{
+  "name": "@luxfhe/example-content-provenance",
+  "version": "1.0.0",
+  "description": "Content Provenance & Media Authentication with FHE (PIP-0011)",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat task:deploy",
+    "task:register": "hardhat task:register-content",
+    "task:attest": "hardhat task:attest-output",
+    "task:verify": "hardhat task:verify-provenance"
+  },
+  "devDependencies": {
+    "@luxfhe/hardhat-plugin": "^0.5.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.3.0",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.0.0"
+  }
+}
