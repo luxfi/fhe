@@ -23,6 +23,7 @@ import (
 
 	"github.com/luxfi/fhe"
 	"github.com/luxfi/fhe/pkg/membership"
+	"github.com/luxfi/fhe/pkg/store"
 	"github.com/luxfi/fhe/pkg/threshold"
 	"github.com/luxfi/mdns"
 )
@@ -81,6 +82,12 @@ func main() {
 						Name:  "log-level",
 						Usage: "Log level: debug, info, warn, error",
 						Value: "info",
+					},
+					&cli.StringFlag{
+						Name:    "password",
+						Usage:   "ZapDB encryption password (or set FHED_PASSWORD env)",
+						Sources: cli.EnvVars("FHED_PASSWORD"),
+						Value:   "",
 					},
 				},
 				Action: runDaemon,
@@ -184,6 +191,7 @@ type FHEDaemon struct {
 	membership    *membership.Manager
 	discovery     *mdns.Discovery
 
+	store   *store.Store
 	dataDir string
 	logger  *slog.Logger
 
@@ -249,11 +257,24 @@ func runDaemon(ctx context.Context, c *cli.Command) error {
 		httpPort = 8448
 	}
 
+	// Open encrypted ZapDB for key material and ciphertext storage
+	password := c.String("password")
+	if password == "" {
+		password = "fhed-dev-" + nodeID // Dev default; production must set FHED_PASSWORD
+		logger.Warn("No password set — using dev default. Set FHED_PASSWORD for production.")
+	}
+	db, err := store.Open(filepath.Join(dataDir, "zapdb"), password)
+	if err != nil {
+		return fmt.Errorf("failed to open zapdb: %w", err)
+	}
+	defer db.Close()
+
 	daemon := &FHEDaemon{
 		nodeID:        nodeID,
 		params:        params,
 		thresholdMode: mode == "threshold",
 		thresholdT:    thresholdT,
+		store:         db,
 		dataDir:       dataDir,
 		logger:        logger,
 	}
@@ -375,25 +396,23 @@ func getParameters(name string) (fhe.Parameters, error) {
 }
 
 func (d *FHEDaemon) loadOrGenerateKeys() error {
-	secretKeyPath := filepath.Join(d.dataDir, "secret.key")
-	publicKeyPath := filepath.Join(d.dataDir, "public.key")
-	bootstrapKeyPath := filepath.Join(d.dataDir, "bootstrap.key")
+	keyID := "default"
 
-	// Try to load existing keys
-	if _, err := os.Stat(secretKeyPath); err == nil {
-		d.logger.Info("Loading existing keys", "path", d.dataDir)
+	// Try to load existing keys from ZapDB
+	if d.store.HasSecretKey(keyID) {
+		d.logger.Info("Loading existing keys from ZapDB")
 
-		skData, err := os.ReadFile(secretKeyPath)
+		skData, err := d.store.GetSecretKey(keyID)
 		if err != nil {
 			return fmt.Errorf("failed to read secret key: %w", err)
 		}
 
-		pkData, err := os.ReadFile(publicKeyPath)
+		pkData, err := d.store.GetPublicKey(keyID)
 		if err != nil {
 			return fmt.Errorf("failed to read public key: %w", err)
 		}
 
-		bskData, err := os.ReadFile(bootstrapKeyPath)
+		bskData, err := d.store.GetBootstrapKey(keyID)
 		if err != nil {
 			return fmt.Errorf("failed to read bootstrap key: %w", err)
 		}
@@ -413,7 +432,6 @@ func (d *FHEDaemon) loadOrGenerateKeys() error {
 			return fmt.Errorf("failed to unmarshal bootstrap key: %w", err)
 		}
 
-		// Create FHE components
 		d.encryptor = fhe.NewEncryptor(d.params, d.secretKey)
 		d.decryptor = fhe.NewDecryptor(d.params, d.secretKey)
 		d.evaluator = fhe.NewEvaluator(d.params, d.bootstrapKey)
@@ -421,32 +439,31 @@ func (d *FHEDaemon) loadOrGenerateKeys() error {
 		return nil
 	}
 
-	// Generate new keys
-	d.logger.Info("Generating new FHE keys (this may take a moment)...", "path", d.dataDir)
+	// Generate new keys and store in ZapDB
+	d.logger.Info("Generating new FHE keys (this may take a moment)...")
 
 	keygen := fhe.NewKeyGenerator(d.params)
 	d.secretKey, d.publicKey = keygen.GenKeyPair()
 	d.bootstrapKey = keygen.GenBootstrapKey(d.secretKey)
 
-	// Create FHE components
 	d.encryptor = fhe.NewEncryptor(d.params, d.secretKey)
 	d.decryptor = fhe.NewDecryptor(d.params, d.secretKey)
 	d.evaluator = fhe.NewEvaluator(d.params, d.bootstrapKey)
 
-	// Save keys
+	// Persist to encrypted ZapDB
 	skData, err := d.secretKey.MarshalBinary()
 	if err != nil {
 		return fmt.Errorf("failed to marshal secret key: %w", err)
 	}
-	if err := os.WriteFile(secretKeyPath, skData, 0600); err != nil {
-		return fmt.Errorf("failed to write secret key: %w", err)
+	if err := d.store.PutSecretKey(keyID, skData); err != nil {
+		return fmt.Errorf("failed to store secret key: %w", err)
 	}
 
 	pkData, err := d.publicKey.MarshalBinary()
 	if err != nil {
 		return fmt.Errorf("failed to marshal public key: %w", err)
 	}
-	if err := os.WriteFile(publicKeyPath, pkData, 0644); err != nil {
+	if err := d.store.PutPublicKey(keyID, pkData); err != nil {
 		return fmt.Errorf("failed to write public key: %w", err)
 	}
 
@@ -454,27 +471,20 @@ func (d *FHEDaemon) loadOrGenerateKeys() error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal bootstrap key: %w", err)
 	}
-	if err := os.WriteFile(bootstrapKeyPath, bskData, 0644); err != nil {
-		return fmt.Errorf("failed to write bootstrap key: %w", err)
+	if err := d.store.PutBootstrapKey(keyID, bskData); err != nil {
+		return fmt.Errorf("failed to store bootstrap key: %w", err)
 	}
 
-	d.logger.Info("Keys generated and saved")
+	d.logger.Info("Keys generated and saved to ZapDB")
 	return nil
 }
 
 func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
-	keySharePath := filepath.Join(d.dataDir, "keyshare.bin")
-	publicKeyPath := filepath.Join(d.dataDir, "public.key")
-	bootstrapKeyPath := filepath.Join(d.dataDir, "bootstrap.key")
+	keyID := "threshold-default"
 
-	// Try to load existing key share
-	if _, err := os.Stat(keySharePath); err == nil {
-		d.logger.Info("Loading existing key share", "path", d.dataDir)
-
-		ksData, err := os.ReadFile(keySharePath)
-		if err != nil {
-			return fmt.Errorf("failed to read key share: %w", err)
-		}
+	// Try to load existing key share from ZapDB
+	if ksData, err := d.store.GetSecretKey(keyID); err == nil {
+		d.logger.Info("Loading existing key share from ZapDB")
 
 		ks, err := threshold.UnmarshalKeyShare(ksData)
 		if err != nil {
@@ -482,8 +492,7 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 		}
 		d.keyShare = ks
 
-		// Load public key
-		pkData, err := os.ReadFile(publicKeyPath)
+		pkData, err := d.store.GetPublicKey(keyID)
 		if err != nil {
 			return fmt.Errorf("failed to read public key: %w", err)
 		}
@@ -492,8 +501,7 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 			return fmt.Errorf("failed to unmarshal public key: %w", err)
 		}
 
-		// Load bootstrap key if available
-		if bskData, err := os.ReadFile(bootstrapKeyPath); err == nil {
+		if bskData, err := d.store.GetBootstrapKey(keyID); err == nil {
 			d.bootstrapKey = new(fhe.BootstrapKey)
 			if err := d.bootstrapKey.UnmarshalBinary(bskData); err != nil {
 				d.logger.Warn("Failed to load bootstrap key, evaluation will not work", "error", err)
@@ -510,11 +518,6 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 		return nil
 	}
 
-	// In threshold mode, we need to wait for distributed keygen
-	d.logger.Info("No key share found. Waiting for distributed keygen or use 'fhed keygen --threshold' first")
-
-	// For now, generate a placeholder (in production, this would be DKG)
-	// This is just for demo purposes
 	d.logger.Warn("Generating single-party threshold keys for demo (NOT secure for production)")
 
 	sessionID := uuid.New().String()
@@ -523,7 +526,6 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 		return fmt.Errorf("failed to generate threshold keys: %w", err)
 	}
 
-	// Take the first share for this node
 	d.keyShare = result.Shares[0]
 	d.publicKey = result.PublicKey
 	d.bootstrapKey = result.BootstrapKey
@@ -532,32 +534,30 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 		d.evaluator = fhe.NewEvaluator(d.params, d.bootstrapKey)
 	}
 
-	// Save key share
+	// Persist to ZapDB
 	ksData, err := threshold.MarshalKeyShare(d.keyShare)
 	if err != nil {
 		return fmt.Errorf("failed to marshal key share: %w", err)
 	}
-	if err := os.WriteFile(keySharePath, ksData, 0600); err != nil {
-		return fmt.Errorf("failed to write key share: %w", err)
+	if err := d.store.PutSecretKey(keyID, ksData); err != nil {
+		return fmt.Errorf("failed to store key share: %w", err)
 	}
 
-	// Save public key
 	pkData, err := d.publicKey.MarshalBinary()
 	if err != nil {
 		return fmt.Errorf("failed to marshal public key: %w", err)
 	}
-	if err := os.WriteFile(publicKeyPath, pkData, 0644); err != nil {
-		return fmt.Errorf("failed to write public key: %w", err)
+	if err := d.store.PutPublicKey(keyID, pkData); err != nil {
+		return fmt.Errorf("failed to store public key: %w", err)
 	}
 
-	// Save bootstrap key
 	if d.bootstrapKey != nil {
 		bskData, err := d.bootstrapKey.MarshalBinary()
 		if err != nil {
 			return fmt.Errorf("failed to marshal bootstrap key: %w", err)
 		}
-		if err := os.WriteFile(bootstrapKeyPath, bskData, 0644); err != nil {
-			return fmt.Errorf("failed to write bootstrap key: %w", err)
+		if err := d.store.PutBootstrapKey(keyID, bskData); err != nil {
+			return fmt.Errorf("failed to store bootstrap key: %w", err)
 		}
 	}
 
