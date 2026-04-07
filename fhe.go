@@ -60,12 +60,12 @@ var (
 
 	// PN11QP54 provides ~128-bit security with higher precision
 	// Uses same dimension for LWE and BR.
-	// N=2048, Q=~2^54
+	// N=2048, Q=0x3FFFFFFFFED001 (prime, 54-bit, Q ≡ 1 mod 4096)
 	PN11QP54 = ParametersLiteral{
 		LogNLWE:              11, // Same as BR
 		LogNBR:               11,
-		QLWE:                 0x3FFFFFFFFFC0001, // Same modulus
-		QBR:                  0x3FFFFFFFFFC0001, // ~2^54
+		QLWE:                 0x3FFFFFFFFED001, // NTT-friendly prime ~2^54
+		QBR:                  0x3FFFFFFFFED001, // Q ≡ 1 (mod 2*2048)
 		BaseTwoDecomposition: 10,
 	}
 
