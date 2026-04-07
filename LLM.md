@@ -322,7 +322,7 @@ fhed reshare --input ./keys --new-t 3 --new-n 5 --output ./reshared
 
 ### Parameters
 - `PN10QP27` (default) - ~128-bit security, good performance
-- `PN11QP54` - ~128-bit security, higher precision
+- `PN11QP54` - ~128-bit security, higher precision (Q=0x3FFFFFFFFED001, 54-bit prime)
 - `STD128` - OpenFHE compatible
 
 ### Example Usage
