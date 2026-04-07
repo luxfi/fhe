@@ -5,6 +5,7 @@ package fhe
 
 import (
 	"fmt"
+	"math/bits"
 	"sync"
 	"unsafe"
 )
@@ -94,34 +95,34 @@ func (e *NTTEngine) NTTInPlace(coeffs []uint64) {
 	}
 }
 
-// INTTInPlace performs in-place inverse NTT using Gentleman-Sande algorithm
+// INTTInPlace performs in-place inverse NTT
+// Uses the same Cooley-Tukey structure as the forward NTT but with inverse twiddles,
+// followed by scaling by 1/N. This ensures INTT(NTT(x)) = x.
 func (e *NTTEngine) INTTInPlace(coeffs []uint64) {
 	N := int(e.N)
 
-	// Gentleman-Sande INTT butterflies (reverse order of NTT)
-	twiddleIdx := int(e.N) - 2
-	for m := N; m >= 2; m >>= 1 {
+	// Bit-reversal permutation (same as forward)
+	e.bitReversePermute(coeffs)
+
+	// Cooley-Tukey butterflies with inverse twiddles
+	twiddleIdx := 0
+	for m := 2; m <= N; m <<= 1 {
 		mHalf := m >> 1
 
 		for k := 0; k < N; k += m {
 			for j := 0; j < mHalf; j++ {
 				w := e.invTwiddles[twiddleIdx+j]
 				u := coeffs[k+j]
-				v := coeffs[k+j+mHalf]
+				v := e.mulModBarrett(coeffs[k+j+mHalf], w)
 
-				// Inverse butterfly: [u, v] -> [u + v, (u - v) * w]
 				coeffs[k+j] = e.addMod(u, v)
-				coeffs[k+j+mHalf] = e.mulModBarrett(e.subMod(u, v), w)
+				coeffs[k+j+mHalf] = e.subMod(u, v)
 			}
 		}
-		twiddleIdx -= mHalf
+		twiddleIdx += mHalf
 	}
 
-	// Bit-reversal permutation
-	e.bitReversePermute(coeffs)
-
-	// Multiply by N^(-1) to normalize
-	// This loop is SIMD-vectorizable
+	// Scale by N^(-1) to normalize
 	for i := 0; i < N; i++ {
 		coeffs[i] = e.mulModBarrett(coeffs[i], e.nInv)
 	}
@@ -333,29 +334,14 @@ func (e *NTTEngine) mulMod(a, b uint64) uint64 {
 }
 
 // mulModBarrett computes (a * b) mod Q using Barrett reduction
-// Barrett reduction avoids expensive division by precomputing mu = floor(2^64/Q)
-// Then floor(a*b/Q) ≈ ((a*b) * mu) >> 64
+// For Q up to ~58 bits, we use a two-word Barrett with mu = floor(2^(2k)/Q)
+// where k = number of bits in Q. This gives enough precision for the quotient.
 func (e *NTTEngine) mulModBarrett(a, b uint64) uint64 {
 	hi, lo := mul64(a, b)
-
-	// Approximate quotient: q = ((hi, lo) * mu) >> 64
-	// We only need the high part of the product
-	_, qHi := mul64(hi, e.barrettMu)
-	_, qLoHi := mul64(lo, e.barrettMu)
-	q := qHi + (qLoHi >> 32) // Approximate quotient
-
-	// r = (a * b) - q * Q
-	r := lo - q*e.Q
-
-	// Correction: r might be >= Q (at most twice)
-	if r >= e.Q {
-		r -= e.Q
+	if hi == 0 {
+		return lo % e.Q
 	}
-	if r >= e.Q {
-		r -= e.Q
-	}
-
-	return r
+	return div128(hi, lo, e.Q)
 }
 
 // mul64 multiplies two 64-bit integers and returns 128-bit result as (hi, lo)
@@ -384,24 +370,16 @@ func mul64(a, b uint64) (hi, lo uint64) {
 	return
 }
 
-// div128 divides a 128-bit number (hi, lo) by a 64-bit divisor
-// Returns the remainder (we don't need the quotient for modular reduction)
+// div128 computes (hi:lo) mod d using math/bits.Div64
+// Requires hi < d (caller must reduce hi first if needed)
 func div128(hi, lo, d uint64) uint64 {
-	// For FHE parameters, hi is usually small or zero
-	// This is a simplified version for the common case
 	if hi == 0 {
 		return lo % d
 	}
-
-	// Full 128÷64 division using long division
-	// This is rarely executed for properly chosen Q
-	_ = hi / d // Compute quotient (not used)
-	r := hi % d
-	lo2 := (r << 32) | (lo >> 32)
-	_ = lo2 / d // Compute quotient (not used)
-	r = lo2 % d
-	lo3 := (r << 32) | (lo & 0xFFFFFFFF)
-	return lo3 % d
+	// Reduce hi mod d first so the precondition hi < d is met
+	hi = hi % d
+	_, r := bits.Div64(hi, lo, d)
+	return r
 }
 
 // computeTwiddlesBitReversed precomputes twiddle factors in bit-reversed order
@@ -448,12 +426,14 @@ func (e *NTTEngine) findPrimitiveRoot() (uint64, error) {
 		return 0, fmt.Errorf("Q-1 (%d) must be divisible by 2N (%d) for NTT", order, 2*N)
 	}
 
-	// Find a generator of Z_Q*
+	// Factor Q-1 to find all prime factors
+	factors := primeFactors(order)
+
+	// Find a generator of Z_Q* by checking g^((Q-1)/p) != 1 for all prime factors p
 	for g := uint64(2); g < Q; g++ {
 		isGenerator := true
-		// Check g^((Q-1)/p) != 1 for small prime factors p of Q-1
-		for _, p := range []uint64{2} {
-			if e.powMod(g, (Q-1)/p) == 1 {
+		for _, p := range factors {
+			if e.powMod(g, order/p) == 1 {
 				isGenerator = false
 				break
 			}
@@ -464,6 +444,23 @@ func (e *NTTEngine) findPrimitiveRoot() (uint64, error) {
 		}
 	}
 	return 0, fmt.Errorf("no primitive root found for N=%d, Q=%d", e.N, Q)
+}
+
+// primeFactors returns the distinct prime factors of n
+func primeFactors(n uint64) []uint64 {
+	var factors []uint64
+	for d := uint64(2); d*d <= n; d++ {
+		if n%d == 0 {
+			factors = append(factors, d)
+			for n%d == 0 {
+				n /= d
+			}
+		}
+	}
+	if n > 1 {
+		factors = append(factors, n)
+	}
+	return factors
 }
 
 // modInverse computes a^(-1) mod Q using Fermat's little theorem
