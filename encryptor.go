@@ -4,6 +4,8 @@
 package fhe
 
 import (
+	"fmt"
+
 	"github.com/luxfi/lattice/v7/core/rlwe"
 )
 
@@ -23,9 +25,9 @@ func NewEncryptor(params Parameters, sk *SecretKey) *Encryptor {
 	}
 }
 
-// Encrypt encrypts a boolean value
-// Note: Panics on error (should not happen with valid parameters)
-func (enc *Encryptor) Encrypt(value bool) *Ciphertext {
+// EncryptSafe encrypts a boolean value, returning an error on failure.
+// Prefer this over Encrypt for production code paths.
+func (enc *Encryptor) EncryptSafe(value bool) (*Ciphertext, error) {
 	pt := rlwe.NewPlaintext(enc.params.paramsLWE, enc.params.paramsLWE.MaxLevel())
 
 	q := enc.params.QLWE()
@@ -46,10 +48,20 @@ func (enc *Encryptor) Encrypt(value bool) *Ciphertext {
 
 	ct := rlwe.NewCiphertext(enc.params.paramsLWE, 1, enc.params.paramsLWE.MaxLevel())
 	if err := enc.encryptor.Encrypt(pt, ct); err != nil {
-		panic(err) // Should not happen with valid parameters
+		return nil, fmt.Errorf("fhe encrypt: %w", err)
 	}
 
-	return &Ciphertext{ct}
+	return &Ciphertext{ct}, nil
+}
+
+// Encrypt encrypts a boolean value.
+// Deprecated: Use EncryptSafe for production code. This method panics on error.
+func (enc *Encryptor) Encrypt(value bool) *Ciphertext {
+	ct, err := enc.EncryptSafe(value)
+	if err != nil {
+		panic(err)
+	}
+	return ct
 }
 
 // EncryptBit is an alias for Encrypt
