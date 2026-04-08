@@ -333,15 +333,13 @@ func (e *NTTEngine) mulMod(a, b uint64) uint64 {
 	return div128(hi, lo, e.Q)
 }
 
-// mulModBarrett computes (a * b) mod Q using Barrett reduction
-// For Q up to ~58 bits, we use a two-word Barrett with mu = floor(2^(2k)/Q)
-// where k = number of bits in Q. This gives enough precision for the quotient.
+// mulModBarrett computes (a * b) mod Q using Barrett reduction.
+// Constant-time: always executes the full 128-bit path regardless of input.
 func (e *NTTEngine) mulModBarrett(a, b uint64) uint64 {
 	hi, lo := mul64(a, b)
-	if hi == 0 {
-		return lo % e.Q
-	}
-	return div128(hi, lo, e.Q)
+	// Always execute the full path to avoid timing side-channel on hi == 0
+	_, r := bits.Div64(hi%e.Q, lo, e.Q)
+	return r
 }
 
 // mul64 multiplies two 64-bit integers and returns 128-bit result as (hi, lo)
