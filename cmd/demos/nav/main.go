@@ -3,133 +3,180 @@
 
 // Command nav demonstrates confidential Net Asset Value (NAV) computation using FHE.
 //
-// An ETF's holdings (10 positions with share counts and prices) are encrypted.
+// An ETF's holdings (positions with share counts and prices) are encrypted.
 // NAV = sum(holdings * prices) / totalShares is computed on encrypted data using
 // repeated addition. Only the final NAV is decrypted for the authorized party.
 //
 // Usage:
 //
-//	go run ./cmd/demos/nav
+//	go run ./cmd/demos/nav serve
 package main
 
 import (
 	"fmt"
-	"os"
-	"time"
+	"log"
+	"sync"
 
+	"github.com/hanzoai/base"
+	"github.com/hanzoai/base/core"
 	"github.com/luxfi/fhe"
 )
 
-type holding struct {
-	ticker string
-	shares uint8 // number of shares held (small for demo)
-	price  uint8 // price per share in dollars
+type encHolding struct {
+	Ticker   string
+	Shares   uint8
+	EncPrice [8]*fhe.Ciphertext
+}
+
+type navResult struct {
+	TotalValue       uint64 `json:"total_value"`
+	SharesOutstanding uint64 `json:"shares_outstanding"`
+	NAVPerShare      uint64 `json:"nav_per_share"`
+}
+
+type fheState struct {
+	mu               sync.Mutex
+	enc              *fhe.Encryptor
+	dec              *fhe.Decryptor
+	eval             *fhe.Evaluator
+	holdings         []encHolding
+	sharesOutstanding uint64
+	result           *navResult
 }
 
 func main() {
-	fmt.Println("=== FHE Confidential NAV Computation Demo ===")
-	fmt.Println("Compute ETF NAV on encrypted holdings")
-	fmt.Println()
+	app := base.New()
 
-	// Setup
-	fmt.Print("Initializing FHE... ")
-	t0 := time.Now()
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		st, err := initFHE()
+		if err != nil {
+			return fmt.Errorf("fhe init: %w", err)
+		}
+		registerRoutes(se, st)
+		return se.Next()
+	})
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initFHE() (*fheState, error) {
 	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
 	keygen := fhe.NewKeyGenerator(params)
 	sk, _ := keygen.GenKeyPair()
 	bsk := keygen.GenBootstrapKey(sk)
-	enc := fhe.NewEncryptor(params, sk)
-	dec := fhe.NewDecryptor(params, sk)
-	eval := fhe.NewEvaluator(params, bsk)
-	fmt.Printf("done (%v)\n\n", time.Since(t0))
+	return &fheState{
+		enc:  fhe.NewEncryptor(params, sk),
+		dec:  fhe.NewDecryptor(params, sk),
+		eval: fhe.NewEvaluator(params, bsk),
+	}, nil
+}
 
-	// ETF holdings: small values so sums stay in 8-bit range
-	// Total value = 2*19 + 2*21 + 1*14 + 2*17 + 1*18 + 2*25 + 1*12 + 1*20 + 2*10 + 1*14
-	//             = 38 + 42 + 14 + 34 + 18 + 50 + 12 + 20 + 20 + 14 = 262
-	// But 262 > 255, so let's reduce: use 5 holdings to stay under 255.
-	holdings := []holding{
-		{ticker: "AAPL", shares: 2, price: 19},
-		{ticker: "MSFT", shares: 2, price: 21},
-		{ticker: "NVDA", shares: 1, price: 14},
-		{ticker: "GOOG", shares: 2, price: 17},
-		{ticker: "AMZN", shares: 1, price: 18},
-	}
-	totalShares := uint64(5) // total ETF shares outstanding
+func registerRoutes(se *core.ServeEvent, st *fheState) {
+	g := se.Router.Group("/v1")
 
-	var expectedTotal uint64
-	fmt.Println("ETF Holdings (shown for verification):")
-	for _, h := range holdings {
-		value := uint64(h.shares) * uint64(h.price)
-		expectedTotal += value
-		fmt.Printf("  %6s: %d shares @ $%d = $%d\n", h.ticker, h.shares, h.price, value)
-	}
-	expectedNAV := expectedTotal / totalShares
-	fmt.Printf("  Total value: $%d\n", expectedTotal)
-	fmt.Printf("  Shares outstanding: %d\n", totalShares)
-	fmt.Printf("  Expected NAV: $%d/share\n\n", expectedNAV)
+	// POST /v1/holdings — submit encrypted holdings
+	g.POST("/holdings", func(re *core.RequestEvent) error {
+		var req struct {
+			SharesOutstanding uint64 `json:"shares_outstanding"`
+			Holdings          []struct {
+				Ticker string `json:"ticker"`
+				Shares uint8  `json:"shares"`
+				Price  uint8  `json:"price"`
+			} `json:"holdings"`
+		}
+		if err := re.BindBody(&req); err != nil {
+			return re.JSON(400, map[string]string{"error": "invalid body"})
+		}
+		if len(req.Holdings) == 0 {
+			return re.JSON(400, map[string]string{"error": "holdings required"})
+		}
+		if req.SharesOutstanding == 0 {
+			return re.JSON(400, map[string]string{"error": "shares_outstanding required"})
+		}
 
-	// Encrypt prices
-	fmt.Println("Encrypting holdings...")
-	t0 = time.Now()
-	encPrices := make([][8]*fhe.Ciphertext, len(holdings))
-	for i, h := range holdings {
-		encPrices[i] = encryptByte(enc, h.price)
-	}
-	fmt.Printf("Encryption done (%v)\n\n", time.Since(t0))
+		st.mu.Lock()
+		defer st.mu.Unlock()
 
-	// Compute NAV: for each position, add price to itself (shares-1) times, then sum all
-	fmt.Println("Computing NAV on encrypted data...")
-	fmt.Println("  Strategy: repeated addition (shares * price)")
-	t0 = time.Now()
+		st.holdings = nil
+		st.result = nil
+		st.sharesOutstanding = req.SharesOutstanding
 
-	var encTotal [8]*fhe.Ciphertext
-	initialized := false
+		for _, h := range req.Holdings {
+			st.holdings = append(st.holdings, encHolding{
+				Ticker:   h.Ticker,
+				Shares:   h.Shares,
+				EncPrice: encryptByte(st.enc, h.Price),
+			})
+		}
 
-	for idx, h := range holdings {
-		t1 := time.Now()
-		// shares * price via repeated addition
-		posValue := encPrices[idx]
-		for s := uint8(1); s < h.shares; s++ {
-			posValue, err = addBytes(eval, enc, posValue, encPrices[idx])
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error multiplying %s: %v\n", h.ticker, err)
-				os.Exit(1)
+		return re.JSON(201, map[string]any{
+			"count":   len(st.holdings),
+			"message": "holdings encrypted",
+		})
+	})
+
+	// POST /v1/compute — compute NAV homomorphically
+	g.POST("/compute", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		if len(st.holdings) == 0 {
+			return re.JSON(400, map[string]string{"error": "no holdings loaded"})
+		}
+
+		var encTotal [8]*fhe.Ciphertext
+		initialized := false
+
+		for _, h := range st.holdings {
+			// shares * price via repeated addition
+			posValue := h.EncPrice
+			var err error
+			for s := uint8(1); s < h.Shares; s++ {
+				posValue, err = addBytes(st.eval, st.enc, posValue, h.EncPrice)
+				if err != nil {
+					return re.JSON(500, map[string]string{"error": err.Error()})
+				}
+			}
+
+			if !initialized {
+				encTotal = posValue
+				initialized = true
+			} else {
+				encTotal, err = addBytes(st.eval, st.enc, encTotal, posValue)
+				if err != nil {
+					return re.JSON(500, map[string]string{"error": err.Error()})
+				}
 			}
 		}
 
-		if !initialized {
-			encTotal = posValue
-			initialized = true
-		} else {
-			encTotal, err = addBytes(eval, enc, encTotal, posValue)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error accumulating %s: %v\n", h.ticker, err)
-				os.Exit(1)
-			}
+		decTotal := uint64(decryptByte(st.dec, encTotal))
+		st.result = &navResult{
+			TotalValue:        decTotal,
+			SharesOutstanding: st.sharesOutstanding,
+			NAVPerShare:       decTotal / st.sharesOutstanding,
 		}
-		fmt.Printf("  %6s: %d additions (%v)\n", h.ticker, h.shares, time.Since(t1))
-	}
-	fmt.Printf("Total computation: %v\n\n", time.Since(t0))
 
-	// Decrypt and compute NAV (division by public totalShares is plaintext)
-	decTotal := uint64(decryptByte(dec, encTotal))
-	navPerShare := decTotal / totalShares
+		return re.JSON(200, map[string]string{
+			"message": "NAV computed, call GET /v1/nav to see result",
+		})
+	})
 
-	fmt.Println("--- Result ---")
-	fmt.Printf("IBIT NAV: $%d per share (computed on encrypted data)\n", navPerShare)
-	fmt.Printf("Total fund value: $%d (decrypted)\n", decTotal)
-	fmt.Printf("Shares outstanding: %d (public)\n", totalShares)
+	// GET /v1/nav — get encrypted NAV value
+	g.GET("/nav", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
 
-	if navPerShare == expectedNAV {
-		fmt.Println("PASS: NAV matches expected value")
-	} else {
-		fmt.Printf("NOTE: NAV=%d vs expected=%d (FHE arithmetic precision)\n", navPerShare, expectedNAV)
-	}
-	fmt.Println("\nNote: individual holdings were never revealed to the NAV calculator.")
+		if st.result == nil {
+			return re.JSON(404, map[string]string{"error": "no NAV computed yet"})
+		}
+
+		return re.JSON(200, st.result)
+	})
 }
 
 func encryptByte(enc *fhe.Encryptor, v uint8) [8]*fhe.Ciphertext {
@@ -150,7 +197,6 @@ func decryptByte(dec *fhe.Decryptor, bits [8]*fhe.Ciphertext) uint8 {
 	return v
 }
 
-// addBytes adds two encrypted 8-bit values using ripple-carry full adder.
 func addBytes(eval *fhe.Evaluator, enc *fhe.Encryptor, a, b [8]*fhe.Ciphertext) ([8]*fhe.Ciphertext, error) {
 	carry := enc.Encrypt(false)
 	var result [8]*fhe.Ciphertext
