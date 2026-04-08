@@ -9,118 +9,190 @@
 //
 // Usage:
 //
-//	go run ./cmd/demos/darkpool
+//	go run ./cmd/demos/darkpool serve
 package main
 
 import (
 	"fmt"
-	"os"
-	"time"
+	"log"
+	"sync"
 
+	"github.com/google/uuid"
+	"github.com/hanzoai/base"
+	"github.com/hanzoai/base/core"
 	"github.com/luxfi/fhe"
 )
 
-const priceBits = 8 // 8-bit prices (0-255)
+const priceBits = 8
 
-type order struct {
-	id    int
-	isBid bool
-	price uint8
-	qty   uint8
+type encOrder struct {
+	ID       string
+	Side     string // "bid" or "ask"
+	EncPrice [8]*fhe.Ciphertext
+	EncQty   [8]*fhe.Ciphertext
+}
 
-	encPrice [8]*fhe.Ciphertext
-	encQty   [8]*fhe.Ciphertext
+type matchResult struct {
+	BidID string `json:"bid_id"`
+	AskID string `json:"ask_id"`
+}
+
+type fheState struct {
+	mu      sync.Mutex
+	params  fhe.Parameters
+	enc     *fhe.Encryptor
+	dec     *fhe.Decryptor
+	eval    *fhe.Evaluator
+	orders  map[string]*encOrder
+	matches []matchResult
 }
 
 func main() {
-	fmt.Println("=== FHE Dark Pool Demo ===")
-	fmt.Println("Encrypted order matching without revealing prices")
-	fmt.Println()
+	app := base.New()
 
-	// Setup
-	fmt.Print("Initializing FHE... ")
-	t0 := time.Now()
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		st, err := initFHE()
+		if err != nil {
+			return fmt.Errorf("fhe init: %w", err)
+		}
+		registerRoutes(se, st)
+		return se.Next()
+	})
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initFHE() (*fheState, error) {
 	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
 	keygen := fhe.NewKeyGenerator(params)
 	sk, _ := keygen.GenKeyPair()
 	bsk := keygen.GenBootstrapKey(sk)
-	enc := fhe.NewEncryptor(params, sk)
-	dec := fhe.NewDecryptor(params, sk)
-	eval := fhe.NewEvaluator(params, bsk)
-	fmt.Printf("done (%v)\n\n", time.Since(t0))
+	return &fheState{
+		params:  params,
+		enc:     fhe.NewEncryptor(params, sk),
+		dec:     fhe.NewDecryptor(params, sk),
+		eval:    fhe.NewEvaluator(params, bsk),
+		orders:  make(map[string]*encOrder),
+		matches: nil,
+	}, nil
+}
 
-	// Orders: 3 bids, 3 asks
-	bids := []order{
-		{id: 1, isBid: true, price: 85, qty: 100},
-		{id: 2, isBid: true, price: 84, qty: 200},
-		{id: 3, isBid: true, price: 86, qty: 75},
-	}
-	asks := []order{
-		{id: 4, isBid: false, price: 84, qty: 100},
-		{id: 5, isBid: false, price: 87, qty: 250},
-		{id: 6, isBid: false, price: 85, qty: 90},
-	}
+func registerRoutes(se *core.ServeEvent, st *fheState) {
+	g := se.Router.Group("/v1")
 
-	// Encrypt all orders
-	fmt.Println("Encrypting 6 limit orders...")
-	t0 = time.Now()
-	for i := range bids {
-		bids[i].encPrice = encryptByte(enc, bids[i].price)
-		bids[i].encQty = encryptByte(enc, bids[i].qty)
-	}
-	for i := range asks {
-		asks[i].encPrice = encryptByte(enc, asks[i].price)
-		asks[i].encQty = encryptByte(enc, asks[i].qty)
-	}
-	fmt.Printf("Encryption done (%v)\n\n", time.Since(t0))
+	// POST /v1/orders — submit encrypted order
+	g.POST("/orders", func(re *core.RequestEvent) error {
+		var req struct {
+			Side  string `json:"side"`
+			Price uint8  `json:"price"`
+			Qty   uint8  `json:"qty"`
+		}
+		if err := re.BindBody(&req); err != nil {
+			return re.JSON(400, map[string]string{"error": "invalid body"})
+		}
+		if req.Side != "bid" && req.Side != "ask" {
+			return re.JSON(400, map[string]string{"error": "side must be bid or ask"})
+		}
 
-	// Match bids vs asks: bid.price >= ask.price
-	fmt.Println("Matching encrypted orders (bid.price >= ask.price)...")
-	type match struct {
-		bid, ask order
-	}
-	var matches []match
+		st.mu.Lock()
+		defer st.mu.Unlock()
 
-	for _, bid := range bids {
-		for _, ask := range asks {
-			t1 := time.Now()
-			isGe, err := geEncrypted(eval, bid.encPrice, ask.encPrice)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "error comparing: %v\n", err)
-				os.Exit(1)
-			}
-			isMatch := dec.Decrypt(isGe)
-			elapsed := time.Since(t1)
+		id := uuid.NewString()
+		o := &encOrder{
+			ID:       id,
+			Side:     req.Side,
+			EncPrice: encryptByte(st.enc, req.Price),
+			EncQty:   encryptByte(st.enc, req.Qty),
+		}
+		st.orders[id] = o
 
-			if isMatch {
-				matches = append(matches, match{bid: bid, ask: ask})
-				fmt.Printf("  Order %d vs %d: MATCH (%v)\n", bid.id, ask.id, elapsed)
+		return re.JSON(201, map[string]string{"id": id, "side": req.Side})
+	})
+
+	// GET /v1/orders — list orders (IDs + side only, values encrypted)
+	g.GET("/orders", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		type entry struct {
+			ID       string `json:"id"`
+			Side     string `json:"side"`
+			EncPrice string `json:"enc_price"`
+		}
+		var out []entry
+		for _, o := range st.orders {
+			out = append(out, entry{
+				ID:       o.ID,
+				Side:     o.Side,
+				EncPrice: "(encrypted)",
+			})
+		}
+		return re.JSON(200, out)
+	})
+
+	// POST /v1/match — run homomorphic matching on all encrypted orders
+	g.POST("/match", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		var bids, asks []*encOrder
+		for _, o := range st.orders {
+			if o.Side == "bid" {
+				bids = append(bids, o)
 			} else {
-				fmt.Printf("  Order %d vs %d: no match (%v)\n", bid.id, ask.id, elapsed)
+				asks = append(asks, o)
 			}
 		}
-	}
 
-	// Decrypt matched fills
-	fmt.Printf("\n--- Matched Fills (%d) ---\n", len(matches))
-	for _, m := range matches {
-		bidPrice := decryptByte(dec, m.bid.encPrice)
-		askPrice := decryptByte(dec, m.ask.encPrice)
-		bidQty := decryptByte(dec, m.bid.encQty)
-		askQty := decryptByte(dec, m.ask.encQty)
-
-		fillQty := bidQty
-		if askQty < fillQty {
-			fillQty = askQty
+		st.matches = nil
+		for _, bid := range bids {
+			for _, ask := range asks {
+				isGe, err := geEncrypted(st.eval, bid.EncPrice, ask.EncPrice)
+				if err != nil {
+					return re.JSON(500, map[string]string{"error": err.Error()})
+				}
+				if st.dec.Decrypt(isGe) {
+					st.matches = append(st.matches, matchResult{
+						BidID: bid.ID,
+						AskID: ask.ID,
+					})
+				}
+			}
 		}
-		fmt.Printf("  Matched: Buy %d @ $%d <-> Sell %d @ $%d (fill %d shares)\n",
-			bidQty, bidPrice, askQty, askPrice, fillQty)
-	}
-	fmt.Println("\nNote: unmatched order prices were never revealed.")
+
+		return re.JSON(200, map[string]any{
+			"matches": st.matches,
+			"count":   len(st.matches),
+		})
+	})
+
+	// POST /v1/reveal/{id} — decrypt an order by ID
+	g.POST("/reveal/{id}", func(re *core.RequestEvent) error {
+		id := re.Request.PathValue("id")
+
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		o, ok := st.orders[id]
+		if !ok {
+			return re.JSON(404, map[string]string{"error": "order not found"})
+		}
+
+		price := decryptByte(st.dec, o.EncPrice)
+		qty := decryptByte(st.dec, o.EncQty)
+
+		return re.JSON(200, map[string]any{
+			"id":    o.ID,
+			"side":  o.Side,
+			"price": price,
+			"qty":   qty,
+		})
+	})
 }
 
 func encryptByte(enc *fhe.Encryptor, v uint8) [8]*fhe.Ciphertext {
@@ -142,19 +214,14 @@ func decryptByte(dec *fhe.Decryptor, bits [8]*fhe.Ciphertext) uint8 {
 }
 
 // geEncrypted computes a >= b on encrypted 8-bit values using MSB-first comparison.
-// Returns an encrypted bit: 1 if a >= b, 0 otherwise.
 func geEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext, error) {
-	// Compare from MSB to LSB: a >= b iff NOT (a < b)
-	// a < b: find first bit where they differ (MSB to LSB); at that bit a=0, b=1
 	var isLess, isEqual *fhe.Ciphertext
 
 	for i := priceBits - 1; i >= 0; i-- {
-		// bitLt = NOT(a[i]) AND b[i] -- this bit says a < b at position i
 		bitLt, err := eval.ANDNY(a[i], b[i])
 		if err != nil {
 			return nil, fmt.Errorf("bit %d ANDNY: %w", i, err)
 		}
-		// bitEq = NOT(a[i] XOR b[i]) -- bits are equal
 		bitXor, err := eval.XOR(a[i], b[i])
 		if err != nil {
 			return nil, fmt.Errorf("bit %d XOR: %w", i, err)
@@ -165,7 +232,6 @@ func geEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext,
 			isLess = bitLt
 			isEqual = bitEq
 		} else {
-			// isLess = isLess OR (isEqual AND bitLt)
 			eqAndLt, err := eval.AND(isEqual, bitLt)
 			if err != nil {
 				return nil, err
@@ -174,7 +240,6 @@ func geEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext,
 			if err != nil {
 				return nil, err
 			}
-			// isEqual = isEqual AND bitEq
 			isEqual, err = eval.AND(isEqual, bitEq)
 			if err != nil {
 				return nil, err
@@ -182,6 +247,5 @@ func geEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext,
 		}
 	}
 
-	// a >= b is NOT(a < b)
 	return eval.NOT(isLess), nil
 }
