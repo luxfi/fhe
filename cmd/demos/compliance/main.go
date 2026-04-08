@@ -3,134 +3,176 @@
 
 // Command compliance demonstrates programmable compliance checks on encrypted portfolios.
 //
-// A portfolio of 5 positions is encrypted. The system verifies SEC diversification
+// A portfolio of positions is encrypted. The system verifies SEC diversification
 // rules (no single position > 25% of total, total exposure < 80%) entirely on
 // encrypted data using boolean circuit comparisons. Only the boolean results are
 // decrypted.
 //
 // Usage:
 //
-//	go run ./cmd/demos/compliance
+//	go run ./cmd/demos/compliance serve
 package main
 
 import (
 	"fmt"
-	"os"
-	"time"
+	"log"
+	"sync"
 
+	"github.com/hanzoai/base"
+	"github.com/hanzoai/base/core"
 	"github.com/luxfi/fhe"
 )
 
-const valueBits = 8 // 8-bit values (0-255)
+const valueBits = 8
 
-type position struct {
-	name   string
-	weight uint8 // percentage 0-100
+type encPosition struct {
+	Name      string
+	EncWeight [8]*fhe.Ciphertext
+}
+
+type fheState struct {
+	mu        sync.Mutex
+	enc       *fhe.Encryptor
+	dec       *fhe.Decryptor
+	eval      *fhe.Evaluator
+	portfolio []encPosition
+	result    *complianceResult
+}
+
+type complianceResult struct {
+	Diversification bool `json:"diversification"`
+	ExposureUnder80 bool `json:"exposure_under_80"`
+	Overall         bool `json:"overall"`
 }
 
 func main() {
-	fmt.Println("=== FHE Programmable Compliance Demo ===")
-	fmt.Println("Verify SEC diversification on encrypted portfolio")
-	fmt.Println()
+	app := base.New()
 
-	// Setup
-	fmt.Print("Initializing FHE... ")
-	t0 := time.Now()
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		st, err := initFHE()
+		if err != nil {
+			return fmt.Errorf("fhe init: %w", err)
+		}
+		registerRoutes(se, st)
+		return se.Next()
+	})
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initFHE() (*fheState, error) {
 	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
 	keygen := fhe.NewKeyGenerator(params)
 	sk, _ := keygen.GenKeyPair()
 	bsk := keygen.GenBootstrapKey(sk)
-	enc := fhe.NewEncryptor(params, sk)
-	dec := fhe.NewDecryptor(params, sk)
-	eval := fhe.NewEvaluator(params, bsk)
-	fmt.Printf("done (%v)\n\n", time.Since(t0))
+	return &fheState{
+		enc:  fhe.NewEncryptor(params, sk),
+		dec:  fhe.NewDecryptor(params, sk),
+		eval: fhe.NewEvaluator(params, bsk),
+	}, nil
+}
 
-	// Portfolio
-	portfolio := []position{
-		{name: "AAPL", weight: 20},
-		{name: "MSFT", weight: 18},
-		{name: "NVDA", weight: 15},
-		{name: "GOOG", weight: 12},
-		{name: "AMZN", weight: 10},
-	}
-	var totalWeight uint8
-	for _, p := range portfolio {
-		totalWeight += p.weight
-		fmt.Printf("  %s: %d%%\n", p.name, p.weight)
-	}
-	fmt.Printf("  Total exposure: %d%%\n\n", totalWeight)
+func registerRoutes(se *core.ServeEvent, st *fheState) {
+	g := se.Router.Group("/v1")
 
-	// Encrypt positions
-	fmt.Println("Encrypting portfolio positions...")
-	t0 = time.Now()
-	encWeights := make([][8]*fhe.Ciphertext, len(portfolio))
-	for i, p := range portfolio {
-		encWeights[i] = encryptByte(enc, p.weight)
-	}
-	// Encrypt threshold (25%) as constant for comparison
-	encThreshold := encryptByte(enc, 25)
-	fmt.Printf("Encryption done (%v)\n\n", time.Since(t0))
-
-	// Check 1: no single position > 25%
-	fmt.Println("Check 1: Each position <= 25%...")
-	t0 = time.Now()
-	allCompliant := enc.Encrypt(true) // accumulator
-	for i, p := range portfolio {
-		t1 := time.Now()
-		// leEncrypted returns 1 if weight <= 25
-		leResult, err := leEncrypted(eval, encWeights[i], encThreshold)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+	// POST /v1/portfolio — submit encrypted holdings
+	g.POST("/portfolio", func(re *core.RequestEvent) error {
+		var req struct {
+			Positions []struct {
+				Name   string `json:"name"`
+				Weight uint8  `json:"weight"`
+			} `json:"positions"`
 		}
-		// AND into accumulator
-		allCompliant, err = eval.AND(allCompliant, leResult)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+		if err := re.BindBody(&req); err != nil {
+			return re.JSON(400, map[string]string{"error": "invalid body"})
 		}
-		fmt.Printf("  %s checked (%v)\n", p.name, time.Since(t1))
-	}
-	check1 := dec.Decrypt(allCompliant)
-	fmt.Printf("  Diversification: %v (%v)\n\n", check1, time.Since(t0))
-
-	// Check 2: total exposure < 80%
-	fmt.Println("Check 2: Total exposure < 80%...")
-	t0 = time.Now()
-	// Sum weights using ripple-carry adder
-	encTotal := encWeights[0]
-	for i := 1; i < len(encWeights); i++ {
-		t1 := time.Now()
-		encTotal, err = addBytes(eval, enc, encTotal, encWeights[i])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error adding: %v\n", err)
-			os.Exit(1)
+		if len(req.Positions) == 0 {
+			return re.JSON(400, map[string]string{"error": "positions required"})
 		}
-		fmt.Printf("  Added position %d (%v)\n", i+1, time.Since(t1))
-	}
 
-	encMaxExposure := encryptByte(enc, 80)
-	t1 := time.Now()
-	ltResult, err := ltEncrypted(eval, encTotal, encMaxExposure)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
-	check2 := dec.Decrypt(ltResult)
-	fmt.Printf("  Total < 80%%: %v (%v)\n\n", check2, time.Since(t1))
+		st.mu.Lock()
+		defer st.mu.Unlock()
 
-	// Verify
-	decTotal := decryptByte(dec, encTotal)
-	fmt.Printf("  (Verification: encrypted total decrypts to %d%%)\n\n", decTotal)
+		st.portfolio = nil
+		st.result = nil
+		for _, p := range req.Positions {
+			st.portfolio = append(st.portfolio, encPosition{
+				Name:      p.Name,
+				EncWeight: encryptByte(st.enc, p.Weight),
+			})
+		}
 
-	// Final
-	fmt.Println("--- Result ---")
-	fmt.Printf("Portfolio compliant: %v\n", check1 && check2)
-	fmt.Println("(Holdings were never revealed to the compliance engine)")
+		return re.JSON(201, map[string]any{
+			"count":   len(st.portfolio),
+			"message": "portfolio encrypted",
+		})
+	})
+
+	// POST /v1/check — run SEC diversification check homomorphically
+	g.POST("/check", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		if len(st.portfolio) == 0 {
+			return re.JSON(400, map[string]string{"error": "no portfolio loaded"})
+		}
+
+		// Check 1: no single position > 25%
+		encThreshold := encryptByte(st.enc, 25)
+		allCompliant := st.enc.Encrypt(true)
+		for _, p := range st.portfolio {
+			leResult, err := leEncrypted(st.eval, p.EncWeight, encThreshold)
+			if err != nil {
+				return re.JSON(500, map[string]string{"error": err.Error()})
+			}
+			allCompliant, err = st.eval.AND(allCompliant, leResult)
+			if err != nil {
+				return re.JSON(500, map[string]string{"error": err.Error()})
+			}
+		}
+		check1 := st.dec.Decrypt(allCompliant)
+
+		// Check 2: total exposure < 80%
+		encTotal := st.portfolio[0].EncWeight
+		var err error
+		for i := 1; i < len(st.portfolio); i++ {
+			encTotal, err = addBytes(st.eval, st.enc, encTotal, st.portfolio[i].EncWeight)
+			if err != nil {
+				return re.JSON(500, map[string]string{"error": err.Error()})
+			}
+		}
+		encMaxExposure := encryptByte(st.enc, 80)
+		ltResult, err := ltEncrypted(st.eval, encTotal, encMaxExposure)
+		if err != nil {
+			return re.JSON(500, map[string]string{"error": err.Error()})
+		}
+		check2 := st.dec.Decrypt(ltResult)
+
+		st.result = &complianceResult{
+			Diversification: check1,
+			ExposureUnder80: check2,
+			Overall:         check1 && check2,
+		}
+
+		return re.JSON(200, st.result)
+	})
+
+	// GET /v1/result — get compliance result (boolean, not holdings)
+	g.GET("/result", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		if st.result == nil {
+			return re.JSON(404, map[string]string{"error": "no check run yet"})
+		}
+
+		return re.JSON(200, st.result)
+	})
 }
 
 func encryptByte(enc *fhe.Encryptor, v uint8) [8]*fhe.Ciphertext {
@@ -141,22 +183,10 @@ func encryptByte(enc *fhe.Encryptor, v uint8) [8]*fhe.Ciphertext {
 	return bits
 }
 
-func decryptByte(dec *fhe.Decryptor, bits [8]*fhe.Ciphertext) uint8 {
-	var v uint8
-	for i := 0; i < 8; i++ {
-		if dec.Decrypt(bits[i]) {
-			v |= 1 << i
-		}
-	}
-	return v
-}
-
-// addBytes adds two encrypted 8-bit values using ripple-carry.
 func addBytes(eval *fhe.Evaluator, enc *fhe.Encryptor, a, b [8]*fhe.Ciphertext) ([8]*fhe.Ciphertext, error) {
 	carry := enc.Encrypt(false)
 	var result [8]*fhe.Ciphertext
 	for i := 0; i < 8; i++ {
-		// sum = a XOR b XOR carry (full adder)
 		abXor, err := eval.XOR(a[i], b[i])
 		if err != nil {
 			return result, err
@@ -165,7 +195,6 @@ func addBytes(eval *fhe.Evaluator, enc *fhe.Encryptor, a, b [8]*fhe.Ciphertext) 
 		if err != nil {
 			return result, err
 		}
-		// carry = MAJORITY(a, b, carry)
 		carry, err = eval.MAJORITY(a[i], b[i], carry)
 		if err != nil {
 			return result, err
@@ -175,7 +204,6 @@ func addBytes(eval *fhe.Evaluator, enc *fhe.Encryptor, a, b [8]*fhe.Ciphertext) 
 	return result, nil
 }
 
-// ltEncrypted computes a < b on encrypted 8-bit values.
 func ltEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext, error) {
 	var isLess, isEqual *fhe.Ciphertext
 	for i := valueBits - 1; i >= 0; i-- {
@@ -209,7 +237,6 @@ func ltEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext,
 	return isLess, nil
 }
 
-// leEncrypted computes a <= b: NOT(b < a).
 func leEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext, error) {
 	bLtA, err := ltEncrypted(eval, b, a)
 	if err != nil {
