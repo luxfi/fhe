@@ -3,127 +3,174 @@
 
 // Command marketmaker demonstrates private market making with FHE.
 //
-// Three market makers submit encrypted bid/ask quotes. The system selects
-// the best bid (highest) and best ask (lowest) via boolean circuit comparisons.
+// Market makers submit encrypted bid/ask quotes. The system selects the best
+// bid (highest) and best ask (lowest) via boolean circuit comparisons.
 // Only the winning quotes are decrypted -- losing quotes stay private.
 //
 // Usage:
 //
-//	go run ./cmd/demos/marketmaker
+//	go run ./cmd/demos/marketmaker serve
 package main
 
 import (
 	"fmt"
-	"os"
-	"time"
+	"log"
+	"sync"
 
+	"github.com/google/uuid"
+	"github.com/hanzoai/base"
+	"github.com/hanzoai/base/core"
 	"github.com/luxfi/fhe"
 )
 
 const priceBits = 8
 
-type quote struct {
-	maker string
-	bid   uint8
-	ask   uint8
+type encQuote struct {
+	ID     string
+	Maker  string
+	EncBid [8]*fhe.Ciphertext
+	EncAsk [8]*fhe.Ciphertext
+}
+
+type spreadResult struct {
+	BestBidMaker string `json:"best_bid_maker"`
+	BestBidPrice uint8  `json:"best_bid_price"`
+	BestAskMaker string `json:"best_ask_maker"`
+	BestAskPrice uint8  `json:"best_ask_price"`
+	Spread       int    `json:"spread"`
+}
+
+type fheState struct {
+	mu     sync.Mutex
+	enc    *fhe.Encryptor
+	dec    *fhe.Decryptor
+	eval   *fhe.Evaluator
+	quotes []encQuote
+	spread *spreadResult
 }
 
 func main() {
-	fmt.Println("=== FHE Private Market Making Demo ===")
-	fmt.Println("Select best bid/ask from encrypted quotes")
-	fmt.Println()
+	app := base.New()
 
-	// Setup
-	fmt.Print("Initializing FHE... ")
-	t0 := time.Now()
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		st, err := initFHE()
+		if err != nil {
+			return fmt.Errorf("fhe init: %w", err)
+		}
+		registerRoutes(se, st)
+		return se.Next()
+	})
+
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initFHE() (*fheState, error) {
 	params, err := fhe.NewParametersFromLiteral(fhe.PN10QP27)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
 	keygen := fhe.NewKeyGenerator(params)
 	sk, _ := keygen.GenKeyPair()
 	bsk := keygen.GenBootstrapKey(sk)
-	enc := fhe.NewEncryptor(params, sk)
-	dec := fhe.NewDecryptor(params, sk)
-	eval := fhe.NewEvaluator(params, bsk)
-	fmt.Printf("done (%v)\n\n", time.Since(t0))
+	return &fheState{
+		enc:  fhe.NewEncryptor(params, sk),
+		dec:  fhe.NewDecryptor(params, sk),
+		eval: fhe.NewEvaluator(params, bsk),
+	}, nil
+}
 
-	// Three market makers
-	quotes := []quote{
-		{maker: "MM1", bid: 84, ask: 86},
-		{maker: "MM2", bid: 85, ask: 87},
-		{maker: "MM3", bid: 83, ask: 85},
-	}
-	for _, q := range quotes {
-		fmt.Printf("  %s: bid $%d / ask $%d\n", q.maker, q.bid, q.ask)
-	}
-	fmt.Println()
+func registerRoutes(se *core.ServeEvent, st *fheState) {
+	g := se.Router.Group("/v1")
 
-	// Encrypt
-	fmt.Println("Encrypting quotes...")
-	t0 = time.Now()
-	type encQuote struct {
-		maker  string
-		encBid [8]*fhe.Ciphertext
-		encAsk [8]*fhe.Ciphertext
-	}
-	encQuotes := make([]encQuote, len(quotes))
-	for i, q := range quotes {
-		encQuotes[i].maker = q.maker
-		encQuotes[i].encBid = encryptByte(enc, q.bid)
-		encQuotes[i].encAsk = encryptByte(enc, q.ask)
-	}
-	fmt.Printf("Encryption done (%v)\n\n", time.Since(t0))
-
-	// Best bid (highest)
-	fmt.Println("Finding best bid (highest)...")
-	t0 = time.Now()
-	bestBidIdx := 0
-	for i := 1; i < len(encQuotes); i++ {
-		t1 := time.Now()
-		// is encQuotes[i].bid > encQuotes[bestBidIdx].bid?
-		gtResult, err := gtEncrypted(eval, encQuotes[i].encBid, encQuotes[bestBidIdx].encBid)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+	// POST /v1/quotes — submit encrypted quote
+	g.POST("/quotes", func(re *core.RequestEvent) error {
+		var req struct {
+			Maker string `json:"maker"`
+			Bid   uint8  `json:"bid"`
+			Ask   uint8  `json:"ask"`
 		}
-		isGreater := dec.Decrypt(gtResult)
-		fmt.Printf("  %s > %s: %v (%v)\n", encQuotes[i].maker, encQuotes[bestBidIdx].maker, isGreater, time.Since(t1))
-		if isGreater {
-			bestBidIdx = i
+		if err := re.BindBody(&req); err != nil {
+			return re.JSON(400, map[string]string{"error": "invalid body"})
 		}
-	}
-	fmt.Printf("Best bid found (%v)\n\n", time.Since(t0))
-
-	// Best ask (lowest)
-	fmt.Println("Finding best ask (lowest)...")
-	t0 = time.Now()
-	bestAskIdx := 0
-	for i := 1; i < len(encQuotes); i++ {
-		t1 := time.Now()
-		ltResult, err := ltEncrypted(eval, encQuotes[i].encAsk, encQuotes[bestAskIdx].encAsk)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
+		if req.Maker == "" {
+			return re.JSON(400, map[string]string{"error": "maker required"})
 		}
-		isLess := dec.Decrypt(ltResult)
-		fmt.Printf("  %s < %s: %v (%v)\n", encQuotes[i].maker, encQuotes[bestAskIdx].maker, isLess, time.Since(t1))
-		if isLess {
-			bestAskIdx = i
+
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		q := encQuote{
+			ID:     uuid.NewString(),
+			Maker:  req.Maker,
+			EncBid: encryptByte(st.enc, req.Bid),
+			EncAsk: encryptByte(st.enc, req.Ask),
 		}
-	}
-	fmt.Printf("Best ask found (%v)\n\n", time.Since(t0))
+		st.quotes = append(st.quotes, q)
+		st.spread = nil // invalidate cached spread
 
-	// Decrypt winners
-	bestBidPrice := decryptByte(dec, encQuotes[bestBidIdx].encBid)
-	bestAskPrice := decryptByte(dec, encQuotes[bestAskIdx].encAsk)
+		return re.JSON(201, map[string]string{"id": q.ID, "maker": q.Maker})
+	})
 
-	fmt.Println("--- Result ---")
-	fmt.Printf("Best bid: %s @ $%d\n", encQuotes[bestBidIdx].maker, bestBidPrice)
-	fmt.Printf("Best ask: %s @ $%d\n", encQuotes[bestAskIdx].maker, bestAskPrice)
-	fmt.Printf("Spread: $%d\n", bestAskPrice-bestBidPrice)
-	fmt.Println("\nNote: losing quotes were never decrypted.")
+	// POST /v1/best — compute best bid/ask homomorphically
+	g.POST("/best", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		if len(st.quotes) < 2 {
+			return re.JSON(400, map[string]string{"error": "need at least 2 quotes"})
+		}
+
+		// Best bid (highest)
+		bestBidIdx := 0
+		for i := 1; i < len(st.quotes); i++ {
+			gtResult, err := gtEncrypted(st.eval, st.quotes[i].EncBid, st.quotes[bestBidIdx].EncBid)
+			if err != nil {
+				return re.JSON(500, map[string]string{"error": err.Error()})
+			}
+			if st.dec.Decrypt(gtResult) {
+				bestBidIdx = i
+			}
+		}
+
+		// Best ask (lowest)
+		bestAskIdx := 0
+		for i := 1; i < len(st.quotes); i++ {
+			ltResult, err := ltEncrypted(st.eval, st.quotes[i].EncAsk, st.quotes[bestAskIdx].EncAsk)
+			if err != nil {
+				return re.JSON(500, map[string]string{"error": err.Error()})
+			}
+			if st.dec.Decrypt(ltResult) {
+				bestAskIdx = i
+			}
+		}
+
+		bestBid := decryptByte(st.dec, st.quotes[bestBidIdx].EncBid)
+		bestAsk := decryptByte(st.dec, st.quotes[bestAskIdx].EncAsk)
+
+		st.spread = &spreadResult{
+			BestBidMaker: st.quotes[bestBidIdx].Maker,
+			BestBidPrice: bestBid,
+			BestAskMaker: st.quotes[bestAskIdx].Maker,
+			BestAskPrice: bestAsk,
+			Spread:       int(bestAsk) - int(bestBid),
+		}
+
+		return re.JSON(200, st.spread)
+	})
+
+	// GET /v1/spread — get cached spread
+	g.GET("/spread", func(re *core.RequestEvent) error {
+		st.mu.Lock()
+		defer st.mu.Unlock()
+
+		if st.spread == nil {
+			return re.JSON(404, map[string]string{"error": "no spread computed yet"})
+		}
+
+		return re.JSON(200, st.spread)
+	})
 }
 
 func encryptByte(enc *fhe.Encryptor, v uint8) [8]*fhe.Ciphertext {
@@ -144,11 +191,10 @@ func decryptByte(dec *fhe.Decryptor, bits [8]*fhe.Ciphertext) uint8 {
 	return v
 }
 
-// ltEncrypted computes a < b on encrypted 8-bit values (MSB-first).
 func ltEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext, error) {
 	var isLess, isEqual *fhe.Ciphertext
 	for i := priceBits - 1; i >= 0; i-- {
-		bitLt, err := eval.ANDNY(a[i], b[i]) // NOT(a) AND b
+		bitLt, err := eval.ANDNY(a[i], b[i])
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +224,6 @@ func ltEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext,
 	return isLess, nil
 }
 
-// gtEncrypted computes a > b: same as b < a.
 func gtEncrypted(eval *fhe.Evaluator, a, b [8]*fhe.Ciphertext) (*fhe.Ciphertext, error) {
 	return ltEncrypted(eval, b, a)
 }
