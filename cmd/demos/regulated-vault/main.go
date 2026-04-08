@@ -116,10 +116,17 @@ func main() {
 		s.dec = fhe.NewDecryptor(params, sk)
 		s.eval = fhe.NewEvaluator(params, bsk)
 
-		// In production: Shamir-split sk into 5 shares, distribute to MPC nodes.
-		// Here we simulate by keeping shares in memory.
+		// WARNING: In this demo, the full FHE secret key is held in memory by a
+		// single process. Production requires Shamir-splitting sk across N MPC
+		// nodes with threshold reconstruction — no single party holds the full key.
 		s.shares = shamirSplit([]byte("simulated-secret-key"), s.totalKeys, s.threshold)
 
+		fmt.Printf("\n")
+		fmt.Printf("  ============================================================\n")
+		fmt.Printf("  WARNING: DEMO ONLY — operator holds full FHE key in memory.\n")
+		fmt.Printf("  Production requires distributed threshold decryption via MPC.\n")
+		fmt.Printf("  DO NOT deploy this binary with real user data.\n")
+		fmt.Printf("  ============================================================\n")
 		fmt.Printf("\n")
 		fmt.Printf("  Regulated Vault (FHE + MPC Threshold Decrypt)\n")
 		fmt.Printf("  ─────────────────────────────────────────────\n")
@@ -356,6 +363,7 @@ func registerRoutes(e *core.ServeEvent, s *state) {
 					})
 				}
 				return re.JSON(http.StatusOK, map[string]any{
+					"warning":     "DEMO ONLY — operator holds full FHE key. Production requires MPC threshold decryption.",
 					"id":          id,
 					"record_id":   req.RecordID,
 					"requester":   req.Requester,
