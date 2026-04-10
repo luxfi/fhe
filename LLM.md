@@ -311,14 +311,14 @@ fhed reshare --input ./keys --new-t 3 --new-n 5 --output ./reshared
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/health` | GET | Health check with params info |
-| `/publickey` | GET | Get public key (hex-encoded) |
-| `/encrypt` | POST | Encrypt bit or integer |
-| `/decrypt` | POST | Decrypt ciphertext(s) |
-| `/evaluate` | POST | Boolean gate evaluation |
-| `/cluster/status` | GET | Cluster state (threshold mode) |
-| `/cluster/peers` | GET | Discovered peers (threshold mode) |
-| `/cluster/reshare` | POST | Trigger reshare (threshold mode) |
+| `/v1/fhe/health` | GET | Health check with params info |
+| `/v1/fhe/publickey` | GET | Get public key (hex-encoded) |
+| `/v1/fhe/encrypt` | POST | Encrypt bit or integer |
+| `/v1/fhe/decrypt` | POST | Decrypt ciphertext(s) |
+| `/v1/fhe/evaluate` | POST | Boolean gate evaluation |
+| `/v1/fhe/cluster/status` | GET | Cluster state (threshold mode) |
+| `/v1/fhe/cluster/peers` | GET | Discovered peers (threshold mode) |
+| `/v1/fhe/cluster/reshare` | POST | Trigger reshare (threshold mode) |
 
 ### Parameters
 - `PN10QP27` (default) - ~128-bit security, good performance
@@ -328,22 +328,22 @@ fhed reshare --input ./keys --new-t 3 --new-n 5 --output ./reshared
 ### Example Usage
 ```bash
 # Encrypt a bit
-curl -X POST http://localhost:8448/encrypt \
+curl -X POST http://localhost:8448/v1/fhe/encrypt \
   -H "Content-Type: application/json" \
   -d '{"bit": true}'
 
 # Encrypt an integer
-curl -X POST http://localhost:8448/encrypt \
+curl -X POST http://localhost:8448/v1/fhe/encrypt \
   -H "Content-Type: application/json" \
   -d '{"uint32": 42}'
 
 # Boolean AND gate
-curl -X POST http://localhost:8448/evaluate \
+curl -X POST http://localhost:8448/v1/fhe/evaluate \
   -H "Content-Type: application/json" \
   -d '{"operation": "and", "operands": ["<ct1>", "<ct2>"]}'
 
 # Check cluster status (threshold mode)
-curl http://localhost:8448/cluster/status
+curl http://localhost:8448/v1/fhe/cluster/status
 ```
 
 ## mDNS Discovery Package
