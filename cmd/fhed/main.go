@@ -573,16 +573,16 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 func (d *FHEDaemon) createHTTPServer() *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", d.handleHealth)
-	mux.HandleFunc("/publickey", d.handlePublicKey)
-	mux.HandleFunc("/encrypt", d.handleEncrypt)
-	mux.HandleFunc("/decrypt", d.handleDecrypt)
-	mux.HandleFunc("/evaluate", d.handleEvaluate)
+	mux.HandleFunc("/v1/fhe/health", d.handleHealth)
+	mux.HandleFunc("/v1/fhe/publickey", d.handlePublicKey)
+	mux.HandleFunc("/v1/fhe/encrypt", d.handleEncrypt)
+	mux.HandleFunc("/v1/fhe/decrypt", d.handleDecrypt)
+	mux.HandleFunc("/v1/fhe/evaluate", d.handleEvaluate)
 
 	// Cluster management endpoints (threshold mode)
-	mux.HandleFunc("/cluster/status", d.handleClusterStatus)
-	mux.HandleFunc("/cluster/peers", d.handleClusterPeers)
-	mux.HandleFunc("/cluster/reshare", d.handleClusterReshare)
+	mux.HandleFunc("/v1/fhe/cluster/status", d.handleClusterStatus)
+	mux.HandleFunc("/v1/fhe/cluster/peers", d.handleClusterPeers)
+	mux.HandleFunc("/v1/fhe/cluster/reshare", d.handleClusterReshare)
 
 	return &http.Server{Handler: mux}
 }
