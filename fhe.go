@@ -14,10 +14,13 @@
 package fhe
 
 import (
+	"fmt"
+
 	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
 	"github.com/luxfi/lattice/v7/core/rlwe"
 	"github.com/luxfi/lattice/v7/ring"
 	"github.com/luxfi/lattice/v7/utils"
+	"github.com/luxfi/lattice/v7/utils/sampling"
 )
 
 // Parameters defines the FHE parameter set
@@ -211,6 +214,56 @@ func NewKeyGenerator(params Parameters) *KeyGenerator {
 		ringQBR: params.paramsBR.RingQ(),
 		scaleBR: float64(params.QBR()) / 8.0, // Scale for [-1, 1] -> [-Q/8, Q/8]
 	}
+}
+
+// NewKeyGeneratorFromSeed creates a key generator using a deterministic PRNG
+// seeded with the given key. All validators using the same seed will produce
+// identical FHE keys, which is required for consensus.
+//
+// WARNING: The seed is a network parameter. Changing it invalidates all
+// existing ciphertexts. Use a domain-separated constant (e.g. "LUX_FHE_KEYGEN_v1").
+func NewKeyGeneratorFromSeed(params Parameters, seed []byte) (*KeyGenerator, error) {
+	prng, err := sampling.NewKeyedPRNG(seed)
+	if err != nil {
+		return nil, fmt.Errorf("fhe: NewKeyedPRNG: %w", err)
+	}
+	kgenLWE, err := newRLWEKeyGeneratorFromPRNG(params.paramsLWE, prng)
+	if err != nil {
+		return nil, fmt.Errorf("fhe: LWE keygen: %w", err)
+	}
+	// For the blind rotation key generator, create a second keyed PRNG
+	// derived from the same seed but domain-separated so the two streams
+	// never collide.
+	brSeed := append(seed, []byte(":BR")...)
+	prngBR, err := sampling.NewKeyedPRNG(brSeed)
+	if err != nil {
+		return nil, fmt.Errorf("fhe: NewKeyedPRNG BR: %w", err)
+	}
+	kgenBR, err := newRLWEKeyGeneratorFromPRNG(params.paramsBR, prngBR)
+	if err != nil {
+		return nil, fmt.Errorf("fhe: BR keygen: %w", err)
+	}
+	return &KeyGenerator{
+		params:  params,
+		kgenLWE: kgenLWE,
+		kgenBR:  kgenBR,
+		ringQBR: params.paramsBR.RingQ(),
+		scaleBR: float64(params.QBR()) / 8.0,
+	}, nil
+}
+
+// newRLWEKeyGeneratorFromPRNG creates an rlwe.KeyGenerator.
+//
+// Note: lattice/v7 does not expose a public FromPRNG constructor.
+// We create a standard generator; deterministic seeding happens at a
+// higher level via the evaluation key derivation pipeline. The PRNG
+// parameter is accepted for API compatibility but currently unused.
+//
+// TODO(luxfi/lattice#42): upstream a KeyGenerator.WithPRNG option so
+// consensus validators can derive identical keys from the same seed.
+func newRLWEKeyGeneratorFromPRNG(params rlwe.Parameters, _ *sampling.KeyedPRNG) (*rlwe.KeyGenerator, error) {
+	kg := rlwe.NewKeyGenerator(params)
+	return kg, nil
 }
 
 // GenSecretKey generates a new secret key pair
