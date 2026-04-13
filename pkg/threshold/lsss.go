@@ -11,9 +11,29 @@ import (
 	"math/big"
 )
 
-// Prime is a large prime for the finite field (256-bit)
-// This is a safe prime: p = 2q + 1 where q is also prime
-var Prime = mustParseBig("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF43")
+// Prime is the 2048-bit MODP Group 14 safe prime from RFC 3526 §3.
+// It is p = 2q + 1 with q = (p-1)/2 also prime (verified via Miller-Rabin
+// in TestPrime_IsSafePrime). Replaces the earlier 256-bit prime whose
+// (p-1)/2 factored into six primes — making Feldman VSS commitments
+// vulnerable to Pohlig-Hellman reduction to the smallest factor.
+//
+// Reference: RFC 3526 §3, "Group 14" — a 2048-bit MODP group widely deployed
+// in IKE/IKEv2 and TLS. Security level is 112-bit classical (NIST SP 800-56A)
+// which is sufficient for the VSS commitment binding; the Shamir secrets
+// themselves are FHE key-share values whose security does not rely on this
+// prime's hardness.
+var Prime = mustParseBig("" +
+	"FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +
+	"29024E088A67CC74020BBEA63B139B22514A08798E3404DD" +
+	"EF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245" +
+	"E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7ED" +
+	"EE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3D" +
+	"C2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F" +
+	"83655D23DCA3AD961C62F356208552BB9ED529077096966D" +
+	"670C354E4ABC9804F1746C08CA18217C32905E462E36CE3B" +
+	"E39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9" +
+	"DE2BCBF6955817183995497CEA956AE515D2261898FA0510" +
+	"15728E5A8AACAA68FFFFFFFFFFFFFFFF")
 
 func mustParseBig(s string) *big.Int {
 	n, ok := new(big.Int).SetString(s, 16)
@@ -146,21 +166,96 @@ func RecombineShares(shares []*Share, threshold int) (*big.Int, error) {
 }
 
 // Reshare generates new shares for a potentially different threshold/total
-// without reconstructing the secret. Uses the proactive secret sharing technique.
+// without reconstructing the secret. Each old share holder contributes a
+// sub-sharing of their share, and the new shares are the column-sums of
+// those sub-sharings. The secret is never materialized.
 func Reshare(oldShares []*Share, oldThreshold, newThreshold, newTotal int) (*ShareSet, error) {
 	if len(oldShares) < oldThreshold {
 		return nil, fmt.Errorf("not enough shares to reshare: have %d, need %d", len(oldShares), oldThreshold)
 	}
 
-	// First, reconstruct the secret (in a real implementation, this would be
-	// done distributedly using MPC)
-	secret, err := RecombineShares(oldShares, oldThreshold)
-	if err != nil {
-		return nil, fmt.Errorf("failed to recombine shares: %w", err)
+	// Use exactly oldThreshold shares.
+	used := oldShares[:oldThreshold]
+
+	// Each party i computes the Lagrange coefficient for evaluation at 0
+	// (the secret is f(0)), then creates a random polynomial of degree
+	// newThreshold-1 whose constant term is lambda_i * share_i. The sum
+	// of these polynomials evaluated at new indices gives the new shares.
+
+	// Accumulate new shares additively.
+	newValues := make([]*big.Int, newTotal)
+	for j := 0; j < newTotal; j++ {
+		newValues[j] = big.NewInt(0)
 	}
 
-	// Split into new shares
-	return SplitSecret(secret, newThreshold, newTotal)
+	for i, si := range used {
+		// Compute Lagrange coefficient lambda_i at x=0.
+		lambda := lagrangeCoeffAt0(used, i)
+
+		// Constant term = lambda_i * si.Value mod Prime.
+		c0 := new(big.Int).Mul(lambda, si.Value)
+		c0.Mod(c0, Prime)
+
+		// Build a random polynomial of degree newThreshold-1 with c0 as constant.
+		coeffs := make([]*big.Int, newThreshold)
+		coeffs[0] = c0
+		for k := 1; k < newThreshold; k++ {
+			coeff, err := rand.Int(rand.Reader, Prime)
+			if err != nil {
+				return nil, fmt.Errorf("reshare: random coeff: %w", err)
+			}
+			coeffs[k] = coeff
+		}
+
+		// Evaluate the polynomial at new indices 1..newTotal and add.
+		for j := 0; j < newTotal; j++ {
+			x := big.NewInt(int64(j + 1))
+			y := evaluatePolynomial(coeffs, x)
+			newValues[j].Add(newValues[j], y)
+			newValues[j].Mod(newValues[j], Prime)
+		}
+	}
+
+	shares := make([]*Share, newTotal)
+	for j := 0; j < newTotal; j++ {
+		shares[j] = &Share{Index: j + 1, Value: newValues[j]}
+	}
+
+	return &ShareSet{
+		Threshold: newThreshold,
+		Total:     newTotal,
+		Shares:    shares,
+	}, nil
+}
+
+// lagrangeCoeffAt0 computes the Lagrange basis coefficient for share i
+// evaluated at x=0 among the given set of shares.
+func lagrangeCoeffAt0(shares []*Share, i int) *big.Int {
+	num := big.NewInt(1)
+	den := big.NewInt(1)
+	xi := big.NewInt(int64(shares[i].Index))
+
+	for j, sj := range shares {
+		if i == j {
+			continue
+		}
+		xj := big.NewInt(int64(sj.Index))
+		// num *= (0 - xj) = -xj
+		num.Mul(num, new(big.Int).Neg(xj))
+		num.Mod(num, Prime)
+		// den *= (xi - xj)
+		diff := new(big.Int).Sub(xi, xj)
+		den.Mul(den, diff)
+		den.Mod(den, Prime)
+	}
+
+	denInv := new(big.Int).ModInverse(den, Prime)
+	result := new(big.Int).Mul(num, denInv)
+	result.Mod(result, Prime)
+	if result.Sign() < 0 {
+		result.Add(result, Prime)
+	}
+	return result
 }
 
 // AddShare adds a new share for a new party without revealing the secret.
@@ -271,8 +366,10 @@ type Commitment struct {
 	Values []*big.Int // g^{a_i} for each coefficient
 }
 
-// Generator for commitments (a generator of the prime-order subgroup)
-var Generator = big.NewInt(2)
+// Generator for commitments. Since Prime is a safe prime p = 2q+1, the
+// quadratic residue subgroup has order q. g = 2^2 mod p is a generator
+// of this subgroup (order q, not order p-1).
+var Generator = new(big.Int).Exp(big.NewInt(2), big.NewInt(2), Prime)
 
 // ComputeCommitments computes Feldman VSS commitments for the polynomial
 func ComputeCommitments(coeffs []*big.Int) *Commitment {
