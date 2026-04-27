@@ -318,7 +318,40 @@ The `metal_ntt_batch_forward` path in `luxcpp/lattice/src/metal/metal_ntt.mm`
 needs investigation. Without a working batch path, there is no
 crossover at any (N, B) on this backend.
 
-### G3. Fuse N bootstraps into a single Metal kernel. **(6 weeks)**
+### G3. Fuse N bootstraps into a single Metal kernel. **(6 weeks, Metal kernel; CPU-goroutine path shipped 2026-04-27)**
+
+Two distinct paths — both labelled "G3" historically — must be tracked
+separately:
+
+#### G3a. CPU-goroutine batch (`Bootstrap.BatchEvaluate`). **SHIPPED 2026-04-27.**
+
+API: `(*blindrot.Evaluator).BatchEvaluate(cts, testPolys, BRK)` in
+`/Users/z/work/lux/lattice/core/rgsw/blindrot/batch_evaluate.go`. The
+function fans N independent blind-rotations across a goroutine pool of
+size `runtime.GOMAXPROCS(0)`, allocating a fresh `NewEvaluator(paramsBR,
+paramsLWE)` per worker (the existing Evaluator carries mutable scratch
+buffers and the package exposes no `ShallowCopy`; cloning via the public
+constructor is the smallest correct path). The `BRK` key set is shared
+read-only.
+
+Per-iteration output is byte-equal to a serial `Evaluate(ct, tp, BRK)`
+call (test: `TestBatchEvaluate_ByteEqualSerial` at N=16, race-clean).
+
+Measured speedup at N=16, M1 Max, blindrot test params (LogN=10/9):
+
+```
+BenchmarkBatchEvaluate_Serial_N16-10        3   13376724333 ns/op
+BenchmarkBatchEvaluate_Parallel_N16-10      3    2901905945 ns/op
+```
+
+→ **4.61× at these parameters.** The §4 ceiling of 5.84× was measured at
+full FHE policy bootstrap parameters where per-iteration cost dwarfs
+goroutine overhead; on the cheaper blindrot test parameters the relative
+fixed cost of `NewEvaluator` per worker is larger, so the speedup is
+lower. The geometry — linear scaling capped near 8 P-cores — is the
+same.
+
+#### G3b. Metal `metal_batch_bootstrap` kernel. **DEFERRED.**
 
 The current dispatch is one bootstrap = one NTT context call = one Metal
 command buffer (per kernel-launch overhead estimate from #76 BLS pattern,
@@ -327,11 +360,13 @@ of useful work, that is ~530 µs of dispatch overhead — small compared
 to 5.4 s of CPU compute, but in a hypothetical GPU world where bootstrap
 is ~1 ms each, dispatch overhead becomes 50% of run time.
 
-The fix: a `metal_batch_bootstrap` kernel that takes `N×bsk` keys + `N×ct`
+The fix: a `metal_batch_bootstrap` kernel in
+`luxcpp/lattice/src/metal/` that takes `N×bsk` keys + `N×ct`
 ciphertexts and runs all blind-rotates in parallel on one command buffer.
 For a 32-core M1 Max GPU, batches of 32 fit one wavefront; H100 SMs go
-much wider. This is the difference between "FHE on M1 GPU is 2× slower
-than CPU" and "FHE on M1 GPU matches CPU at N≥16".
+much wider. **Not in this milestone.** When the Metal kernel ships,
+`BatchEvaluate` gains a fast-path that dispatches the whole batch to one
+command buffer instead of fanning out goroutines.
 
 ### G4. CUDA / dGPU port of `luxcpp/lattice` Metal kernels. **(8 weeks, requires Linux+H100 runner)**
 
