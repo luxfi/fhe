@@ -389,13 +389,75 @@ to support FheUint32+ field widths reliably. The bench harness confirms
 Lt scales linearly to U16; U32+ on PN10QP27 exhausts the noise budget
 before the gate completes — a correctness ceiling, not a performance one.
 
-### G6. Lazy-carry integer ops (`lazy_carry.go`). **(in tree, untested in policy)**
+### G6. Lazy-carry integer ops (`lazy_carry.go`). **REFUSED — structurally broken; deferred to G3b.** (audit 2026-04-27)
 
-The repo already ships a `LazyCarryEvaluator` (`/Users/z/work/lux/fhe/lazy_carry.go`)
-that combines multiple gates into a single bootstrap by pre-encoding
-weights. Per #114 measurement the bit-sliced policy uses ~53 bootstraps;
-a lazy-carry rewrite of the policy circuit could cut this to ~30, a
-1.7× speedup with no GPU. **Pure-Go optimisation, no GPU dependency.**
+**Status: shipped code is incorrect at the most basic case. Not wireable.**
+
+Audit performed 2026-04-27 against `/Users/z/work/lux/fhe/lazy_carry.go`
+(no commit, no behaviour change in tree).
+
+1. **The "1.7× speedup of the policy circuit" claim has no mechanism.**
+   The bit-sliced policy circuit is `Lt + Lt + (Eq+OR)×3 + AND×2`. None
+   of these are `Add`. `LazyCarryEvaluator.{Lt, Eq}` explicitly call
+   `Propagate` then `ToBitCiphertext` then dispatch to the existing
+   `BitwiseEvaluator.{Lt, Eq}` — the same code path the policy already
+   uses. The lazy-carry optimisation amortises `Add` carry chains across
+   N additions; the policy has zero additions to amortise.
+
+2. **`Propagate` errors on the simplest valid input.** Single
+   `Add(LCI(a), LCI(b))` at FheUint8 → `ToBitCiphertext` returns
+   `propagate for output: limb 1 carry add: bit count mismatch: 8 vs 4`.
+   Root cause: `extractCarry` (lazy_carry.go:389) returns a carry of
+   width `extendedBits - limbBits = 4`, but the next limb's `Value` has
+   width `extendedBits = 8`. `BitwiseEvaluator.Add` rejects mismatched
+   widths. The bug is not a missing zero-extend, it is structural —
+   see (3).
+
+3. **`extractCarry` is not a homomorphic carry extraction.** The
+   function takes a `BitCiphertext` of width `extendedBits` and returns
+   the lower `limbBits` and upper `extendedBits-limbBits` as separate
+   ciphertexts via `copy(bits[:limbBits])`. This is a literal slice of
+   the bit array — there is no PBS, no carry derivation, no
+   homomorphic operation. It only produces a correct decomposition if
+   the input ciphertext was already in the form
+   `low + (carry << limbBits)` — i.e. if `BitwiseEvaluator.Add`
+   produced an output whose upper bits encode a true carry. They do
+   not. `BitwiseEvaluator.Add` is a fixed-width modular ripple-carry
+   adder; the upper bits of its result, after multiple lazy adds with
+   accumulated carry already in those positions, are NOT the carry of
+   the original limb sum. They are the result of adding two numbers
+   whose magnitudes already exceed `2^limbBits`, modular-reduced to
+   `extendedBits`.
+
+4. **No tests in tree.** `lazy_carry.go` ships with zero tests in
+   `luxfi/fhe`. A 16-trial single-Add audit harness was written to
+   stage `lazy_carry_test.go::TestLazyCarry_SingleAdd_Uint8`; trial 0
+   failed at `ToBitCiphertext` with the (2) error, the harness was
+   removed without committing.
+
+**Recommendation: kill G6 as a "near-term throughput win" line item.**
+The throughput advantage of lazy-carry radix arithmetic is real for
+EVM-style accumulator workloads (e.g. `_balances[to] = FHE.add(...)`
+chains where 10+ adds run between reads); it is not real for the
+bit-sliced policy circuit. Wiring lazy_carry into anything is blocked
+on (a) fixing `extractCarry` to perform a real homomorphic carry
+derivation rather than a literal slice, (b) widening the carry to
+limb width before re-add, and (c) re-deriving the noise budget for
+the corrected propagation chain (the published 16-op headroom assumes
+each lazy add costs 0 PBS — once `extractCarry` is corrected the cost
+is `numLimbs - 1` PBS per add at the actual carry depth, not the
+amortised depth).
+
+The "true" lazy-carry win for the policy hot path is to batch
+bootstraps at the gate level (G3a, shipped) and to fuse the bootstrap
+chain on Metal (G3b, deferred). G6 is folded into G3b — when the
+Metal kernel runs the gadget chain end-to-end, lazy-carry-style
+amortisation is implicit in the kernel design and does not require
+the buggy Go `LazyCarryEvaluator` to be salvaged.
+
+**Action: leave `lazy_carry.go` in tree as research code, NOT wired
+into any production path. Closing #123 as "refused — see this G6
+note" rather than as completed.**
 
 ---
 
