@@ -11,7 +11,14 @@ require (
 	github.com/luxfi/metric v1.5.0
 	github.com/spf13/cobra v1.10.2
 	github.com/urfave/cli/v3 v3.6.2
+	golang.org/x/crypto v0.49.0
 )
+
+// Local development against PolyDomain + NTTContext + ReductionBudget added
+// in luxfi/lattice (LP-137-FHE-TYPING). Drop this once luxfi/lattice cuts a
+// release tag (>=v7.1.0) that includes the types/ package on master.
+// Branch: feat/lp-137-types @ a362b2e4.
+replace github.com/luxfi/lattice/v7 => ../lattice
 
 require (
 	github.com/ALTree/bigfloat v0.2.0 // indirect
@@ -78,8 +85,7 @@ require (
 	go.temporal.io/api v1.62.6 // indirect
 	go.temporal.io/sdk v1.41.1 // indirect
 	go.uber.org/mock v0.6.0 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
-	golang.org/x/exp v0.0.0-20260212183809-81e46e3db34a // indirect
+	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
 	golang.org/x/image v0.38.0 // indirect
 	golang.org/x/mod v0.34.0 // indirect
 	golang.org/x/net v0.52.0 // indirect
