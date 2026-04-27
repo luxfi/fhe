@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/luxfi/lattice/v7/ring"
 	lgpu "github.com/luxfi/lattice/v7/gpu"
 )
 
@@ -28,76 +29,64 @@ func gpuProbe() gpuProbeResult {
 			backend:   lgpu.GetBackend(),
 		}
 		if !probeCached.available {
-			probeCached.reason = "lattice_gpu_available() returned false (library built without WITH_GPU=ON)"
+			probeCached.reason = "lattice_gpu_available() returned false (library built without WITH_GPU=ON or missing Metal probe)"
 		}
 	})
 	return probeCached
 }
 
-// nttCtxCache reuses NTT contexts across iterations -- creating them
-// every call would dominate the bench. Keyed by N because Q is fixed.
+// montCtxCache reuses Montgomery NTT contexts across iterations. Keyed
+// by N because Q is fixed. Uses the Montgomery dispatch path which is
+// byte-equal to ring.NTTStandard and supports true single-dispatch
+// batch via lattice_ntt_forward(ctx, data, batch).
 var (
-	nttCtxMu    sync.Mutex
-	nttCtxCache = map[int]*lgpu.NTTContext{}
+	montCtxMu    sync.Mutex
+	montCtxCache = map[int]*lgpu.MontgomeryNTTContext{}
 )
 
-func getNTTContext(n int) (*lgpu.NTTContext, error) {
-	nttCtxMu.Lock()
-	defer nttCtxMu.Unlock()
-	if ctx, ok := nttCtxCache[n]; ok {
+func getMontgomeryNTTContext(n int) (*lgpu.MontgomeryNTTContext, error) {
+	montCtxMu.Lock()
+	defer montCtxMu.Unlock()
+	if ctx, ok := montCtxCache[n]; ok {
 		return ctx, nil
 	}
-	ctx, err := lgpu.NewNTTContext(uint32(n), nttQ)
+	r, err := ring.NewRing(n, []uint64{nttQ})
 	if err != nil {
-		return nil, fmt.Errorf("NewNTTContext(N=%d, Q=0x%x): %w", n, nttQ, err)
+		return nil, fmt.Errorf("ring.NewRing(N=%d, Q=0x%x): %w", n, nttQ, err)
 	}
-	nttCtxCache[n] = ctx
+	ctx, err := lgpu.NewMontgomeryNTTContext(r.SubRings[0])
+	if err != nil {
+		return nil, fmt.Errorf("NewMontgomeryNTTContext(N=%d, Q=0x%x): %w", n, nttQ, err)
+	}
+	montCtxCache[n] = ctx
 	return ctx, nil
 }
 
-// metalNTTForwardSinglePoly dispatches one NTT(N) through the lattice
-// gpu wrapper. The wrapper internally calls metal_ntt_forward in
-// libluxlattice.dylib. Single-poly is the path that worked in #121
-// (12x slower than Go pure-Go, see policy/PERFORMANCE.md S5).
+// metalNTTForwardSinglePoly dispatches one NTT(N) through the
+// Montgomery dispatch path. Output is byte-equal to ring.NTTStandard.
 func metalNTTForwardSinglePoly(n int, data []uint64) error {
-	ctx, err := getNTTContext(n)
+	ctx, err := getMontgomeryNTTContext(n)
 	if err != nil {
 		return err
 	}
 	if len(data) != n {
 		return fmt.Errorf("data length %d != N %d", len(data), n)
 	}
-	// gpu.NTT takes [][]uint64 and returns [][]uint64. We pre-wrap the
-	// caller's slice to avoid an extra allocation per iteration.
-	in := [][]uint64{data}
-	_, err = ctx.NTT(in)
-	return err
+	return ctx.Forward(data, 1)
 }
 
-// metalNTTForwardBatch dispatches batch NTTs. The published
-// luxfi/lattice/v7@v7.0.0/gpu API does not expose a single-dispatch
-// BatchNTT (the underlying libluxlattice exports lattice_ntt_batch_*
-// but the Go wrapper only has NTT([][]uint64) which calls
-// metal_ntt_forward once per polynomial). We therefore measure the
-// "B sequential single-poly NTTs through the cgo boundary" cost,
-// which is what the policy/PERFORMANCE.md S5 already established as
-// 12x slower than Go.
-//
-// When/if the lattice gpu wrapper grows BatchNTT (ETA per
-// FHE-GPU FIX agent), this function will be updated to call it. For
-// now, our cell labels honestly show "B sequential single-poly".
+// metalNTTForwardBatch dispatches batch NTTs through the
+// Montgomery batch dispatcher. After the FHE-GPU FIX
+// (0507c925 + 3fd1ed7), MontgomeryNTTContext.Forward(data, batch) is
+// a single-dispatch batched call -- the BatchNTT C ABI signature
+// mismatch was fixed in luxcpp/lattice/src/lattice.cpp.
 func metalNTTForwardBatch(n, batch int, data []uint64) error {
-	ctx, err := getNTTContext(n)
+	ctx, err := getMontgomeryNTTContext(n)
 	if err != nil {
 		return err
 	}
 	if len(data) != n*batch {
 		return fmt.Errorf("data length %d != N*batch %d*%d", len(data), n, batch)
 	}
-	polys := make([][]uint64, batch)
-	for i := 0; i < batch; i++ {
-		polys[i] = data[i*n : (i+1)*n]
-	}
-	_, err = ctx.NTT(polys)
-	return err
+	return ctx.Forward(data, uint32(batch))
 }

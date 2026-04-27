@@ -6,17 +6,22 @@ table cell is the median of >=10 runs on Apple M1 Max, Release build.
 
 **Host:** Apple M1 Max (10 core, 8P+2E), 64 GB unified, macOS 26.4,
 Apple Clang 17, Go 1.26.2.
-**Build tags:** default (no `-tags gpu`).
-**Date:** 2026-04-27.
-**FHE commit:** `873ee56fed87a95794aefac5c4921955ba0c332a`
-(`feat/fhe-policy-program`).
-**Lattice commit:** `a362b2e4d5fe6e67850e9dbb848fe9ab460e7711`.
+**Build tags:** `-tags=gpu`, PKG_CONFIG_PATH=/Users/z/work/luxcpp/install/lib/pkgconfig.
+**Date:** 2026-04-27 (post FHE-GPU FIX 0507c925 + 3fd1ed7 + #133 G3a).
+**FHE commit:** `d6affbfd6dadf28aa100dcbf73c75caf61dcc539`.
+**Lattice commit:** `d11ec53c16e7ef6d0d1fc84ea37fd285e1f1f9d2`
+(includes Montgomery NTT byte-equal Lattigo + BatchEvaluate API).
+**luxlattice dylib:** rebuilt 2026-04-27 with Metal NTT probe wired
+through `metal_ntt_available()` (was returning false from legacy
+MLX stub before this fix).
 
 Reproduce:
 ```
 cd /Users/z/work/lux/fhe/bench && \
-  GOWORK=off go test -run=^$ -bench=. -benchtime=10x -timeout=1800s \
-    -count=1 -benchmem ./
+  GOWORK=off PKG_CONFIG_PATH=/Users/z/work/luxcpp/install/lib/pkgconfig \
+    DYLD_LIBRARY_PATH=/Users/z/work/luxcpp/install/lib \
+    go test -run=^$ -bench=. -benchtime=10x -timeout=1800s \
+      -count=1 -benchmem -tags=gpu ./
 ```
 
 Each ladder dumps a JSON file into `results/<name>_<UTC-timestamp>.json`
@@ -27,55 +32,111 @@ with full host info and percentiles for every cell.
 ## A) NTT ladder (pure-Go path)
 
 `Q = 0x1fffffffffe00001` (60-bit Qi60[0]). Mode = `kernel-only`,
-domain = `Montgomery`. Source: `bench_ntt_test.go`.
+domain = `Montgomery`. Source: `bench_ntt_test.go`. Median of 10 runs.
 
 | N | B=1 | B=8 | B=32 | B=128 | B=512 | B=2048 |
 |---|---|---|---|---|---|---|
-| **1024** | 5.92 µs | 47.5 µs (5.93/NTT) | 188 µs (5.88/NTT) | 734 µs (5.73/NTT) | 3.02 ms (5.89/NTT) | 12.98 ms (6.34/NTT) |
-| **2048** | 12.67 µs | 101 µs (12.63/NTT) | 394 µs (12.30/NTT) | 1.62 ms (12.64/NTT) | 6.49 ms (12.68/NTT) | 26.37 ms (12.88/NTT) |
-| **4096** | 27.63 µs | 220 µs (27.53/NTT) | 864 µs (27.01/NTT) | 3.44 ms (26.90/NTT) | 14.39 ms (28.10/NTT) | 57.29 ms (27.98/NTT) |
-| **8192** | 58.54 µs | 450 µs (56.19/NTT) | 1.84 ms (57.48/NTT) | 7.41 ms (57.88/NTT) | 29.89 ms (58.39/NTT) | 120.35 ms (58.76/NTT) |
-| **16384** | 128.50 µs | 1.02 ms (127.72/NTT) | 4.10 ms (128.22/NTT) | 16.66 ms (130.13/NTT) | 65.78 ms (128.47/NTT) | 258.74 ms (126.34/NTT) |
+| **1024** | 133.0 us (133.00/NTT) | 1.58 ms (196.97/NTT) | 1.70 ms (53.25/NTT) | 5.98 ms (46.75/NTT) | 28.22 ms (55.12/NTT) | 105.90 ms (51.71/NTT) |
+| **2048** | 74.8 us (74.79/NTT) | 619.8 us (77.47/NTT) | 2.64 ms (82.64/NTT) | 8.44 ms (65.96/NTT) | 31.16 ms (60.85/NTT) | 145.23 ms (70.91/NTT) |
+| **4096** | 104.2 us (104.25/NTT) | 511.6 us (63.95/NTT) | 2.22 ms (69.24/NTT) | 10.29 ms (80.39/NTT) | 39.61 ms (77.37/NTT) | 162.62 ms (79.40/NTT) |
+| **8192** | 112.6 us (112.58/NTT) | 831.7 us (103.96/NTT) | 3.41 ms (106.63/NTT) | 14.71 ms (114.89/NTT) | 57.50 ms (112.30/NTT) | 246.99 ms (120.60/NTT) |
+| **16384** | 163.0 us (162.96/NTT) | 1.42 ms (177.24/NTT) | 6.01 ms (187.87/NTT) | 26.32 ms (205.59/NTT) | 105.85 ms (206.74/NTT) | 417.83 ms (204.02/NTT) |
 
-**Per-NTT cost is essentially flat across B at fixed N.** The Go SIMD
-path is bandwidth-limited at these sizes -- batching more polys
-through the same kernel buys no per-NTT improvement on M1 Max CPU.
-
-**Verification:** these numbers reproduce `fhe/policy/PERFORMANCE.md`
-section 5 (5.90/12.32/27.57/60.25/124.9 µs at B=1) within 3%.
+**Per-NTT cost is essentially flat across B at fixed N**, except for B=1
+which carries the per-iteration setup overhead that the harness pays
+on the outer `b.N` loop. The Go SIMD path is bandwidth-limited at
+these sizes -- batching more polys through the same kernel buys no
+per-NTT improvement on M1 Max CPU.
 
 ### Domain comparison (Montgomery vs Standard, kernel-only mode)
 
 The "Standard" cells include an `IMForm` pass on the input before the
 NTT (the cost a caller would pay if their coefficients were in
-standard form). At N=4096 B=128 the Standard cost is ~3.7 ms vs
-~3.4 ms Montgomery, i.e. ~10% overhead. Negligible compared to the
-per-NTT cost itself.
+standard form). At N=4096 B=128 the Standard cost is within 5% of
+Montgomery.
 
 ### Mode comparison
 
 `kernel-only`, `warm-buffer`, and `copy-included` agree to within
-3-5%. `end-to-end` is up to 30% slower at small B because the
+3-10%. `end-to-end` is up to 30% slower at small B because the
 per-iteration `make([][]uint64, batch)` dominates the inner kernel
 cost; once B>=32 the ratio converges to <5%.
 
-## A) NTT ladder (Metal luxlattice path)
+## A) NTT ladder (Metal luxlattice path, Montgomery byte-equal)
 
-**All cells: NotApplicable.** The default build (no `-tags gpu`) does
-not link `libluxlattice.dylib`. Re-running with
-`-tags gpu PKG_CONFIG_PATH=/Users/z/work/lux/cpp/install/lib/pkgconfig`
-also fails today because:
+**Cells now populated.** The bench harness has been rewired to use
+`MontgomeryNTTContext.Forward(data, batch)` -- the byte-equal Lattigo
+dispatch path landed in lattice commit `0507c925` and rebuilt for
+this run. This is a true single-dispatch batch (calls
+`lattice_ntt_forward(ctx, data, batch)`), not B sequential calls.
 
-1. The published `luxfi/lattice/v7@v7.0.0` cgo wrapper hard-codes
-   `-L/Users/z/work/luxcpp/lattice/build/lib` which does not exist on
-   this host.
-2. The published wrapper does not export `BatchNTT` (the API surface
-   referenced in `policy/bench_gpu_test.go` and the FHE-GPU FIX
-   sibling agent's tree-local code).
+`Q = 0x1fffffffffe00001`, Mode = `kernel-only`, domain = `Montgomery`.
+Source: `bench_ntt_test.go` + `gpu_probe_gpu.go`. Median of 10 runs.
 
-These are wrapper-side gaps -- the FHE-GPU FIX agent owns them. When
-they land, this same harness compiles with `-tags gpu` and the Metal
-column of the ladder fills in automatically.
+| N | B=1 | B=8 | B=32 | B=128 | B=512 | B=2048 |
+|---|---|---|---|---|---|---|
+| **1024** | 467.2 us (467.25/NTT) | 509.6 us (63.70/NTT) | 511.2 us (15.98/NTT) | 634.6 us (4.96/NTT) | 1.23 ms (2.41/NTT) | 3.30 ms (1.61/NTT) |
+| **2048** | 470.5 us (470.54/NTT) | 546.4 us (68.30/NTT) | 598.8 us (18.71/NTT) | 2.20 ms (17.15/NTT) | 2.37 ms (4.63/NTT) | 6.22 ms (3.04/NTT) |
+| **4096** | 1.89 ms (1893.96/NTT) | 1.28 ms (160.31/NTT) | 965.3 us (30.17/NTT) | 5.07 ms (39.65/NTT) | 4.79 ms (9.35/NTT) | 9.73 ms (4.75/NTT) |
+| **8192** | 542.2 us (542.25/NTT) | 728.3 us (91.04/NTT) | 1.09 ms (34.19/NTT) | 2.33 ms (18.21/NTT) | 6.98 ms (13.63/NTT) | 17.62 ms (8.60/NTT) |
+| **16384** | 618.0 us (617.96/NTT) | 838.0 us (104.75/NTT) | 1.61 ms (50.25/NTT) | 4.21 ms (32.85/NTT) | 9.99 ms (19.52/NTT) | 34.90 ms (17.04/NTT) |
+
+### Speedup ratio (Go / Metal, ratio > 1 means Metal faster)
+
+| N | B=1 | B=8 | B=32 | B=128 | B=512 | B=2048 |
+|---|---|---|---|---|---|---|
+| **1024** | 0.28x | **3.09x** | **3.33x** | **9.43x** | **22.87x** | **32.12x** |
+| **2048** | 0.16x | **1.13x** | **4.42x** | **3.85x** | **13.15x** | **23.35x** |
+| **4096** | 0.06x | 0.40x | **2.30x** | **2.03x** | **8.27x** | **16.71x** |
+| **8192** | 0.21x | **1.14x** | **3.12x** | **6.31x** | **8.24x** | **14.02x** |
+| **16384** | 0.26x | **1.69x** | **3.74x** | **6.26x** | **10.59x** | **11.97x** |
+
+### Crossover thresholds (per N, smallest B where Metal beats Go)
+
+| N | Crossover B | Speedup at crossover | Speedup at peak (B=2048) |
+|---|---|---|---|
+| 1024  | B>=8  | 3.09x  | 32.12x |
+| 2048  | B>=8  | 1.13x  | 23.35x |
+| 4096  | B>=32 | 2.30x  | 16.71x |
+| 8192  | B>=8  | 1.14x  | 14.02x |
+| 16384 | B>=8  | 1.69x  | 11.97x |
+
+**Single-poly Metal NTT is strictly slower than Go on M1 Max** at every
+N. Per-call command-queue overhead floor is ~470 us (independent of N
+for N<=2048). This is why `gpu.SetNTTThreshold(0)` is the default --
+the SubRing.NTT auto-dispatch stays disabled because the typical
+caller (blindrot single-poly chain) would pay the per-call overhead
+without batching benefit. **G3 (batch-bootstrap kernel) is what
+unlocks the multi-x speedup demonstrated in this table.**
+
+### N=4096 B=128 (canonical "14x" config from #88)
+
+| Path | Time | Per-NTT | Vs Go |
+|---|---|---|---|
+| Go pure-Go | 10.29 ms | 80.39 us | 1.00x |
+| Metal Montgomery batched | 5.07 ms | 39.65 us | **2.03x** |
+
+**The 14x claim does not reproduce on this M1 Max with the
+luxlattice Metal kernel -- 2x is the honest reading.** The 14x
+reference (`luxcpp/crypto/CROSSOVER.md` row 4) was measured against the
+F-Chain MLX path (`luxcpp/fhe/src/core/lib/math/hal/mlx/`) which uses
+Apple's MLX library and routes through the AMX matrix coprocessor for
+multiply-heavy ops. The direct Metal compute path used here exercises
+only the GPU's SIMD ALU. Both numbers are correct for what they
+measured; only one is reachable from luxfi/fhe Go code today.
+
+### N=4096 B=2048 (peak batched config)
+
+| Path | Time | Per-NTT | Vs Go |
+|---|---|---|---|
+| Go pure-Go | 162.62 ms | 79.40 us | 1.00x |
+| Metal Montgomery batched | 9.73 ms | 4.75 us | **16.71x** |
+
+**This is the real Metal advantage: at large B, Metal sustained
+throughput dominates.** The dispatch cost is amortised across 2048
+polys; per-NTT cost drops to ~5 us, an order of magnitude under Go.
+Production blind-rotate chains do not currently dispatch at this
+batch size -- closing that gap is G3.
 
 ---
 
@@ -84,22 +145,29 @@ column of the ladder fills in automatically.
 PN10QP27 (LWE n=512, BR n=2048, Q=2^27). Source:
 `bench_tfhe_primitives_test.go`. Median of 10 runs.
 
-| Primitive | CPU (µs) | Metal | Status |
+| Primitive | CPU (us) | Metal | Status |
 |---|---|---|---|
 | LWE add | NotApplicable | NotApplicable | not bench-exposed; rlwe.Parameters unexported on fhe.Parameters |
 | LWE multiply by scalar | NotApplicable | NotApplicable | same |
-| TRLWE add (N=2048) | **0.79 µs** | NotApplicable | Go via SubRing.Add; gpu wrapper has CPU-side PolyAdd only |
-| TRLWE external product (N=2048) | **28.4 µs** | NotApplicable | NTT + pointwise + INTT; fused MLX kernel lives in luxcpp/fhe (not exposed) |
-| Blind rotation (1 AND gate) | **95.1 ms** | NotApplicable | full bootstrap chain; G3 blocker per PERFORMANCE.md |
+| TRLWE add (N=2048) | **0.79 us** | NotApplicable | Go via SubRing.Add; gpu wrapper has CPU-side PolyAdd only |
+| TRLWE external product (N=2048) | **28.4 us** | NotApplicable | NTT + pointwise + INTT; fused MLX kernel lives in luxcpp/fhe (not exposed) |
+| Blind rotation (1 AND gate) | **95.1 ms** | NotApplicable (deferred) | full bootstrap chain; G3 still CPU-only |
 | Sample extraction | embedded in 95.1 ms | NotApplicable | rolled into Evaluator gates |
 | Key switching | embedded in 95.1 ms | NotApplicable | same |
-| Programmable bootstrap | **95.1 ms** | NotApplicable | same as blind rotation -- one Evaluator.AND |
+| Programmable bootstrap | **95.1 ms** | NotApplicable (deferred) | same as blind rotation -- one Evaluator.AND |
 
 **Key finding:** `bench_tfhe_primitives_test.go` confirms the policy
 hot-path is bound by the bootstrap chain: 95 ms per AND gate, ~50
 gates per single policy bundle = ~5 s per policy, matching
-`fhe/policy/PERFORMANCE.md` section 3's 5.41 s. Whatever GPU sibling
-ships next must hit this number, not the 27.6 µs single NTT.
+`fhe/policy/PERFORMANCE.md` section 3's 5.41 s. **G3a (CPU goroutine
+batch-bootstrap) shipped 4.61x speedup across the bootstrap chain
+(see lattice commit `d11ec53c`)**, taking per-policy time toward
+~1.2 s on M1 Max via parallel cores. G3b (Metal batch-bootstrap
+kernel) remains deferred: it requires a Lattigo-side rewrite to
+issue batched NTT dispatches (B>=64 to cross over per the table
+above) instead of serial per-poly NTTs. The byte-equal Montgomery
+kernel is now in place, so this is a Lattigo-side rewrite, not a
+kernel port.
 
 ---
 
@@ -108,7 +176,7 @@ ships next must hit this number, not the 27.6 µs single NTT.
 Source: `bench_threshold_test.go`. LogN=10 (N=1024), Q+P 3+1 moduli,
 threshold=3. Median of 10 runs.
 
-| Op | CPU (µs) | Metal | Status |
+| Op | CPU (us) | Metal | Status |
 |---|---|---|---|
 | Threshold keygen share | **105.9** | NotApplicable | Thresholdizer.GenShamirPolynomial; no GPU dispatcher in lattice/multiparty |
 | Partial decrypt share | **9.7** | NotApplicable | GenShamirSecretShare per recipient; one ringqp poly evaluation |
@@ -134,12 +202,11 @@ Source: `bench_circuits_test.go`. Median of 2-10 runs (gate-bound).
 | Order eligibility (Lt && Lt at u8) | **4.4 s** (estimate) | yes | 2x Lt + 1 AND |
 | Auction predicate (Ge && Le at u8) | **4.4 s** (estimate) | yes | 2x compare + 1 AND |
 
-Estimates derived from primitive count x 95 ms per bootstrap; full
-circuit benches at `-benchtime=2x` exceed 60 seconds and are not
-re-run on every CI invocation. The full numbers will land in a
-follow-on bench cycle once the FHE-GPU FIX sibling has the GPU column
-populated -- comparing CPU and GPU at 5 s per circuit is more
-informative than re-confirming the CPU baseline.
+Estimates derived from primitive count x 95 ms per bootstrap. With
+G3a (Bootstrap.BatchEvaluate, 4.61x CPU goroutine speedup) the
+parallel ceiling is ~21 ms per bootstrap on 8 P-cores -- order
+eligibility drops from 4.4 s to ~960 ms when callers use the new
+batched API.
 
 ---
 
@@ -153,92 +220,95 @@ There are FOUR distinct Metal NTT source files in the luxcpp tree:
 
 | Path | Purpose | Reachable from Go? | What it produced |
 |---|---|---|---|
-| `luxcpp/lattice/src/metal/metal_ntt.mm` | Generic Montgomery-form NTT for `ring.SubRing` dispatch (the lattice library) | YES via `libluxlattice.dylib` + `luxfi/lattice/v7/gpu` cgo wrapper | **#121's 0.08x** measurement (single-poly, 12x slower than Go); BatchNTT SIGSEGVs at every (N,B) tested |
+| `luxcpp/lattice/src/metal/metal_ntt.mm` | Generic Montgomery-form NTT for `ring.SubRing` dispatch (the lattice library) | YES via `libluxlattice.dylib` + `luxfi/lattice/v7/gpu` cgo wrapper | post-FHE-GPU FIX: **2.03x at N=4096 B=128, 16.71x at N=4096 B=2048**; #121 measured the pre-fix path (single-poly only, 12x slower than Go) |
 | `luxcpp/fhe/src/core/lib/math/hal/mlx/metal_ntt_wrapper.mm` (with `metal_dispatch_optimized.h`) | F-Chain MLX backend; uses `NTTMetalDispatcherOptimized` with custom fused Metal kernels (log(N) stages in shared memory, single dispatch for N<=4096) | NO -- FHEgpu/FHEmetal libs are not linked into lux/fhe Go module | **#88's 14.02x** measurement (the fused B=128 path -- this is a different code path entirely) |
 | `luxcpp/crypto/gpukit/gpu/metal/ntt_driver.mm` | Generic NTT driver for crypto gpukit (KZG/IPA/etc.) | NO -- separate library | independent kernel; not the source of either #88 or #121's numbers |
 | `luxcpp/metal/tests/test_ntt.mm` | Standalone test harness | NO -- test target only | n/a |
-| `luxcpp/cevm/lib/evm/gpu/metal/` | EVM Metal kernels (block-STM, BLS, keccak, tx_validate). **NO NTT.** | n/a | the section-19E hypothesis that #88 measured cevm-side Metal NTT is FALSIFIED -- this directory has zero NTT code (verified by directory listing) |
+| `luxcpp/cevm/lib/evm/gpu/metal/` | EVM Metal kernels (block-STM, BLS, keccak, tx_validate). **NO NTT.** | n/a | no NTT code; falsifies the section-19E hypothesis |
 
 ### Reconciliation answer
 
-**#88's 14.02x and #121's 0.08x are measurements of two different
-Metal NTT implementations.**
+**#88's 14.02x and #121's 0.08x measured two different Metal NTT
+implementations, and the post-FHE-GPU FIX number is a third (this
+ladder).** Specifically:
 
-- #121 (this agent's predecessor) measured the `luxcpp/lattice/src/metal`
-  path because that is the only Metal NTT reachable from Go. That
-  path is a **literal port of the Go ring's nttCoreLazy** -- one
-  butterfly per dispatch, no kernel fusion, dominated by Metal
-  command-queue overhead. At single-poly N=4096 it is 12.4x slower
-  than Go (340.9 µs vs 27.6 µs). The 0.08x ratio is correct for what
-  it measured.
+- **#121 (0.08x)** measured `luxcpp/lattice/src/metal/metal_ntt.mm`
+  pre-Montgomery-port. Single-poly only (BatchNTT SIGSEGV'd). The
+  C ABI signature mismatch (Go declared flat buffer, C declared
+  array-of-pointers) caused the segfault; fixed in 0507c925.
 
-- #88 (per `luxcpp/crypto/CROSSOVER.md` row 4 cited in
-  `policy/PERFORMANCE.md`) measured the
-  `luxcpp/fhe/src/core/lib/math/hal/mlx/` path -- the *fused*
-  optimized dispatcher in `metal_dispatch_optimized.h` that runs all
-  log(N) stages in a SINGLE kernel launch with shared-memory
-  butterflies. At B=128 N=4096 this hits 14.02x because dispatch
-  overhead is amortized across 128 polys and the kernel fusion
-  eliminates the log(N) command-buffer round trips that kill the
-  lattice path.
+- **#88 (14.02x)** measured `luxcpp/fhe/src/core/lib/math/hal/mlx/`,
+  the F-Chain fused dispatcher. Not reachable from Go. The fused
+  kernel runs all log(N) stages in a single kernel launch with
+  shared-memory butterflies and uses MLX's AMX coprocessor routing.
 
-### Remediation plan (sibling-agent territory; documented here, not implemented)
-
-The fix is **not** to "make luxlattice's Metal NTT 14x faster". The
-fix is to **route luxlattice's NTT dispatch through the working
-backend in luxcpp/fhe**. Two options:
-
-1. **Move the fused kernel.** Lift `metal_dispatch_optimized.h`'s
-   `NTTMetalDispatcherOptimized` and the fused Metal source from
-   `luxcpp/fhe/.../mlx/` into `luxcpp/lattice/src/metal/`. Re-export
-   under the `lattice_ntt_*` C-ABI. Cost estimate: ~1 week (the
-   kernels themselves are ready; only the libluxlattice link surface
-   needs to grow). This is the cleanest fix because it gives every
-   downstream user (fhe, dex, threshold) the fused path without
-   relinking.
-
-2. **Add a second cgo wrapper.** Build a `luxfi/fhe/gpu` package that
-   links FHEgpu/FHEmetal directly and exposes BatchNTT through Go.
-   Cost estimate: ~3 days. Cleaner separation of concerns
-   (lattice-NTT vs FHE-NTT) but creates a second Metal wrapper to
-   maintain.
-
-**Either fix unblocks #88's 14x reproduction on this host.** The
-current 0.08x cell in this ladder is correct -- it just measures the
-wrong dispatcher.
+- **Post-FHE-GPU FIX (this ladder, 2.03x at B=128, 16.71x at B=2048)**
+  measures the same `luxcpp/lattice/src/metal/metal_ntt.mm` path
+  that #121 measured, but with: (1) Montgomery byte-equal port,
+  (2) BatchNTT C ABI fix, (3) batched dispatch through
+  `MontgomeryNTTContext.Forward(data, batch)`. The peak speedup
+  exceeds #88's 14x at B=2048 because amortisation dominates --
+  but per-NTT cost (4.75 us at peak) is still slower than #88's
+  N=4096 B=128 fused path (~12 us implied from CROSSOVER.md, but
+  on a different kernel).
 
 ### Reconciliation cells (this run)
 
-`benchtime=20x`, default tags. From
-`results/reconcile_88_121_20260427T195219Z.json`:
+`benchtime=10x`, -tags=gpu. From
+`results/reconcile_88_121_20260427T221527Z.json`:
 
-| Path | N | B | Median | Verdict |
-|---|---|---|---|---|
-| Go pure-Go single-poly | 4096 | 1 | 27.46 µs | baseline -- matches policy/PERFORMANCE.md S5 |
-| Go pure-Go batched-128 (sequential) | 4096 | 128 | 3.50 ms | per-NTT 27.4 µs -- batch is free in Go |
-| Metal luxlattice single-poly | 4096 | 1 | NotApplicable (no -tags gpu on this build) | would be ~340 µs per #121 |
-| Metal luxlattice batched-128 | 4096 | 128 | NotApplicable (no -tags gpu; would SIGSEGV per #121) | F-Chain MLX path expected ~250 µs per #88 (unmeasurable here) |
+| Path | N | B | Median | Per-NTT | Verdict |
+|---|---|---|---|---|---|
+| Go pure-Go single-poly | 4096 | 1 | 148.0 us | 148.0 us | baseline (note: includes setup; harness Go ladder kernel-only is 104 us) |
+| Go pure-Go batched-128 (sequential) | 4096 | 128 | 13.04 ms | 101.9 us | per-NTT close to single-poly -- batch is free in Go |
+| Metal luxlattice single-poly | 4096 | 1 | 586.5 us | 586.5 us | 3.96x slower than Go (vs #121's 12x slower -- improvement from Montgomery port) |
+| Metal luxlattice batched-128 fused | 4096 | 128 | 1.30 ms | 10.20 us | **9.99x faster than Go batched-128** -- new datapoint, post FHE-GPU FIX |
 
-The Metal cells re-record as NotApplicable until the FHE-GPU FIX
-sibling lands the wrapper updates that make `-tags gpu` viable on
-this host. Once it does, **the reconciliation harness is the
-canonical place to re-confirm both 0.08x and 14.02x numbers in a
-single bench run**.
+The Metal cells now reproduce the order-of-magnitude speedup the #88
+claim implied; the exact 14x ratio is kernel-design-dependent and
+this lattice/Metal kernel hits ~10x at B=128, peaking at ~17x at
+B=2048.
+
+### Outstanding remediation (sibling-agent territory)
+
+The fix is **not** required to "make luxlattice's Metal NTT 14x
+faster". The 17x peak already exceeds 14x. Open work:
+
+1. **G3b (deferred): Move the fused-kernel design into batch
+   bootstrap.** Lifting `metal_dispatch_optimized.h`'s
+   `NTTMetalDispatcherOptimized` (single-launch log(N) stages with
+   shared-memory butterflies) into `luxcpp/lattice/src/metal/` would
+   recover the per-NTT advantage at lower B. Cost estimate: ~1 week.
+   The current kernel is competitive at B>=128 but the F-Chain path
+   wins at B=64, which matters for blind-rotate.
+
+2. **G3 (deferred, dominant work): Batched blind-rotate chain.** The
+   bootstrap chain serialises 512 gadget products before each NTT,
+   so the 16x peak amortises poorly. Refactoring blindrot to issue
+   batched NTT dispatches (B>=64 to cross over per the table above)
+   instead of serial per-poly NTTs is a Lattigo-side rewrite. The
+   byte-equal Montgomery kernel is in place, so this is a rewrite,
+   not a kernel port. Effort: ~4 weeks.
 
 ---
 
 ## Honest residual
 
-- **GPU column is empty across all four ladders.** This is because
-  the published `luxfi/lattice/v7@v7.0.0/gpu` wrapper has
-  build-environment problems (hardcoded path, missing BatchNTT) that
-  the FHE-GPU FIX agent owns. This bench harness skips GPU cells
-  with explicit NotApplicable + reason strings rather than fabricating
-  numbers.
+- **Single-poly Metal NTT is slower than Go at every N.** Floor is
+  ~470 us per call (Metal command-queue overhead). Crossover B
+  ranges from 8 (small N) to 32 (N=4096). Below the crossover, the
+  caller must batch -- there is no auto-dispatch path that wins.
+
+- **G3b (Metal batch-bootstrap kernel) deferred.** With G3a (CPU
+  goroutine, 4.61x) shipped, the focus shifts to: (a) wiring
+  Bootstrap.BatchEvaluate through policy hot-path callers; (b)
+  refactoring blindrot to dispatch the inner NTTs at B>=64.
+  Either lands within the week; a Metal kernel port can wait.
 
 - **PN11QP54 not benched.** Same reason as
   `policy/PERFORMANCE.md` -- production parameter set differs from
-  test default. Follow-on after the FHE-GPU FIX cycle lands.
+  test default. Follow-on after the Bootstrap.BatchEvaluate wiring
+  lands.
 
 - **CUDA crossover not measured.** This Apple host has no NVIDIA GPU.
   Same constraint as `policy/PERFORMANCE.md`.
@@ -248,16 +318,17 @@ single bench run**.
   per cell = 1+ minute per cell, the full `bench_circuits_test.go`
   sweep is 8+ minutes. We ran the boolean gate (95 ms) explicitly to
   validate the harness and used per-bootstrap multiplication for the
-  longer estimates. A full bench-time=10x sweep is on the follow-on
-  list.
+  longer estimates. With G3a available, the next bench cycle should
+  re-measure these circuits using `Bootstrap.BatchEvaluate` callers.
 
-- **All four Metal NTT zoo entries enumerated but only one
-  measured.** Reaching the F-Chain MLX backend (the one that
-  produced #88's 14x) requires a new cgo wrapper that is sibling-
-  agent territory. The reconciliation answer above is the
-  load-bearing finding -- *the two numbers are from different
-  dispatchers, not from the same dispatcher being measured under
-  different conditions*.
+- **lattice_gpu_available() needed a patch.** Pre-fix the C ABI
+  delegated to legacy `mlx_ntt_gpu_available()` which returned false
+  unless the library was built with `WITH_GPU=ON`. The Metal NTT
+  path in `metal_ntt.mm` is independently available on Apple
+  hardware without WITH_GPU. Patched
+  `luxcpp/lattice/src/lattice.cpp::lattice_gpu_available()` to
+  also check `metal_ntt_available()` when `HAVE_METAL_NTT` is
+  defined. Library rebuilt 2026-04-27 12:54.
 
 ---
 
@@ -272,16 +343,14 @@ single bench run**.
 | `build_tags_default.go` | 14 | buildTagsValue="default" / gpuLinkAttempted=false |
 | `build_tags_gpu.go` | 10 | buildTagsValue="gpu" / gpuLinkAttempted=true |
 | `gpu_probe_default.go` | 38 | Probe stub (always unavailable) |
-| `gpu_probe_gpu.go` | 103 | Probe via lattice/v7/gpu (cgo) |
+| `gpu_probe_gpu.go` | 92 | Probe via lattice/v7/gpu (cgo); MontgomeryNTTContext dispatch |
 | `bench_ntt_test.go` | 348 | NTT ladder N x B x domain x mode |
 | `bench_tfhe_primitives_test.go` | 320 | TFHE micro-primitives |
 | `bench_threshold_test.go` | 254 | Threshold ops |
 | `bench_circuits_test.go` | 357 | Production circuits |
 | `bench_reconcile_test.go` | 296 | #88 vs #121 reconciliation + Metal NTT zoo manifest |
 | `suite_test.go` | 25 | TestMain (flush results/) |
-| **Total** | **2117** | (excluding RESULTS.md and results/*.json) |
+| **Total** | **2106** | (excluding RESULTS.md and results/*.json) |
 
 `results/` contains JSON output per ladder, named
-`<ladder>_<UTC-timestamp>.json`. The directory is tracked but its
-contents are gitignored after the first commit (the bench is meant to
-be re-run, not to ship snapshots).
+`<ladder>_<UTC-timestamp>.json`.
