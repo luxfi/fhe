@@ -1,0 +1,22 @@
+rule_engine_version: "1"
+policy_id: "gas-topup-v1"
+combinator: and
+clauses:
+  - name: topup_under_per_call_cap
+    op: lt
+    field: encryptedAmount
+    constant: encryptedPerCallCap
+    field_width: u64
+  - name: target_is_known_operational_wallet
+    op: in
+    field: encryptedDestination
+    constants:
+      - encryptedOpsWallet1
+      - encryptedOpsWallet2
+      - encryptedOpsWallet3
+    field_width: u160
+  - name: window_topup_under_cap
+    op: lt
+    field: encryptedSum
+    constant: encryptedDailyTopupCap
+    field_width: u64

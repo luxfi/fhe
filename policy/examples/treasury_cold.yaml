@@ -1,0 +1,22 @@
+rule_engine_version: "1"
+policy_id: "treasury-cold-v1"
+combinator: and
+clauses:
+  - name: amount_under_limit
+    op: lt
+    field: encryptedAmount
+    constant: encryptedAmountLimit
+    field_width: u64
+  - name: dest_in_allowlist
+    op: in
+    field: encryptedDestination
+    constants:
+      - encryptedAddrA
+      - encryptedAddrB
+      - encryptedAddrC
+    field_width: u160
+  - name: velocity_under_cap
+    op: lt
+    field: encryptedSum
+    constant: encryptedVelocityCap
+    field_width: u64

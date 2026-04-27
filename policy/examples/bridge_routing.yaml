@@ -1,0 +1,30 @@
+rule_engine_version: "1"
+policy_id: "bridge-routing-v1"
+combinator: and
+clauses:
+  - name: amount_under_bridge_cap
+    op: lte
+    field: encryptedAmount
+    constant: encryptedBridgeCap
+    field_width: u64
+  - name: source_chain_allowed
+    op: in
+    field: encryptedSourceChain
+    constants:
+      - encryptedChainEthereum
+      - encryptedChainPolygon
+      - encryptedChainArbitrum
+      - encryptedChainOptimism
+    field_width: u32
+  - name: dest_chain_allowed
+    op: in
+    field: encryptedDestChain
+    constants:
+      - encryptedChainLuxC
+      - encryptedChainLuxX
+    field_width: u32
+  - name: per_window_cap
+    op: lt
+    field: encryptedSum
+    constant: encryptedWindowCap
+    field_width: u64
