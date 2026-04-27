@@ -1,0 +1,26 @@
+rule_engine_version: "1"
+policy_id: "validator-staking-v1"
+combinator: and
+clauses:
+  - name: stake_amount_at_least_min
+    # Encoded as "amount > min" via lt with operands swapped at encrypt time:
+    # Min < Amount  ⇔  Amount > Min. We keep the DSL surface to lt/lte/eq/in.
+    op: lt
+    field: encryptedMinStake
+    constant: encryptedAmount
+    field_width: u64
+  - name: stake_amount_at_most_max
+    op: lte
+    field: encryptedAmount
+    constant: encryptedMaxStake
+    field_width: u64
+  - name: validator_in_active_set
+    op: in
+    field: encryptedValidatorID
+    constants:
+      - encryptedValidator1
+      - encryptedValidator2
+      - encryptedValidator3
+      - encryptedValidator4
+      - encryptedValidator5
+    field_width: u160

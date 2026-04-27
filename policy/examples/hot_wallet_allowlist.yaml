@@ -1,0 +1,22 @@
+rule_engine_version: "1"
+policy_id: "hot-wallet-v1"
+combinator: and
+clauses:
+  - name: amount_under_per_tx_cap
+    op: lt
+    field: encryptedAmount
+    constant: encryptedPerTxCap
+    field_width: u64
+  - name: dest_known
+    op: in
+    field: encryptedDestination
+    constants:
+      - encryptedAddr1
+      - encryptedAddr2
+      - encryptedAddr3
+      - encryptedAddr4
+      - encryptedAddr5
+      - encryptedAddr6
+      - encryptedAddr7
+      - encryptedAddr8
+    field_width: u160
