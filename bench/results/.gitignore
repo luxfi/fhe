@@ -1,0 +1,5 @@
+# Bench output JSON. Regenerated on every run. Tracked directory,
+# ignored contents -- so the structure exists but the snapshots don't
+# clutter git history.
+*.json
+!.gitignore
