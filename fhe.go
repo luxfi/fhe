@@ -14,13 +14,16 @@
 package fhe
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
 
 	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
 	"github.com/luxfi/lattice/v7/core/rlwe"
 	"github.com/luxfi/lattice/v7/ring"
 	"github.com/luxfi/lattice/v7/utils"
 	"github.com/luxfi/lattice/v7/utils/sampling"
+	"golang.org/x/crypto/hkdf"
 )
 
 // Parameters defines the FHE parameter set
@@ -203,6 +206,11 @@ type KeyGenerator struct {
 	kgenBR  *rlwe.KeyGenerator
 	ringQBR *ring.Ring
 	scaleBR float64
+	// prngLWE and prngBR are non-nil only when the generator was constructed
+	// via NewKeyGeneratorFromSeed. They drive deterministic sampling of the
+	// secret-key coefficients in GenSecretKey.
+	prngLWE sampling.PRNG
+	prngBR  sampling.PRNG
 }
 
 // NewKeyGenerator creates a new key generator
@@ -216,71 +224,151 @@ func NewKeyGenerator(params Parameters) *KeyGenerator {
 	}
 }
 
-// NewKeyGeneratorFromSeed creates a key generator using a deterministic PRNG
-// seeded with the given key. All validators using the same seed will produce
-// identical FHE keys, which is required for consensus.
+// keygenHKDFInfoLWE is the HKDF info string for the LWE secret-key stream.
+// Domain-separated from BR to ensure the two PRNG streams never collide.
+const keygenHKDFInfoLWE = "LUX_FHE_KEYGEN_v1:LWE"
+
+// keygenHKDFInfoBR is the HKDF info string for the blind-rotation secret-key
+// stream. Domain-separated from LWE.
+const keygenHKDFInfoBR = "LUX_FHE_KEYGEN_v1:BR"
+
+// keygenHKDFSalt is a fixed salt used for HKDF-SHA256 extract. Treated as a
+// network constant — changing it invalidates all keys derived from prior seeds.
+var keygenHKDFSalt = []byte("LUX_FHE_KEYGEN_v1")
+
+// NewKeyGeneratorFromSeed creates a key generator that deterministically
+// derives the secret-key material from `seed`. All validators using the same
+// seed produce identical secret keys (and therefore identical public/bootstrap
+// keys), which is required for consensus.
+//
+// Derivation pipeline:
+//
+//	prk     = HKDF-Extract(SHA-256, salt=keygenHKDFSalt, ikm=seed)
+//	keyLWE  = HKDF-Expand(prk, info="LUX_FHE_KEYGEN_v1:LWE", L=32)
+//	keyBR   = HKDF-Expand(prk, info="LUX_FHE_KEYGEN_v1:BR",  L=32)
+//
+// keyLWE and keyBR seed two independent blake2b-based KeyedPRNG streams which
+// drive `ring.NewSampler` to fill the secret-key polynomial coefficients
+// according to the parameter set's secret distribution `Xs`.
 //
 // WARNING: The seed is a network parameter. Changing it invalidates all
-// existing ciphertexts. Use a domain-separated constant (e.g. "LUX_FHE_KEYGEN_v1").
+// existing ciphertexts. Use a domain-separated constant
+// (e.g. "LUX_FHE_KEYGEN_v1").
 func NewKeyGeneratorFromSeed(params Parameters, seed []byte) (*KeyGenerator, error) {
-	prng, err := sampling.NewKeyedPRNG(seed)
-	if err != nil {
-		return nil, fmt.Errorf("fhe: NewKeyedPRNG: %w", err)
+	if len(seed) == 0 {
+		return nil, fmt.Errorf("fhe: NewKeyGeneratorFromSeed: empty seed")
 	}
-	kgenLWE, err := newRLWEKeyGeneratorFromPRNG(params.paramsLWE, prng)
+
+	// HKDF-SHA256 extract once, expand to two domain-separated 32-byte keys.
+	prk := hkdf.Extract(sha256.New, seed, keygenHKDFSalt)
+	keyLWE, err := hkdfExpand32(prk, keygenHKDFInfoLWE)
 	if err != nil {
-		return nil, fmt.Errorf("fhe: LWE keygen: %w", err)
+		return nil, fmt.Errorf("fhe: HKDF-Expand LWE: %w", err)
 	}
-	// For the blind rotation key generator, create a second keyed PRNG
-	// derived from the same seed but domain-separated so the two streams
-	// never collide.
-	brSeed := append(seed, []byte(":BR")...)
-	prngBR, err := sampling.NewKeyedPRNG(brSeed)
+	keyBR, err := hkdfExpand32(prk, keygenHKDFInfoBR)
+	if err != nil {
+		return nil, fmt.Errorf("fhe: HKDF-Expand BR: %w", err)
+	}
+
+	prngLWE, err := sampling.NewKeyedPRNG(keyLWE)
+	if err != nil {
+		return nil, fmt.Errorf("fhe: NewKeyedPRNG LWE: %w", err)
+	}
+	prngBR, err := sampling.NewKeyedPRNG(keyBR)
 	if err != nil {
 		return nil, fmt.Errorf("fhe: NewKeyedPRNG BR: %w", err)
 	}
-	kgenBR, err := newRLWEKeyGeneratorFromPRNG(params.paramsBR, prngBR)
-	if err != nil {
-		return nil, fmt.Errorf("fhe: BR keygen: %w", err)
-	}
+
 	return &KeyGenerator{
 		params:  params,
-		kgenLWE: kgenLWE,
-		kgenBR:  kgenBR,
+		kgenLWE: rlwe.NewKeyGenerator(params.paramsLWE),
+		kgenBR:  rlwe.NewKeyGenerator(params.paramsBR),
 		ringQBR: params.paramsBR.RingQ(),
 		scaleBR: float64(params.QBR()) / 8.0,
+		// Stash the per-stream PRNGs; GenSecretKey consumes them when set so
+		// the resulting secret key is fully deterministic for a given seed.
+		prngLWE: prngLWE,
+		prngBR:  prngBR,
 	}, nil
 }
 
-// newRLWEKeyGeneratorFromPRNG creates an rlwe.KeyGenerator.
-//
-// Note: lattice/v7 does not expose a public FromPRNG constructor.
-// We create a standard generator; deterministic seeding happens at a
-// higher level via the evaluation key derivation pipeline. The PRNG
-// parameter is accepted for API compatibility but currently unused.
-//
-// TODO(luxfi/lattice#42): upstream a KeyGenerator.WithPRNG option so
-// consensus validators can derive identical keys from the same seed.
-func newRLWEKeyGeneratorFromPRNG(params rlwe.Parameters, _ *sampling.KeyedPRNG) (*rlwe.KeyGenerator, error) {
-	kg := rlwe.NewKeyGenerator(params)
-	return kg, nil
+// hkdfExpand32 expands `prk` to a 32-byte key using HKDF-SHA256 with the
+// given info string.
+func hkdfExpand32(prk []byte, info string) ([]byte, error) {
+	r := hkdf.Expand(sha256.New, prk, []byte(info))
+	out := make([]byte, 32)
+	if _, err := io.ReadFull(r, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-// GenSecretKey generates a new secret key pair
+// sampleSecretKeyDeterministic fills `sk` in-place with secret-key
+// coefficients drawn from the parameter set's `Xs` distribution using `prng`
+// as the source of randomness. The polynomial is left in NTT + Montgomery
+// form, matching the convention used by `rlwe.KeyGenerator.GenSecretKeyNew`.
+func sampleSecretKeyDeterministic(params rlwe.Parameters, prng sampling.PRNG, sk *rlwe.SecretKey) error {
+	ringQP := params.RingQP()
+
+	// RingQ is always present; sample Xs into sk.Value.Q at level Q.
+	samplerQ, err := ring.NewSampler(prng, ringQP.RingQ, params.Xs(), false)
+	if err != nil {
+		return fmt.Errorf("fhe: ring.NewSampler Q: %w", err)
+	}
+	samplerQ.AtLevel(sk.LevelQ()).Read(sk.Value.Q)
+	ringQP.RingQ.AtLevel(sk.LevelQ()).NTT(sk.Value.Q, sk.Value.Q)
+	ringQP.RingQ.AtLevel(sk.LevelQ()).MForm(sk.Value.Q, sk.Value.Q)
+
+	// RingP is optional (only when special primes P are configured).
+	if ringQP.RingP != nil && sk.LevelP() >= 0 {
+		samplerP, err := ring.NewSampler(prng, ringQP.RingP, params.Xs(), false)
+		if err != nil {
+			return fmt.Errorf("fhe: ring.NewSampler P: %w", err)
+		}
+		samplerP.AtLevel(sk.LevelP()).Read(sk.Value.P)
+		ringQP.RingP.AtLevel(sk.LevelP()).NTT(sk.Value.P, sk.Value.P)
+		ringQP.RingP.AtLevel(sk.LevelP()).MForm(sk.Value.P, sk.Value.P)
+	}
+	return nil
+}
+
+// GenSecretKey generates a new secret key pair.
+//
+// When the generator was constructed via NewKeyGeneratorFromSeed the secret
+// key coefficients are sampled from the seeded blake2b stream so the result
+// is fully deterministic. Otherwise the standard cryptographically random
+// sampler is used.
 func (kg *KeyGenerator) GenSecretKey() *SecretKey {
 	// When LWE and BR have the same dimension, use the same key for both
-	// This simplifies bootstrapping by eliminating key switching
+	// This simplifies bootstrapping by eliminating key switching.
 	if kg.params.N() == kg.params.NBR() {
 		sk := kg.kgenBR.GenSecretKeyNew()
+		if kg.prngBR != nil {
+			if err := sampleSecretKeyDeterministic(kg.params.paramsBR, kg.prngBR, sk); err != nil {
+				panic(fmt.Sprintf("fhe: deterministic BR sample: %v", err))
+			}
+		}
 		return &SecretKey{
 			SKLWE: sk,
 			SKBR:  sk,
 		}
 	}
-	// Different dimensions require separate keys
+	// Different dimensions require separate keys.
+	skLWE := kg.kgenLWE.GenSecretKeyNew()
+	skBR := kg.kgenBR.GenSecretKeyNew()
+	if kg.prngLWE != nil {
+		if err := sampleSecretKeyDeterministic(kg.params.paramsLWE, kg.prngLWE, skLWE); err != nil {
+			panic(fmt.Sprintf("fhe: deterministic LWE sample: %v", err))
+		}
+	}
+	if kg.prngBR != nil {
+		if err := sampleSecretKeyDeterministic(kg.params.paramsBR, kg.prngBR, skBR); err != nil {
+			panic(fmt.Sprintf("fhe: deterministic BR sample: %v", err))
+		}
+	}
 	return &SecretKey{
-		SKLWE: kg.kgenLWE.GenSecretKeyNew(),
-		SKBR:  kg.kgenBR.GenSecretKeyNew(),
+		SKLWE: skLWE,
+		SKBR:  skBR,
 	}
 }
 
