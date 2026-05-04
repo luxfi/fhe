@@ -6,7 +6,8 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hanzoai/base v0.39.1
 	github.com/luxfi/database v1.17.44
-	github.com/luxfi/lattice/v7 v7.0.0
+	github.com/luxfi/lattice/v7 v7.1.0
+	github.com/luxfi/math v1.3.0
 	github.com/luxfi/mdns v0.1.0
 	github.com/luxfi/metric v1.5.0
 	github.com/spf13/cobra v1.10.2
@@ -55,7 +56,6 @@ require (
 	github.com/luxfi/crypto v1.17.45 // indirect
 	github.com/luxfi/ids v1.2.9 // indirect
 	github.com/luxfi/log v1.4.1 // indirect
-	github.com/luxfi/math v1.2.3 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/zapdb/v4 v4.9.3 // indirect
@@ -79,7 +79,7 @@ require (
 	go.temporal.io/api v1.62.6 // indirect
 	go.temporal.io/sdk v1.41.1 // indirect
 	go.uber.org/mock v0.6.0 // indirect
-	golang.org/x/exp v0.0.0-20260212183809-81e46e3db34a // indirect
+	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
 	golang.org/x/image v0.38.0 // indirect
 	golang.org/x/mod v0.34.0 // indirect
 	golang.org/x/net v0.52.0 // indirect
