@@ -1,0 +1,186 @@
+{
+  "name": "tfhe_primitives",
+  "host": {
+    "time": "2026-04-27T19:51:24Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkTFHE_TRLWE_|^BenchmarkTFHE_LWE_|^BenchmarkTFHE_KeySwitch_Metal|^BenchmarkTFHE_BlindRotation_Metal|^BenchmarkTFHE_SampleExtract_Metal|^BenchmarkTFHE_ProgrammableBootstrap_Metal -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "LWE_Add/CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "lwe_add"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: rlwe.Parameters / RingQ are unexported on fhe.Parameters; LWE add is internal to Evaluator.addCiphertexts and not bench-exposed",
+      "iterations": 0
+    },
+    {
+      "name": "LWE_Add/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "lwe_add"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: lattice gpu wrapper exposes NTT/poly-mul, not LWE-tuple add (lives in luxcpp/fhe mlx backend, not exposed via lux/fhe cgo)",
+      "iterations": 0
+    },
+    {
+      "name": "LWE_ScalarMul/CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "lwe_scalar_mul"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: rlwe.Parameters unexported on fhe.Parameters; scalar mul not exposed",
+      "iterations": 0
+    },
+    {
+      "name": "LWE_ScalarMul/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "lwe_scalar_mul"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: gpu wrapper has PolyScalarMul on full poly arrays only, not LWE tuple semantics",
+      "iterations": 0
+    },
+    {
+      "name": "TRLWE_Add/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_add"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 1292,
+      "mean_ns": 1292,
+      "p50_ns": 1292,
+      "p95_ns": 1292,
+      "p99_ns": 1292,
+      "ops_per_sec": 773993.8080495356
+    },
+    {
+      "name": "TRLWE_Add/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_add"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 791,
+      "mean_ns": 808,
+      "p50_ns": 791,
+      "p95_ns": 833,
+      "p99_ns": 833,
+      "ops_per_sec": 1264222.5031605563
+    },
+    {
+      "name": "TRLWE_Add/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_add"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: built without -tags gpu; GPU wrapper not linked",
+      "iterations": 0
+    },
+    {
+      "name": "TRLWE_ExternalProduct/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_external_product",
+        "scope": "NTT+pointwise+INTT"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 29417,
+      "mean_ns": 29417,
+      "p50_ns": 29417,
+      "p95_ns": 29417,
+      "p99_ns": 29417,
+      "ops_per_sec": 33993.94907706428
+    },
+    {
+      "name": "TRLWE_ExternalProduct/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_external_product",
+        "scope": "NTT+pointwise+INTT"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 28542,
+      "mean_ns": 28966,
+      "p50_ns": 28542,
+      "p95_ns": 30583,
+      "p99_ns": 30583,
+      "ops_per_sec": 35036.08716978488
+    },
+    {
+      "name": "TRLWE_ExternalProduct/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_external_product"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: fused external product lives in luxcpp/fhe (FHEgpu/FHEmetal libs), not exposed to lux/fhe via cgo",
+      "iterations": 0
+    },
+    {
+      "name": "BlindRotation/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "blind_rotation"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: blind-rotate is the G3 blocker per fhe/policy/PERFORMANCE.md -- no GPU dispatch wired through Evaluator.bootstrap",
+      "iterations": 0
+    },
+    {
+      "name": "SampleExtract/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "sample_extraction"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: sample-extract internal to Evaluator.sampleExtractAndModSwitch -- not bench-isolated",
+      "iterations": 0
+    },
+    {
+      "name": "KeySwitch/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "key_switching"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: key-switch in lattice/core/rlwe.Evaluator -- not routed through gpu wrapper",
+      "iterations": 0
+    },
+    {
+      "name": "ProgrammableBootstrap/Metal",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "primitive": "programmable_bootstrap"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: PBS = blind-rotate + sample-extract + key-switch -- all G3-blocked per fhe/policy/PERFORMANCE.md",
+      "iterations": 0
+    }
+  ]
+}

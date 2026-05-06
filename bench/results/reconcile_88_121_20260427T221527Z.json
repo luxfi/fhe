@@ -1,0 +1,160 @@
+{
+  "name": "reconcile_88_121",
+  "host": {
+    "time": "2026-04-27T22:15:26Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "gpu",
+    "fhe_commit": "d6affbfd6dadf28aa100dcbf73c75caf61dcc539",
+    "lattice_commit": "d11ec53c16e7ef6d0d1fc84ea37fd285e1f1f9d2"
+  },
+  "command": "go test -test.paniconexit0 -test.bench=BenchmarkReconcile -test.benchtime=10x -test.count=1 -test.timeout=10m0s",
+  "cells": [
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "label": "go pure-Go single-poly N=4096 (the denominator in #121's ratio)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 152542,
+      "mean_ns": 152542,
+      "p50_ns": 152542,
+      "p95_ns": 152542,
+      "p99_ns": 152542,
+      "ops_per_sec": 6555.571580286085
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "label": "go pure-Go single-poly N=4096 (the denominator in #121's ratio)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 148083,
+      "mean_ns": 154358,
+      "p50_ns": 148083,
+      "p95_ns": 167166,
+      "p99_ns": 167166,
+      "ops_per_sec": 6752.969618389687
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/batched-128-sequential",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "label": "go pure-Go N=4096 sequenced 128 times (matches what blind-rotate does)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 18206417,
+      "mean_ns": 18206417,
+      "p50_ns": 18206417,
+      "p95_ns": 18206417,
+      "p99_ns": 18206417,
+      "ops_per_sec": 54.92568911280017
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/batched-128-sequential",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "label": "go pure-Go N=4096 sequenced 128 times (matches what blind-rotate does)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 13042916,
+      "mean_ns": 13124604,
+      "p50_ns": 13042916,
+      "p95_ns": 14971541,
+      "p99_ns": 14971541,
+      "ops_per_sec": 76.66997165357807
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "backend": "Metal",
+        "label": "metal luxlattice single-poly N=4096 (the numerator in #121's 0.08x ratio)",
+        "path": "metal-luxlattice"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 624500,
+      "mean_ns": 624500,
+      "p50_ns": 624500,
+      "p95_ns": 624500,
+      "p99_ns": 624500,
+      "ops_per_sec": 1601.281024819856
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "backend": "Metal",
+        "label": "metal luxlattice single-poly N=4096 (the numerator in #121's 0.08x ratio)",
+        "path": "metal-luxlattice"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 586542,
+      "mean_ns": 624441,
+      "p50_ns": 586542,
+      "p95_ns": 707667,
+      "p99_ns": 707667,
+      "ops_per_sec": 1704.907747441786
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/batched-128-fused",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "backend": "Metal",
+        "label": "metal luxlattice BatchNTT N=4096 B=128 (the #88 14.02x claim target)",
+        "path": "metal-luxlattice"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 1327541,
+      "mean_ns": 1327541,
+      "p50_ns": 1327541,
+      "p95_ns": 1327541,
+      "p99_ns": 1327541,
+      "ops_per_sec": 753.2724036395109
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/batched-128-fused",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "backend": "Metal",
+        "label": "metal luxlattice BatchNTT N=4096 B=128 (the #88 14.02x claim target)",
+        "path": "metal-luxlattice"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 1304458,
+      "mean_ns": 1339120,
+      "p50_ns": 1304458,
+      "p95_ns": 1394875,
+      "p99_ns": 1394875,
+      "ops_per_sec": 766.6019143583005
+    }
+  ]
+}

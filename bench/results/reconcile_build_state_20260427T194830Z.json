@@ -1,0 +1,146 @@
+{
+  "name": "reconcile_build_state",
+  "host": {
+    "time": "2026-04-27T19:48:30Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkReconcile_ -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "BuildState/fhe-mlx-dispatch-optimized-header",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_dispatch_optimized.h"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-ntt-wrapper-source",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_ntt_wrapper.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-mlx-backend-cpp",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/mlx_backend.cpp"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-fused-kernel-source",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_dispatch_optimized.h"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-build-output",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/build-mlx/src/core/lib/math/hal/mlx/metal_ntt_bench"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/luxlattice-source",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/lattice/src/metal/metal_ntt.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/luxlattice-installed-dylib",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/install/lib/libluxlattice.1.0.0.dylib"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-dispatch-optimized-header",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_dispatch_optimized.h"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-ntt-wrapper-source",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_ntt_wrapper.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-mlx-backend-cpp",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/mlx_backend.cpp"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-fused-kernel-source",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_dispatch_optimized.h"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/fhe-mlx-build-output",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/fhe/build-mlx/src/core/lib/math/hal/mlx/metal_ntt_bench"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/luxlattice-source",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/lattice/src/metal/metal_ntt.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "BuildState/luxlattice-installed-dylib",
+      "params": {
+        "exists": "true",
+        "path": "/Users/z/work/lux/cpp/install/lib/libluxlattice.1.0.0.dylib"
+      },
+      "status": "ok",
+      "iterations": 0
+    }
+  ]
+}
