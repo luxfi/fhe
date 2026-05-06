@@ -1,537 +1,106 @@
 // Copyright (c) 2025, Lux Industries Inc
 // SPDX-License-Identifier: BSD-3-Clause
 
+// Package fhe NTT thin wrapper.
+//
+// This file is a delegating wrapper around the unified Lux NTT
+// substrate at github.com/luxfi/math/ntt/subring (the Lattigo-derived
+// Montgomery negacyclic NTT body, mirrored on the C++ side by
+// crypto/fhe/cpp/backends/cpu/ntt_cpu.cpp via
+// lux::crypto::corona::lattice_ring::NTTStandard).
+//
+// The previous standalone cyclic NTT implementation has been removed;
+// there were zero production callers of NTTEngine (only ntt_simd_test.go).
+// Convention is now negacyclic — same body, same byte representation,
+// across Go and C++.
+
 package fhe
 
 import (
 	"fmt"
-	"math/bits"
 	"sync"
-	"unsafe"
+
+	"github.com/luxfi/math/ntt/subring"
 )
 
-// NTTEngine provides SIMD-optimized NTT operations for CPU fallback.
-// Uses AVX2/AVX-512 on x86-64 and NEON on ARM64.
+// NTTEngine is a thin wrapper around a cached *subring.SubRing
+// keyed by (N, Q). All forward/inverse NTT operations delegate to
+// the unified substrate.
 type NTTEngine struct {
-	N              uint32
-	Q              uint64
-	twiddleFactors []uint64
-	invTwiddles    []uint64
-	nInv           uint64
-
-	// Precomputed Barrett reduction constants
-	barrettMu uint64 // floor(2^64 / Q)
-	barrettK  int    // number of bits for Barrett
-
-	// Montgomery form constants
-	montR   uint64 // R = 2^64 mod Q
-	montR2  uint64 // R^2 mod Q
-	montInv uint64 // -Q^(-1) mod 2^64
+	N  uint32
+	Q  uint64
+	sr *subring.SubRing
 }
 
-// NewNTTEngine creates a new SIMD-optimized NTT engine
-func NewNTTEngine(N uint32, Q uint64) (*NTTEngine, error) {
-	e := &NTTEngine{
-		N:              N,
-		Q:              Q,
-		twiddleFactors: make([]uint64, N),
-		invTwiddles:    make([]uint64, N),
+// engineCache memoizes SubRing instances keyed by (N, Q) so that
+// callers constructing many NTTEngine values for the same parameters
+// share the (expensive) NTT constant tables.
+var (
+	engineCacheMu sync.RWMutex
+	engineCache   = make(map[engineKey]*subring.SubRing)
+)
+
+type engineKey struct {
+	N uint32
+	Q uint64
+}
+
+// resolveSubRing returns or builds the cached *subring.SubRing for (N, Q).
+func resolveSubRing(N uint32, Q uint64) (*subring.SubRing, error) {
+	k := engineKey{N: N, Q: Q}
+
+	engineCacheMu.RLock()
+	sr, ok := engineCache[k]
+	engineCacheMu.RUnlock()
+	if ok {
+		return sr, nil
 	}
 
-	// Find primitive 2N-th root of unity
-	omega, err := e.findPrimitiveRoot()
+	engineCacheMu.Lock()
+	defer engineCacheMu.Unlock()
+	if sr, ok := engineCache[k]; ok {
+		return sr, nil
+	}
+
+	sr, err := subring.NewSubRing(int(N), Q)
 	if err != nil {
-		return nil, fmt.Errorf("find primitive root: %w", err)
+		return nil, fmt.Errorf("fhe: subring.NewSubRing(N=%d, Q=%d): %w", N, Q, err)
 	}
-	omegaInv := e.modInverse(omega)
-
-	// Precompute twiddle factors in bit-reversed order for in-place NTT
-	e.computeTwiddlesBitReversed(omega, omegaInv)
-
-	// N^(-1) mod Q for INTT normalization
-	e.nInv = e.modInverse(uint64(N))
-
-	// Barrett reduction constant
-	e.barrettK = 64
-	e.barrettMu = e.computeBarrettMu()
-
-	// Montgomery constants
-	e.montR = e.computeMontgomeryR()
-	e.montR2 = e.mulMod(e.montR, e.montR)
-	e.montInv = e.computeMontgomeryInv()
-
-	return e, nil
+	if err := sr.GenerateNTTConstants(); err != nil {
+		return nil, fmt.Errorf("fhe: GenerateNTTConstants(N=%d, Q=%d): %w", N, Q, err)
+	}
+	engineCache[k] = sr
+	return sr, nil
 }
 
-// NTTInPlace performs in-place NTT using Cooley-Tukey algorithm
-// Optimized for SIMD vectorization with explicit parallelism
+// NewNTTEngine creates an NTTEngine for the given ring degree and modulus.
+// The underlying SubRing is shared across engines with identical (N, Q).
+func NewNTTEngine(N uint32, Q uint64) (*NTTEngine, error) {
+	sr, err := resolveSubRing(N, Q)
+	if err != nil {
+		return nil, err
+	}
+	return &NTTEngine{N: N, Q: Q, sr: sr}, nil
+}
+
+// NTTInPlace performs an in-place forward NTT (negacyclic, Montgomery form).
 func (e *NTTEngine) NTTInPlace(coeffs []uint64) {
-	N := int(e.N)
-
-	// Bit-reversal permutation
-	e.bitReversePermute(coeffs)
-
-	// Cooley-Tukey NTT butterflies
-	// The structure allows SIMD vectorization across independent butterflies
-	twiddleIdx := 0
-	for m := 2; m <= N; m <<= 1 {
-		mHalf := m >> 1
-
-		// Process all butterflies at this stage
-		// Each group of m elements has m/2 independent butterflies
-		for k := 0; k < N; k += m {
-			// This inner loop is SIMD-vectorizable
-			for j := 0; j < mHalf; j++ {
-				w := e.twiddleFactors[twiddleIdx+j]
-				u := coeffs[k+j]
-				v := e.mulModBarrett(coeffs[k+j+mHalf], w)
-
-				// Butterfly: [u, v] -> [u + v, u - v]
-				coeffs[k+j] = e.addMod(u, v)
-				coeffs[k+j+mHalf] = e.subMod(u, v)
-			}
-		}
-		twiddleIdx += mHalf
-	}
+	e.sr.NTT(coeffs, coeffs)
 }
 
-// INTTInPlace performs in-place inverse NTT
-// Uses the same Cooley-Tukey structure as the forward NTT but with inverse twiddles,
-// followed by scaling by 1/N. This ensures INTT(NTT(x)) = x.
+// INTTInPlace performs an in-place inverse NTT (negacyclic, Montgomery form).
+// INTT(NTT(x)) == x.
 func (e *NTTEngine) INTTInPlace(coeffs []uint64) {
-	N := int(e.N)
-
-	// Bit-reversal permutation (same as forward)
-	e.bitReversePermute(coeffs)
-
-	// Cooley-Tukey butterflies with inverse twiddles
-	twiddleIdx := 0
-	for m := 2; m <= N; m <<= 1 {
-		mHalf := m >> 1
-
-		for k := 0; k < N; k += m {
-			for j := 0; j < mHalf; j++ {
-				w := e.invTwiddles[twiddleIdx+j]
-				u := coeffs[k+j]
-				v := e.mulModBarrett(coeffs[k+j+mHalf], w)
-
-				coeffs[k+j] = e.addMod(u, v)
-				coeffs[k+j+mHalf] = e.subMod(u, v)
-			}
-		}
-		twiddleIdx += mHalf
-	}
-
-	// Scale by N^(-1) to normalize
-	for i := 0; i < N; i++ {
-		coeffs[i] = e.mulModBarrett(coeffs[i], e.nInv)
-	}
+	e.sr.INTT(coeffs, coeffs)
 }
 
-// NTTBatch performs NTT on multiple polynomials in parallel
-// Exploits both inter-polynomial and intra-polynomial parallelism
-func (e *NTTEngine) NTTBatch(polys [][]uint64) {
-	var wg sync.WaitGroup
-	batchSize := len(polys)
-
-	// Determine optimal parallelism based on batch size
-	numWorkers := batchSize
-	if numWorkers > 16 {
-		numWorkers = 16 // Cap at 16 parallel workers
-	}
-
-	chunkSize := (batchSize + numWorkers - 1) / numWorkers
-
-	for w := 0; w < numWorkers; w++ {
-		start := w * chunkSize
-		end := start + chunkSize
-		if end > batchSize {
-			end = batchSize
-		}
-		if start >= end {
-			continue
-		}
-
-		wg.Add(1)
-		go func(s, end int, eng *NTTEngine) {
-			defer wg.Done()
-			for i := s; i < end; i++ {
-				eng.NTTInPlace(polys[i])
-			}
-		}(start, end, e)
-	}
-
-	wg.Wait()
-}
-
-// INTTBatch performs INTT on multiple polynomials in parallel
-func (e *NTTEngine) INTTBatch(polys [][]uint64) {
-	var wg sync.WaitGroup
-	batchSize := len(polys)
-
-	numWorkers := batchSize
-	if numWorkers > 16 {
-		numWorkers = 16
-	}
-
-	chunkSize := (batchSize + numWorkers - 1) / numWorkers
-
-	for w := 0; w < numWorkers; w++ {
-		start := w * chunkSize
-		end := start + chunkSize
-		if end > batchSize {
-			end = batchSize
-		}
-		if start >= end {
-			continue
-		}
-
-		wg.Add(1)
-		go func(s, end int, eng *NTTEngine) {
-			defer wg.Done()
-			for i := s; i < end; i++ {
-				eng.INTTInPlace(polys[i])
-			}
-		}(start, end, e)
-	}
-
-	wg.Wait()
-}
-
-// PolyMulNTT multiplies two polynomials already in NTT form
-// Result is also in NTT form. SIMD-vectorizable element-wise multiplication.
-func (e *NTTEngine) PolyMulNTT(a, b, result []uint64) {
-	N := int(e.N)
-
-	// Element-wise multiplication in NTT domain
-	// This loop is fully SIMD-vectorizable
-	for i := 0; i < N; i++ {
-		result[i] = e.mulModBarrett(a[i], b[i])
-	}
-}
-
-// PolyMulNTTAccum multiplies and accumulates: result += a * b (in NTT form)
-func (e *NTTEngine) PolyMulNTTAccum(a, b, result []uint64) {
-	N := int(e.N)
-
-	for i := 0; i < N; i++ {
-		prod := e.mulModBarrett(a[i], b[i])
-		result[i] = e.addMod(result[i], prod)
-	}
-}
-
-// PolyAdd adds two polynomials: result = a + b
-func (e *NTTEngine) PolyAdd(a, b, result []uint64) {
-	N := int(e.N)
-	Q := e.Q
-
-	for i := 0; i < N; i++ {
-		sum := a[i] + b[i]
-		if sum >= Q {
-			sum -= Q
-		}
-		result[i] = sum
-	}
-}
-
-// PolySub subtracts two polynomials: result = a - b
-func (e *NTTEngine) PolySub(a, b, result []uint64) {
-	N := int(e.N)
-	Q := e.Q
-
-	for i := 0; i < N; i++ {
-		if a[i] >= b[i] {
-			result[i] = a[i] - b[i]
-		} else {
-			result[i] = Q - b[i] + a[i]
-		}
-	}
-}
-
-// PolyNeg negates a polynomial: result = -a
-func (e *NTTEngine) PolyNeg(a, result []uint64) {
-	N := int(e.N)
-	Q := e.Q
-
-	for i := 0; i < N; i++ {
-		if a[i] == 0 {
-			result[i] = 0
-		} else {
-			result[i] = Q - a[i]
-		}
-	}
-}
-
-// PolyMulScalar multiplies polynomial by scalar: result = a * scalar
-func (e *NTTEngine) PolyMulScalar(a []uint64, scalar uint64, result []uint64) {
-	N := int(e.N)
-
-	for i := 0; i < N; i++ {
-		result[i] = e.mulModBarrett(a[i], scalar)
-	}
-}
-
-// ========== Helper Functions ==========
-
-// bitReversePermute performs in-place bit-reversal permutation
-func (e *NTTEngine) bitReversePermute(coeffs []uint64) {
-	N := int(e.N)
-	logN := e.log2(N)
-
-	for i := 0; i < N; i++ {
-		j := e.reverseBits(i, logN)
-		if i < j {
-			coeffs[i], coeffs[j] = coeffs[j], coeffs[i]
-		}
-	}
-}
-
-// reverseBits reverses the lower logN bits of x
-func (e *NTTEngine) reverseBits(x, logN int) int {
-	result := 0
-	for i := 0; i < logN; i++ {
-		result = (result << 1) | (x & 1)
-		x >>= 1
-	}
-	return result
-}
-
-// log2 returns floor(log2(n))
-func (e *NTTEngine) log2(n int) int {
-	r := 0
-	for n > 1 {
-		n >>= 1
-		r++
-	}
-	return r
-}
-
-// addMod computes (a + b) mod Q
-func (e *NTTEngine) addMod(a, b uint64) uint64 {
-	sum := a + b
-	if sum >= e.Q {
-		sum -= e.Q
-	}
-	return sum
-}
-
-// subMod computes (a - b) mod Q
-func (e *NTTEngine) subMod(a, b uint64) uint64 {
-	if a >= b {
-		return a - b
-	}
-	return e.Q - b + a
-}
-
-// mulMod computes (a * b) mod Q using standard division
-func (e *NTTEngine) mulMod(a, b uint64) uint64 {
-	hi, lo := mul64(a, b)
-	if hi == 0 {
-		return lo % e.Q
-	}
-	// For larger results, use the full 128-bit division
-	return div128(hi, lo, e.Q)
-}
-
-// mulModBarrett computes (a * b) mod Q using Barrett reduction.
-// Constant-time: always executes the full 128-bit path regardless of input.
-func (e *NTTEngine) mulModBarrett(a, b uint64) uint64 {
-	hi, lo := mul64(a, b)
-	// Always execute the full path to avoid timing side-channel on hi == 0
-	_, r := bits.Div64(hi%e.Q, lo, e.Q)
-	return r
-}
-
-// mul64 multiplies two 64-bit integers and returns 128-bit result as (hi, lo)
-func mul64(a, b uint64) (hi, lo uint64) {
-	// Use assembly intrinsic if available, otherwise use portable version
-	// This is the portable Go version - compiler may optimize to MULX on x86-64
-	aLo, aHi := a&0xFFFFFFFF, a>>32
-	bLo, bHi := b&0xFFFFFFFF, b>>32
-
-	p0 := aLo * bLo
-	p1 := aLo * bHi
-	p2 := aHi * bLo
-	p3 := aHi * bHi
-
-	mid := p1 + p2
-	carry := uint64(0)
-	if mid < p1 {
-		carry = 1 << 32
-	}
-
-	lo = p0 + (mid << 32)
-	if lo < p0 {
-		carry++
-	}
-	hi = p3 + (mid >> 32) + carry
-	return
-}
-
-// div128 computes (hi:lo) mod d using math/bits.Div64
-// Requires hi < d (caller must reduce hi first if needed)
-func div128(hi, lo, d uint64) uint64 {
-	if hi == 0 {
-		return lo % d
-	}
-	// Reduce hi mod d first so the precondition hi < d is met
-	hi = hi % d
-	_, r := bits.Div64(hi, lo, d)
-	return r
-}
-
-// computeTwiddlesBitReversed precomputes twiddle factors in bit-reversed order
-func (e *NTTEngine) computeTwiddlesBitReversed(omega, omegaInv uint64) {
-	N := int(e.N)
-
-	// Forward NTT twiddles
-	idx := 0
-	for m := 2; m <= N; m <<= 1 {
-		mHalf := m >> 1
-		w := uint64(1)
-		wStep := e.powMod(omega, uint64(N/m))
-
-		for j := 0; j < mHalf; j++ {
-			e.twiddleFactors[idx+j] = w
-			w = e.mulMod(w, wStep)
-		}
-		idx += mHalf
-	}
-
-	// Inverse NTT twiddles (same structure as forward for consistency)
-	idx = 0
-	for m := 2; m <= N; m <<= 1 {
-		mHalf := m >> 1
-		w := uint64(1)
-		wStep := e.powMod(omegaInv, uint64(N/m))
-
-		for j := 0; j < mHalf; j++ {
-			e.invTwiddles[idx+j] = w
-			w = e.mulMod(w, wStep)
-		}
-		idx += mHalf
-	}
-}
-
-// findPrimitiveRoot finds a primitive 2N-th root of unity mod Q
-func (e *NTTEngine) findPrimitiveRoot() (uint64, error) {
-	N := uint64(e.N)
-	Q := e.Q
-	order := Q - 1
-
-	// Q-1 must be divisible by 2N for NTT
-	if order%(2*N) != 0 {
-		return 0, fmt.Errorf("Q-1 (%d) must be divisible by 2N (%d) for NTT", order, 2*N)
-	}
-
-	// Factor Q-1 to find all prime factors
-	factors := primeFactors(order)
-
-	// Find a generator of Z_Q* by checking g^((Q-1)/p) != 1 for all prime factors p
-	for g := uint64(2); g < Q; g++ {
-		isGenerator := true
-		for _, p := range factors {
-			if e.powMod(g, order/p) == 1 {
-				isGenerator = false
-				break
-			}
-		}
-		if isGenerator {
-			// omega = g^((Q-1)/(2N)) is a primitive 2N-th root
-			return e.powMod(g, order/(2*N)), nil
-		}
-	}
-	return 0, fmt.Errorf("no primitive root found for N=%d, Q=%d", e.N, Q)
-}
-
-// primeFactors returns the distinct prime factors of n
-func primeFactors(n uint64) []uint64 {
-	var factors []uint64
-	for d := uint64(2); d*d <= n; d++ {
-		if n%d == 0 {
-			factors = append(factors, d)
-			for n%d == 0 {
-				n /= d
-			}
-		}
-	}
-	if n > 1 {
-		factors = append(factors, n)
-	}
-	return factors
-}
-
-// modInverse computes a^(-1) mod Q using Fermat's little theorem
-func (e *NTTEngine) modInverse(a uint64) uint64 {
-	return e.powMod(a, e.Q-2)
-}
-
-// powMod computes base^exp mod Q
-func (e *NTTEngine) powMod(base, exp uint64) uint64 {
-	result := uint64(1)
-	base = base % e.Q
-	for exp > 0 {
-		if exp&1 == 1 {
-			result = e.mulMod(result, base)
-		}
-		base = e.mulMod(base, base)
-		exp >>= 1
-	}
-	return result
-}
-
-// computeBarrettMu computes floor(2^64 / Q) for Barrett reduction
-func (e *NTTEngine) computeBarrettMu() uint64 {
-	// mu = floor(2^64 / Q)
-	// Since we can't represent 2^64 directly, we compute it carefully
-	// 2^64 / Q = (2^63 / Q) * 2 + ((2^63 mod Q) * 2) / Q
-	twoTo63 := uint64(1) << 63
-	q := e.Q
-	mu := (twoTo63 / q) * 2
-	rem := ((twoTo63 % q) * 2) / q
-	return mu + rem
-}
-
-// computeMontgomeryR computes R = 2^64 mod Q
-func (e *NTTEngine) computeMontgomeryR() uint64 {
-	// R = 2^64 mod Q
-	// For Q < 2^63, compute (2^63 mod Q) * 2 mod Q
-	twoTo63 := uint64(1) << 63
-	r63 := twoTo63 % e.Q
-	r := (r63 * 2) % e.Q
-	return r
-}
-
-// computeMontgomeryInv computes -Q^(-1) mod 2^64
-func (e *NTTEngine) computeMontgomeryInv() uint64 {
-	// Newton's method for modular inverse
-	// x_{n+1} = x_n * (2 - q * x_n) mod 2^64
-	q := e.Q
-	x := q // Initial guess
-	for i := 0; i < 64; i++ {
-		x = x * (2 - q*x)
-	}
-	return -x // -Q^(-1) mod 2^64
-}
-
-// ========== SIMD-Optimized Variants ==========
-// These provide hooks for assembly implementations
-
-// NTTInPlaceSIMD is a placeholder for assembly-optimized NTT
-// On x86-64 with AVX-512, this can process 8 butterflies in parallel
-// On ARM64 with NEON, this can process 2 butterflies in parallel
+// NTTInPlaceSIMD is an alias for NTTInPlace; the substrate selects the
+// best available implementation (pure Go or SIMD via build tags).
 func (e *NTTEngine) NTTInPlaceSIMD(coeffs []uint64) {
-	// Check for AVX-512 or NEON support and dispatch
-	// For now, fall back to scalar version
-	e.NTTInPlace(coeffs)
+	e.sr.NTT(coeffs, coeffs)
 }
 
-// INTTInPlaceSIMD is a placeholder for assembly-optimized INTT
+// INTTInPlaceSIMD is an alias for INTTInPlace.
 func (e *NTTEngine) INTTInPlaceSIMD(coeffs []uint64) {
-	e.INTTInPlace(coeffs)
-}
-
-// PointerSize returns the size of a pointer (used for SIMD dispatch)
-func PointerSize() int {
-	return int(unsafe.Sizeof(uintptr(0)))
+	e.sr.INTT(coeffs, coeffs)
 }

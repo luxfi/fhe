@@ -1,0 +1,29 @@
+{
+  "name": "ntt_ladder_metal",
+  "host": {
+    "time": "2026-04-27T21:51:15Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "gpu",
+    "fhe_commit": "01b98a8ed264e678c29c75e294358521804e33dd",
+    "lattice_commit": "d11ec53c16e7ef6d0d1fc84ea37fd285e1f1f9d2"
+  },
+  "command": "go test -test.paniconexit0 -test.bench=BenchmarkNTTLadderMetal -test.benchtime=3x -test.count=1 -test.timeout=15m0s -test.v=true",
+  "cells": [
+    {
+      "name": "BenchmarkNTTLadderMetal",
+      "params": {
+        "backend": "cpu"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: lattice_gpu_available() returned false (library built without WITH_GPU=ON)",
+      "iterations": 0
+    }
+  ]
+}
