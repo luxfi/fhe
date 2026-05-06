@@ -1,0 +1,29 @@
+{
+  "name": "ntt_ladder_metal",
+  "host": {
+    "time": "2026-04-27T19:51:15Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkNTTLadderMetal$ -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "BenchmarkNTTLadderMetal",
+      "params": {
+        "backend": "CPU (pure Go)"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: built without -tags gpu; GPU wrapper not linked",
+      "iterations": 0
+    }
+  ]
+}

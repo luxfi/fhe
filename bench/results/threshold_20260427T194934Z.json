@@ -1,0 +1,124 @@
+{
+  "name": "threshold",
+  "host": {
+    "time": "2026-04-27T19:49:34Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkThreshold_KeygenShare_CPU$|^BenchmarkThreshold_PartialDecryptShare_CPU$|^BenchmarkThreshold_ShareAggregate_CPU$ -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "BenchmarkThreshold_KeygenShare_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "threshold_keygen_share",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 171042,
+      "mean_ns": 171042,
+      "p50_ns": 171042,
+      "p95_ns": 171042,
+      "p99_ns": 171042,
+      "ops_per_sec": 5846.517229686276
+    },
+    {
+      "name": "BenchmarkThreshold_KeygenShare_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "threshold_keygen_share",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 105875,
+      "mean_ns": 111158,
+      "p50_ns": 105875,
+      "p95_ns": 120958,
+      "p99_ns": 120958,
+      "ops_per_sec": 9445.100354191263
+    },
+    {
+      "name": "BenchmarkThreshold_PartialDecryptShare_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "partial_decrypt_share",
+        "scope": "GenShamirSecretShare (per-recipient)",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 10666,
+      "mean_ns": 10666,
+      "p50_ns": 10666,
+      "p95_ns": 10666,
+      "p99_ns": 10666,
+      "ops_per_sec": 93755.85974123383
+    },
+    {
+      "name": "BenchmarkThreshold_PartialDecryptShare_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "partial_decrypt_share",
+        "scope": "GenShamirSecretShare (per-recipient)",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 9667,
+      "mean_ns": 9987,
+      "p50_ns": 9667,
+      "p95_ns": 9958,
+      "p99_ns": 9958,
+      "ops_per_sec": 103444.70880314472
+    },
+    {
+      "name": "BenchmarkThreshold_ShareAggregate_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "share_aggregate",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 4167,
+      "mean_ns": 4167,
+      "p50_ns": 4167,
+      "p95_ns": 4167,
+      "p99_ns": 4167,
+      "ops_per_sec": 239980.80153587714
+    },
+    {
+      "name": "BenchmarkThreshold_ShareAggregate_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "share_aggregate",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 1583,
+      "mean_ns": 1649,
+      "p50_ns": 1583,
+      "p95_ns": 1625,
+      "p99_ns": 1625,
+      "ops_per_sec": 631711.9393556538
+    }
+  ]
+}
