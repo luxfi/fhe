@@ -1,0 +1,150 @@
+{
+  "name": "reconcile_zoo",
+  "host": {
+    "time": "2026-04-27T22:15:26Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "gpu",
+    "fhe_commit": "d6affbfd6dadf28aa100dcbf73c75caf61dcc539",
+    "lattice_commit": "d11ec53c16e7ef6d0d1fc84ea37fd285e1f1f9d2"
+  },
+  "command": "go test -test.paniconexit0 -test.bench=BenchmarkReconcile -test.benchtime=10x -test.count=1 -test.timeout=10m0s",
+  "cells": [
+    {
+      "name": "MetalNTTZoo/luxlattice",
+      "params": {
+        "exists": "true",
+        "name": "luxlattice",
+        "notes": "BatchNTT path SIGSEGVs at every (N,B) tested per #121; single-poly works but is 12x slower than Go.",
+        "purpose": "Generic Montgomery-form NTT for ring.SubRing dispatch (the #121 measurement target).",
+        "reachable": "yes (via libluxlattice + luxfi/lattice/v7/gpu cgo)",
+        "source_path": "/Users/z/work/lux/cpp/lattice/src/metal/metal_ntt.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/fhe-mlx-backend",
+      "params": {
+        "exists": "true",
+        "name": "fhe-mlx-backend",
+        "notes": "This is the path that produced #88's claimed 14.02x at N=4096 B=128 fused. The fused kernel source is in metal_dispatch_optimized.h::get_fused_ntt_kernel_source. NOT measurable from Go today.",
+        "purpose": "F-Chain MLX backend NTT wrapper; routes to NTTMetalDispatcherOptimized (custom Metal kernels with fused log(N) stages, shared-memory butterflies).",
+        "reachable": "no (FHEgpu/FHEmetal libs not linked into lux/fhe Go module)",
+        "source_path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_ntt_wrapper.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/crypto-gpukit",
+      "params": {
+        "exists": "true",
+        "name": "crypto-gpukit",
+        "notes": "Independent implementation -- not the same code path as either #88 or #121.",
+        "purpose": "Generic NTT driver for gpukit; used by other crypto primitives that need NTT (KZG, IPA, etc.).",
+        "reachable": "no (separate library, not linked into lux/fhe)",
+        "source_path": "/Users/z/work/lux/cpp/crypto/gpukit/gpu/metal/ntt_driver.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/metal-tests-test-ntt",
+      "params": {
+        "exists": "true",
+        "name": "metal-tests-test-ntt",
+        "notes": "Contains a minimal reference implementation used to validate the kernel under a build harness. Not a runtime path.",
+        "purpose": "Standalone Metal NTT unit test; doc-only, not a dispatcher.",
+        "reachable": "no (test target only)",
+        "source_path": "/Users/z/work/lux/cpp/metal/tests/test_ntt.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/cevm-metal",
+      "params": {
+        "exists": "true",
+        "name": "cevm-metal",
+        "notes": "The §19E hypothesis that #88 might have measured cevm-side Metal NTT is FALSIFIED -- the cevm metal directory contains zero NTT code (verified by directory listing 2026-04-27).",
+        "purpose": "EVM-execution Metal kernels (block-STM, BLS, keccak256, tx_validate). NO NTT.",
+        "reachable": "n/a -- no NTT here",
+        "source_path": "/Users/z/work/lux/cpp/cevm/lib/evm/gpu/metal/"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/luxlattice",
+      "params": {
+        "exists": "true",
+        "name": "luxlattice",
+        "notes": "BatchNTT path SIGSEGVs at every (N,B) tested per #121; single-poly works but is 12x slower than Go.",
+        "purpose": "Generic Montgomery-form NTT for ring.SubRing dispatch (the #121 measurement target).",
+        "reachable": "yes (via libluxlattice + luxfi/lattice/v7/gpu cgo)",
+        "source_path": "/Users/z/work/lux/cpp/lattice/src/metal/metal_ntt.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/fhe-mlx-backend",
+      "params": {
+        "exists": "true",
+        "name": "fhe-mlx-backend",
+        "notes": "This is the path that produced #88's claimed 14.02x at N=4096 B=128 fused. The fused kernel source is in metal_dispatch_optimized.h::get_fused_ntt_kernel_source. NOT measurable from Go today.",
+        "purpose": "F-Chain MLX backend NTT wrapper; routes to NTTMetalDispatcherOptimized (custom Metal kernels with fused log(N) stages, shared-memory butterflies).",
+        "reachable": "no (FHEgpu/FHEmetal libs not linked into lux/fhe Go module)",
+        "source_path": "/Users/z/work/lux/cpp/fhe/src/core/lib/math/hal/mlx/metal_ntt_wrapper.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/crypto-gpukit",
+      "params": {
+        "exists": "true",
+        "name": "crypto-gpukit",
+        "notes": "Independent implementation -- not the same code path as either #88 or #121.",
+        "purpose": "Generic NTT driver for gpukit; used by other crypto primitives that need NTT (KZG, IPA, etc.).",
+        "reachable": "no (separate library, not linked into lux/fhe)",
+        "source_path": "/Users/z/work/lux/cpp/crypto/gpukit/gpu/metal/ntt_driver.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/metal-tests-test-ntt",
+      "params": {
+        "exists": "true",
+        "name": "metal-tests-test-ntt",
+        "notes": "Contains a minimal reference implementation used to validate the kernel under a build harness. Not a runtime path.",
+        "purpose": "Standalone Metal NTT unit test; doc-only, not a dispatcher.",
+        "reachable": "no (test target only)",
+        "source_path": "/Users/z/work/lux/cpp/metal/tests/test_ntt.mm"
+      },
+      "status": "ok",
+      "iterations": 0
+    },
+    {
+      "name": "MetalNTTZoo/cevm-metal",
+      "params": {
+        "exists": "true",
+        "name": "cevm-metal",
+        "notes": "The §19E hypothesis that #88 might have measured cevm-side Metal NTT is FALSIFIED -- the cevm metal directory contains zero NTT code (verified by directory listing 2026-04-27).",
+        "purpose": "EVM-execution Metal kernels (block-STM, BLS, keccak256, tx_validate). NO NTT.",
+        "reachable": "n/a -- no NTT here",
+        "source_path": "/Users/z/work/lux/cpp/cevm/lib/evm/gpu/metal/"
+      },
+      "status": "ok",
+      "iterations": 0
+    }
+  ]
+}
