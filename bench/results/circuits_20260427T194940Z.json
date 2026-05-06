@@ -1,0 +1,54 @@
+{
+  "name": "circuits",
+  "host": {
+    "time": "2026-04-27T19:49:40Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkCircuit_BoolGate_CPU$ -test.benchtime=2x -test.timeout=5m0s",
+  "cells": [
+    {
+      "name": "BoolGate/CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "circuit": "boolean_and",
+        "params": "PN10QP27"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 99870084,
+      "mean_ns": 99870084,
+      "p50_ns": 99870084,
+      "p95_ns": 99870084,
+      "p99_ns": 99870084,
+      "ops_per_sec": 10.01300850012302,
+      "notes": "correctness verified against plaintext"
+    },
+    {
+      "name": "BoolGate/CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "circuit": "boolean_and",
+        "params": "PN10QP27"
+      },
+      "status": "ok",
+      "iterations": 2,
+      "median_ns": 95055958,
+      "mean_ns": 95916979,
+      "p50_ns": 95055958,
+      "p95_ns": 95055958,
+      "p99_ns": 95055958,
+      "ops_per_sec": 10.520119107105312,
+      "notes": "correctness verified against plaintext"
+    }
+  ]
+}
