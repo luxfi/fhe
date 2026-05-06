@@ -1,0 +1,86 @@
+{
+  "name": "tfhe_primitives",
+  "host": {
+    "time": "2026-04-27T19:49:46Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkTFHE_TRLWE_Add_CPU$|^BenchmarkTFHE_TRLWE_ExternalProduct_CPU$ -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "TRLWE_Add/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_add"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 1292,
+      "mean_ns": 1292,
+      "p50_ns": 1292,
+      "p95_ns": 1292,
+      "p99_ns": 1292,
+      "ops_per_sec": 773993.8080495356
+    },
+    {
+      "name": "TRLWE_Add/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_add"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 791,
+      "mean_ns": 883,
+      "p50_ns": 791,
+      "p95_ns": 833,
+      "p99_ns": 833,
+      "ops_per_sec": 1264222.5031605563
+    },
+    {
+      "name": "TRLWE_ExternalProduct/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_external_product",
+        "scope": "NTT+pointwise+INTT"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 31208,
+      "mean_ns": 31208,
+      "p50_ns": 31208,
+      "p95_ns": 31208,
+      "p99_ns": 31208,
+      "ops_per_sec": 32043.06588054345
+    },
+    {
+      "name": "TRLWE_ExternalProduct/CPU",
+      "params": {
+        "N": "2048",
+        "backend": "CPU (pure Go)",
+        "primitive": "trlwe_external_product",
+        "scope": "NTT+pointwise+INTT"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 28416,
+      "mean_ns": 29687,
+      "p50_ns": 28416,
+      "p95_ns": 32416,
+      "p99_ns": 32416,
+      "ops_per_sec": 35191.44144144144
+    }
+  ]
+}

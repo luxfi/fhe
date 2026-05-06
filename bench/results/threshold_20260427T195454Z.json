@@ -1,0 +1,54 @@
+{
+  "name": "threshold",
+  "host": {
+    "time": "2026-04-27T19:54:54Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkReconcile_88_vs_121$|^BenchmarkReconcile_MetalNTTZoo$|^BenchmarkTFHE_TRLWE_Add_CPU$|^BenchmarkThreshold_ShareAggregate_CPU$ -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "BenchmarkThreshold_ShareAggregate_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "share_aggregate",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 2750,
+      "mean_ns": 2750,
+      "p50_ns": 2750,
+      "p95_ns": 2750,
+      "p99_ns": 2750,
+      "ops_per_sec": 363636.36363636365
+    },
+    {
+      "name": "BenchmarkThreshold_ShareAggregate_CPU",
+      "params": {
+        "backend": "CPU (pure Go)",
+        "logN": "10",
+        "primitive": "share_aggregate",
+        "threshold": "3"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 5750,
+      "mean_ns": 6470,
+      "p50_ns": 5750,
+      "p95_ns": 7583,
+      "p99_ns": 7583,
+      "ops_per_sec": 173913.04347826086
+    }
+  ]
+}
