@@ -1,0 +1,136 @@
+{
+  "name": "reconcile_88_121",
+  "host": {
+    "time": "2026-04-27T19:54:54Z",
+    "go_version": "go1.26.2",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "num_cpu": 10,
+    "gomaxprocs": 10,
+    "cpu_brand": "Apple M1 Max",
+    "os_product": "macOS",
+    "os_version": "26.4",
+    "build_tags": "default",
+    "fhe_commit": "873ee56fed87a95794aefac5c4921955ba0c332a",
+    "lattice_commit": "a362b2e4d5fe6e67850e9dbb848fe9ab460e7711"
+  },
+  "command": "go test -test.paniconexit0 -test.count=1 -test.run=^$ -test.bench=^BenchmarkReconcile_88_vs_121$|^BenchmarkReconcile_MetalNTTZoo$|^BenchmarkTFHE_TRLWE_Add_CPU$|^BenchmarkThreshold_ShareAggregate_CPU$ -test.benchtime=10x -test.timeout=2m0s",
+  "cells": [
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "label": "go pure-Go single-poly N=4096 (the denominator in #121's ratio)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 40292,
+      "mean_ns": 40292,
+      "p50_ns": 40292,
+      "p95_ns": 40292,
+      "p99_ns": 40292,
+      "ops_per_sec": 24818.82259505609
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "label": "go pure-Go single-poly N=4096 (the denominator in #121's ratio)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 29000,
+      "mean_ns": 49291,
+      "p50_ns": 29000,
+      "p95_ns": 94917,
+      "p99_ns": 94917,
+      "ops_per_sec": 34482.75862068965
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/batched-128-sequential",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "label": "go pure-Go N=4096 sequenced 128 times (matches what blind-rotate does)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 1,
+      "median_ns": 4696084,
+      "mean_ns": 4696084,
+      "p50_ns": 4696084,
+      "p95_ns": 4696084,
+      "p99_ns": 4696084,
+      "ops_per_sec": 212.94338005878942
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Go/batched-128-sequential",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "label": "go pure-Go N=4096 sequenced 128 times (matches what blind-rotate does)",
+        "path": "go-pure"
+      },
+      "status": "ok",
+      "iterations": 10,
+      "median_ns": 3959250,
+      "mean_ns": 4072999,
+      "p50_ns": 3959250,
+      "p95_ns": 4603958,
+      "p99_ns": 4603958,
+      "ops_per_sec": 252.57308833743764
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "label": "metal luxlattice single-poly N=4096 (the numerator in #121's 0.08x ratio)",
+        "path": "metal-luxlattice"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: built without -tags gpu; GPU wrapper not linked",
+      "iterations": 0
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/single-poly",
+      "params": {
+        "B": "1",
+        "N": "4096",
+        "label": "metal luxlattice single-poly N=4096 (the numerator in #121's 0.08x ratio)",
+        "path": "metal-luxlattice"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: built without -tags gpu; GPU wrapper not linked",
+      "iterations": 0
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/batched-128-fused",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "label": "metal luxlattice BatchNTT N=4096 B=128 (the #88 14.02x claim target)",
+        "path": "metal-luxlattice"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: built without -tags gpu; GPU wrapper not linked",
+      "iterations": 0
+    },
+    {
+      "name": "BenchmarkReconcile_88_vs_121/Metal/batched-128-fused",
+      "params": {
+        "B": "128",
+        "N": "4096",
+        "label": "metal luxlattice BatchNTT N=4096 B=128 (the #88 14.02x claim target)",
+        "path": "metal-luxlattice"
+      },
+      "status": "skipped",
+      "reason": "NotApplicable: built without -tags gpu; GPU wrapper not linked",
+      "iterations": 0
+    }
+  ]
+}
