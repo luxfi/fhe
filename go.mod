@@ -10,6 +10,7 @@ require (
 	github.com/luxfi/math v1.4.0
 	github.com/luxfi/mdns v0.1.0
 	github.com/luxfi/metric v1.5.0
+	github.com/luxfi/pq v1.0.3
 	github.com/spf13/cobra v1.10.2
 	github.com/urfave/cli/v3 v3.6.2
 	golang.org/x/crypto v0.49.0
