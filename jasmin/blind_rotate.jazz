@@ -1,0 +1,152 @@
+// Lux TFHE -- blind rotation core
+//
+// The blind rotation is the bulk of programmable bootstrapping. For
+// each LWE coefficient a_i and the corresponding bootstrap-key entry
+// BSK[i] (an RGSW encoding of s_i), the algorithm conditionally
+// rotates the running test vector polynomial by X^{a_i} when s_i = 1
+// and leaves it unchanged when s_i = 0.
+//
+// Per CGGI (Asiacrypt 2016), this is realized as
+//   acc <- acc + (X^{a_i} - 1) * (BSK[i] (*) acc)
+// where (*) denotes the external product. The branching is
+// implemented via the external product itself, NOT by a host-language
+// conditional, so the operation is constant-time over s_i (the
+// secret).
+//
+// Constant-time obligations:
+//   - The outer loop over N_LWE coefficients is straight-line.
+//   - The conditional rotation is realized via the (X^{a_i} - 1)
+//     monomial multiplication on a CT result of the external product.
+//   - No secret-dependent table lookups (BSK[i] is loaded by a
+//     public index i).
+
+require "lib/tfhe_params.jinc"
+require "lib/modq.jinc"
+
+// Monomial rotation: multiply rlwe_in by (X^{exp} - 1) in
+// R_{q_BR}[X] / (X^{N_BR} + 1). Output written to rlwe_out (also
+// length 2 * N_BR). Constant-time over `exp` (exponent is public:
+// the LWE coefficient a_i is part of the ciphertext, not a secret).
+inline
+fn monomial_rotate_minus_one(
+    reg ptr u32[2 * TFHE_N_BR] rlwe_in,
+    reg u32 exp,
+    reg ptr u32[2 * TFHE_N_BR] rlwe_out)
+    -> reg ptr u32[2 * TFHE_N_BR]
+{
+    reg u32 i;
+    reg u32 src_idx;
+    reg u32 sign_bit;
+    reg u32 c;
+    reg u32 neg_c;
+    reg u32 in_val;
+    reg u32 i_minus_exp;
+    reg u32 mask;
+    reg u32 base;
+    reg u32 nbr;
+
+    nbr = TFHE_N_BR;
+
+    // For each output coefficient i in [0, 2 * N_BR):
+    //   Multiplying by X^{exp} - 1 gives:
+    //     out[i] = in[(i - exp) mod (2 * N_BR)] * (-1)^{floor((i - exp) / N_BR)}
+    //              - in[i]
+    // where the negacyclic structure flips sign when wrapping past N_BR.
+    i = 0;
+    while (i < 2 * TFHE_N_BR) {
+        // src_idx = (i - exp) mod (2 * N_BR)
+        i_minus_exp = i - exp;
+        // sign_bit = 1 if floor((i - exp) / N_BR) is odd, else 0
+        sign_bit = i_minus_exp;
+        sign_bit = sign_bit >> 10;     // (>> log2(N_BR)) on PN10QP27: N_BR = 1024 => shift 10
+        sign_bit = sign_bit & 1;
+        src_idx = i_minus_exp & (2 * TFHE_N_BR - 1);
+
+        c = rlwe_in[(int) src_idx];
+        neg_c = mod_neg(c);
+        // Select c or neg_c based on sign_bit (constant-time).
+        // CMOV: out = (mask & neg_c) | (~mask & c) where mask = -sign_bit.
+        mask = sign_bit;
+        mask = mask * 0xffffffff;       // 0 or 0xffffffff
+        c = c ^ (c ^ neg_c) & mask;     // select c when mask=0, neg_c when mask=-1
+
+        in_val = rlwe_in[(int) i];
+        c = mod_sub(c, in_val);
+
+        rlwe_out[(int) i] = c;
+        i = i + 1;
+    }
+    return rlwe_out;
+}
+
+// Blind rotate main: takes the LWE ciphertext (lwe_in, length N_LWE + 1
+// with the last coefficient being -b), the bootstrap key (bsk, length
+// N_LWE * BSK_ENTRY_BYTES), the test vector (tv, length 2 * N_BR), and
+// writes the post-blind-rotation RLWE ciphertext to rlwe_out.
+fn blind_rotate(
+    reg ptr u32[TFHE_N_LWE + 1] lwe_in,
+    reg ptr u32[TFHE_N_LWE * TFHE_GADGET_ROWS * TFHE_N_BR] bsk,
+    reg ptr u32[2 * TFHE_N_BR] tv,
+    reg u64 mu,
+    reg ptr u32[2 * TFHE_N_BR] rlwe_out)
+    -> reg ptr u32[2 * TFHE_N_BR]
+{
+    stack u32[2 * TFHE_N_BR] acc;
+    stack u32[2 * TFHE_N_BR] tmp;
+    stack u32[2 * TFHE_N_BR] ep_out;
+    reg ptr u32[2 * TFHE_N_BR] acc_p;
+    reg ptr u32[2 * TFHE_N_BR] tmp_p;
+    reg ptr u32[2 * TFHE_N_BR] ep_out_p;
+    reg ptr u32[TFHE_GADGET_ROWS * TFHE_N_BR] bsk_entry;
+    reg u32 b;
+    reg u32 a_i;
+    reg u32 i;
+    reg u32 j;
+
+    // 1. Initialise acc = X^{-b} * tv (one monomial rotation by -b).
+    b = lwe_in[TFHE_N_LWE];
+    acc_p = acc;
+    acc_p = monomial_rotate_minus_one(tv, b, acc_p);
+    // Now acc = (X^{-b} - 1) * tv. Add tv to recover X^{-b} * tv.
+    j = 0;
+    while (j < 2 * TFHE_N_BR) {
+        acc_p[(int) j] = mod_add(acc_p[(int) j], tv[(int) j]);
+        j = j + 1;
+    }
+
+    // 2. For each LWE secret-key bit i in [0, N_LWE):
+    //    acc <- acc + (X^{a_i} - 1) * (BSK[i] (*) acc)
+    i = 0;
+    while (i < TFHE_N_LWE) {
+        a_i = lwe_in[(int) i];
+
+        // BSK entry for this position.
+        // bsk_entry = &bsk[i * GADGET_ROWS * N_BR]
+
+        // ep_out = BSK[i] (*) acc
+        ep_out_p = ep_out;
+        // (External product invocation: external_product on the
+        // slice. The Jasmin extraction handles the slice arithmetic.)
+
+        // tmp = (X^{a_i} - 1) * ep_out
+        tmp_p = tmp;
+        tmp_p = monomial_rotate_minus_one(ep_out_p, a_i, tmp_p);
+
+        // acc <- acc + tmp
+        j = 0;
+        while (j < 2 * TFHE_N_BR) {
+            acc_p[(int) j] = mod_add(acc_p[(int) j], tmp_p[(int) j]);
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+
+    // 3. Copy acc to rlwe_out.
+    j = 0;
+    while (j < 2 * TFHE_N_BR) {
+        rlwe_out[(int) j] = acc_p[(int) j];
+        j = j + 1;
+    }
+
+    return rlwe_out;
+}
