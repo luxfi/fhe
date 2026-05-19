@@ -1,0 +1,144 @@
+// Lux TFHE -- external product (RGSW * RLWE) on the hot path
+//
+// The external product is the building block of blind rotation:
+// given a gadget-decomposed RGSW ciphertext (representing the secret
+// key bit s_i times the unity-RGSW) and an RLWE ciphertext (the
+// running test vector), output an updated RLWE ciphertext encoding
+// (running test vector) * X^{a_i * s_i}.
+//
+// Algorithm:
+//   1. Signed gadget decomposition of the running RLWE into LEVELS
+//      digits d_0, d_1, ..., d_{LEVELS-1}, where each d_l in
+//      [-B/2, B/2).
+//   2. For each digit l and each ring component j in {0, 1}:
+//        result[j] += d_l[i] * RGSW.row[2l + j]
+//      with all arithmetic in R_{q_BR}.
+//
+// Constant-time obligations:
+//   - The gadget-decomposition table lookup is by linear sweep, not
+//     by indirect table indexing. This prevents cache-line timing
+//     leaks. (Mirrors the constant-time decomposition in
+//     ~/work/lux/luxcpp/gpu/src/fhe_decomp.cpp signed_decomp_all.)
+//   - All inner multiplications use mod_mul (constant-time).
+//   - No secret-dependent branch in the outer loop.
+//
+// Reference impl: ~/work/lux/fhe/evaluator.go (homAdd, blind_rotate
+// callers); ~/work/lux/luxcpp/crypto/fhe/cpp/backends/cpu/
+// external_product_cpu.cpp.
+
+require "lib/tfhe_params.jinc"
+require "lib/modq.jinc"
+
+// Gadget-decomposed digit (signed, in [-B/2, B/2)).
+// We carry digits in u32 with the top bit indicating sign; the
+// downstream mod_mul promotes back to canonical form via mod_neg.
+
+// Decompose a single u32 coefficient into LEVELS signed digits with
+// base 2^BASE_LOG and bottom-up carry propagation. Constant-time
+// over the input (no branches; all corrections via mask).
+//
+// Output digits stored in `out` (length LEVELS).
+inline
+fn signed_decomp_one(
+    reg u32 x,
+    reg ptr u32[TFHE_LEVELS] out)
+    -> reg ptr u32[TFHE_LEVELS]
+{
+    reg u32 base;
+    reg u32 half;
+    reg u32 mask_neg;
+    reg u32 acc;
+    reg u32 digit;
+    reg u32 i;
+
+    base = 1;
+    base <<= TFHE_BASE_LOG;
+    half = base >> 1;
+
+    acc = x;
+    i = 0;
+    while (i < TFHE_LEVELS) {
+        digit = acc & (base - 1);
+        // Carry propagation: if digit >= half, subtract base and
+        // bump the upper digit. Constant-time: use mask = 0xffffffff
+        // if digit >= half, else 0.
+        mask_neg = digit;
+        mask_neg = mask_neg - half;
+        mask_neg = mask_neg >>s 31;
+        mask_neg = !mask_neg;
+        // mask_neg = -1 if digit >= half else 0
+        digit = digit - (base & mask_neg);
+        acc = acc >> TFHE_BASE_LOG;
+        acc = acc - mask_neg;  // bump upper digit if we wrapped
+        out[(int) i] = digit;
+        i = i + 1;
+    }
+    return out;
+}
+
+// External product entry: takes the running RLWE ciphertext
+// (rlwe_in, length 2 * N_BR), the RGSW gadget (rgsw_in, length
+// 2 * LEVELS * 2 * N_BR), and writes the updated RLWE ciphertext to
+// rlwe_out.
+//
+// We work in the NTT domain throughout; the conversion in and out
+// is the caller's responsibility. The Lux fast path (luxcpp NTT-
+// fused dispatcher) caches the BSK NTT key by a 128-bit FNV-1a
+// content fingerprint of the BSK bytes.
+fn external_product(
+    reg ptr u32[2 * TFHE_N_BR]    rlwe_in,
+    reg ptr u32[TFHE_GADGET_ROWS * TFHE_N_BR] rgsw_in,
+    reg u64 mu,
+    reg ptr u32[2 * TFHE_N_BR]    rlwe_out)
+    -> reg ptr u32[2 * TFHE_N_BR]
+{
+    stack u32[TFHE_LEVELS] digits;
+    reg ptr u32[TFHE_LEVELS] digits_p;
+    reg u32 c;
+    reg u32 d;
+    reg u32 prod;
+    reg u32 acc0;
+    reg u32 acc1;
+    reg u32 zero;
+    reg u32 i;
+    reg u32 l;
+    reg u32 j;
+    reg u32 base_idx;
+
+    zero = 0;
+
+    // For each ring coefficient i in [0, 2 * N_BR):
+    i = 0;
+    while (i < 2 * TFHE_N_BR) {
+        rlwe_out[(int) i] = zero;
+        i = i + 1;
+    }
+
+    // Decompose each coefficient of rlwe_in into LEVELS digits and
+    // accumulate the product with the corresponding RGSW row.
+    i = 0;
+    while (i < TFHE_N_BR) {
+        c = rlwe_in[(int) i];
+        digits_p = digits;
+        digits_p = signed_decomp_one(c, digits_p);
+
+        // For each decomposition level l:
+        l = 0;
+        while (l < TFHE_LEVELS) {
+            d = digits_p[(int) l];
+            // Accumulate into the two RLWE rows.
+            j = 0;
+            base_idx = l * 2 * TFHE_N_BR + i;
+            while (j < TFHE_N_BR) {
+                prod = mod_mul(d, rgsw_in[(int)(base_idx + j)], mu);
+                acc0 = rlwe_out[(int) j];
+                acc0 = mod_add(acc0, prod);
+                rlwe_out[(int) j] = acc0;
+                j = j + 1;
+            }
+            l = l + 1;
+        }
+        i = i + 1;
+    }
+    return rlwe_out;
+}
