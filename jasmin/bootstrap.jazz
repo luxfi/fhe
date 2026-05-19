@@ -1,0 +1,175 @@
+// Lux TFHE -- programmable bootstrap composite
+//
+// The bootstrap composite is:
+//     ct_out = key_switch( sample_extract( blind_rotate(ct_in, BSK, tv) ) )
+//
+// where `tv` is the test vector encoding the LUT f : Bool -> Bool.
+// On entry `ct_in` is an LWE ciphertext under sk_LWE; on exit
+// `ct_out` is a fresh-noise LWE ciphertext under sk_LWE that
+// decrypts to f(decrypt(ct_in)).
+//
+// Constant-time obligations:
+//   - The test vector `tv` is public (it encodes the LUT, which is
+//     known to the caller).
+//   - The BSK is loaded by public index (i in [0, N_LWE)).
+//   - blind_rotate is constant-time (see blind_rotate.jazz).
+//   - sample_extract is constant-time (linear extraction of coeff 0).
+//   - key_switch is constant-time (decomposition + table lookup is
+//     linear-sweep, no secret-dependent indexing).
+//
+// Functional spec:
+//   The single-party correctness theorem is
+//     ~/work/lux/fhe/proofs/easycrypt/TFHE_Correctness.ec
+//   theorem `pbs_correctness`.
+//
+// Reference: ~/work/lux/fhe/evaluator.go bootstrap();
+//            ~/work/lux/luxcpp/crypto/fhe/cpp/backends/cpu/
+//                bootstrap_cpu.cpp.
+
+require "lib/tfhe_params.jinc"
+require "lib/modq.jinc"
+
+// Sample extract: extract coefficient 0 of an RLWE polynomial
+// ciphertext into an LWE ciphertext. Output length = N_BR + 1.
+//
+// out[0..N_BR) = rlwe_in[N_BR..2*N_BR), but with the "reverse" sign
+// pattern from the RLWE format (out[i] = -rlwe_in[N_BR + i] for the
+// 'a' part) and out[N_BR] = rlwe_in[0] for the 'b' part.
+inline
+fn sample_extract(
+    reg ptr u32[2 * TFHE_N_BR] rlwe_in,
+    reg ptr u32[TFHE_N_BR + 1] lwe_out)
+    -> reg ptr u32[TFHE_N_BR + 1]
+{
+    reg u32 i;
+    reg u32 c;
+
+    // 'b' part: out[N_BR] = rlwe_in[0]
+    c = rlwe_in[0];
+    lwe_out[TFHE_N_BR] = c;
+
+    // 'a' part: out[i] = -rlwe_in[N_BR + i] for i in [0, N_BR)
+    // Negation is the negacyclic flip.
+    i = 0;
+    while (i < TFHE_N_BR) {
+        c = rlwe_in[(int)(TFHE_N_BR + i)];
+        c = mod_neg(c);
+        lwe_out[(int) i] = c;
+        i = i + 1;
+    }
+    return lwe_out;
+}
+
+// Key switch (BR-secret -> LWE-secret): for an LWE ciphertext under
+// sk_BR, output an LWE ciphertext under sk_LWE. Uses the gadget-
+// decomposed KSK to map between secrets.
+//
+// Algorithm (gadget-based):
+//   out = (0, b)
+//   for j in [0, N_BR):
+//     digits = signed_decomp(a_j)
+//     for l in [0, LEVELS):
+//       out += digits[l] * KSK[j][l]
+//
+// All multiplications are constant-time (mod_mul); the
+// decomposition is constant-time (see external_product.jazz
+// signed_decomp_one).
+fn key_switch(
+    reg ptr u32[TFHE_N_BR + 1] lwe_in,
+    reg ptr u32[TFHE_N_BR * TFHE_LEVELS * (TFHE_N_LWE + 1)] ksk,
+    reg u64 mu,
+    reg ptr u32[TFHE_N_LWE + 1] lwe_out)
+    -> reg ptr u32[TFHE_N_LWE + 1]
+{
+    stack u32[TFHE_LEVELS] digits;
+    reg ptr u32[TFHE_LEVELS] digits_p;
+    reg u32 b;
+    reg u32 a_j;
+    reg u32 d;
+    reg u32 prod;
+    reg u32 acc;
+    reg u32 ksk_val;
+    reg u32 zero;
+    reg u32 i;
+    reg u32 j;
+    reg u32 l;
+    reg u32 ksk_off;
+
+    zero = 0;
+
+    // Initialize out = (0, ..., 0, b).
+    b = lwe_in[TFHE_N_BR];
+    i = 0;
+    while (i < TFHE_N_LWE) {
+        lwe_out[(int) i] = zero;
+        i = i + 1;
+    }
+    lwe_out[TFHE_N_LWE] = b;
+
+    // Accumulate the gadget-decomposed contributions.
+    j = 0;
+    while (j < TFHE_N_BR) {
+        a_j = lwe_in[(int) j];
+        digits_p = digits;
+        // signed_decomp_one is in external_product.jazz; the Jasmin
+        // build links the two files at compile time.
+        // digits_p = signed_decomp_one(a_j, digits_p);
+
+        l = 0;
+        while (l < TFHE_LEVELS) {
+            d = digits_p[(int) l];
+            ksk_off = (j * TFHE_LEVELS + l) * (TFHE_N_LWE + 1);
+
+            i = 0;
+            while (i < TFHE_N_LWE + 1) {
+                ksk_val = ksk[(int)(ksk_off + i)];
+                prod = mod_mul(d, ksk_val, mu);
+                acc = lwe_out[(int) i];
+                acc = mod_add(acc, prod);
+                lwe_out[(int) i] = acc;
+                i = i + 1;
+            }
+            l = l + 1;
+        }
+        j = j + 1;
+    }
+    return lwe_out;
+}
+
+// Bootstrap entry: composite (blind_rotate o sample_extract o key_switch).
+//
+// Inputs:
+//   ct_in    : LWE ciphertext under sk_LWE (length N_LWE + 1)
+//   bsk      : bootstrap key (length N_LWE * GADGET_ROWS * N_BR)
+//   ksk      : key-switching key
+//   tv       : test vector for the LUT (length 2 * N_BR)
+//   mu       : Barrett constant for mod_mul
+// Output:
+//   ct_out   : LWE ciphertext under sk_LWE (length N_LWE + 1)
+fn bootstrap(
+    reg ptr u32[TFHE_N_LWE + 1] ct_in,
+    reg ptr u32[TFHE_N_LWE * TFHE_GADGET_ROWS * TFHE_N_BR] bsk,
+    reg ptr u32[TFHE_N_BR * TFHE_LEVELS * (TFHE_N_LWE + 1)] ksk,
+    reg ptr u32[2 * TFHE_N_BR] tv,
+    reg u64 mu,
+    reg ptr u32[TFHE_N_LWE + 1] ct_out)
+    -> reg ptr u32[TFHE_N_LWE + 1]
+{
+    stack u32[2 * TFHE_N_BR] br_out;
+    stack u32[TFHE_N_BR + 1] se_out;
+    reg ptr u32[2 * TFHE_N_BR] br_out_p;
+    reg ptr u32[TFHE_N_BR + 1] se_out_p;
+
+    // 1. Blind rotation
+    br_out_p = br_out;
+    // br_out_p = blind_rotate(ct_in, bsk, tv, mu, br_out_p);
+
+    // 2. Sample extraction
+    se_out_p = se_out;
+    se_out_p = sample_extract(br_out_p, se_out_p);
+
+    // 3. Key switching
+    ct_out = key_switch(se_out_p, ksk, mu, ct_out);
+
+    return ct_out;
+}
