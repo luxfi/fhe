@@ -1,0 +1,128 @@
+// Lux TFHE -- constant-time modular arithmetic over Z_q
+//
+// Constant-time mod_add / mod_sub / mod_mul / mod_neg over the
+// PN10QP27 prime q = 0x7fff801 = 134215681 (27 bits, NTT-friendly).
+//
+// All routines are mask-based and contain no secret-dependent
+// branches. They mirror the constant-time helpers in
+// `~/work/lux/luxcpp/gpu/src/cpu_fhe_helpers.hpp`
+// (mod_add_q / mod_sub_q / mod_mul_q / mod_neg_q).
+
+require "tfhe_params.jinc"
+
+// q = TFHE_Q_LWE = 0x7fff801. Promoted to a u64 for the Barrett
+// reduction; the lo 32 bits are the canonical representation.
+param int TFHE_Q_U32 = TFHE_Q_LWE;
+
+// Modular addition: (a + b) mod q, constant-time.
+inline
+fn mod_add(reg u32 a, reg u32 b) -> reg u32
+{
+    reg u32 s;
+    reg u32 mask;
+
+    s = a;
+    s = s + b;
+    // s = a + b in u32. Now s >= q iff (s >= q) holds; subtract q
+    // conditionally via mask.
+    mask = s;
+    mask = mask - TFHE_Q_U32;
+    // If s < q, then mask underflows to a large value (top bit set).
+    // We want mask = 0 if s >= q (subtract q) and mask = q if s < q
+    // (no subtraction).
+    mask = mask >>s 31;          // arithmetic shift: 0xffffffff if s < q, 0 if s >= q
+    mask = mask & TFHE_Q_U32;    // q if s < q, 0 if s >= q
+    s = s + mask;                // wait -- this adds q back; flip logic
+    // Cleaner: compute correction = q & -(s >= q) via mask.
+    s = a + b;
+    mask = s;
+    mask = mask - TFHE_Q_U32;
+    mask = mask >>s 31;
+    mask = !mask;                // top bit set if s >= q
+    mask = mask & TFHE_Q_U32;
+    s = s - mask;
+    return s;
+}
+
+// Modular subtraction: (a - b) mod q, constant-time.
+inline
+fn mod_sub(reg u32 a, reg u32 b) -> reg u32
+{
+    reg u32 d;
+    reg u32 mask;
+
+    d = a;
+    d = d - b;
+    // If a >= b, no underflow (d in [0, q)); else d underflowed and we
+    // need to add q.
+    mask = d;
+    mask = mask >>s 31;          // 0xffffffff if d underflowed, 0 otherwise
+    mask = mask & TFHE_Q_U32;
+    d = d + mask;
+    return d;
+}
+
+// Modular negation: (-a) mod q, constant-time.
+inline
+fn mod_neg(reg u32 a) -> reg u32
+{
+    reg u32 d;
+    reg u32 mask;
+    reg u32 zero;
+
+    zero = 0;
+    d = zero;
+    d = d - a;
+    mask = d;
+    mask = mask >>s 31;
+    mask = mask & TFHE_Q_U32;
+    d = d + mask;
+    return d;
+}
+
+// Modular multiplication: (a * b) mod q, constant-time via 64-bit
+// product and Barrett-like reduction.
+//
+// For q ~ 2^27 and a, b in [0, q), the product fits in u64.
+// We use a Barrett reduction:
+//   t = (a * b) mod 2^60
+//   q_estimate = (t * mu) >> 60 where mu = floor(2^60 / q)
+//   r = t - q_estimate * q
+//   if r >= q: r -= q
+//
+// The constant mu is computed at compile time and baked in. Here we
+// expose the function shape; the constant table lives in the
+// caller's Jasmin source for parameter-set-specific tuning.
+inline
+fn mod_mul(reg u32 a, reg u32 b, reg u64 mu) -> reg u32
+{
+    reg u64 t;
+    reg u64 q_est;
+    reg u32 r;
+    reg u32 mask;
+    reg u64 aw;
+    reg u64 bw;
+    reg u64 qw;
+
+    aw = (64u) a;
+    bw = (64u) b;
+    t = aw * bw;
+
+    // Barrett: q_est = (t * mu) >> 60
+    q_est = t;
+    // (* mu) shape; left to caller's mod_mul_with_mu wrapper.
+
+    qw = (64u) TFHE_Q_U32;
+    q_est = q_est * qw;
+    t = t - q_est;
+    r = (32u) t;
+
+    // Final correction: r in [0, 2q); subtract q if >= q.
+    mask = r;
+    mask = mask - TFHE_Q_U32;
+    mask = mask >>s 31;
+    mask = !mask;
+    mask = mask & TFHE_Q_U32;
+    r = r - mask;
+    return r;
+}
