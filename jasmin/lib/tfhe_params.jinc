@@ -1,0 +1,53 @@
+// Lux TFHE -- shared Jasmin parameters
+//
+// Resolves the per-parameter-set constants for the TFHE hot path:
+//   PN10QP27          (~128-bit security, N=1024)
+//   PN11QP54          (~128-bit precision, N=2048)
+//   PN9QP28_STD128    (OpenFHE STD128 compatible, N_LWE=512, N_BR=1024)
+//   PN9QP27_STD128Q   (OpenFHE STD128Q post-quantum, N_LWE=512, N_BR=1024)
+//
+// The Lux Go reference is in `~/work/lux/fhe/fhe.go` (Parameters and
+// ParametersLiteral). The C++ production reference is in
+// `~/work/lux/luxcpp/crypto/fhe/cpp/`. This Jasmin file is the
+// formosa-style high-assurance baseline; it commits to the
+// PN10QP27 parameter set (Lux's default) as the canonical Jasmin
+// instantiation. Other parameter sets reuse the same algorithm shape
+// with the per-set constants substituted.
+
+// LWE polynomial dimension (default PN10QP27).
+param int TFHE_N_LWE = 1024;
+
+// BR (blind rotation) polynomial dimension. For PN10QP27 this equals
+// N_LWE so no key switching across rings is needed.
+param int TFHE_N_BR  = 1024;
+
+// LWE ciphertext modulus (~2^27).
+param int TFHE_Q_LWE = 0x7fff801;
+
+// BR ciphertext modulus (same as Q_LWE for PN10QP27).
+param int TFHE_Q_BR  = 0x7fff801;
+
+// Base-two decomposition base log_b for the gadget decomposition
+// in the external product.
+param int TFHE_BASE_LOG = 7;
+
+// Number of decomposition levels.
+param int TFHE_LEVELS = 4;
+
+// Coefficient bit-width in the host language. 32 bits suffice for
+// values mod q (q < 2^32).
+param int TFHE_COEFF_BYTES = 4;
+
+// Per-ciphertext byte size (one polynomial slot per coefficient).
+param int TFHE_CT_LWE_BYTES = TFHE_N_LWE * TFHE_COEFF_BYTES;
+
+// External-product RGSW gadget shape: (2 * levels) RLWE rows.
+param int TFHE_GADGET_ROWS = 2 * TFHE_LEVELS;
+
+// Bootstrap key (BSK) byte size: N_LWE RGSW gadgets, each of size
+// GADGET_ROWS * N_BR * COEFF_BYTES.
+param int TFHE_BSK_BYTES = TFHE_N_LWE * TFHE_GADGET_ROWS * TFHE_N_BR * TFHE_COEFF_BYTES;
+
+// Key-switching key (KSK) byte size: N_BR rows, each of size
+// (LEVELS * N_LWE * COEFF_BYTES).
+param int TFHE_KSK_BYTES = TFHE_N_BR * TFHE_LEVELS * TFHE_N_LWE * TFHE_COEFF_BYTES;
