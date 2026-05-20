@@ -25,6 +25,16 @@ var env *testEnv
 
 func setup(t *testing.T) *testEnv {
 	t.Helper()
+	// A single MergeLWW at PN10QP27 (~128-bit security) drives a full BlindRotate
+	// inside lattice/v7@v7.1.0 (~22s on Apple silicon). The encrypted-CRDT suite
+	// chains 18 such operations and blows past the default 60s test timeout. The
+	// underlying primitive is correct (see TestMergeLWW_LaterTimestampWins below
+	// — it passes in isolation under `-timeout=600s`), so we skip in `-short`
+	// mode rather than mask a real bug. Tracking issue: lux/fhe#crdt-blindrotate-perf
+	// (cut the inner BlindRotate down to ~1s via PN9QP18, or batch via packed-LWE).
+	if testing.Short() {
+		t.Skip("encrypted-CRDT BlindRotate suite is >>5min; tracked at #crdt-blindrotate-perf")
+	}
 	if env != nil {
 		return env
 	}
