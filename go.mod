@@ -115,4 +115,4 @@ require (
 	modernc.org/sqlite v1.48.0 // indirect
 )
 
-replace github.com/luxfi/math => /Users/z/work/lux/math
+replace github.com/luxfi/math => ../math
