@@ -1,3 +1,5 @@
+//go:build demos
+
 // regulated-vault — Private app where operators can't see user data,
 // but regulators can force-decrypt via MPC threshold approval.
 //
