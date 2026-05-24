@@ -574,3 +574,20 @@ All code uses permissive licenses:
 | `core/kms/core/` | KMS core logic |
 | `go/tfhe/cmd/` | Go FHE server |
 | `ml/torus-ml/src/` | ML with FHE |
+
+## NTT (Go side, `ntt_simd.go` + `ntt_gpu.go`)
+
+`fhe.NTTEngine` wraps a cached `subring.SubRing` keyed by `(N, Q)`. Two API tiers:
+
+| Method | Path |
+|--------|------|
+| `NTTInPlace(coeffs)` / `INTTInPlace(coeffs)` | Single polynomial, CPU subring. |
+| `NTTBatch(polys) / INTTBatch(polys)` | Batch dispatch — `luxfi/lattice/v7/gpu` (Metal/CUDA) when `gpu.GPUAvailable()` AND the engine's `(N,Q)` passes byte-equality probe; otherwise per-poly CPU. |
+| `GPUNTTAvailable()` | Reports whether the GPU path serves this engine. |
+
+CGo is the only build-tag axis. The byte-equality probe runs once per `(N, Q)`
+and caches the result — a GPU context that disagrees with the CPU oracle is
+rejected (never silently dispatched).
+
+Tests: `ntt_gpu_test.go::TestNTTBatch_ByteEqualToInPlace`,
+`TestINTTBatch_RoundTrip`.
