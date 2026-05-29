@@ -1,83 +1,38 @@
-# fhEVM Workshop
+# Lux FHEVM Workshop
 
-Welcome to this workshop on building an encrypted ERC20 token!
+> **Status:** under construction. The previous workshop bundled
+> upstream tooling that is no longer part of the Lux stack
+> (`fhevmjs`, `fhevm-tfhe-cli`). The replacement uses the
+> **Torus** compiler and the Lux FHE Coprocessor and is being
+> ported as those land.
 
-See more of our examples at https://dapps.luxfhe.ai.
+## What this workshop will cover
 
-## Getting started
+Building an encrypted ERC-20 token end to end:
 
-Install LuxFHE Devnet in MetaMask:
+- Solidity contract using Lux FHE precompiles via `FHE.sol`
+- Off-chain compilation of the encrypted client with the Torus
+  framework (`github.com/luxfi/torus`)
+- Reencrypt-for-user EIP-712 flow using `eip712-reencrypt.sol`
+- Submission through the Lux FHE Coprocessor
+  (`github.com/luxfi/fhe-coprocessor`)
 
-- Network name: LuxFHE Devnet
+The Solidity sources in this directory (`erc20.sol`,
+`eip712-reencrypt.sol`) are stable and continue to be the canonical
+contract examples. Only the client tooling changed.
+
+## Environment (when the client tooling lands)
+
+Lux FHE Devnet in MetaMask:
+
+- Network name: Lux FHE Devnet
 - RPC URL: https://devnet.luxfhe.ai
 - Chain ID: 8009
 - Currency symbol: LUX
 - Block explorer: https://main.explorer.luxfhe.ai/
 
-## Encrypted ERC20
+## Tracking
 
-Set env variable `WORKSHOP_PRIVATE_KEY` to private key that was used to deploy the contract (as copied from MetaMask, i.e. without `0x` prefix):
-
-```
-export WORKSHOP_PRIVATE_KEY=<private key>
-```
-
-When a contract have been deployed to the devnet, the Python files can be used to interact with it by set env variable `CONTRACT` to the address (as copied from Remix) and saving the ABI to `abi.json`.
-
-### Nodejs with fhevmjs
-
-Go in `fhevmjs` directory and `npm install`. Be sure you set `WORKSHOP_PRIVATE_KEY` and `CONTRACT`
-
-Mint new tokens:
-
-```bash
-CONTRACT=<address> npm run mint 100
-```
-
-Get your current balance:
-
-```bash
-CONTRACT=<address> npm run balanceOf
-```
-
-Make a transfer:
-
-```bash
-CONTRACT=<address> npm run transfer 0x56c836D1d7c9f64b9654B433dCa16f1014429DC5 100
-```
-
-### Python
-
-Use Python3.10 or earlier:
-
-```
-python3.10 -m venv venv
-. ./venv/bin/activate
-pip install -r requirements.txt
-```
-
-For now we also need to installed the fhEVM cli:
-
-```
-git clone https://github.com/luxfhe-ai/fhevm-tfhe-cli
-cd fhevm-tfhe-cli
-cargo install --path .
-```
-
-Mint new tokens:
-
-```
-python mint.py --amount 100 --contract <address>
-```
-
-Get your current balance:
-
-```
-python get_balance.py --contract <address>
-```
-
-Make a transfer:
-
-```
-python transfer.py --amount 5 --to <address> --contract <address>
-```
+See the canonical naming and product map under
+`Lux FHE` / `Torus` (compiler / framework) — the workshop will
+follow that hierarchy.
