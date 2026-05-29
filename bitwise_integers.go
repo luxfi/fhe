@@ -33,6 +33,25 @@ func (bc *BitCiphertext) NumBits() int {
 	return bc.numBits
 }
 
+// Bits returns the per-bit ciphertexts. The returned slice aliases the
+// internal storage — callers must not mutate it. Exposed so threshold
+// decryption can iterate per-bit without round-tripping through
+// MarshalBinary; threshold-FHE operates one *Ciphertext at a time.
+func (bc *BitCiphertext) Bits() []*Ciphertext {
+	return bc.bits
+}
+
+// NewBitCiphertextFromBits constructs a BitCiphertext from a slice of
+// per-bit ciphertexts. Used by threshold decryption to rebuild a
+// BitCiphertext after operating on individual bits.
+func NewBitCiphertextFromBits(bits []*Ciphertext, t FheUintType) *BitCiphertext {
+	return &BitCiphertext{
+		bits:    bits,
+		numBits: len(bits),
+		fheType: t,
+	}
+}
+
 // WrapBoolCiphertext wraps a single bit ciphertext into a BitCiphertext of type FheBool
 func WrapBoolCiphertext(ct *Ciphertext) *BitCiphertext {
 	return &BitCiphertext{
