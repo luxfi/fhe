@@ -8,7 +8,7 @@ go get github.com/luxfi/fhe
 
 ## What This Is
 
-A from-scratch TFHE (Threshold Fully Homomorphic Encryption) implementation in Go. Not a wrapper around tfhe-rs, not a binding to Zama, not a port of OpenFHE. The core is built directly on `luxfi/lattice` (RLWE, RGSW, blind rotation) with NTT SIMD acceleration written in Go.
+A from-scratch TFHE (Threshold Fully Homomorphic Encryption) implementation in Go. Built directly on `luxfi/lattice` (RLWE, RGSW, blind rotation) with NTT SIMD acceleration written in Go. Native FHE — no external library dependency; the Lux stack is self-contained.
 
 This library encrypts individual bits, bootstraps after every gate, and composes gates into arbitrary boolean circuits including full integer arithmetic. It supports encrypted integer types from 4-bit to 256-bit (including `euint160` for Ethereum addresses and `euint256` for uint256).
 
@@ -166,7 +166,7 @@ go test ./...
 
 - [Lux TFHE](https://github.com/luxfi/papers/blob/main/lux-tfhe.pdf) -- TFHE construction and parameter analysis
 - [Lux FHE Smart Contracts](https://github.com/luxfi/papers/blob/main/lux-fhe-smart-contracts.pdf) -- encrypted EVM execution
-- [Lux FHE Benchmarks](https://github.com/luxfi/papers/blob/main/lux-fhe-benchmarks.pdf) -- gate timing and comparison with OpenFHE/tfhe-rs
+- [Lux FHE Benchmarks](https://github.com/luxfi/papers/blob/main/lux-fhe-benchmarks.pdf) -- gate timing on Apple M2 / EPYC / H100
 - [Lux FHE API](https://github.com/luxfi/papers/blob/main/lux-fhe-api.pdf) -- precompile interface specification
 - [Lux FHE MPC Hybrid](https://github.com/luxfi/papers/blob/main/lux-fhe-mpc-hybrid.pdf) -- threshold decryption via MPC
 - [Lux NTT Transform](https://github.com/luxfi/papers/blob/main/lux-ntt-transform.pdf) -- SIMD NTT optimization
@@ -175,7 +175,7 @@ go test ./...
 
 - [`luxfi/lattice`](https://github.com/luxfi/lattice) -- RLWE, RGSW, ring operations, blind rotation (the actual lattice math)
 
-No dependency on tfhe-rs, Zama, OpenFHE, SEAL, HElib, or any other FHE library.
+Self-contained — `luxfi/lattice` is the only external dependency, and it lives in the same ecosystem.
 
 ## License
 
