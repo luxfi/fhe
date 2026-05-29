@@ -138,6 +138,20 @@ func (p Parameters) NBR() int {
 	return p.paramsBR.N()
 }
 
+// ParamsLWE returns the underlying rlwe.Parameters used for LWE bit ciphertexts.
+// Exposed so out-of-tree consumers (notably pkg/threshold) can drive lattice
+// primitives directly against the same parameter set used by Encryptor /
+// Decryptor — no duplicate parameter construction, no ad-hoc Q recomputation.
+func (p Parameters) ParamsLWE() rlwe.Parameters {
+	return p.paramsLWE
+}
+
+// ParamsBR returns the underlying rlwe.Parameters used for blind-rotation /
+// bootstrapping. Exposed for the same reason as ParamsLWE.
+func (p Parameters) ParamsBR() rlwe.Parameters {
+	return p.paramsBR
+}
+
 // QLWE returns the LWE modulus
 func (p Parameters) QLWE() uint64 {
 	return p.paramsLWE.Q()[0]
