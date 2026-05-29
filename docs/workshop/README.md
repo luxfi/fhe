@@ -12,7 +12,7 @@ Building an encrypted ERC-20 token end to end:
 
 - Solidity contract using Lux FHE precompiles via `FHE.sol`
 - Off-chain compilation of the encrypted client with the Torus
-  framework (`github.com/luxfi/torus`)
+  framework (`github.com/luxfhe/torus`)
 - Reencrypt-for-user EIP-712 flow using `eip712-reencrypt.sol`
 - Submission through the Lux FHE Coprocessor
   (`github.com/luxfi/fhe-coprocessor`)
