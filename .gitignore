@@ -71,3 +71,4 @@ playwright-report/
 test-results/
 *.log
 tmp/
+target/
