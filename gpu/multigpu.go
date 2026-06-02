@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/mlx"
 	"github.com/luxfi/fhe"
+	"github.com/luxfi/mlx"
 )
 
 // MultiGPUConfig configures the multi-GPU engine
@@ -41,7 +41,7 @@ type MultiGPUConfig struct {
 // DefaultMultiGPUConfig returns sensible defaults
 func DefaultMultiGPUConfig() MultiGPUConfig {
 	return MultiGPUConfig{
-		FHEConfig:         DefaultConfig(),
+		FHEConfig:          DefaultConfig(),
 		NumGPUs:            0, // Use all
 		BSKCacheMemory:     0, // Auto
 		Scheduler:          DefaultSchedulerConfig(),

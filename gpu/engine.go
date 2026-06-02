@@ -14,8 +14,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/luxfi/mlx"
 	"github.com/luxfi/fhe"
+	"github.com/luxfi/mlx"
 )
 
 // Config holds GPU FHE engine configuration

@@ -99,7 +99,7 @@ func (rc *RadixCiphertext) NumBits() int {
 
 // IntegerParams holds parameters for radix integer operations
 type IntegerParams struct {
-	fheParams  Parameters
+	fheParams   Parameters
 	shortParams *ShortIntParams
 	blockBits   int // Bits per radix block (2 or 4)
 }
@@ -116,7 +116,7 @@ func NewIntegerParams(params Parameters, blockBits int) (*IntegerParams, error) 
 	}
 
 	return &IntegerParams{
-		fheParams:  params,
+		fheParams:   params,
 		shortParams: shortParams,
 		blockBits:   blockBits,
 	}, nil
