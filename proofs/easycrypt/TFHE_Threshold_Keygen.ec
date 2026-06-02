@@ -202,15 +202,16 @@ proof.
         let trip = nth witness T (i - 1) in
         trip.`2) Q =
     map (honest_share p sk) Q.
-  + by apply eq_in_map => i Hi /=; apply Hshares.
-  pose ek := (dkg_aggregate p T).`2.
-  have Hek : honest_keypair sk ek.
-  + (* Apply threshold_bsk_functional and rewrite using Hshares. *)
-    have := threshold_bsk_functional p T Q HhonestDKG HQuniq HQsize.
-    rewrite -HsharesEq.
-    have := shamir_inverse_eval p sk Q HQuniq HQsize.
-    move => _ Hkey.
-    by have := Hkey.
+  + apply eq_in_map => i Hi /=.
+    by have := Hshares i Hi => /=.
+  have Hek : honest_keypair sk (dkg_aggregate p T).`2.
+  + (* threshold_bsk_functional gives honest_keypair of the reconstructed
+       secret; rewrite the share-map (HsharesEq) and the Shamir inverse
+       (shamir_inverse_eval) to collapse the reconstructed secret to sk. *)
+    have Hbsk := threshold_bsk_functional p T Q HhonestDKG HQuniq HQsize.
+    move: Hbsk; rewrite HsharesEq (shamir_inverse_eval p sk Q HQuniq HQsize).
+    by case: (dkg_aggregate p T).
+  move: Hek; case: (dkg_aggregate p T) => s ek /= Hek.
   by apply tfhe_pbs_correctness.
 qed.
 
