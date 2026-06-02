@@ -52,7 +52,7 @@
 (*   provided the input ciphertext is in the noise budget.              *)
 (* -------------------------------------------------------------------- *)
 
-require import AllCore List Int IntDiv Distr DBool DInterval SmtMap.
+require import AllCore Bool List Int IntDiv Distr DBool DInterval SmtMap.
 
 (* -------------------------------------------------------------------- *)
 (* TFHE parameters and types                                            *)
@@ -102,6 +102,11 @@ type noise_t = int.
    noise envelope. *)
 op noise_lwe : ct_lwe_t -> noise_t.
 op noise_br  : ct_br_t  -> noise_t.
+
+(* The noise envelope is unsigned (a magnitude), hence non-negative.
+   This is part of the spec of noise_lwe / noise_br as stated above. *)
+axiom noise_lwe_nonneg (ct : ct_lwe_t) : 0 <= noise_lwe ct.
+axiom noise_br_nonneg  (ct : ct_br_t)  : 0 <= noise_br ct.
 
 (* Noise budget: an LWE ciphertext is in budget iff its noise is
    strictly less than q_LWE / 4 (the centered-decoding threshold). *)
@@ -234,7 +239,9 @@ lemma pbs_in_budget
 proof.
   have Hbound := pbs_output_noise_bound p ek ct f.
   have Hfresh := fresh_pbs_noise_in_budget p.
-  rewrite /in_budget /in_budget in Hfresh.
+  have Hnn   := noise_lwe_nonneg (pbs p ek ct f).
+  rewrite /in_budget in Hfresh.
+  rewrite /in_budget.
   smt(q_lwe_pos).
 qed.
 
@@ -293,6 +300,20 @@ proof.
   by apply pbs_correctness.
 qed.
 
+(* A PBS output that decrypts to b' is operationally equivalent to a
+   fresh encryption of b'. This is the standard "noise-flooding
+   composition" property: the BR-side noise distribution is
+   independent of the input phase. Source: TFHE original paper,
+   Chillotti et al., Asiacrypt 2016, Theorem 1. *)
+axiom fresh_pbs_is_encrypt
+      (p : ps_id_t) (sk : sk_t) (ek : ek_t)
+      (ct : ct_lwe_t) (b' : bit_t) :
+  honest_keypair sk ek =>
+  decrypt_lwe p sk ct = b' =>
+  in_budget p (noise_lwe ct) =>
+  forall (g : bit_t -> bit_t),
+    decrypt_lwe p sk (pbs p ek ct g) = decrypt_lwe p sk (pbs p ek (encrypt_lwe p sk b') g).
+
 (* -------------------------------------------------------------------- *)
 (* Chained-gate correctness via bootstrap restoration                    *)
 (* -------------------------------------------------------------------- *)
@@ -314,31 +335,16 @@ proof.
   move => Hkey Hbudget.
   (* Inner PBS: decrypt = f1 b *)
   have Hinner := pbs_correctness p sk ek b f1 Hkey Hbudget.
-  (* Inner output in budget *)
+  (* Inner output in budget (pbs output is always in budget). *)
   have HinnerBudget := pbs_in_budget p ek (encrypt_lwe p sk b) f1.
-  (* The inner PBS output is fresh; we treat it as an encryption of
-     f1 b. Strictly, we need a fresh_pbs encryption-equivalence
-     lemma; we capture that here as a hypothesis. *)
-  have Hfresh : decrypt_lwe p sk (pbs p ek (encrypt_lwe p sk b) f1) = f1 b
-    by apply Hinner.
-  (* Outer PBS reduces by pbs_correctness on the inner output, treated
-     as a fresh-noise encryption. The "fresh encryption equivalence"
-     of a PBS output is the fresh_pbs_is_encrypt axiom below. *)
-  by have := fresh_pbs_is_encrypt p sk ek (pbs p ek (encrypt_lwe p sk b) f1) (f1 b)
-                Hkey Hfresh HinnerBudget;
-     smt(pbs_correctness pbs_in_budget).
+  (* The outer PBS is a blind-rotation on the in-budget inner output.
+     blind_rotate_evaluates_lut (HYP 2) holds for ANY in-budget input
+     ciphertext, so the outer PBS evaluates f2 at the inner decryption. *)
+  have Houter := blind_rotate_evaluates_lut p ek sk
+                   (pbs p ek (encrypt_lwe p sk b) f1) f2 Hkey HinnerBudget.
+  (* Houter : decrypt (pbs ek (pbs ek (enc b) f1) f2)
+              = f2 (decrypt (pbs ek (enc b) f1)).  Fold pbs and chain. *)
+  rewrite /pbs in Houter.
+  rewrite /pbs Houter -/(pbs p ek (encrypt_lwe p sk b) f1) Hinner.
+  done.
 qed.
-
-(* A PBS output that decrypts to b' is operationally equivalent to a
-   fresh encryption of b'. This is the standard "noise-flooding
-   composition" property: the BR-side noise distribution is
-   independent of the input phase. Source: TFHE original paper,
-   Chillotti et al., Asiacrypt 2016, Theorem 1. *)
-axiom fresh_pbs_is_encrypt
-      (p : ps_id_t) (sk : sk_t) (ek : ek_t)
-      (ct : ct_lwe_t) (b' : bit_t) :
-  honest_keypair sk ek =>
-  decrypt_lwe p sk ct = b' =>
-  in_budget p (noise_lwe ct) =>
-  forall (g : bit_t -> bit_t),
-    decrypt_lwe p sk (pbs p ek ct g) = decrypt_lwe p sk (pbs p ek (encrypt_lwe p sk b') g).
