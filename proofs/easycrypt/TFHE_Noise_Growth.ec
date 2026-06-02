@@ -53,6 +53,13 @@ axiom q_lwe_pos    (p : ps_id_t) : 0 < q_lwe p.
 axiom n_lwe_pos    (p : ps_id_t) : 0 < n_lwe p.
 axiom sigma_e_pos  (p : ps_id_t) : 0 < sigma_e p.
 
+(* Decoding-window well-formedness: the centered-decoding threshold
+   q_LWE/4 must be a non-trivial window, i.e. q_LWE >= 4. This holds
+   for every production parameter set (q_LWE ~ 2^27..2^54); it is the
+   minimal bound under which the q_LWE/8 PBS slack sits strictly below
+   the q_LWE/4 decoding threshold. *)
+axiom q_lwe_ge4    (p : ps_id_t) : 4 <= q_lwe p.
+
 (* -------------------------------------------------------------------- *)
 (* Per-operation noise bounds                                            *)
 (* -------------------------------------------------------------------- *)
@@ -108,7 +115,7 @@ lemma pbs_output_in_budget
 proof.
   have H1 := pbs_noise_bound p ek ct f.
   have H2 := pbs_slack_bound p.
-  have H3 := q_lwe_pos p.
+  have H3 := q_lwe_ge4 p.
   smt().
 qed.
 
@@ -140,13 +147,12 @@ lemma pbs_chain_in_budget
   fs <> [] =>
   noise_lwe (pbs_chain p ek ct fs) < q_lwe p %/ 4.
 proof.
-  case fs => [//= | f0 fs0 _].
-  rewrite /pbs_chain /=.
-  elim/last_ind: fs0 (pbs p ek ct f0) => /=.
-  + by move => ct0; apply pbs_output_in_budget.
-  + move => fs1 f1 IH ct0 /=.
-    rewrite foldl_rcons.
-    by apply pbs_output_in_budget.
+  (* A non-empty LUT list ends in a final PBS, whose output noise is in
+     budget by pbs_output_in_budget, irrespective of the accumulated
+     inner ciphertext. Expose the last element via last_ind. *)
+  elim/last_ind: fs => [// | fs0 fl _ _].
+  rewrite /pbs_chain foldl_rcons.
+  by apply pbs_output_in_budget.
 qed.
 
 (* -------------------------------------------------------------------- *)
