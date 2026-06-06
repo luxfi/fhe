@@ -7,7 +7,7 @@
 // substrate at github.com/luxfi/math/ntt/subring (the Lattigo-derived
 // Montgomery negacyclic NTT body, mirrored on the C++ side by
 // crypto/fhe/cpp/backends/cpu/ntt_cpu.cpp via
-// lux::crypto::ringtail::lattice_ring::NTTStandard).
+// lux::crypto::corona::lattice_ring::NTTStandard).
 //
 // The previous standalone cyclic NTT implementation has been removed;
 // there were zero production callers of NTTEngine (only ntt_simd_test.go).
