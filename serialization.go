@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/luxfi/lattice/v7/core/rgsw/blindrot"
 	"github.com/luxfi/lattice/v7/core/rlwe"
 	"github.com/luxfi/lattice/v7/ring"
 )
@@ -108,63 +109,153 @@ type BootstrapKeyData struct {
 	TestPolyNOR  []byte
 }
 
-// MarshalBinary serializes the bootstrap key to binary format
+// bskTestPolyOrder is the canonical wire order for the bootstrap key's test
+// polynomials. Marshal and Unmarshal iterate it identically so the set stays in
+// lock-step; adding a gate means appending here (and never reordering).
+func (bsk *BootstrapKey) bskTestPolyPtrs() []**ring.Poly {
+	return []**ring.Poly{
+		&bsk.TestPolyAND, &bsk.TestPolyOR, &bsk.TestPolyXOR, &bsk.TestPolyNAND,
+		&bsk.TestPolyNOR, &bsk.TestPolyXNOR, &bsk.TestPolyID, &bsk.TestPolyMAJORITY,
+		&bsk.TestPolyCMPCOMBINE,
+	}
+}
+
+// MarshalBinary serializes the bootstrap key to binary format. It serializes
+// every field required to bootstrap from the deserialized key: BRK, the
+// key-switching key KSK, and all test polynomials.
 func (bsk *BootstrapKey) MarshalBinary() ([]byte, error) {
 	var buf bytes.Buffer
 
-	// Serialize BRK using gob
+	// Serialize BRK as its concrete type. BRK is the
+	// blindrot.BlindRotationEvaluationKeySet interface; gob cannot round-trip a
+	// value encoded through an interface back into an interface field without
+	// matching concrete registration. Encoding/decoding the concrete
+	// MemBlindRotationEvaluationKeySet on both sides is symmetric and avoids
+	// that asymmetry. GenEvaluationKeyNew always produces this concrete type.
+	concreteBRK, ok := bsk.BRK.(blindrot.MemBlindRotationEvaluationKeySet)
+	if !ok {
+		return nil, fmt.Errorf("serialize BRK: unsupported concrete type %T", bsk.BRK)
+	}
 	enc := gob.NewEncoder(&buf)
-	if err := enc.Encode(bsk.BRK); err != nil {
+	if err := enc.Encode(concreteBRK); err != nil {
 		return nil, fmt.Errorf("serialize BRK: %w", err)
 	}
 
-	// Serialize test polynomials
-	if err := serializePoly(&buf, bsk.TestPolyAND); err != nil {
-		return nil, fmt.Errorf("serialize TestPolyAND: %w", err)
+	// Serialize KSK (key-switching key) with a presence flag. Without it the
+	// deserialized key cannot perform sample extraction / bootstrapping.
+	if err := serializeEvalKey(&buf, bsk.KSK); err != nil {
+		return nil, fmt.Errorf("serialize KSK: %w", err)
 	}
-	if err := serializePoly(&buf, bsk.TestPolyOR); err != nil {
-		return nil, fmt.Errorf("serialize TestPolyOR: %w", err)
-	}
-	if err := serializePoly(&buf, bsk.TestPolyNAND); err != nil {
-		return nil, fmt.Errorf("serialize TestPolyNAND: %w", err)
-	}
-	if err := serializePoly(&buf, bsk.TestPolyNOR); err != nil {
-		return nil, fmt.Errorf("serialize TestPolyNOR: %w", err)
+
+	// Serialize all test polynomials in canonical order, each with a presence
+	// flag (some gates may be unset depending on how the key was generated).
+	for i, p := range bsk.bskTestPolyPtrs() {
+		if err := serializeOptionalPoly(&buf, *p); err != nil {
+			return nil, fmt.Errorf("serialize test poly %d: %w", i, err)
+		}
 	}
 
 	return buf.Bytes(), nil
 }
 
-// UnmarshalBinary deserializes the bootstrap key from binary format
+// UnmarshalBinary deserializes the bootstrap key from binary format.
 func (bsk *BootstrapKey) UnmarshalBinary(data []byte) error {
 	buf := bytes.NewReader(data)
 
-	// Deserialize BRK
+	// Deserialize BRK into the concrete type, then store it in the interface
+	// field (symmetric with MarshalBinary).
+	var concreteBRK blindrot.MemBlindRotationEvaluationKeySet
 	dec := gob.NewDecoder(buf)
-	if err := dec.Decode(&bsk.BRK); err != nil {
+	if err := dec.Decode(&concreteBRK); err != nil {
 		return fmt.Errorf("deserialize BRK: %w", err)
 	}
+	bsk.BRK = concreteBRK
 
-	// Deserialize test polynomials
-	var err error
-	bsk.TestPolyAND, err = deserializePoly(buf)
+	// Deserialize KSK.
+	ksk, err := deserializeEvalKey(buf)
 	if err != nil {
-		return fmt.Errorf("deserialize TestPolyAND: %w", err)
+		return fmt.Errorf("deserialize KSK: %w", err)
 	}
-	bsk.TestPolyOR, err = deserializePoly(buf)
-	if err != nil {
-		return fmt.Errorf("deserialize TestPolyOR: %w", err)
-	}
-	bsk.TestPolyNAND, err = deserializePoly(buf)
-	if err != nil {
-		return fmt.Errorf("deserialize TestPolyNAND: %w", err)
-	}
-	bsk.TestPolyNOR, err = deserializePoly(buf)
-	if err != nil {
-		return fmt.Errorf("deserialize TestPolyNOR: %w", err)
+	bsk.KSK = ksk
+
+	// Deserialize all test polynomials in the same canonical order.
+	for i, p := range bsk.bskTestPolyPtrs() {
+		poly, err := deserializeOptionalPoly(buf)
+		if err != nil {
+			return fmt.Errorf("deserialize test poly %d: %w", i, err)
+		}
+		*p = poly
 	}
 
 	return nil
+}
+
+// serializeEvalKey writes an rlwe.EvaluationKey with a presence flag and a
+// length prefix, reusing the key's own MarshalBinary.
+func serializeEvalKey(w io.Writer, ek *rlwe.EvaluationKey) error {
+	if ek == nil {
+		return binary.Write(w, binary.LittleEndian, uint8(0))
+	}
+	if err := binary.Write(w, binary.LittleEndian, uint8(1)); err != nil {
+		return err
+	}
+	data, err := ek.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	if err := binary.Write(w, binary.LittleEndian, uint32(len(data))); err != nil {
+		return err
+	}
+	_, err = w.Write(data)
+	return err
+}
+
+// deserializeEvalKey reads an rlwe.EvaluationKey written by serializeEvalKey.
+func deserializeEvalKey(r io.Reader) (*rlwe.EvaluationKey, error) {
+	var present uint8
+	if err := binary.Read(r, binary.LittleEndian, &present); err != nil {
+		return nil, err
+	}
+	if present == 0 {
+		return nil, nil
+	}
+	var n uint32
+	if err := binary.Read(r, binary.LittleEndian, &n); err != nil {
+		return nil, err
+	}
+	data := make([]byte, n)
+	if _, err := io.ReadFull(r, data); err != nil {
+		return nil, err
+	}
+	ek := new(rlwe.EvaluationKey)
+	if err := ek.UnmarshalBinary(data); err != nil {
+		return nil, err
+	}
+	return ek, nil
+}
+
+// serializeOptionalPoly writes a *ring.Poly preceded by a presence flag so nil
+// polynomials round-trip as nil rather than panicking in serializePoly.
+func serializeOptionalPoly(w io.Writer, poly *ring.Poly) error {
+	if poly == nil {
+		return binary.Write(w, binary.LittleEndian, uint8(0))
+	}
+	if err := binary.Write(w, binary.LittleEndian, uint8(1)); err != nil {
+		return err
+	}
+	return serializePoly(w, poly)
+}
+
+// deserializeOptionalPoly reads a *ring.Poly written by serializeOptionalPoly.
+func deserializeOptionalPoly(r io.Reader) (*ring.Poly, error) {
+	var present uint8
+	if err := binary.Read(r, binary.LittleEndian, &present); err != nil {
+		return nil, err
+	}
+	if present == 0 {
+		return nil, nil
+	}
+	return deserializePoly(r)
 }
 
 func serializePoly(w io.Writer, poly *ring.Poly) error {
@@ -231,6 +322,127 @@ func (ct *Ciphertext) UnmarshalBinary(data []byte) error {
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	ct.Ciphertext = new(rlwe.Ciphertext)
 	return dec.Decode(ct.Ciphertext)
+}
+
+// ========== RadixCiphertext Serialization ==========
+
+// radixSerializeVersion tags the RadixCiphertext wire format so the layout can
+// evolve without silently misreading older blobs.
+const radixSerializeVersion uint8 = 1
+
+// MarshalBinary serializes a RadixCiphertext to binary format.
+//
+// Layout: version | fheType | blockBits(int32) | numBlocks(int32) | blocks...
+// Each block is: msgBits(int32) | msgSpace(int32) | len(int32) | gob(rlwe.Ciphertext).
+// The per-block gob payload reuses the Ciphertext wrapper so the radix format
+// stays in lock-step with single-ciphertext serialization.
+func (rc *RadixCiphertext) MarshalBinary() ([]byte, error) {
+	var buf bytes.Buffer
+
+	if err := buf.WriteByte(radixSerializeVersion); err != nil {
+		return nil, err
+	}
+	if err := buf.WriteByte(uint8(rc.fheType)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(&buf, binary.LittleEndian, int32(rc.blockBits)); err != nil {
+		return nil, err
+	}
+	if err := binary.Write(&buf, binary.LittleEndian, int32(len(rc.blocks))); err != nil {
+		return nil, err
+	}
+
+	for i, block := range rc.blocks {
+		if block == nil || block.ct == nil {
+			return nil, fmt.Errorf("radix block %d: nil ciphertext", i)
+		}
+		if err := binary.Write(&buf, binary.LittleEndian, int32(block.msgBits)); err != nil {
+			return nil, err
+		}
+		if err := binary.Write(&buf, binary.LittleEndian, int32(block.msgSpace)); err != nil {
+			return nil, err
+		}
+
+		blockData, err := (&Ciphertext{Ciphertext: block.ct}).MarshalBinary()
+		if err != nil {
+			return nil, fmt.Errorf("radix block %d: %w", i, err)
+		}
+		if err := binary.Write(&buf, binary.LittleEndian, int32(len(blockData))); err != nil {
+			return nil, err
+		}
+		if _, err := buf.Write(blockData); err != nil {
+			return nil, err
+		}
+	}
+
+	return buf.Bytes(), nil
+}
+
+// UnmarshalBinary deserializes a RadixCiphertext from binary format produced by
+// MarshalBinary. numBlocks is recovered from the wire data, not assumed.
+func (rc *RadixCiphertext) UnmarshalBinary(data []byte) error {
+	buf := bytes.NewReader(data)
+
+	version, err := buf.ReadByte()
+	if err != nil {
+		return err
+	}
+	if version != radixSerializeVersion {
+		return fmt.Errorf("radix ciphertext: unsupported version %d", version)
+	}
+
+	fheType, err := buf.ReadByte()
+	if err != nil {
+		return err
+	}
+	rc.fheType = FheUintType(fheType)
+
+	var blockBits, numBlocks int32
+	if err := binary.Read(buf, binary.LittleEndian, &blockBits); err != nil {
+		return err
+	}
+	if err := binary.Read(buf, binary.LittleEndian, &numBlocks); err != nil {
+		return err
+	}
+	if numBlocks < 0 {
+		return fmt.Errorf("radix ciphertext: invalid block count %d", numBlocks)
+	}
+	rc.blockBits = int(blockBits)
+	rc.numBlocks = int(numBlocks)
+
+	rc.blocks = make([]*ShortInt, numBlocks)
+	for i := int32(0); i < numBlocks; i++ {
+		var msgBits, msgSpace, blockLen int32
+		if err := binary.Read(buf, binary.LittleEndian, &msgBits); err != nil {
+			return err
+		}
+		if err := binary.Read(buf, binary.LittleEndian, &msgSpace); err != nil {
+			return err
+		}
+		if err := binary.Read(buf, binary.LittleEndian, &blockLen); err != nil {
+			return err
+		}
+		if blockLen < 0 {
+			return fmt.Errorf("radix block %d: invalid length %d", i, blockLen)
+		}
+
+		blockData := make([]byte, blockLen)
+		if _, err := io.ReadFull(buf, blockData); err != nil {
+			return err
+		}
+
+		wrapped := new(Ciphertext)
+		if err := wrapped.UnmarshalBinary(blockData); err != nil {
+			return fmt.Errorf("radix block %d: %w", i, err)
+		}
+		rc.blocks[i] = &ShortInt{
+			ct:       wrapped.Ciphertext,
+			msgBits:  int(msgBits),
+			msgSpace: int(msgSpace),
+		}
+	}
+
+	return nil
 }
 
 // ========== BitCiphertext Serialization ==========
