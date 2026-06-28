@@ -40,9 +40,20 @@ type KeyGenResult struct {
 	Shares       []*KeyShare // One per party
 }
 
-// GenerateSharedKey performs distributed key generation.
-// In a real implementation, this would be done via MPC.
-// For now, we generate keys and split them using LSSS.
+// GenerateSharedKey is a TRUSTED-DEALER key-COMMITMENT facility, NOT the
+// threshold-FHE key generator. It generates a keypair in one process and
+// large-prime Shamir-splits the SHA-256 HASH of each secret-key component
+// (hashToFieldElement) — i.e. it shares a COMMITMENT to the key, for verifiable-
+// secret-sharing / dealer-equivocation auditing. The resulting KeyShare values
+// are shares of a hash and CANNOT perform threshold decryption.
+//
+// For the trustless threshold-FHE lane use DealerlessKeyGen (dealerless_dkg.go),
+// which is dealerless (no party ever holds the FHE secret key) and produces
+// decrypt-capable LWEShare values consumed by PartialDecryptLWE / CombineLWE. See
+// the package doc for the canonical flow.
+//
+// Deprecated: not part of the threshold-decrypt path; retained only for the
+// commitment-VSS use case.
 func GenerateSharedKey(params fhe.Parameters, threshold, total int, sessionID string) (*KeyGenResult, error) {
 	if threshold > total {
 		return nil, fmt.Errorf("threshold %d exceeds total %d", threshold, total)
