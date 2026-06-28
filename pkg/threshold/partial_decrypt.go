@@ -241,6 +241,12 @@ type LWEPartialDecryption struct {
 // ShareLWESecretKey Shamir-splits the LWE secret key coefficient-by-
 // coefficient over Z_q where q is the LWE modulus.
 //
+// TRUSTED-DEALER. This takes a WHOLE secret key, so the caller momentarily holds
+// the full FHE secret — a single point of compromise. It is retained as a
+// test/KAT oracle for the LWEShare type; the trustless PRODUCTION key generation
+// is DealerlessKeyGen (dealerless_dkg.go), where no party ever holds the secret.
+// Both produce the same LWEShare via the same dealing helpers (dealCoeffSubShares).
+//
 // Pipeline:
 //
 //  1. Extract the secret-key polynomial from NTT+Montgomery form back to
