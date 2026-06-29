@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="fhe" width="880"></p>
+
 # Lux FHE
 
 Fully homomorphic encryption library for computing on encrypted data -- original Go implementation built on lattice-based cryptography.
