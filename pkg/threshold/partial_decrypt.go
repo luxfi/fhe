@@ -61,7 +61,6 @@
 package threshold
 
 import (
-	"crypto/rand"
 	"fmt"
 	"math/big"
 
@@ -242,6 +241,12 @@ type LWEPartialDecryption struct {
 // ShareLWESecretKey Shamir-splits the LWE secret key coefficient-by-
 // coefficient over Z_q where q is the LWE modulus.
 //
+// TRUSTED-DEALER. This takes a WHOLE secret key, so the caller momentarily holds
+// the full FHE secret — a single point of compromise. It is retained as a
+// test/KAT oracle for the LWEShare type; the trustless PRODUCTION key generation
+// is DealerlessKeyGen (dealerless_dkg.go), where no party ever holds the secret.
+// Both produce the same LWEShare via the same dealing helpers (dealCoeffSubShares).
+//
 // Pipeline:
 //
 //  1. Extract the secret-key polynomial from NTT+Montgomery form back to
@@ -267,57 +272,38 @@ func ShareLWESecretKey(skLWE *rlwe.SecretKey, params rlwe.Parameters, threshold,
 	if uint64(total) >= q {
 		return nil, fmt.Errorf("threshold/lwe: total %d exceeds LWE modulus %d", total, q)
 	}
-	ringQ := params.RingQ()
-	N := ringQ.N()
 
-	// 1) Extract the secret key to standard coefficient form.
-	//    skLWE.Value.Q is NTT + Montgomery; mirror genSecretKeyFromSampler
-	//    in reverse: first IMForm then INTT.
-	skStd := ringQ.NewPoly()
-	ringQ.IMForm(skLWE.Value.Q, skStd)
-	ringQ.INTT(skStd, skStd)
-	// skStd.Coeffs[0] now holds the standard coefficients in [0, q).
+	// 1) Extract the secret key to standard coefficient form. (Shared helper
+	//    extractStdCoeffs mirrors genSecretKeyFromSampler in reverse: IMForm
+	//    then INTT, returning a fresh copy and zeroing its scratch.)
+	stdCoeffs := extractStdCoeffs(params, skLWE)
 
-	// 2) Share s itself (not Δ·s). The Bendlin-Damgård trick is that
-	//    the *integer* Lagrange numerators Λ_j = Δ · λ_j satisfy
-	//    Σ_j Λ_j · f(j) = Δ · f(0) by linearity; combine therefore
-	//    yields Δ · s without any pre-scaling of the secret. The
-	//    smudging noise is the only term that picks up a Λ-factor in
-	//    magnitude, and we calibrate σ accordingly (see SmudgingSigma).
-	qBig := new(big.Int).SetUint64(q)
+	// 2) Share s itself (not Δ·s) via the SAME coefficient-wise dealing used by
+	//    the dealerless DKG (dealCoeffSubShares). The Bendlin-Damgård trick is
+	//    that the *integer* Lagrange numerators Λ_j = Δ · λ_j satisfy
+	//    Σ_j Λ_j · f(j) = Δ · f(0) by linearity; combine therefore yields Δ · s
+	//    without any pre-scaling of the secret. The smudging noise is the only
+	//    term that picks up a Λ-factor in magnitude (see SmudgingSigma).
+	//
+	//    The ONLY difference from the dealerless path: here a single trusted
+	//    dealer holds the whole skLWE and deals it; in DealerlessKeyGen each
+	//    party deals only its own contribution and the shares are summed. The
+	//    dealing math is identical — hence shared — but the trust model is not.
+	sub, err := dealCoeffSubShares(stdCoeffs, q, threshold, total)
+	zeroU64(stdCoeffs)
+	if err != nil {
+		return nil, err
+	}
 
-	// 3) For each of the N coefficients, generate a random degree-(t-1)
-	//    polynomial whose constant term is s[i] mod q, then evaluate
-	//    at x = 1..total.
 	shares := make([]LWEShare, total)
 	for j := 0; j < total; j++ {
 		shares[j] = LWEShare{
 			Index:  j + 1,
-			Coeffs: make([]uint64, N),
+			Coeffs: sub[j],
 			Q:      q,
 			Total:  total,
 		}
 	}
-
-	for i := 0; i < N; i++ {
-		coeffs := make([]*big.Int, threshold)
-		coeffs[0] = new(big.Int).SetUint64(skStd.Coeffs[0][i])
-		for k := 1; k < threshold; k++ {
-			r, err := rand.Int(rand.Reader, qBig)
-			if err != nil {
-				return nil, fmt.Errorf("threshold/lwe: random coeff: %w", err)
-			}
-			coeffs[k] = r
-		}
-		for j := 0; j < total; j++ {
-			x := new(big.Int).SetInt64(int64(j + 1))
-			shares[j].Coeffs[i] = evalPolyModQ(coeffs, x, qBig)
-		}
-	}
-
-	// Zero the local standard-form copy of the secret. The caller still
-	// owns skLWE — they may zero or keep it as the dealer's choice.
-	skStd.Zero()
 
 	return shares, nil
 }
