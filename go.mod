@@ -4,11 +4,11 @@ go 1.26.4
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/luxfi/database v1.19.3
+	github.com/luxfi/database v1.21.1
 	github.com/luxfi/lattice/v7 v7.1.0
-	github.com/luxfi/math v1.4.1
+	github.com/luxfi/math v1.5.1
 	github.com/luxfi/mdns v0.1.0
-	github.com/luxfi/metric v1.5.1
+	github.com/luxfi/metric v1.8.1
 	github.com/luxfi/pq v1.0.3
 	github.com/spf13/cobra v1.10.2
 	github.com/urfave/cli/v3 v3.6.2
@@ -57,11 +57,12 @@ require (
 	github.com/klauspost/crc32 v1.3.0 // indirect
 	github.com/luxfi/accel v1.1.2 // indirect
 	github.com/luxfi/age v1.5.1 // indirect
-	github.com/luxfi/cache v1.2.1 // indirect
-	github.com/luxfi/compress v0.0.5 // indirect
-	github.com/luxfi/concurrent v0.0.3 // indirect
-	github.com/luxfi/crypto v1.19.10 // indirect
-	github.com/luxfi/ids v1.2.9 // indirect
+	github.com/luxfi/cache v1.3.1 // indirect
+	github.com/luxfi/compress v0.1.1 // indirect
+	github.com/luxfi/concurrent v0.1.1 // indirect
+	github.com/luxfi/crypto v1.20.2 // indirect
+	github.com/luxfi/geth v1.20.1
+	github.com/luxfi/ids v1.3.2 // indirect
 	github.com/luxfi/log v1.4.3 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
