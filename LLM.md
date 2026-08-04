@@ -515,7 +515,7 @@ luxd (single node, --dev mode)
 
 The `@luxfhe/sdk` currently connects to a standalone FHE server at `localhost:8448`. For native luxd:
 - SDK should connect to luxd's RPC endpoint
-- T-Chain provides FHE services via JSON-RPC at `/ext/bc/T/rpc`
+- T-Chain provides FHE services via JSON-RPC at `/v1/bc/T/rpc`
 
 ### Unified FHE API (2025-01-01)
 
