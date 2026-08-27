@@ -58,7 +58,7 @@ luxfhe/
 │       └── IFHE.sol        # FHE types and interface
 │
 ├── core/                   # Core FHE implementations
-│   ├── concrete/           # TFHE compiler (Python to FHE)
+│   ├── torus/           # TFHE compiler (Python to FHE)
 │   ├── fhevm/              # Full-stack FHEVM framework
 │   ├── fhevm-solidity/     # FHEVM Solidity library
 │   ├── kms/                # Key Management System (Rust)
@@ -171,7 +171,7 @@ luxfhe/
 ├─────────────────────────────────────────────────────────────────────────┤
 │                         Core Components                                  │
 │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐            │
-│  │   concrete/    │  │    fhevm/      │  │     kms/       │            │
+│  │   torus/    │  │    fhevm/      │  │     kms/       │            │
 │  │ TFHE Compiler  │  │ Full Stack VM  │  │ Key Management │            │
 │  │   (Python)     │  │   (Solidity)   │  │    (Rust)      │            │
 │  └────────────────┘  └────────────────┘  └────────────────┘            │
@@ -220,7 +220,7 @@ luxfhe/
 
 ## Core Components
 
-### concrete/ - TFHE Compiler
+### torus/ - TFHE Compiler
 Python-to-FHE compiler. Converts Python code with numpy operations into FHE circuits.
 - `frontends/` - Python frontend
 - `compilers/` - FHE circuit compilers
