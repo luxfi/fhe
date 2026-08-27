@@ -1,0 +1,13 @@
+# Native CI for luxfi/fhe, on the git.hanzo.ai runner fleet.
+#
+# The whole tree rather than a named list, so a package added later is covered
+# without editing this file.
+test:
+  - name: build
+    run: |
+      set -e
+      go build ./...
+  - name: unit
+    run: |
+      set -e
+      go test ./... -count=1
