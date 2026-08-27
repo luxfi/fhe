@@ -58,7 +58,7 @@ luxfhe/
 │       └── IFHE.sol        # FHE types and interface
 │
 ├── core/                   # Core FHE implementations
-│   ├── torus/           # TFHE compiler (Python to FHE)
+│   ├── concrete/           # TFHE compiler (Python to FHE)
 │   ├── fhevm/              # Full-stack FHEVM framework
 │   ├── fhevm-solidity/     # FHEVM Solidity library
 │   ├── kms/                # Key Management System (Rust)
@@ -171,7 +171,7 @@ luxfhe/
 ├─────────────────────────────────────────────────────────────────────────┤
 │                         Core Components                                  │
 │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐            │
-│  │   torus/    │  │    fhevm/      │  │     kms/       │            │
+│  │   concrete/    │  │    fhevm/      │  │     kms/       │            │
 │  │ TFHE Compiler  │  │ Full Stack VM  │  │ Key Management │            │
 │  │   (Python)     │  │   (Solidity)   │  │    (Rust)      │            │
 │  └────────────────┘  └────────────────┘  └────────────────┘            │
@@ -220,7 +220,7 @@ luxfhe/
 
 ## Core Components
 
-### torus/ - TFHE Compiler
+### concrete/ - TFHE Compiler
 Python-to-FHE compiler. Converts Python code with numpy operations into FHE circuits.
 - `frontends/` - Python frontend
 - `compilers/` - FHE circuit compilers
@@ -515,7 +515,7 @@ luxd (single node, --dev mode)
 
 The `@luxfhe/sdk` currently connects to a standalone FHE server at `localhost:8448`. For native luxd:
 - SDK should connect to luxd's RPC endpoint
-- T-Chain provides FHE services via JSON-RPC at `/ext/bc/T/rpc`
+- T-Chain provides FHE services via JSON-RPC at `/v1/bc/T/rpc`
 
 ### Unified FHE API (2025-01-01)
 
