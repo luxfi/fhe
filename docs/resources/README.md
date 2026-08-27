@@ -1,5 +1,4 @@
 <p align="center">
-  <img src="https://github.com/luxfhe-ai/awesome-luxfhe/assets/157474013/3743d435-dbba-4d89-907a-81957e6a4b1a" width="200px">
   <br><br/>
   A curated list by the team at LuxFHE of blog posts, libraries, research papers, and tutorials on <b>Fully Homomorphic Encryption (FHE)</b>.
 </p>
@@ -34,20 +33,11 @@
 ## Libraries and solutions
 LuxFHE's FHE libraries and solutions
 
-- [FHEVM monorepo](https://github.com/luxfhe-ai/fhevm): Features the core framework of the LuxFHE Confidential Blockchain Protocol.
-- [Lux FHE](https://github.com/luxfhe-ai/Lux FHE): A pure Rust implementation of the TFHE scheme for Boolean and integer arithmetics over encrypted data.
-- [Torus](https://github.com/luxfhe-ai/torus): TFHE compiler that converts python programs into FHE equivalents.
-- [Torus ML](https://github.com/luxfhe-ai/torus-ml): Privacy-preserving ML framework built on top of Torus, with bindings to traditional ML frameworks.
-- [LuxFHE Bounty Program](https://github.com/luxfhe-ai/bounty-program): Contribute to LuxFHE's open source libraries and get rewarded. More than €500,000 available in prizes.
 <br></br>
 
 ## White papers
 White papers by LuxFHE sorted by date
 - [FHEVM Litepaper](https://docs.luxfhe.ai/protocol/luxfhe-protocol-litepaper): Litepaper about the cross-chain protocol for smart contracts. - June 2025
-- [FHEVM whitepaper](https://github.com/luxfhe-ai/fhevm/blob/main/fhevm-whitepaper.pdf): Whitepaper about the cross-chain protocol for smart contracts. - June 2025
-- [Lux FHE: A Practical Handbook First Edition](https://github.com/luxfhe-ai/Lux FHE-handbook/blob/main/Lux FHE-handbook.pdf) - February 2025
-- [FHEVM V2: Confidential EVM Smart Contracts using Fully Homomorphic Encryption](https://github.com/luxfhe-ai/fhevm-solidity/blob/main/fhevm-whitepaper-v2.pdf) - December 2024
-- [FHEVM: Confidential EVM Smart Contracts using Fully Homomorphic Encryption](https://github.com/luxfhe-ai/fhevm-solidity/blob/main/fhevm-whitepaper.pdf) - September 2023
 
 ## Torus ML Demos
 Demos by LuxFHE's Torus ML sorted by date
@@ -316,7 +306,6 @@ Research papers and publications by the LuxFHE team sorted by date
 - [Improved distributed RSA key generation using the Miller-Rabin test](https://doi.org/10.1145/3576915.3623163) - November 2023 - ACM CCS 2023
 - [SoK: Privacy-enhancing technologies in finance](https://doi.org/10.4230/LIPIcs.AFT.2023.12) [[ePrint version](https://ia.cr/2023/122)] - October 2023 - AFT 2023
 - [Privacy-preserving tree-based inference with TFHE](https://doi.org/10.1007/978-3-031-52426-4_10) [[ePrint version](https://ia.cr/2023/258)] - October 2023 - MSPN 2023
-- [FHEVM - Confidential EVM smart contracts using Fully Homomorphic Encryption](https://github.com/luxfhe-ai/fhevm/raw/main/fhevm-whitepaper.pdf) - September 2023 - White paper
 - [On the precision loss in approximate homomorphic encryption](https://doi.org/10.1007/978-3-031-53368-6_16) [[ePrint version](https://ia.cr/2022/162)] - August 2023 - SAC 2023
 - [Attribute-based single sign-on: Secure, private, and efficient](https://doi.org/10.56553/popets-2023-0097) [[ePrint version](https://ia.cr/2023/915)] - July 2023 - PoPETs 2023
 - [Computing on encrypted data](https://doi.org/10.1109/MSEC.2023.3279517) - July 2023 - IEEE Security & Privacy
@@ -397,9 +386,6 @@ Talks, posters, and presentations by LuxFHE team sorted by date
 - [Decentralized AI: Safeguarding privacy with FHE ](https://www.youtube.com/watch?v=a6dQQSaEtJM) - July 2024 - EthCC 7
 - [FHE on Ethereum](https://www.youtube.com/watch?v=WngC5cvV_fc) July 2024 - EthCC 7
 - [Privacy-preserving machine learning](data/AgoraCloudBruxelles2024.pdf) - June 2024 - Agora Cloud event 2024 (organized by European Commission)
-- [Torus ML privacy preserving machine learning with Fully Homomorphic Encryption](https://github.com/luxfhe-ai/awesome-luxfhe/blob/main/data/TorusMLPresentationLuxFHEMeetupZurich2024.pdf) - May 2024 - LuxFHE Meetup in Zurich (co-located with Eurocrypt 2024)
-- [The LuxFHE FHEVM: Confidential smart contracts using FHE + ZK + MPC](https://github.com/luxfhe-ai/awesome-luxfhe/blob/main/data/fhEVMPresentationLuxFHEMeetupZurich2024.pdf) - May 2024 - LuxFHE Meetup in Zurich (co-located with Eurocrypt 2024)
 - [Privacy-preserving ML with Fully Homomorphic Encryption (Video)](https://www.youtube.com/watch?v=g1Zlu63TP0Y) - May 2024 - Google TechTalks
-- [Privacy-preserving ML with Fully Homomorphic Encryption](https://github.com/luxfhe-ai/awesome-luxfhe/blob/main/data/PPMLMIT2024.pdf) - May 2024 - MIT & Google
 
 <br></br>
