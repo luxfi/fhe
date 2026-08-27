@@ -92,3 +92,9 @@ ml-sdk
 /vote
 CLAUDE.md
 *.eco
+
+# compiled binaries
+/auction
+/compliance
+/darkpool
+/bin/
