@@ -14,9 +14,9 @@
   },
   "devDependencies": {
     "@luxfhe/hardhat-plugin": "^0.5.0",
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@openzeppelin/contracts": "^5.3.0",
-    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "@openzeppelin/contracts": "^5.6.1",
+    "hardhat": "^3.15.0",
     "typescript": "7.0.2"
   }
 }
