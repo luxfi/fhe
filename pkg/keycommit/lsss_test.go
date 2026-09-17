@@ -1,7 +1,7 @@
 // Copyright (C) 2025-2026, Lux Industries Inc. All rights reserved.
 // SPDX-License-Identifier: BSD-3-Clause
 
-package threshold
+package keycommit
 
 import (
 	"math/big"

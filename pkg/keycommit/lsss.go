@@ -1,9 +1,15 @@
 // Copyright (C) 2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// Package threshold implements threshold FHE with LSSS (Linear Secret Sharing Scheme).
-// LSSS enables dynamic resharing: adding/removing nodes without full key regeneration.
-package threshold
+// Package keycommit Shamir-splits, over the 2048-bit MODP prime below, a
+// SHA-256 commitment to an FHE key's components, with Feldman commitments so a
+// dealer cannot equivocate about what it committed to.
+//
+// Its shares cannot decrypt: the key is generated whole by whoever calls
+// CommitKey, and what gets shared is a hash of it. Threshold custody of an FHE
+// key is github.com/luxfi/threshold/protocols/tfhe.
+
+package keycommit
 
 import (
 	"crypto/rand"

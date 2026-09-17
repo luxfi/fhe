@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/fhe"
 	"github.com/luxfi/fhe/pkg/membership"
 	"github.com/luxfi/fhe/pkg/store"
-	"github.com/luxfi/fhe/pkg/threshold"
+	"github.com/luxfi/fhe/pkg/keycommit"
 	"github.com/luxfi/mdns"
 )
 
@@ -187,7 +187,7 @@ type FHEDaemon struct {
 	// Threshold mode
 	thresholdMode bool
 	thresholdT    int
-	keyShare      *threshold.KeyShare
+	keyShare      *keycommit.KeyCommitment
 	membership    *membership.Manager
 	discovery     *mdns.Discovery
 
@@ -486,7 +486,7 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 	if ksData, err := d.store.GetSecretKey(keyID); err == nil {
 		d.logger.Info("Loading existing key share from ZapDB")
 
-		ks, err := threshold.UnmarshalKeyShare(ksData)
+		ks, err := keycommit.UnmarshalCommitment(ksData)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal key share: %w", err)
 		}
@@ -521,7 +521,7 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 	d.logger.Warn("Generating single-party threshold keys for demo (NOT secure for production)")
 
 	sessionID := uuid.New().String()
-	result, err := threshold.GenerateSharedKey(d.params, d.thresholdT, d.thresholdT, sessionID)
+	result, err := keycommit.CommitKey(d.params, d.thresholdT, d.thresholdT, sessionID)
 	if err != nil {
 		return fmt.Errorf("failed to generate threshold keys: %w", err)
 	}
@@ -535,7 +535,7 @@ func (d *FHEDaemon) loadOrGenerateThresholdKey() error {
 	}
 
 	// Persist to ZapDB
-	ksData, err := threshold.MarshalKeyShare(d.keyShare)
+	ksData, err := keycommit.MarshalCommitment(d.keyShare)
 	if err != nil {
 		return fmt.Errorf("failed to marshal key share: %w", err)
 	}
@@ -1019,7 +1019,7 @@ func runKeygen(ctx context.Context, c *cli.Command) error {
 		fmt.Printf("Generating threshold keys (%d-of-%d)...\n", t, n)
 
 		sessionID := uuid.New().String()
-		result, err := threshold.GenerateSharedKey(params, t, n, sessionID)
+		result, err := keycommit.CommitKey(params, t, n, sessionID)
 		if err != nil {
 			return fmt.Errorf("failed to generate threshold keys: %w", err)
 		}
@@ -1031,7 +1031,7 @@ func runKeygen(ctx context.Context, c *cli.Command) error {
 				return fmt.Errorf("failed to create party directory: %w", err)
 			}
 
-			ksData, err := threshold.MarshalKeyShare(share)
+			ksData, err := keycommit.MarshalCommitment(share)
 			if err != nil {
 				return fmt.Errorf("failed to marshal key share: %w", err)
 			}
@@ -1120,7 +1120,7 @@ func runReshare(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("failed to read input directory: %w", err)
 	}
 
-	var oldShares []*threshold.KeyShare
+	var oldShares []*keycommit.KeyCommitment
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
@@ -1135,7 +1135,7 @@ func runReshare(ctx context.Context, c *cli.Command) error {
 			return fmt.Errorf("failed to read key share %s: %w", entry.Name(), err)
 		}
 
-		ks, err := threshold.UnmarshalKeyShare(ksData)
+		ks, err := keycommit.UnmarshalCommitment(ksData)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal key share %s: %w", entry.Name(), err)
 		}
@@ -1151,7 +1151,7 @@ func runReshare(ctx context.Context, c *cli.Command) error {
 	fmt.Printf("Resharing to %d-of-%d...\n", newT, newN)
 
 	newSessionID := uuid.New().String()
-	result, err := threshold.ReshareKey(oldShares, newT, newN, newSessionID)
+	result, err := keycommit.ReshareCommitment(oldShares, newT, newN, newSessionID)
 	if err != nil {
 		return fmt.Errorf("failed to reshare: %w", err)
 	}
@@ -1166,7 +1166,7 @@ func runReshare(ctx context.Context, c *cli.Command) error {
 			return fmt.Errorf("failed to create party directory: %w", err)
 		}
 
-		ksData, err := threshold.MarshalKeyShare(share)
+		ksData, err := keycommit.MarshalCommitment(share)
 		if err != nil {
 			return fmt.Errorf("failed to marshal key share: %w", err)
 		}

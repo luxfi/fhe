@@ -1,7 +1,7 @@
 // Copyright (C) 2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package threshold
+package keycommit
 
 import (
 	"bytes"
@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/fhe"
 )
 
-// KeyShare represents a party's share of the FHE secret key
-type KeyShare struct {
+// KeyCommitment represents a party's share of the FHE secret key
+type KeyCommitment struct {
 	PartyIndex int    // 1-based party index
 	SessionID  string // Keygen session identifier
 
@@ -29,32 +29,24 @@ type KeyShare struct {
 	Params    fhe.Parameters
 }
 
-// KeyGenResult is the result of distributed key generation
-type KeyGenResult struct {
+// CommitResult is the result of distributed key generation
+type CommitResult struct {
 	SessionID    string
 	Threshold    int
 	Total        int
 	PublicKey    *fhe.PublicKey
 	BootstrapKey *fhe.BootstrapKey
 	Params       fhe.Parameters
-	Shares       []*KeyShare // One per party
+	Shares       []*KeyCommitment // One per party
 }
 
-// GenerateSharedKey is a TRUSTED-DEALER key-COMMITMENT facility, NOT the
-// threshold-FHE key generator. It generates a keypair in one process and
-// large-prime Shamir-splits the SHA-256 HASH of each secret-key component
-// (hashToFieldElement) — i.e. it shares a COMMITMENT to the key, for verifiable-
-// secret-sharing / dealer-equivocation auditing. The resulting KeyShare values
-// are shares of a hash and CANNOT perform threshold decryption.
+// CommitKey generates a keypair in one process and Shamir-splits the SHA-256
+// hash of each secret-key component. The resulting shares are shares of a hash
+// and cannot perform threshold decryption.
 //
-// For the trustless threshold-FHE lane use DealerlessKeyGen (dealerless_dkg.go),
-// which is dealerless (no party ever holds the FHE secret key) and produces
-// decrypt-capable LWEShare values consumed by PartialDecryptLWE / CombineLWE. See
-// the package doc for the canonical flow.
-//
-// Deprecated: not part of the threshold-decrypt path; retained only for the
-// commitment-VSS use case.
-func GenerateSharedKey(params fhe.Parameters, threshold, total int, sessionID string) (*KeyGenResult, error) {
+// Deprecated: for threshold custody use
+// github.com/luxfi/threshold/protocols/tfhe.
+func CommitKey(params fhe.Parameters, threshold, total int, sessionID string) (*CommitResult, error) {
 	if threshold > total {
 		return nil, fmt.Errorf("threshold %d exceeds total %d", threshold, total)
 	}
@@ -90,9 +82,9 @@ func GenerateSharedKey(params fhe.Parameters, threshold, total int, sessionID st
 	}
 
 	// Create key shares for each party
-	shares := make([]*KeyShare, total)
+	shares := make([]*KeyCommitment, total)
 	for i := 0; i < total; i++ {
-		shares[i] = &KeyShare{
+		shares[i] = &KeyCommitment{
 			PartyIndex: i + 1,
 			SessionID:  sessionID,
 			SKLWEShare: lweSharings.Shares[i],
@@ -104,7 +96,7 @@ func GenerateSharedKey(params fhe.Parameters, threshold, total int, sessionID st
 		}
 	}
 
-	return &KeyGenResult{
+	return &CommitResult{
 		SessionID:    sessionID,
 		Threshold:    threshold,
 		Total:        total,
@@ -115,8 +107,8 @@ func GenerateSharedKey(params fhe.Parameters, threshold, total int, sessionID st
 	}, nil
 }
 
-// ReshareKey performs LSSS resharing to change threshold or add/remove parties
-func ReshareKey(oldShares []*KeyShare, newThreshold, newTotal int, newSessionID string) (*KeyGenResult, error) {
+// ReshareCommitment performs LSSS resharing to change threshold or add/remove parties
+func ReshareCommitment(oldShares []*KeyCommitment, newThreshold, newTotal int, newSessionID string) (*CommitResult, error) {
 	if len(oldShares) == 0 {
 		return nil, fmt.Errorf("no shares provided")
 	}
@@ -146,9 +138,9 @@ func ReshareKey(oldShares []*KeyShare, newThreshold, newTotal int, newSessionID 
 	}
 
 	// Create new key shares (public key remains the same)
-	newShares := make([]*KeyShare, newTotal)
+	newShares := make([]*KeyCommitment, newTotal)
 	for i := 0; i < newTotal; i++ {
-		newShares[i] = &KeyShare{
+		newShares[i] = &KeyCommitment{
 			PartyIndex: i + 1,
 			SessionID:  newSessionID,
 			SKLWEShare: newLWEShares.Shares[i],
@@ -160,7 +152,7 @@ func ReshareKey(oldShares []*KeyShare, newThreshold, newTotal int, newSessionID 
 		}
 	}
 
-	return &KeyGenResult{
+	return &CommitResult{
 		SessionID:    newSessionID,
 		Threshold:    newThreshold,
 		Total:        newTotal,
@@ -172,7 +164,7 @@ func ReshareKey(oldShares []*KeyShare, newThreshold, newTotal int, newSessionID 
 }
 
 // AddParty adds a new party by computing their share
-func AddParty(existingShares []*KeyShare, newPartyIndex int, newSessionID string) (*KeyShare, error) {
+func AddParty(existingShares []*KeyCommitment, newPartyIndex int, newSessionID string) (*KeyCommitment, error) {
 	if len(existingShares) == 0 {
 		return nil, fmt.Errorf("no shares provided")
 	}
@@ -201,7 +193,7 @@ func AddParty(existingShares []*KeyShare, newPartyIndex int, newSessionID string
 		return nil, fmt.Errorf("failed to add SKBR share: %w", err)
 	}
 
-	return &KeyShare{
+	return &KeyCommitment{
 		PartyIndex: newPartyIndex,
 		SessionID:  newSessionID,
 		SKLWEShare: newLWEShare,
@@ -213,8 +205,8 @@ func AddParty(existingShares []*KeyShare, newPartyIndex int, newSessionID string
 	}, nil
 }
 
-// RefreshKeyShares refreshes all shares to provide proactive security
-func RefreshKeyShares(shares []*KeyShare, newSessionID string) ([]*KeyShare, error) {
+// RefreshCommitments refreshes all shares to provide proactive security
+func RefreshCommitments(shares []*KeyCommitment, newSessionID string) ([]*KeyCommitment, error) {
 	if len(shares) == 0 {
 		return nil, fmt.Errorf("no shares provided")
 	}
@@ -251,9 +243,9 @@ func RefreshKeyShares(shares []*KeyShare, newSessionID string) ([]*KeyShare, err
 	}
 
 	// Create new key shares
-	newShares := make([]*KeyShare, total)
+	newShares := make([]*KeyCommitment, total)
 	for i := 0; i < total; i++ {
-		newShares[i] = &KeyShare{
+		newShares[i] = &KeyCommitment{
 			PartyIndex: shares[i].PartyIndex,
 			SessionID:  newSessionID,
 			SKLWEShare: newLWESet.Shares[i],
@@ -285,8 +277,8 @@ func serializeRLWESecretKey(sk interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// MarshalKeyShare serializes a key share
-func MarshalKeyShare(ks *KeyShare) ([]byte, error) {
+// MarshalCommitment serializes a key share
+func MarshalCommitment(ks *KeyCommitment) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	if err := enc.Encode(ks); err != nil {
@@ -295,10 +287,10 @@ func MarshalKeyShare(ks *KeyShare) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// UnmarshalKeyShare deserializes a key share
-func UnmarshalKeyShare(data []byte) (*KeyShare, error) {
+// UnmarshalCommitment deserializes a key share
+func UnmarshalCommitment(data []byte) (*KeyCommitment, error) {
 	dec := gob.NewDecoder(bytes.NewReader(data))
-	var ks KeyShare
+	var ks KeyCommitment
 	if err := dec.Decode(&ks); err != nil {
 		return nil, err
 	}
